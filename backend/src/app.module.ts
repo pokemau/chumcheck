@@ -1,24 +1,28 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
-import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
-import { StartupController } from './startup/startup.controller';
 import { StartupModule } from './startup/startup.module';
 import { ReadinesslevelModule } from './readinesslevel/readinesslevel.module';
 import { AiModule } from './ai/ai.module';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+
+import { User } from './entities/user.entity';
+import { Startup } from './entities/startup.entity';
+import { CapsuleProposal } from './entities/capsule-proposal.entity';
 
 @Module({
   imports: [
     AiModule,
     AuthModule,
-    PrismaModule,
     ReadinesslevelModule,
     StartupModule,
     UserModule,
+    MikroOrmModule.forRoot(),
+    MikroOrmModule.forFeature({
+      entities: [User, Startup, CapsuleProposal],
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

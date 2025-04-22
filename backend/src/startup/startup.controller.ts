@@ -3,13 +3,10 @@ import {
   Controller,
   Get,
   Post,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { readFile } from 'fs/promises';
-
-import { Express } from 'express';
 
 import * as PdfParse from 'pdf-parse';
 import { AiService } from 'src/ai/ai.service';

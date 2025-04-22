@@ -1,15 +1,15 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from 'generated/prisma/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prismaService: PrismaService,
+    private em: EntityManager,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
@@ -17,29 +17,21 @@ export class AuthService {
   async signup(dto: AuthDto) {
     try {
       const hash = await argon.hash(dto.password);
-      const user = await this.prismaService.user.create({
-        data: {
-          email: dto.email,
-          hash,
-        },
-      });
 
+      const user = new User();
+      user.email = dto.email;
+      user.hash = hash;
+
+      await this.em.persistAndFlush(user);
       return this.signToken(user.id, user.email, user.role);
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') throw new ForbiddenException('Email Taken');
-      }
       throw error;
     }
   }
 
   async signin(dto: AuthDto) {
-    const user = await this.prismaService.user.findUnique({
-      where: {
-        email: dto.email,
-      },
-    });
-    if (!user) throw new ForbiddenException('No user found');
+    const user = await this.em.findOne(User, { email: dto.email });
+    if (!user) throw new ForbiddenException('User not found.');
 
     const passwordMatches = await argon.verify(user.hash, dto.password);
     if (!passwordMatches) throw new ForbiddenException('Wrong Password');

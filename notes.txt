@@ -9,4 +9,3 @@ TODO
 
 startup creation
   - implement bulk create tables
-  - create prisma models
