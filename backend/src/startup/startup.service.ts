@@ -10,11 +10,14 @@ export class StartupService {
 
   async createStartup(dto: StartupApplicationDto) {
     const startup = new Startup();
+
     const user = await this.em.findOne(User, { id: dto.userId });
     if (!user) {
       throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
     }
+
     startup.name = dto.name;
+
     startup.user = user;
     startup.dataPrivacy = dto.dataPrivacy;
     startup.eligibility = dto.eligibility;

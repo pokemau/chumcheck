@@ -189,11 +189,11 @@
           "mappedType": "boolean"
         }
       },
-      "name": "startup",
+      "name": "startups",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "startup_pkey",
+          "keyName": "startups_pkey",
           "columnNames": [
             "id"
           ],
@@ -205,12 +205,12 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "startup_user_id_foreign": {
-          "constraintName": "startup_user_id_foreign",
+        "startups_user_id_foreign": {
+          "constraintName": "startups_user_id_foreign",
           "columnNames": [
             "user_id"
           ],
-          "localTableName": "public.startup",
+          "localTableName": "public.startups",
           "referencedColumnNames": [
             "id"
           ],
@@ -356,7 +356,7 @@
           "referencedColumnNames": [
             "id"
           ],
-          "referencedTableName": "public.startup",
+          "referencedTableName": "public.startups",
           "updateRule": "cascade"
         }
       },
