@@ -1,30 +1,27 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { StartupApplicationDto } from './dto';
-import { AiService } from 'src/ai/ai.service';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { Startup } from 'src/entities/startup.entity';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class StartupService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(private em: EntityManager) {}
 
   async createStartup(dto: StartupApplicationDto) {
-    const startup = await this.prismaService.startup.create({
-      data: {
-        name: dto.name,
-        dataPrivacy: Boolean(dto.dataPrivacy),
-        links: dto.links,
-        groupName: dto.groupName,
-        universityName: dto.universityName,
-        eligibility: Boolean(dto.eligibility),
-        user: {
-          connect: { id: Number(dto.userId) },
-        },
-      },
-    });
+    const startup = new Startup();
+    const user = await this.em.findOne(User, { id: dto.userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
+    }
+    startup.name = dto.name;
+    startup.user = user;
+    startup.dataPrivacy = dto.dataPrivacy;
+    startup.eligibility = dto.eligibility;
+
+    await this.em.persistAndFlush(startup);
     return startup;
   }
 
-  async findStartupById(startupId: number) {
-    //const startup = await this.prismaService.startup.findUnique({});
-  }
+  async findStartupById(startupId: number) {}
 }
