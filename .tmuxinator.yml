@@ -1,0 +1,11 @@
+# ./.tmuxinator.yml
+
+name: chumcheck
+root: ~/Code/chumcheck/
+
+windows:
+  - editor: nvim
+  - term:
+  - server: cd backend && npm run dev
+  - frontend: cd frontend && BROWSER=brave pnpm dev --open
+  - studio: cd backend && npx prisma studio --browser brave

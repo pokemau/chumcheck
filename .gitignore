@@ -1,0 +1,26 @@
+.DS_Store
+node_modules
+/build
+/.svelte-kit
+/package
+.env
+.env.*
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+!.env.example
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.history/
+# backend/media/
+.pnpm-store/
+
+.python-version
+.ropeproject
+
+
+# MAU IGNORES
+# .tmuxinator.yml
+# q.sh
+# start.sh

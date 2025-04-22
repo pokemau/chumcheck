@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+
+  email String @unique
+  hash  String
+
+  firstName String?
+  lastName  String?
+
+  role     Role      @default(Startup)
+  startups Startup[]
+
+  @@map("users")
+}
+
+model Startup {
+  id                  Int     @id @default(autoincrement())
+  name                String
+  // owner
+  user                User    @relation(fields: [userId], references: [id])
+  userId              Int
+  qualificationStatus Int     @default(1)
+  dataPrivacy         Boolean @default(false)
+
+  // WALA PAKO KBAW SA USECASE ANI (file location man guro ni sa pdf)
+  //capsuleProposal     String?
+
+  links          String? @db.Text()
+  groupName      String? @db.VarChar(100)
+  universityName String? @db.VarChar(100)
+  eligibility    Boolean @default(false)
+
+  capsuleProposal CapsuleProposal?
+
+  @@map("startups")
+}
+
+model CapsuleProposal {
+  id                  Int     @id @default(autoincrement())
+  title               String
+  description         String
+  problemStatement    String
+  targetMarket        String
+  solutionDescription String
+  objectives          String
+  scope               String
+  methodology         String
+  startupId           Int     @unique
+  startup             Startup @relation(fields: [startupId], references: [id])
+
+  @@map("capsule_proposals")
+}
+
+enum Role {
+  Startup
+  Mentor
+  Manager
+}
+
+enum QualificationStatus {
+  PENDING   @map("1")
+  RATED     @map("2")
+  QUALIFIED @map("3")
+}
