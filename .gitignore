@@ -24,3 +24,5 @@ vite.config.ts.timestamp-*
 # .tmuxinator.yml
 # q.sh
 # start.sh
+
+/backend_django
