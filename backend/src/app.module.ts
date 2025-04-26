@@ -11,8 +11,11 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { User } from './entities/user.entity';
 import { Startup } from './entities/startup.entity';
 import { CapsuleProposal } from './entities/capsule-proposal.entity';
+import { UratQuestion } from './entities/urat-question.entity';
+import { AppController } from './app.controller';
 
 @Module({
+  controllers: [AppController],
   imports: [
     AiModule,
     AuthModule,
@@ -21,7 +24,7 @@ import { CapsuleProposal } from './entities/capsule-proposal.entity';
     UserModule,
     MikroOrmModule.forRoot(),
     MikroOrmModule.forFeature({
-      entities: [User, Startup, CapsuleProposal],
+      entities: [User, Startup, CapsuleProposal, UratQuestion],
     }),
     ConfigModule.forRoot({
       isGlobal: true,

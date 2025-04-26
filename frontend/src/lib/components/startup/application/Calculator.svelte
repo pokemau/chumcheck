@@ -12,7 +12,10 @@
         <label class="label" for="">
           <span class="label-text text-base">{category.category}</span>
         </label>
-        <RadioGroup.Root value={`${category.questions[0].id}`} name={category.category}>
+        <RadioGroup.Root
+          value={`${category.questions[0].id}`}
+          name={category.category}
+        >
           {#each category.questions as question, i}
             <div class="flex items-center space-x-2">
               <RadioGroup.Item
