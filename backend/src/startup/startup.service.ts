@@ -8,6 +8,12 @@ import { User } from 'src/entities/user.entity';
 export class StartupService {
   constructor(private em: EntityManager) {}
 
+  async getStartups(userId: number) {
+    return await this.em.find(Startup, {
+      user: userId,
+    });
+  }
+
   async createStartup(dto: StartupApplicationDto) {
     const startup = new Startup();
 

@@ -4,7 +4,7 @@
 </script>
 
 <a
-  href={`/startups/${startup.id}/${startup?.qualification_status === 3 ? 'readiness-level' : 'pending'}`}
+  href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
 >
   <Card.Root class="h-40 cursor-pointer hover:bg-secondary">
     <Card.Content class="h-full">
@@ -15,13 +15,16 @@
           >
             {startup.name
               .split(' ')
-              .map((word) => word.charAt(0).toUpperCase())
+              .map((word: any) => word.charAt(0).toUpperCase())
               .join('')
               .slice(0, 2)}
           </div>
           <h1>{startup.name}</h1>
           {#if role === 'Manager as Mentor'}
-            <h1>Mentor: {startup?.mentors[0]?.first_name} {startup?.mentors[0]?.last_name}</h1>
+            <h1>
+              Mentor: {startup?.mentors[0]?.first_name}
+              {startup?.mentors[0]?.last_name}
+            </h1>
           {/if}
         </div>
       </div>

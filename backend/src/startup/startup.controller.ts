@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,7 +17,7 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
-@Controller('startup')
+@Controller('startups')
 export class StartupController {
   constructor(
     private startupService: StartupService,
@@ -24,13 +25,11 @@ export class StartupController {
   ) {}
 
   @Get('/startups')
-  getStartups() {
-    return {
-      message: 'STARTUPS RAAAAAAAAHHHHHHHHHHHHHHH',
-    };
+  getStartups(@Request() req) {
+    return this.startupService.getStartups(req.user.id);
   }
 
-  @Post('/create')
+  @Post('/create-startup')
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async createStartup(
     @Body() dto: StartupApplicationDto,

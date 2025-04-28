@@ -177,7 +177,7 @@ export class AppService {
       {
         question: 'One or more initial product hypotheses have been defined',
         score: 1,
-        category: CalculatorCategory.Product_Development,
+        category: CalculatorCategory.Product_Definition_Design,
       },
       {
         question:
@@ -207,7 +207,7 @@ export class AppService {
         question:
           'Secondary market research has been performed and basic knowledge of potential applications and competitive landscape have been identified',
         score: 1,
-        category: CalculatorCategory.Product_Definition_Design,
+        category: CalculatorCategory.Competitive_Landscape,
       },
       {
         question:
@@ -237,7 +237,7 @@ export class AppService {
         question:
           'No team or company in place (single individual, no legal entity)',
         score: 1,
-        category: CalculatorCategory.Competitive_Landscape,
+        category: CalculatorCategory.Team,
       },
       {
         question:
