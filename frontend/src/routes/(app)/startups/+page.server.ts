@@ -43,25 +43,7 @@ export const actions: Actions = {
       }
     }
 
-    //FormData {
-    //  data_privacy: 'true',
-    //  eligibility: 'true',
-    //  name: 'f',
-    //  user_id: '1',
-    //  capsule_proposal: File {
-    //    size: 88304,
-    //    type: 'application/pdf',
-    //    name: 'a.pdf',
-    //    lastModified: 1745152938968
-    //  },
-    //  links: 'https://maurice.vercel.app/',
-    //  group_name: 'a',
-    //  university_name: 'a'
-    //}
-
-    console.log(newFormData);
-
-    const response = await fetch(`${PUBLIC_API_URL}/startup/create`, {
+    const response = await fetch(`${PUBLIC_API_URL}/startups/create-startup`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${cookies.get('Access')}`
@@ -69,30 +51,7 @@ export const actions: Actions = {
       body: newFormData
     });
 
-    console.log('RES');
-    console.log('RES');
-    console.log('RES');
-    console.log(response);
-
     const data = await response.json();
-
-    console.log('DATA');
-    console.log('DATA');
-    console.log('DATA');
-    console.log(data);
-
-    //{
-    //  id: 3,
-    //  name: 'TestUp',
-    //  qualificationStatus: 1,
-    //  dataPrivacy: true,
-    //  capsuleProposal: null,
-    //  links: 'https://maurice.vercel.app/',
-    //  groupName: 'Group 1',
-    //  universityName: 'null',
-    //  eligibility: true,
-    //  userId: 1
-    //}
 
     if (!response.ok) {
       // TODO: return error
@@ -121,22 +80,22 @@ export const actions: Actions = {
     ];
 
     const answers: {
-      startup_id: number;
-      urat_question_id: number;
+      startupId: number;
+      uratQuestionId: number;
       response: string;
       score: number;
     }[] = [];
 
     const calculatorAnswers: {
-      startup_id: number;
-      calculator_question_id: number;
+      startupId: number;
+      calculatorQuestionId: number;
     }[] = [];
 
     types.forEach((type) => {
       for (let i = 0; i < 3; i++) {
         answers.push({
-          startup_id: startupId,
-          urat_question_id: Number.parseInt(
+          startupId: startupId,
+          uratQuestionId: Number.parseInt(
             formData.get(`${type}${i}id`) as string
           ),
           response: formData.get(`${type}${i}`) as string,
@@ -145,37 +104,41 @@ export const actions: Actions = {
       }
     });
 
+    //console.log(formData);
+
     categories.forEach((category) => {
-      console.log('CATEGORY', parseInt(formData.get(`${category}`) as string));
-      //calculatorAnswers.push({
-      //  startup_id: startupId,
-      //  calculator_question_id: parseInt(formData.get(`${category}`) as string)
-      //});
+      //console.log('CATEGORY', parseInt(formData.get(`${category}`) as string));
+      calculatorAnswers.push({
+        startupId: startupId,
+        calculatorQuestionId: parseInt(formData.get(`${category}`) as string)
+      });
     });
 
-    console.log(formData);
-    console.log(answers);
-    console.log(calculatorAnswers);
+    ////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
-    const urat_answers = await fetch(
-      `${PUBLIC_API_URL}/urat-question-answers/bulk-create/`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${cookies.get('Access')}`
-        },
-        body: JSON.stringify({
-          urat_question_answers: answers
-        })
-      }
-    );
+    //const urat_answers = await fetch(
+    //  `${PUBLIC_API_URL}/urat-question-answers/bulk-create/`,
+    //  {
+    //    method: 'POST',
+    //    headers: {
+    //      'Content-type': 'application/json',
+    //      Authorization: `Bearer ${cookies.get('Access')}`
+    //    },
+    //    body: JSON.stringify({
+    //      urat_question_answers: answers
+    //    })
+    //  }
+    //);
+
+    //console.log('CALC ANSWERS');
+    //console.log('CALC ANSWERS');
+    //console.log('CALC ANSWERS');
+    //console.log(JSON.stringify({ calculatorAnswers }));
 
     const calculator_answers = await fetch(
-      `${PUBLIC_API_URL}/calculator-question-answers/bulk-create/`,
+      `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/create`,
       {
         method: 'POST',
         headers: {
@@ -183,10 +146,15 @@ export const actions: Actions = {
           Authorization: `Bearer ${cookies.get('Access')}`
         },
         body: JSON.stringify({
-          calculator_question_answers: calculatorAnswers
+          calculatorAnswers
         })
       }
     );
+
+    const res = await calculator_answers.json();
+
+    console.log(res);
+
     //
     //    if (urat_answers.ok && calculator_answers.ok) {
     //      const capsule_info = await fetch(

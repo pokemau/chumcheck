@@ -16,13 +16,13 @@
 
       const data2 = await calculatorQuestions.json();
 
-      console.log('URAT QUESTIONS');
-      console.log(data);
-
-      console.log('CALC CATEGORIES');
-      console.log(data2);
-
-      console.log(data.results);
+      //console.log('URAT QUESTIONS');
+      //console.log(data);
+      //
+      //console.log('CALC CATEGORIES');
+      //console.log(data2);
+      //
+      //console.log(data.results);
 
       if (calculatorQuestions.ok) {
         return {

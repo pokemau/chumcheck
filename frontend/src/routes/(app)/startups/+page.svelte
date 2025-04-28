@@ -15,7 +15,7 @@
   let { data } = $props();
 
   const queryResult = useQuery('startupData', () =>
-    getData(`/startup/startups`, data.access!)
+    getData(`/startups/startups`, data.access!)
   );
 
   const role: any = data.role;

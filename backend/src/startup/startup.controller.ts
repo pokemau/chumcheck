@@ -16,7 +16,7 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
-@Controller('startup')
+@Controller('startups')
 export class StartupController {
   constructor(
     private startupService: StartupService,
@@ -30,7 +30,7 @@ export class StartupController {
     };
   }
 
-  @Post('/create')
+  @Post('/create-startup')
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async createStartup(
     @Body() dto: StartupApplicationDto,

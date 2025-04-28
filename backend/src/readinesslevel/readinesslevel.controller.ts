@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { UratQuestionDto } from './dto';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { CalculatorQuestionAnswerDto, UratQuestionDto } from './dto';
 import { ReadinesslevelService } from './readinesslevel.service';
+import { JwtGuard } from 'src/auth/guard';
 
 @Controller('readinesslevel')
 export class ReadinesslevelController {
@@ -16,14 +17,22 @@ export class ReadinesslevelController {
     return await this.readinessLevelService.getCalculatorQuestions();
   }
 
-  @Post('/urat-question-answers')
-  createUratQuestionAnswers(@Body() dto: UratQuestionDto) {
+  @UseGuards(JwtGuard)
+  @Post('/urat-question-answers/create')
+  async createUratQuestionAnswers(@Body() dto: UratQuestionDto) {
     console.log('BULK CREATE URAT QUESTION ANSWERS');
     console.log('BULK CREATE URAT QUESTION ANSWERS');
     console.log('BULK CREATE URAT QUESTION ANSWERS');
     console.log(dto);
   }
 
-  @Post('/calculator-question-answers')
-  createCalculatorQuestionAnswers() {}
+  @UseGuards(JwtGuard)
+  @Post('/calculator-question-answers/create')
+  async createCalculatorQuestionAnswers(
+    @Body() dto: CalculatorQuestionAnswerDto,
+  ) {
+    return await this.readinessLevelService.createCalculatorQuestionAnswers(
+      dto,
+    );
+  }
 }
