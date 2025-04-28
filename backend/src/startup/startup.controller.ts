@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -24,10 +25,8 @@ export class StartupController {
   ) {}
 
   @Get('/startups')
-  getStartups() {
-    return {
-      message: 'STARTUPS RAAAAAAAAHHHHHHHHHHHHHHH',
-    };
+  getStartups(@Request() req) {
+    return this.startupService.getStartups(req.user.id);
   }
 
   @Post('/create-startup')

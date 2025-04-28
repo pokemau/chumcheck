@@ -29,11 +29,10 @@
   const isLoading = $derived($queryResult.isLoading);
   const isError = $derived($queryResult.isError);
   const hasStartups = $derived(
-    Array.isArray($queryResult.data?.results) &&
-      $queryResult.data.results.length > 0
+    Array.isArray($queryResult.data) && $queryResult.data.length > 0
   );
   const listOfStartups = $derived(
-    $queryResult.isSuccess && hasStartups ? $queryResult.data.results : []
+    $queryResult.isSuccess && hasStartups ? $queryResult.data : []
   );
 
   let showApplicationForm = $state(false);
@@ -119,9 +118,10 @@
 {/snippet}
 
 {#snippet startups()}
+  {console.log('STARTUPS')}
   {#if role !== 'Startup'}
     <div class="mt-3 grid grid-cols-4 gap-3">
-      {#each listOfStartups.filter((startup: any) => startup.qualification_status === 3) as startup}
+      {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
         <StartupCard {startup} {role} />
       {/each}
     </div>
@@ -131,7 +131,7 @@
         <Accordion.Trigger>Qualified Startups</Accordion.Trigger>
         <Accordion.Content>
           <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualification_status === 3) as startup}
+            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
               <StartupCard {startup} {role} />
             {/each}
           </div>
@@ -141,7 +141,7 @@
         <Accordion.Trigger>Pending Startups</Accordion.Trigger>
         <Accordion.Content>
           <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualification_status === 1 || startup.qualification_status === 2) as startup}
+            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 1 || startup.qualificationStatus === 2) as startup}
               <StartupCard {startup} {role} />
             {/each}
           </div>

@@ -83,7 +83,7 @@ export const actions: Actions = {
       startupId: number;
       uratQuestionId: number;
       response: string;
-      score: number;
+      //score: number;
     }[] = [];
 
     const calculatorAnswers: {
@@ -98,8 +98,8 @@ export const actions: Actions = {
           uratQuestionId: Number.parseInt(
             formData.get(`${type}${i}id`) as string
           ),
-          response: formData.get(`${type}${i}`) as string,
-          score: 1
+          response: formData.get(`${type}${i}`) as string
+          //score: 1
         });
       }
     });
@@ -118,19 +118,25 @@ export const actions: Actions = {
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
 
-    //const urat_answers = await fetch(
-    //  `${PUBLIC_API_URL}/urat-question-answers/bulk-create/`,
-    //  {
-    //    method: 'POST',
-    //    headers: {
-    //      'Content-type': 'application/json',
-    //      Authorization: `Bearer ${cookies.get('Access')}`
-    //    },
-    //    body: JSON.stringify({
-    //      urat_question_answers: answers
-    //    })
-    //  }
-    //);
+    console.log('ANSWERS');
+    console.log('ANSWERS');
+    console.log('ANSWERS');
+    console.log(answers);
+
+    const urat_answers = await fetch(
+      `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/create`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+          Authorization: `Bearer ${cookies.get('Access')}`
+        },
+        body: JSON.stringify({ answers })
+      }
+    );
+
+    const urat_res = await urat_answers.json();
+    console.log(urat_res);
 
     //console.log('CALC ANSWERS');
     //console.log('CALC ANSWERS');
