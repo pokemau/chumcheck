@@ -1,8 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { StartupApplicationDto } from './dto';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
+import { start } from 'repl';
 
 @Injectable()
 export class StartupService {
@@ -12,6 +17,14 @@ export class StartupService {
     return await this.em.find(Startup, {
       user: userId,
     });
+  }
+
+  async getStartupById(startupId: number) {
+    return await this.em.findOne(Startup, { id: startupId });
+  }
+
+  async getPendingStartupsRankingByUrat() {
+    return await this.em.findAll(Startup);
   }
 
   async createStartup(dto: StartupApplicationDto) {
@@ -33,4 +46,10 @@ export class StartupService {
   }
 
   async findStartupById(startupId: number) {}
+
+  async getCalculatorFinalScores(startupId: number) {
+    return {
+      message: 'CALC FINAL SCORES',
+    };
+  }
 }
