@@ -109,4 +109,23 @@ export class ReadinesslevelService {
     await this.em.persistAndFlush(answers);
     return { message: 'Calculator Question Answers created successfully!' };
   }
+
+  async getUratQuestionAnswers(startupId: number) {
+    const answers = await this.em.find(
+      UratQuestionAnswer,
+      {
+        startup: startupId,
+      },
+      { populate: ['uratQuestion'] },
+    );
+
+    return answers.map((answer) => ({
+      id: answer.id,
+      response: answer.response,
+      score: answer.score,
+      startupId: answer.startup.id,
+      questionId: answer.uratQuestion.id,
+      readinessType: answer.uratQuestion.readinessType,
+    }));
+  }
 }

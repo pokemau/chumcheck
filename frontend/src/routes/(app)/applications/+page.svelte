@@ -40,6 +40,7 @@
     });
 
     const data = await response.json();
+
     if (response.ok) {
       const urat_questions = await fetch(
         `${PUBLIC_API_URL}/readinesslevel/urat-questions/`,
@@ -54,7 +55,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
         {
           method: 'GET',
           headers: {
@@ -78,9 +79,8 @@
       const calculator_data = await calculator.json();
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
-        console.log(data.members);
-        que = questions_data.results;
-        ans = answers_data.results;
+        que = questions_data;
+        ans = answers_data;
         calc = calculator_data;
         toggleDialog();
       }
@@ -136,7 +136,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/urat-question-answers/?startupId=${startupId}`,
         {
           method: 'get',
           headers: {
@@ -269,7 +269,7 @@
     const data = await response.json();
     if (response.ok) {
       const level = await fetch(
-        `${PUBLIC_API_URL}/startup-readiness-levels/?startup_id=${data.id}`,
+        `${PUBLIC_API_URL}/startup-readiness-levels/?startupId=${data.id}`,
         {
           method: 'get',
           headers: {
@@ -340,11 +340,11 @@
     if ($queries[0].data.length > 0) {
       if (selectedTab === 'pending') {
         applicants = $queries[0].data.filter(
-          (applicant: any) => applicant.qualification_status === 1
+          (applicant: any) => applicant.qualificationStatus === 1
         );
       } else if (selectedTab === 'rated') {
         applicants = $queries[0].data.filter(
-          (applicant: any) => applicant.qualification_status === 2
+          (applicant: any) => applicant.qualificationStatus === 2
         );
       }
     } else {
@@ -423,7 +423,7 @@
                 }}
               >
                 <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
-                <Table.Cell>{applicant.group_name}</Table.Cell>
+                <Table.Cell>{applicant.groupName}</Table.Cell>
                 <Table.Cell class=""
                   >{applicant.leader_first_name}
                   {applicant.leader_last_name}</Table.Cell

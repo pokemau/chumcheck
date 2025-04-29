@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import {
   CalculatorQuestionAnswerDto,
   UratQuestionAnswerDto,
@@ -36,5 +45,11 @@ export class ReadinesslevelController {
     return await this.readinessLevelService.createCalculatorQuestionAnswers(
       dto,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Get('urat-question-answers')
+  async getUratQuestionAnswers(@Query('startupId') startupId: number) {
+    return await this.readinessLevelService.getUratQuestionAnswers(startupId);
   }
 }
