@@ -44,7 +44,7 @@
     const success = $page.url.searchParams.get('success');
 
     if (success === 'true') {
-      console.log('Success is true');
+      //console.log('Success is true');
       toast.success('Application successfull.');
       // Remove the 'success' parameter from the URL
       const url = new URL($page.url.href);
@@ -65,6 +65,7 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
+      console.log('QUERYRESULT DATA');
       console.log($queryResult.data);
     }
   });
@@ -118,10 +119,13 @@
 {/snippet}
 
 {#snippet startups()}
-  {console.log('STARTUPS')}
+  {console.log('ROLE')}
+  {console.log(role)}
   {#if role !== 'Startup'}
+    {console.log('HERE')}
     <div class="mt-3 grid grid-cols-4 gap-3">
       {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
+        {console.log(startup, role)}
         <StartupCard {startup} {role} />
       {/each}
     </div>
