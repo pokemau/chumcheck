@@ -1,19 +1,21 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Controller,
+  Get,
+  ParseEnumPipe,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
+import { UserService } from './user.service';
+import { Role } from 'src/entities/enums/role.enum';
 
 @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
+  constructor(private userService: UserService) {}
+
   @Get()
-  async getUsers(@Query('user_type') userType: string, @Req() req: Request) {
-    if (userType === 'ME') {
-      return {
-        message: 'IS ME',
-      };
-    }
-    return {
-      message: 'IS NOT ME',
-    };
+  async getUsers(@Query('userRole', new ParseEnumPipe(Role)) userRole: Role) {
+    return await this.userService.getUserByRole(userRole);
   }
 }
