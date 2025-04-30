@@ -20,8 +20,8 @@
       queryFn: () => getData(`/startups/${startupId}/`, access!)
     },
     {
-      queryKey: ['readinessLevelsPage1'],
-      queryFn: () => getData(`/readinesslevel/readiness-levels/?page_size=54`, access!)
+      queryKey: ['readinessLevels'],
+      queryFn: () => getData(`/readinesslevel/readiness-levels`, access!)
     },
     {
       queryKey: ['haveScores', startupId],
@@ -205,7 +205,7 @@
 {/snippet}
 
 {#snippet error()}
-  hello
+  ERROR
 {/snippet}
 
 {#snippet rated()}

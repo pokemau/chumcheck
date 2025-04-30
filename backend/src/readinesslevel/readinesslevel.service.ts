@@ -7,6 +7,7 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
+import { ReadinessLevel } from 'src/entities/readinesslevel.entity';
 
 @Injectable()
 export class ReadinesslevelService {
@@ -15,6 +16,7 @@ export class ReadinesslevelService {
   async getUratQuestions() {
     return await this.em.findAll(UratQuestion);
   }
+
   async getCalculatorQuestions() {
     const calcQuestions = await this.em.findAll(CalculatorQuestion);
 
@@ -41,6 +43,10 @@ export class ReadinesslevelService {
     });
 
     return res;
+  }
+
+  async getReadinessLevels(){
+    return await this.em.findAll(ReadinessLevel);
   }
 
   async createUratQuestionAnswers(dto: UratQuestionAnswerDto) {
