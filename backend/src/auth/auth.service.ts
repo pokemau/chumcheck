@@ -21,6 +21,8 @@ export class AuthService {
       const user = new User();
       user.email = dto.email;
       user.hash = hash;
+      user.firstName = dto.firstName;
+      user.lastName = dto.lastName;
 
       await this.em.persistAndFlush(user);
       return this.signToken(user.id, user.email, user.role);

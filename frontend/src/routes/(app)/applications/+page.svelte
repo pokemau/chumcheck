@@ -136,7 +136,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startupId=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
         {
           method: 'get',
           headers: {
@@ -159,41 +159,45 @@
 
       const calculator_data = await calculator.json();
 
+      console.log(answers_data);
+      console.log(calculator_data);
+
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
-        que = questions_data.results;
-        ans = answers_data.results;
+        que = questions_data;
+        ans = answers_data;
         calc = calculator_data;
         trl = ans
-          .filter((d) => d.readiness_type === 'Technology')
+          .filter((d) => d.readinessType === 'Technology')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         orl = ans
-          .filter((d) => d.readiness_type === 'Organizational')
+          .filter((d) => d.readinessType === 'Organizational')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         mrl = ans
-          .filter((d) => d.readiness_type === 'Market')
+          .filter((d) => d.readinessType === 'Market')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         rrl = ans
-          .filter((d) => d.readiness_type === 'Regulatory')
+          .filter((d) => d.readinessType === 'Regulatory')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         arl = ans
-          .filter((d) => d.readiness_type === 'Acceptance')
+          .filter((d) => d.readinessType === 'Acceptance')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         irl = ans
-          .filter((d) => d.readiness_type === 'Investment')
+          .filter((d) => d.readinessType === 'Investment')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
+        //console.log(trl, orl, mrl, rrl, arl, irl);
         toggleDialog();
       }
     }
@@ -312,7 +316,7 @@
       queryKey: ['mentors'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/users/?user_type=ME`, {
+          await axiosInstance.get(`/users?userRole=Mentor`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -369,7 +373,7 @@
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
   <div>Fetching...</div>
 {:else}
-  {@const mentors = $queries[1].data.results}
+  {@const mentors = $queries[1].data}
   <div class="flex flex-col gap-3">
     <div class="flex justify-between rounded-lg bg-background">
       <Tabs.Root value="pending">

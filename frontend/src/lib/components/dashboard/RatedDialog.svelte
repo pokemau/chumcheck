@@ -38,6 +38,12 @@
     rejectStartup;
 
   let selectedMentor = mentors[0].id;
+  //let selectedMentor = 1;
+
+  console.log('RATED HERE');
+  console.log('RATED HERE');
+  console.log('RATED HERE');
+  console.log('RATED HERE');
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
@@ -179,7 +185,9 @@
         </div>
         <!-- Calculator -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Technology and Commercialization Calculator</h1>
+          <h1 class="text-lg font-semibold">
+            Technology and Commercialization Calculator
+          </h1>
           <div>Technology: {calc.technology_level}</div>
           <div>Commercialization: {calc.commercialization_level}</div>
           <div class="p-10">
@@ -233,13 +241,15 @@
 
           <Select.Root type="single" bind:value={selectedMentor}>
             <Select.Trigger class="w-[180px]">
-              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0].first_name}
-              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0].last_name}
+              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
+                .first_name}
+              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
+                .last_name}
             </Select.Trigger>
             <Select.Content>
               {#each mentors as mentor}
                 <Select.Item value={mentor.id}
-                  >{`${mentor.first_name} ${mentor.last_name}`}</Select.Item
+                  >{`${mentor.firstName} ${mentor.lastName}`}</Select.Item
                 >
               {/each}
             </Select.Content>
@@ -247,8 +257,12 @@
         </div>
         <div class="flex justify-end gap-3">
           <!-- <Button variant="destructive">Reject</Button> -->
-          <Button variant="destructive" onclick={() => rejectStartup(inf.id)}>Reject</Button>
-          <Button onclick={() => approveStartup(inf.id, selectedMentor)}>Approve</Button>
+          <Button variant="destructive" onclick={() => rejectStartup(inf.id)}
+            >Reject</Button
+          >
+          <Button onclick={() => approveStartup(inf.id, selectedMentor)}
+            >Approve</Button
+          >
         </div>
       </div>
     </div></Dialog.Content
