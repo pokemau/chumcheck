@@ -24,7 +24,7 @@ export class StartupService {
   }
 
   async getPendingStartupsRankingByUrat() {
-    return await this.em.findAll(Startup);
+    return await this.em.find(Startup, {}, { populate: ['mentors'] });
   }
 
   async createStartup(dto: StartupApplicationDto) {
