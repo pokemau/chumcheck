@@ -155,7 +155,7 @@
                   id="email"
                   type="text"
                   placeholder="m@example.com"
-                  value={member.first_name}
+                  value={member.firstName}
                 />
                 <Input
                   readonly
@@ -163,7 +163,7 @@
                   id="email"
                   type="text"
                   placeholder="m@example.com"
-                  value={member.last_name}
+                  value={member.lastName}
                 />
               </div>
             </div>
@@ -242,9 +242,9 @@
           <Select.Root type="single" bind:value={selectedMentor}>
             <Select.Trigger class="w-[180px]">
               {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
-                .first_name}
+                .firstName}
               {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
-                .last_name}
+                .lastName}
             </Select.Trigger>
             <Select.Content>
               {#each mentors as mentor}

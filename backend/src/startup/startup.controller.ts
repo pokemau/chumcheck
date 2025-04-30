@@ -39,10 +39,8 @@ export class StartupController {
   }
 
   @Get('/ranking-by-rubrics/')
-  getStartupsByRubrics() {
-    return {
-      message: 'RANKING BY RUBRICS',
-    };
+  async getStartupsByRubrics() {
+    return await this.startupService.getPendingStartupsRankingByUrat();
   }
 
   @Post('/create-startup')

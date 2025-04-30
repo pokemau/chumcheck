@@ -1,6 +1,8 @@
 import {
+  Collection,
   Entity,
   Enum,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryKey,
@@ -43,4 +45,7 @@ export class Startup {
     nullable: true,
   })
   capsuleProposal?: CapsuleProposal;
+
+  @ManyToMany(() => User)
+  mentors = new Collection<User>(this);
 }

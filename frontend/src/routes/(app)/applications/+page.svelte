@@ -159,9 +159,6 @@
 
       const calculator_data = await calculator.json();
 
-      console.log(answers_data);
-      console.log(calculator_data);
-
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
         que = questions_data;
@@ -197,7 +194,6 @@
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
-        //console.log(trl, orl, mrl, rrl, arl, irl);
         toggleDialog();
       }
     }
@@ -434,8 +430,8 @@
                 >
                 {#if selectedTab === 'qualified'}
                   <Table.Cell
-                    >{applicant?.mentors[0]?.first_name}
-                    {applicant?.mentors[0]?.last_name}</Table.Cell
+                    >{applicant?.mentors[0]?.firstName}
+                    {applicant?.mentors[0]?.lastName}</Table.Cell
                   >
                 {/if}
               </Table.Row>
