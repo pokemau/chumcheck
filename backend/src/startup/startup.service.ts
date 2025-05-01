@@ -72,16 +72,21 @@ export class StartupService {
   async getReadinessLevelCriterionAnswers(startupId: number) {
     return this.em.find(StartupCriterionAnswer, {
       startup: startupId, 
-    }, {
-      populate: ['criterion'],
+    },{populate: ['criterion'],
+      orderBy: {
+        id: 'ASC',
+      },
     });
   }
 
   async getStartupReadinessLevel(startupId: number) {
     return this.em.find(StartupReadinessLevel, {
-      startup: startupId, 
-    }, {
-      populate: ['readinessLevel'],
+      startup: startupId ,
+    },{populate: ['readinessLevel'],
+      orderBy: {
+        id: 'ASC',
+      },
     });
   }
+  
 }
