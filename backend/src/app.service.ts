@@ -4,7 +4,7 @@ import { UratQuestion } from './entities/urat-question.entity';
 import { ReadinessType } from './entities/enums/readiness-type.enum';
 import { CalculatorCategory } from './entities/enums/calculator-category.enum';
 import { CalculatorQuestion } from './entities/calculator-question.entity';
-import { ReadinessLevel } from './entities/readiness_level.entity';
+import { ReadinessLevel } from './entities/readiness-level.entity';
 
 @Injectable()
 export class AppService {

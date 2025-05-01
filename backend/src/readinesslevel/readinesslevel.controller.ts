@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -36,10 +37,13 @@ export class ReadinesslevelController {
     return await this.readinessLevelService.getReadinessLevels();
   }
 
-  @Get('/criterion')
-  async getReadinessLevelCriterion() {
-    return await this.readinessLevelService.getReadinessLevelCriterion();
+  @Get('/criterion-answers')
+  async getReadinessLevelCriterion(
+    @Query('startup_id', ParseIntPipe) startupId: number,
+  ) {
+    return this.readinessLevelService.getReadinessLevelCriterionAnswers(startupId);
   }
+  
 
   @UseGuards(JwtGuard)
   @Post('/urat-question-answers/create')

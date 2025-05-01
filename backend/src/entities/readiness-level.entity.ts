@@ -1,6 +1,6 @@
 import { Collection, Entity, Enum, OneToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { ReadinessType } from './enums/readiness-type.enum';
-import { LevelCriterion } from './level_criterion.entity';
+import { LevelCriterion } from './level-criterion.entity';
 
 @Entity({ tableName: 'readiness_levels' })
 export class ReadinessLevel {

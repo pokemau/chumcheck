@@ -27,7 +27,7 @@
       queryKey: ['haveScores', startupId],
       queryFn: () =>
         getData(
-          `/readinesslevel/criterion-answers/?startup_id=${startupId}`,
+          `/readinesslevel/criterion-answers?startup_id=${startupId}`,
           access!
         )
     },

@@ -7,8 +7,9 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
-import { ReadinessLevel } from 'src/entities/readiness_level.entity';
-import { LevelCriterion } from 'src/entities/level_criterion.entity';
+import { ReadinessLevel } from 'src/entities/readiness-level.entity';
+import { LevelCriterion } from 'src/entities/level-criterion.entity';
+import { StartupCriterionAnswer } from 'src/entities/startup-criterion-answer.entity';
 
 @Injectable()
 export class ReadinesslevelService {
@@ -53,6 +54,15 @@ export class ReadinesslevelService {
   async getReadinessLevelCriterion(){
     return await this.em.findAll(LevelCriterion);
   }
+
+  async getReadinessLevelCriterionAnswers(startupId: number) {
+    return this.em.find(StartupCriterionAnswer, {
+      startup: startupId, 
+    }, {
+      populate: ['criterion'],
+    });
+  }
+  
 
   async createUratQuestionAnswers(dto: UratQuestionAnswerDto) {
     const answers = await Promise.all(
