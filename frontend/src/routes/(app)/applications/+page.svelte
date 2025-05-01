@@ -279,7 +279,7 @@
     const data = await response.json();
     if (response.ok) {
       const level = await fetch(
-        `${PUBLIC_API_URL}/startup-readiness-levels/?startupId=${data.id}`,
+        `${PUBLIC_API_URL}/startups/startup-readiness-level/?startupId=${data.id}`,
         {
           method: 'get',
           headers: {
@@ -291,17 +291,15 @@
       const levels = await level.json();
       if (level.ok) {
         inf = data;
-        lev = levels.results;
-        dialogReady = true;
-        toggleDialog();
-        return {
-        	info: data,
-        	questions: questions_data.results,
-        	answers: answers_data.results,
-        	access: access,
-        	calculator: calculator_data
-        };
+        lev = levels;
+        // return {
+        // 	info: data,
+        // 	lev: levels.results,
+        // 	access: access,
+        // };
       }
+      dialogReady = true;
+      toggleDialog();
     }
   }
 
@@ -452,6 +450,7 @@
               <Table.Row
                 class="h-14 cursor-pointer"
                 onclick={async () => {
+                  dialogReady = false
                   dialogLoading = true;
                   if (selectedTab === 'pending') {
                     await getPendingStartupInformation(applicant.id);

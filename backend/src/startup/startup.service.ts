@@ -9,6 +9,8 @@ import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/entities/enums/role.enum';
 import { StartupCriterionAnswer } from 'src/entities/startup-criterion-answer.entity';
+import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
+import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { QualificationStatus } from 'src/entities/enums/qualification-status.enum';
@@ -297,6 +299,7 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
     
     startup.qualificationStatus = QualificationStatus.QUALIFIED;
+    this.createStartupReadinessLevels(startupId);
   
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been approved.` };
@@ -464,5 +467,74 @@ export class StartupService {
     }, {
       populate: ['readinessLevel'],
     });
+  }
+
+  private async createStartupReadinessLevels(startupId: number): Promise<StartupReadinessLevel[]> {
+    // Fetch the startup
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} does not exist`);
+    }
+
+    const uratQuestionAnswers = await this.em.find(UratQuestionAnswer, {
+      startup: startupId,
+    }, {
+      populate: ['uratQuestion'],
+    });
+
+    // Calculate total scores for each ReadinessType
+    const scoresByReadinessType: Record<ReadinessType, number> = {
+      [ReadinessType.T]: 0,
+      [ReadinessType.M]: 0,
+      [ReadinessType.R]: 0,
+      [ReadinessType.A]: 0,
+      [ReadinessType.O]: 0,
+      [ReadinessType.I]: 0,
+    };
+    for (const answer of uratQuestionAnswers) {
+      const readinessType = answer.uratQuestion.readinessType;
+      scoresByReadinessType[readinessType] += answer.score;
+    }
+  
+    // Normalize scores by dividing by 3
+    for (const readinessType in scoresByReadinessType) {
+      scoresByReadinessType[readinessType] = Math.ceil(scoresByReadinessType[readinessType] / 3);
+    }
+  
+    // Fetch all readiness levels
+    const readinessLevels = await this.em.find(ReadinessLevel, {});
+    const readinessLevelsByType = readinessLevels.reduce((map, level) => {
+      if (!map[level.readinessType]) {
+        map[level.readinessType] = [];
+      }
+      map[level.readinessType].push(level);
+      return map;
+    }, {} as Record<ReadinessType, ReadinessLevel[]>);
+  
+    // Create a StartupReadinessLevel for each ReadinessType
+    const startupReadinessLevels: StartupReadinessLevel[] = [];
+    for (const readinessType of Object.values(ReadinessType)) {
+      const score = scoresByReadinessType[readinessType] || 1; // Default to 1 if no score
+      const levels = readinessLevelsByType[readinessType];
+  
+      if (!levels || levels.length === 0) {
+        throw new BadRequestException(`No readiness levels found for type: ${readinessType}`);
+      }
+  
+      // Map the normalized score directly to the corresponding level
+      const selectedLevel = levels.find((level) => level.level === score) || levels[5]; // Default to the first level if no match
+  
+      const startupReadinessLevel = new StartupReadinessLevel();
+      startupReadinessLevel.startup = startup;
+      startupReadinessLevel.readinessLevel = selectedLevel;
+  
+      this.em.persist(startupReadinessLevel);
+      startupReadinessLevels.push(startupReadinessLevel);
+    }
+
+    // Save all the new StartupReadinessLevel entities
+    await this.em.flush();
+  
+    return startupReadinessLevels;
   }
 }
