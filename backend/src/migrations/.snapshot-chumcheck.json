@@ -119,11 +119,11 @@
           "mappedType": "enum"
         }
       },
-      "name": "readinesslevels",
+      "name": "readiness_levels",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "readinesslevels_pkey",
+          "keyName": "readiness_levels_pkey",
           "columnNames": [
             "id"
           ],

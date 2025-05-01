@@ -36,6 +36,11 @@ export class ReadinesslevelController {
     return await this.readinessLevelService.getReadinessLevels();
   }
 
+  @Get('/readiness-level-criterion-answers')
+  async getReadinessLevelCriterionAnswers() {
+    return await this.readinessLevelService.getReadinessLevelCriterionAnswers();
+  }
+
   @UseGuards(JwtGuard)
   @Post('/urat-question-answers/create')
   async createUratQuestionAnswers(@Body() dto: UratQuestionAnswerDto) {

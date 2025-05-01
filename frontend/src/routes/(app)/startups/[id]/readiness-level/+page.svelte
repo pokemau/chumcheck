@@ -27,7 +27,7 @@
       queryKey: ['haveScores', startupId],
       queryFn: () =>
         getData(
-          `/readiness-level-criterion-answers/?page_size=324&startup_id=${startupId}`,
+          `/readiness-level-criterion-answers/startup_id=${startupId}`,
           access!
         )
     },
