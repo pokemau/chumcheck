@@ -5,13 +5,18 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  //@Post('/a')
-  //generateUratQuestions() {
+  // @Post('/a')
+  // generateUratQuestions() {
   //  this.appService.generateUratQuestions();
-  //}
-  //
-  //@Post('/b')
-  //generateCalculatorQuestions() {
+  // }
+  
+  // @Post('/b')
+  // generateCalculatorQuestions() {
   //  this.appService.generateCalculatorQuestions();
-  //}
+  // }
+
+  // @Post('/c')
+  // generateReadinessTypes() {
+  //  this.appService.generateReadinessTypes();
+  // }
 }

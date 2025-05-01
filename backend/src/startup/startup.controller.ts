@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -31,6 +32,20 @@ export class StartupController {
   @Get('/startups')
   getStartups(@Req() req: any) {
     return this.startupService.getStartups(req.user.id);
+  }
+
+  @Get('/criterion-answers')
+  async getReadinessLevelCriterionAnswers(
+    @Query('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return this.startupService.getReadinessLevelCriterionAnswers(startupId);
+  }
+
+  @Get('/startup-readiness-level')
+  async getStartupReadinessLevel(
+    @Query('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return this.startupService.getStartupReadinessLevel(startupId);
   }
 
   @Get('/ranking-by-urat/')
