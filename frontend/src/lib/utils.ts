@@ -1,21 +1,38 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { browser } from '$app/environment';
-import type { Role } from './types';
+// import type { Role } from './types';
 import axiosInstance from './axios';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const readiness = [
-  'Technology',
-  'Investment',
-  'Acceptance',
-  'Regulatory',
-  'Organizational',
-  'Market'
-];
+export enum CalculatorCategory {
+  Technology = 'Technology',
+  Product_Development = 'Product Development',
+  Product_Definition = 'Product Definition',
+  Competitive_Landscape = 'Competitive Landscape',
+  Team = 'Team',
+  Go_To_Market = 'Go-To-Market',
+  Supply_Chain = 'Supply Chain',
+}
+
+export enum ReadinessType {
+  Technology = 'Technology',
+  Market = 'Market',
+  Acceptance = 'Acceptance',
+  Regulatory = 'Regulatory',
+  Organizational = 'Organizational',
+  Investment = 'Investment',
+}
+
+export enum Role {
+  Manager = 'Manager',
+  Mentor = 'Mentor',
+  Startup = 'Startup',
+  Manager_as_Mentor = 'Manager as Mentor',
+}
 
 export const getRole = (
   role: 'Manager' | 'Mentor' | 'Startup' | 'Manager_as_Mentor'

@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryKey,
   Property,
+  DateTimeType,
 } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CapsuleProposal } from './capsule-proposal.entity';
@@ -48,4 +49,7 @@ export class Startup {
 
   @ManyToMany(() => User)
   mentors = new Collection<User>(this);
+
+  @Property({ type: DateTimeType, nullable: true })
+  datetimeDeleted?: Date;
 }

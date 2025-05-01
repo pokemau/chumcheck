@@ -1,3 +1,5 @@
+import type { ReadinessType } from "./utils";
+
 export type Role = 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
 export type Application = {
   id: string;
@@ -8,3 +10,24 @@ export type Application = {
 };
 
 export type Actions = 'Create' | 'View' | 'Edit' | 'Delete';
+
+export type CalculatorQuestionAnswer = {
+  id: number;
+  question: {
+    category: string;
+    score: number;
+  };
+  startupId: number;
+};
+
+export type UratQuestionAnswer = {
+  id: number;
+  response: string;
+  score: number;
+  startupId: number;
+  uratQuestion: {
+    id: number;
+    question: string;
+    readinessType: ReadinessType;
+  };
+};

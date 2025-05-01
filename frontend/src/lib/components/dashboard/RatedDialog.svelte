@@ -15,6 +15,10 @@
   import * as Select from '$lib/components/ui/select';
   import { PUBLIC_API_URL } from '$env/static/public';
   import { isMentor } from '$lib/utils';
+  import { CalculatorCategory } from '$lib/utils';
+  import type { CalculatorQuestionAnswer } from '$lib/types';
+  import { ReadinessType } from '$lib/utils';
+  import type { UratQuestionAnswer } from '$lib/types';
 
   let showCapsule = false;
 
@@ -25,25 +29,50 @@
     que,
     ans,
     calc: any,
-    trl = 0,
-    orl = 0,
-    mrl = 0,
-    rrl = 0,
-    arl = 0,
-    irl = 0,
+    uratReadinessScores,
     showDialog,
     toggleDialog,
     mentors,
     approveStartup,
     rejectStartup;
 
-  let selectedMentor = mentors[0].id;
-  //let selectedMentor = 1;
+  const calculatorCategoryLabels = [
+    CalculatorCategory.Technology,
+    CalculatorCategory.Product_Development,
+    CalculatorCategory.Product_Definition,
+    CalculatorCategory.Competitive_Landscape,
+    CalculatorCategory.Team,
+    CalculatorCategory.Go_To_Market,
+    CalculatorCategory.Supply_Chain
+  ];
 
-  console.log('RATED HERE');
-  console.log('RATED HERE');
-  console.log('RATED HERE');
-  console.log('RATED HERE');
+  const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
+  const apiKeyMapping: Record<string, string> = {
+    [CalculatorCategory.Technology]: "Technology",
+    [CalculatorCategory.Product_Development]: "Product Development",
+    [CalculatorCategory.Product_Definition]: "Product Definition/Design",
+    [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
+    [CalculatorCategory.Team]: "Team",
+    [CalculatorCategory.Go_To_Market]: "Go-To-Market",
+    [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
+  };
+
+  const apiKey = apiKeyMapping[label];
+    return calc[apiKey] || 0;
+  });
+
+  const uratLabels = [
+    ReadinessType.Technology,
+    ReadinessType.Organizational,
+    ReadinessType.Market,
+    ReadinessType.Regulatory,
+    ReadinessType.Acceptance,
+    ReadinessType.Investment,
+  ];
+
+  const uratScoresByType = uratLabels.map((type) => uratReadinessScores[type] || 0);
+
+  let selectedMentor = mentors?.[0]?.id || null;
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
@@ -188,31 +217,15 @@
           <h1 class="text-lg font-semibold">
             Technology and Commercialization Calculator
           </h1>
-          <div>Technology: {calc.technology_level}</div>
-          <div>Commercialization: {calc.commercialization_level}</div>
+          <div>Technology: {calc["Technology Level"]}</div>
+          <div>Commercialization: {calc["Commercialization Level"]}</div>
           <div class="p-10">
             <RadarChart
               id={inf.id}
               min={0}
               max={5}
-              data={[
-                calc.technology_score,
-                calc.product_development,
-                calc.product_definition,
-                calc.competitive_landscape,
-                calc.team,
-                calc.go_to_market,
-                calc.supply_chain
-              ]}
-              labels={[
-                'Technology',
-                'Product Development',
-                'Product Definition',
-                'Competitive Landscape',
-                'Team',
-                'Go-To-Market',
-                'Supply Chain'
-              ]}
+              data={calculatorScoresByCategory}
+              labels={calculatorCategoryLabels}
             />
           </div>
         </div>
@@ -224,15 +237,8 @@
               id={inf.id + 100}
               min={0}
               max={15}
-              data={[trl, orl, mrl, rrl, arl, irl]}
-              labels={[
-                'Technology',
-                'Organizational',
-                'Market',
-                'Regulatory',
-                'Acceptance',
-                'Investment'
-              ]}
+              data={uratScoresByType}
+              labels={uratLabels}
             />
           </div>
         </div>
@@ -241,10 +247,12 @@
 
           <Select.Root type="single" bind:value={selectedMentor}>
             <Select.Trigger class="w-[180px]">
-              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
-                .firstName}
-              {mentors.filter((mentor: any) => mentor.id === selectedMentor)[0]
-                .lastName}
+              {#if mentors && mentors.length > 0 && selectedMentor}
+                {mentors.find((mentor: any) => mentor.id === selectedMentor)?.firstName || 'Select Mentor'}
+                {mentors.find((mentor: any) => mentor.id === selectedMentor)?.lastName || ''}
+              {:else}
+                Select Mentor
+              {/if}
             </Select.Trigger>
             <Select.Content>
               {#each mentors as mentor}

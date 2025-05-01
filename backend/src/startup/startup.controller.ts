@@ -40,7 +40,7 @@ export class StartupController {
 
   @Get('/ranking-by-rubrics/')
   async getStartupsByRubrics() {
-    return await this.startupService.getPendingStartupsRankingByUrat();
+    return await this.startupService.getQualifiedStartupsRankingByRubrics();
   }
 
   @Post('/create-startup')
@@ -82,5 +82,32 @@ export class StartupController {
   @Get(':startupId/calculator-final-scores')
   async getCalculatorFinalScores(@Param('startupId') startupId: number) {
     return await this.startupService.getCalculatorFinalScores(startupId);
+  }
+
+  @Post(':startupId/rate-applicant')
+  async rateApplicant(
+    @Param('startupId') startupId: number,
+    @Body('scores') scores: { readinessType: string; questionId: number; score: number }[]
+  ) {
+    return this.startupService.rateApplicant(startupId, scores);
+  }
+
+  @Post(':startupId/approve-applicant')
+  async approveApplicant(@Param('startupId') startupId: number) {
+    return await this.startupService.approveApplicant(startupId);
+  }
+
+  @Post(':startupId/reject-applicant')
+  async rejectApplicant(@Param('startupId') startupId: number) {
+    return await this.startupService.rejectApplicant(startupId);
+  }
+
+  @Post(':startupId/appoint-mentors')
+  async appointMentors(
+    @Param('startupId') startupId: number,
+    @Body('mentor_ids') mentorIds: number[],
+    @Body('cohort_id') cohortId: number
+  ) {
+    return await this.startupService.appointMentors(startupId, mentorIds, cohortId);
   }
 }

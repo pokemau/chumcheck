@@ -8,19 +8,23 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { PUBLIC_API_URL } from '$env/static/public';
   import type { PageData } from './$types';
+  import { page } from '$app/state';
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
   import RatedDialog from '$lib/components/dashboard/RatedDialog.svelte';
   import QualifiedDialog from '$lib/components/dashboard/QualifiedDialog.svelte';
   import axiosInstance from '$lib/axios';
   import { useQueries } from '@sveltestack/svelte-query';
+  import { ReadinessType } from '$lib/utils';
 
   export let data: PageData;
 
   let access = data.access;
 
-  let selectedTab = 'pending';
+  $: selectedTab = page.url.searchParams.get('tab') || 'pending';
   let applicants: any = [];
 
+  let dialogReady = false;
+  let dialogLoading = false;
   let showDialog = false;
 
   function toggleDialog() {
@@ -69,25 +73,31 @@
       const calculator = await fetch(
         `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
         {
-          method: 'get',
+          method: 'GET',
           headers: {
             Authorization: `Bearer ${access}`
           }
         }
       );
 
-      const calculator_data = await calculator.json();
-      if (urat_questions.ok && urat_answers.ok && calculator.ok) {
+      let calculator_data;
+      try {
+        calculator_data = await calculator.json();
+      } catch (error) {
+        console.error('Error parsing calculator JSON:', error);
+      }
+      if (urat_questions.ok && urat_answers.ok && calculator.ok && calculator_data) {
         inf = data;
         que = questions_data;
         ans = answers_data;
         calc = calculator_data;
+        dialogReady = true;
         toggleDialog();
       }
     }
   }
 
-  async function saveRating(startupId: string) {
+  async function saveRating(startupId: string, scores: Record<number, number>) {
     const response = await fetch(
       `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
       {
@@ -95,7 +105,10 @@
         headers: {
           'Content-type': 'application/json',
           Authorization: `Bearer ${access}`
-        }
+        },
+        body: JSON.stringify({
+          scores
+        })
       }
     );
 
@@ -106,12 +119,14 @@
     }
   }
   // rated
-  let trl = 0,
-    orl = 0,
-    mrl = 0,
-    rrl = 0,
-    arl = 0,
-    irl = 0;
+  const uratReadinessScores: Record<ReadinessType, number> = {
+        [ReadinessType.Technology]: 0,
+        [ReadinessType.Organizational]: 0,
+        [ReadinessType.Market]: 0,
+        [ReadinessType.Regulatory]: 0,
+        [ReadinessType.Acceptance]: 0,
+        [ReadinessType.Investment]: 0,
+      };
   async function getRatedStartupInformation(startupId: number) {
     const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
       method: 'get',
@@ -136,7 +151,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/?startupId=${startupId}`,
         {
           method: 'get',
           headers: {
@@ -146,6 +161,7 @@
       );
 
       const answers_data = await urat_answers.json();
+      console.log('answers_data:', answers_data);
 
       const calculator = await fetch(
         `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
@@ -157,43 +173,27 @@
         }
       );
 
-      const calculator_data = await calculator.json();
+      let calculator_data;
+      try {
+        calculator_data = await calculator.json();
+      } catch (error) {
+        console.error('Error parsing calculator JSON:', error);
+      }
 
-      if (urat_questions.ok && urat_answers.ok && calculator.ok) {
-        inf = data;
-        que = questions_data;
-        ans = answers_data;
+      if (urat_questions.ok && urat_answers.ok && calculator.ok && calculator_data) {
+        inf = data; 
+        que = questions_data.results || [];
+        ans = answers_data.results || [];
         calc = calculator_data;
-        trl = ans
-          .filter((d) => d.readinessType === 'Technology')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
-        orl = ans
-          .filter((d) => d.readinessType === 'Organizational')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
-        mrl = ans
-          .filter((d) => d.readinessType === 'Market')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
-        rrl = ans
-          .filter((d) => d.readinessType === 'Regulatory')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
-        arl = ans
-          .filter((d) => d.readinessType === 'Acceptance')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
-        irl = ans
-          .filter((d) => d.readinessType === 'Investment')
-          .reduce((accumulator: any, currentValue: any) => {
-            return accumulator + currentValue.score;
-          }, 0);
+        answers_data.forEach((answer: any) => {
+          const readinessType = answer.readinessType as ReadinessType;
+          if (uratReadinessScores[readinessType] !== undefined) {
+            uratReadinessScores[readinessType] += answer.score;
+          } else {
+            console.warn(`Unknown readiness type: ${readinessType}`, answer);
+          }
+        });
+        dialogReady = true;
         toggleDialog();
       }
     }
@@ -229,8 +229,13 @@
       );
 
       if (assignmentor.ok) {
-        const filtered = applicants.filter((d) => d.id !== startupId);
-        applicants = filtered;
+        // const filtered = applicants.filter((d) => d.id !== startupId);
+        // applicants = filtered;
+        // const startup = $queries[0].data.find((applicant: any) => applicant.id === startupId);
+        // if (startup) {
+        //   startup.qualificationStatus = 3;
+        // }
+        window.location.href = '/applications?tab=rated';
       }
       toggleDialog();
     }
@@ -249,10 +254,15 @@
     );
 
     if (response.ok) {
-      return {
-        message: 'email has been sent to the applicant'
-      };
+      // const filtered = applicants.filter((d) => d.id !== startupId);
+      // applicants = filtered;
+      // const startup = $queries[0].data.find((applicant: any) => applicant.id === startupId);
+      // if (startup) {
+      //   startup.qualificationStatus = 4;
+      // }
+      window.location.href = '/applications?tab=rated';
     }
+    toggleDialog();
   }
 
   // qualified
@@ -282,14 +292,15 @@
       if (level.ok) {
         inf = data;
         lev = levels.results;
-        // return {
-        // 	info: data,
-        // 	questions: questions_data.results,
-        // 	answers: answers_data.results,
-        // 	access: access,
-        // 	calculator: calculator_data
-        // };
+        dialogReady = true;
         toggleDialog();
+        return {
+        	info: data,
+        	questions: questions_data.results,
+        	answers: answers_data.results,
+        	access: access,
+        	calculator: calculator_data
+        };
       }
     }
   }
@@ -312,7 +323,7 @@
       queryKey: ['mentors'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/users?userRole=Mentor`, {
+          await axiosInstance.get(`/users/?userRole=Mentor`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -346,6 +357,10 @@
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 2
         );
+      } else {
+        applicants = $queries[0].data.filter(
+          (applicant: any) => applicant.qualificationStatus === 3
+        );
       }
     } else {
       applicants = []; // Handle case when there are no applicants
@@ -366,30 +381,54 @@
 <svelte:head>
   <title>ChumCheck - Applications</title>
 </svelte:head>
+
+<style>
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
   <div>Fetching...</div>
 {:else}
   {@const mentors = $queries[1].data}
   <div class="flex flex-col gap-3">
     <div class="flex justify-between rounded-lg bg-background">
-      <Tabs.Root value="pending">
+      <Tabs.Root value={selectedTab}>
         <Tabs.List class="border bg-flutter-gray/20">
           <Tabs.Trigger
             value="pending"
             onclick={() => {
               selectedTab = 'pending';
+              goto('/applications?tab=pending');
             }}>Pending</Tabs.Trigger
           >
           <Tabs.Trigger
             value="rated"
             onclick={() => {
               selectedTab = 'rated';
+              goto('/applications?tab=rated');
             }}>Rated</Tabs.Trigger
           >
           <Tabs.Trigger
             value="qualified"
             onclick={() => {
               selectedTab = 'qualified';
+              goto('/applications?tab=qualified');
             }}>Qualified</Tabs.Trigger
           >
         </Tabs.List>
@@ -412,14 +451,16 @@
             {#each applicants as applicant}
               <Table.Row
                 class="h-14 cursor-pointer"
-                onclick={() => {
+                onclick={async () => {
+                  dialogLoading = true;
                   if (selectedTab === 'pending') {
-                    getPendingStartupInformation(applicant.id);
+                    await getPendingStartupInformation(applicant.id);
                   } else if (selectedTab === 'rated') {
-                    getRatedStartupInformation(applicant.id);
+                    await getRatedStartupInformation(applicant.id);
                   } else {
-                    getQualifiedStartupInformation(applicant.id);
+                    await getQualifiedStartupInformation(applicant.id);
                   }
+                  dialogLoading = false;
                 }}
               >
                 <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
@@ -444,37 +485,47 @@
     </div>
   </div>
 
+  {#if dialogLoading}
+    <div class="fixed inset-0 flex items-center justify-center bg-background bg-opacity-90 z-50">
+      <div class="p-5 rounded-lg shadow-lg flex items-center gap-3">
+        <div class="loader"></div>
+        <span>Loading...</span>
+      </div>
+    </div>
+  {/if}
+
   <!-- pending dialog -->
-  {#if selectedTab === 'pending'}
-    <PendingDialog
-      {inf}
-      {que}
-      {ans}
-      {calc}
-      {saveRating}
-      {showDialog}
-      {toggleDialog}
-      {access}
-    />
-  {:else if selectedTab === 'rated'}
-    <RatedDialog
-      {inf}
-      {que}
-      {ans}
-      {calc}
-      {trl}
-      {orl}
-      {mrl}
-      {rrl}
-      {arl}
-      {irl}
-      {approveStartup}
-      {rejectStartup}
-      {mentors}
-      {showDialog}
-      {toggleDialog}
-    />
-  {:else}
-    <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} />
+  {#if dialogReady}
+    {#if selectedTab === 'pending'}
+      <!-- {#if calc} -->
+        <PendingDialog
+          {inf}
+          {que}
+          {ans}
+          {calc}
+          {saveRating}
+          {showDialog}
+          {toggleDialog}
+          {access}
+        />
+      <!-- {/if} -->
+    {:else if selectedTab === 'rated'}
+      {#if calc}
+        <RatedDialog
+          {inf}
+          {que}
+          {ans}
+          {calc}
+          {uratReadinessScores}
+          {approveStartup}
+          {rejectStartup}
+          {mentors}
+          {showDialog}
+          {toggleDialog}
+        />
+      {/if}
+    {:else}
+      <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} />
+    {/if}
   {/if}
 {/if}
