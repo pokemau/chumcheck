@@ -68,4 +68,20 @@ export class StartupService {
       message: 'CALC FINAL SCORES',
     };
   }
+
+  async getReadinessLevelCriterionAnswers(startupId: number) {
+    return this.em.find(StartupCriterionAnswer, {
+      startup: startupId, 
+    }, {
+      populate: ['criterion'],
+    });
+  }
+
+  async getStartupReadinessLevel(startupId: number) {
+    return this.em.find(StartupReadinessLevel, {
+      startup: startupId, 
+    }, {
+      populate: ['readinessLevel'],
+    });
+  }
 }

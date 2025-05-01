@@ -34,6 +34,20 @@ export class StartupController {
     return this.startupService.getStartups(req.user.id);
   }
 
+  @Get('/criterion-answers')
+  async getReadinessLevelCriterionAnswers(
+    @Query('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return this.startupService.getReadinessLevelCriterionAnswers(startupId);
+  }
+
+  @Get('/startup-readiness-level')
+  async getStartupReadinessLevel(
+    @Query('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return this.startupService.getStartupReadinessLevel(startupId);
+  }
+
   @Get('/ranking-by-urat/')
   async getStartupsByUrat() {
     return await this.startupService.getPendingStartupsRankingByUrat();
