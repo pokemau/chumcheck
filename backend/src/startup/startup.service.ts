@@ -8,6 +8,8 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
 import { Role } from 'src/entities/enums/role.enum';
+import { StartupCriterionAnswer } from 'src/entities/startup-criterion-answer.entity';
+import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 
 @Injectable()
 export class StartupService {

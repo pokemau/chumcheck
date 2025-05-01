@@ -33,7 +33,7 @@
     },
     {
       queryKey: ['readinessLevel', startupId],
-      queryFn: () => getData(`/startup-readiness-levels/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/readinesslevel/startup-readiness-level?startup_id=${startupId}`, access!)
     }
   ]);
   const { isLoading, isError } = $derived(useQueriesState($readinessLevelQueries));
