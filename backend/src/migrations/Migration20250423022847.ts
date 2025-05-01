@@ -1,8 +1,12 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20250422115556 extends Migration {
+export class Migration20250423022847 extends Migration {
 
   override async up(): Promise<void> {
+    this.addSql(`create table "calculator_questions" ("id" serial primary key, "question" varchar(255) not null, "score" int not null, "category" text check ("category" in ('Technology', 'Product Development', 'Product Definition Design', 'Competitive Landscape', 'Team', 'Go-To-Market', 'Manufacturing Supply Chain')) not null);`);
+
+    this.addSql(`create table "urat_questions" ("id" serial primary key, "question" varchar(255) not null, "readiness_type" text check ("readiness_type" in ('Technology', 'Market', 'Acceptance', 'Organizational', 'Regulatory', 'Investment')) not null);`);
+
     this.addSql(`create table "users" ("id" serial primary key, "email" varchar(255) not null, "hash" varchar(255) not null, "first_name" varchar(255) null, "last_name" varchar(255) null, "role" text check ("role" in ('Startup', 'Mentor', 'Manager')) not null default 'Startup');`);
     this.addSql(`alter table "users" add constraint "users_email_unique" unique ("email");`);
 
@@ -20,6 +24,10 @@ export class Migration20250422115556 extends Migration {
     this.addSql(`alter table "startups" drop constraint "startups_user_id_foreign";`);
 
     this.addSql(`alter table "capsule_proposals" drop constraint "capsule_proposals_startup_id_foreign";`);
+
+    this.addSql(`drop table if exists "calculator_questions" cascade;`);
+
+    this.addSql(`drop table if exists "urat_questions" cascade;`);
 
     this.addSql(`drop table if exists "users" cascade;`);
 

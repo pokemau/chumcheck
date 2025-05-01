@@ -17,7 +17,14 @@
   function toggleCapsule() {
     showCapsule = !showCapsule;
   }
-  export let inf: any, que: any, ans: any, calc: any, saveRating, showDialog, toggleDialog, access;
+  export let inf: any,
+    que: any,
+    ans: any,
+    calc: any,
+    saveRating,
+    showDialog,
+    toggleDialog,
+    access;
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
@@ -159,7 +166,9 @@
         </div>
         <!-- Calculator -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Technology and Commercialization Calculator</h1>
+          <h1 class="text-lg font-semibold">
+            Technology and Commercialization Calculator
+          </h1>
           <div class="p-10">
             <RadarChart
               id={inf.id}
@@ -191,38 +200,40 @@
           <h1 class="text-lg font-semibold">URAT Assessment</h1>
           <div class="flex flex-col gap-3">
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Technology')}
-              answers={ans.filter((d) => d.readiness_type === 'Technology')}
+              questions={que.filter((d) => d.readinessType === 'Technology')}
+              answers={ans.filter((d) => d.readinessType === 'Technology')}
               type="Technology"
               {access}
             />
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Market')}
-              answers={ans.filter((d) => d.readiness_type === 'Market')}
+              questions={que.filter((d) => d.readinessType === 'Market')}
+              answers={ans.filter((d) => d.readinessType === 'Market')}
               type="Market"
               {access}
             />
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Regulatory')}
-              answers={ans.filter((d) => d.readiness_type === 'Regulatory')}
+              questions={que.filter((d) => d.readinessType === 'Regulatory')}
+              answers={ans.filter((d) => d.readinessType === 'Regulatory')}
               type="Regulatory"
               {access}
             />
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Acceptance')}
-              answers={ans.filter((d) => d.readiness_type === 'Acceptance')}
+              questions={que.filter((d) => d.readinessType === 'Acceptance')}
+              answers={ans.filter((d) => d.readinessType === 'Acceptance')}
               type="Acceptance"
               {access}
             />
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Organizational')}
-              answers={ans.filter((d) => d.readiness_type === 'Organizational')}
+              questions={que.filter(
+                (d) => d.readinessType === 'Organizational'
+              )}
+              answers={ans.filter((d) => d.readinessType === 'Organizational')}
               type="Organizational"
               {access}
             />
             <Assessment
-              questions={que.filter((d) => d.readiness_type === 'Investment')}
-              answers={ans.filter((d) => d.readiness_type === 'Investment')}
+              questions={que.filter((d) => d.readinessType === 'Investment')}
+              answers={ans.filter((d) => d.readinessType === 'Investment')}
               type="Investment"
               {access}
             />

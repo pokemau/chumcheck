@@ -40,6 +40,7 @@
     });
 
     const data = await response.json();
+
     if (response.ok) {
       const urat_questions = await fetch(
         `${PUBLIC_API_URL}/readinesslevel/urat-questions/`,
@@ -54,7 +55,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
         {
           method: 'GET',
           headers: {
@@ -78,9 +79,8 @@
       const calculator_data = await calculator.json();
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
-        console.log(data.members);
-        que = questions_data.results;
-        ans = answers_data.results;
+        que = questions_data;
+        ans = answers_data;
         calc = calculator_data;
         toggleDialog();
       }
@@ -136,7 +136,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
         {
           method: 'get',
           headers: {
@@ -161,36 +161,36 @@
 
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
-        que = questions_data.results;
-        ans = answers_data.results;
+        que = questions_data;
+        ans = answers_data;
         calc = calculator_data;
         trl = ans
-          .filter((d) => d.readiness_type === 'Technology')
+          .filter((d) => d.readinessType === 'Technology')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         orl = ans
-          .filter((d) => d.readiness_type === 'Organizational')
+          .filter((d) => d.readinessType === 'Organizational')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         mrl = ans
-          .filter((d) => d.readiness_type === 'Market')
+          .filter((d) => d.readinessType === 'Market')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         rrl = ans
-          .filter((d) => d.readiness_type === 'Regulatory')
+          .filter((d) => d.readinessType === 'Regulatory')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         arl = ans
-          .filter((d) => d.readiness_type === 'Acceptance')
+          .filter((d) => d.readinessType === 'Acceptance')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
         irl = ans
-          .filter((d) => d.readiness_type === 'Investment')
+          .filter((d) => d.readinessType === 'Investment')
           .reduce((accumulator: any, currentValue: any) => {
             return accumulator + currentValue.score;
           }, 0);
@@ -269,7 +269,7 @@
     const data = await response.json();
     if (response.ok) {
       const level = await fetch(
-        `${PUBLIC_API_URL}/startup-readiness-levels/?startup_id=${data.id}`,
+        `${PUBLIC_API_URL}/startup-readiness-levels/?startupId=${data.id}`,
         {
           method: 'get',
           headers: {
@@ -312,7 +312,7 @@
       queryKey: ['mentors'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/users/?user_type=ME`, {
+          await axiosInstance.get(`/users?userRole=Mentor`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -340,11 +340,11 @@
     if ($queries[0].data.length > 0) {
       if (selectedTab === 'pending') {
         applicants = $queries[0].data.filter(
-          (applicant: any) => applicant.qualification_status === 1
+          (applicant: any) => applicant.qualificationStatus === 1
         );
       } else if (selectedTab === 'rated') {
         applicants = $queries[0].data.filter(
-          (applicant: any) => applicant.qualification_status === 2
+          (applicant: any) => applicant.qualificationStatus === 2
         );
       }
     } else {
@@ -369,7 +369,7 @@
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
   <div>Fetching...</div>
 {:else}
-  {@const mentors = $queries[1].data.results}
+  {@const mentors = $queries[1].data}
   <div class="flex flex-col gap-3">
     <div class="flex justify-between rounded-lg bg-background">
       <Tabs.Root value="pending">
@@ -423,15 +423,15 @@
                 }}
               >
                 <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
-                <Table.Cell>{applicant.group_name}</Table.Cell>
+                <Table.Cell>{applicant.groupName}</Table.Cell>
                 <Table.Cell class=""
                   >{applicant.leader_first_name}
                   {applicant.leader_last_name}</Table.Cell
                 >
                 {#if selectedTab === 'qualified'}
                   <Table.Cell
-                    >{applicant?.mentors[0]?.first_name}
-                    {applicant?.mentors[0]?.last_name}</Table.Cell
+                    >{applicant?.mentors[0]?.firstName}
+                    {applicant?.mentors[0]?.lastName}</Table.Cell
                   >
                 {/if}
               </Table.Row>

@@ -44,17 +44,20 @@
 
     const data = await response.json();
     if (response.ok) {
-      const urat_questions = await fetch(`${PUBLIC_API_URL}/readinesslevel/urat-questions/`, {
-        method: 'get',
-        headers: {
-          Authorization: `Bearer ${access}`
+      const urat_questions = await fetch(
+        `${PUBLIC_API_URL}/readinesslevel/urat-questions/`,
+        {
+          method: 'get',
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
         }
-      });
+      );
 
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/urat-question-answers/?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startup_id=${startupId}`,
         {
           method: 'get',
           headers: {
@@ -65,8 +68,10 @@
 
       const answers_data = await urat_answers.json();
 
+      console.log(answers_data);
+
       const calculator = await fetch(
-        `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
+        `${PUBLIC_API_URL}/readinesslevel/${startupId}/calculator-final-scores/`,
         {
           method: 'get',
           headers: {
@@ -79,8 +84,8 @@
 
       if (urat_questions.ok && urat_answers.ok && calculator.ok) {
         inf = data;
-        que = questions_data.results;
-        ans = answers_data.results;
+        que = questions_data;
+        ans = answers_data;
         calc = calculator_data;
         console.log(data);
         // return {
@@ -118,11 +123,18 @@
             <Table.Row class="h-[80px]">
               <Table.Cell class="font-medium">{applicant.name}</Table.Cell>
               <Table.Cell>{applicant.group_name}</Table.Cell>
-              <Table.Cell class="hidden md:table-cell">{applicant.user}</Table.Cell>
+              <Table.Cell class="hidden md:table-cell"
+                >{applicant.user}</Table.Cell
+              >
               <Table.Cell>
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger asChild let:builder>
-                    <Button aria-haspopup="true" size="icon" variant="ghost" builders={[builder]}>
+                    <Button
+                      aria-haspopup="true"
+                      size="icon"
+                      variant="ghost"
+                      builders={[builder]}
+                    >
                       <Ellipsis class="h-4 w-4" />
                       <span class="sr-only">Toggle menu</span>
                     </Button>
@@ -131,7 +143,8 @@
                     <DropdownMenu.Label>Action</DropdownMenu.Label>
                     <DropdownMenu.Item>Approve</DropdownMenu.Item>
                     <DropdownMenu.Item>Reject</DropdownMenu.Item>
-                    <DropdownMenu.Item on:click={() => getStartupInformation(applicant.id)}
+                    <DropdownMenu.Item
+                      on:click={() => getStartupInformation(applicant.id)}
                       >View</DropdownMenu.Item
                     >
                   </DropdownMenu.Content>
@@ -155,7 +168,13 @@
           <h1 class="text-lg font-semibold">Project Details</h1>
           <div class="grid gap-2">
             <Label for="email">Startup Name</Label>
-            <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
+            <Input
+              readonly
+              name="email"
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+            />
           </div>
 
           <div class="grid gap-2">
@@ -191,41 +210,109 @@
           <h1 class="text-lg font-semibold">Group Information</h1>
           <div class="grid gap-2">
             <Label for="email">Group Name</Label>
-            <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
+            <Input
+              readonly
+              name="email"
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+            />
           </div>
 
           <div class="grid gap-2">
             <Label for="email">Leader</Label>
             <div class="flex gap-3">
-              <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
             </div>
           </div>
           <div class="grid gap-2">
             <Label for="email">Member #1</Label>
             <div class="flex gap-3">
-              <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
             </div>
           </div>
           <div class="grid gap-2">
             <Label for="email">Member #2</Label>
             <div class="flex gap-3">
-              <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
-              <Input readonly name="email" id="email" type="text" placeholder="m@example.com" />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="email"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
+              <Input
+                readonly
+                name="email"
+                id="email"
+                type="text"
+                placeholder="m@example.com"
+              />
             </div>
           </div>
           <div class="grid gap-2">
             <Label for="email">University Name</Label>
-            <Input readonly name="email" id="email" type="email" placeholder="m@example.com" />
+            <Input
+              readonly
+              name="email"
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+            />
           </div>
         </div>
         <!-- Calculator -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Technology and Commercialization Calculator</h1>
+          <h1 class="text-lg font-semibold">
+            Technology and Commercialization Calculator
+          </h1>
           <div class="p-10">
             <RadarChart id={inf.id} />
           </div>

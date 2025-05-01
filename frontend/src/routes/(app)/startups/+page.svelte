@@ -15,7 +15,7 @@
   let { data } = $props();
 
   const queryResult = useQuery('startupData', () =>
-    getData(`/startup/startups`, data.access!)
+    getData(`/startups/startups`, data.access!)
   );
 
   const role: any = data.role;
@@ -29,11 +29,10 @@
   const isLoading = $derived($queryResult.isLoading);
   const isError = $derived($queryResult.isError);
   const hasStartups = $derived(
-    Array.isArray($queryResult.data?.results) &&
-      $queryResult.data.results.length > 0
+    Array.isArray($queryResult.data) && $queryResult.data.length > 0
   );
   const listOfStartups = $derived(
-    $queryResult.isSuccess && hasStartups ? $queryResult.data.results : []
+    $queryResult.isSuccess && hasStartups ? $queryResult.data : []
   );
 
   let showApplicationForm = $state(false);
@@ -45,7 +44,7 @@
     const success = $page.url.searchParams.get('success');
 
     if (success === 'true') {
-      console.log('Success is true');
+      //console.log('Success is true');
       toast.success('Application successfull.');
       // Remove the 'success' parameter from the URL
       const url = new URL($page.url.href);
@@ -66,6 +65,7 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
+      console.log('QUERYRESULT DATA');
       console.log($queryResult.data);
     }
   });
@@ -119,9 +119,13 @@
 {/snippet}
 
 {#snippet startups()}
+  {console.log('ROLE')}
+  {console.log(role)}
   {#if role !== 'Startup'}
+    {console.log('HERE')}
     <div class="mt-3 grid grid-cols-4 gap-3">
-      {#each listOfStartups.filter((startup: any) => startup.qualification_status === 3) as startup}
+      {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
+        {console.log(startup, role)}
         <StartupCard {startup} {role} />
       {/each}
     </div>
@@ -131,7 +135,7 @@
         <Accordion.Trigger>Qualified Startups</Accordion.Trigger>
         <Accordion.Content>
           <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualification_status === 3) as startup}
+            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
               <StartupCard {startup} {role} />
             {/each}
           </div>
@@ -141,7 +145,7 @@
         <Accordion.Trigger>Pending Startups</Accordion.Trigger>
         <Accordion.Content>
           <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualification_status === 1 || startup.qualification_status === 2) as startup}
+            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 1 || startup.qualificationStatus === 2) as startup}
               <StartupCard {startup} {role} />
             {/each}
           </div>

@@ -1,8 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  Param,
   Post,
+  Query,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +18,7 @@ import { StartupApplicationDto } from './dto';
 import { StartupService } from './startup.service';
 import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -24,13 +29,21 @@ export class StartupController {
   ) {}
 
   @Get('/startups')
-  getStartups() {
-    return {
-      message: 'STARTUPS RAAAAAAAAHHHHHHHHHHHHHHH',
-    };
+  getStartups(@Req() req: any) {
+    return this.startupService.getStartups(req.user.id);
   }
 
-  @Post('/create')
+  @Get('/ranking-by-urat/')
+  async getStartupsByUrat() {
+    return await this.startupService.getPendingStartupsRankingByUrat();
+  }
+
+  @Get('/ranking-by-rubrics/')
+  async getStartupsByRubrics() {
+    return await this.startupService.getPendingStartupsRankingByUrat();
+  }
+
+  @Post('/create-startup')
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async createStartup(
     @Body() dto: StartupApplicationDto,
@@ -57,5 +70,17 @@ export class StartupController {
       console.error(error);
       return error;
     }
+  }
+
+  @Get(':startupId')
+  async getStartupById(@Param('startupId') startupId: string) {
+    const id = Number(startupId);
+    if (isNaN(id)) throw new BadRequestException('Invalid Startup ID');
+    return await this.startupService.getStartupById(id);
+  }
+
+  @Get(':startupId/calculator-final-scores')
+  async getCalculatorFinalScores(@Param('startupId') startupId: number) {
+    return await this.startupService.getCalculatorFinalScores(startupId);
   }
 }

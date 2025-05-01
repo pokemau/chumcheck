@@ -6,41 +6,45 @@
 
     const data = await uratQuestions.json();
     if (uratQuestions.ok) {
+      //const calculatorQuestions = await fetch(
+      //  `${PUBLIC_API_URL}/readinesslevel/calculator-categories/`
+      //);
+
       const calculatorQuestions = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/calculator-categories/`
+        `${PUBLIC_API_URL}/readinesslevel/calculator-questions/`
       );
 
       const data2 = await calculatorQuestions.json();
 
-      console.log('URAT QUESTIONS');
-      console.log(data);
-
-      console.log('CALC CATEGORIES');
-      console.log(data2);
-
-      console.log(data.results);
+      //console.log('URAT QUESTIONS');
+      //console.log(data);
+      //
+      //console.log('CALC CATEGORIES');
+      //console.log(data2);
+      //
+      //console.log(data.results);
 
       if (calculatorQuestions.ok) {
         return {
-          technologyQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Technology'
+          technologyQuestions: data.filter(
+            (d: any) => d.readinessType === 'Technology'
           ),
-          marketQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Market'
+          marketQuestions: data.filter(
+            (d: any) => d.readinessType === 'Market'
           ),
-          acceptanceQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Acceptance'
+          acceptanceQuestions: data.filter(
+            (d: any) => d.readinessType === 'Acceptance'
           ),
-          organizationalQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Organizational'
+          organizationalQuestions: data.filter(
+            (d: any) => d.readinessType === 'Organizational'
           ),
-          regulatoryQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Regulatory'
+          regulatoryQuestions: data.filter(
+            (d: any) => d.readinessType === 'Regulatory'
           ),
-          investmentQuestions: data.results.filter(
-            (d: any) => d.readiness_type === 'Investment'
+          investmentQuestions: data.filter(
+            (d: any) => d.readinessType === 'Investment'
           ),
-          calculator: data2.results
+          calculator: data2
         };
       }
     }

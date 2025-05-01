@@ -28,13 +28,16 @@
     const formData = new FormData();
     formData.append('capsule_proposal', files[0]);
 
-    const response = await fetch(`${PUBLIC_API_URL}/startup/capsule-proposal`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${access}`
-      },
-      body: formData
-    });
+    const response = await fetch(
+      `${PUBLIC_API_URL}/startups/capsule-proposal`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${access}`
+        },
+        body: formData
+      }
+    );
 
     const data = await response.json();
 

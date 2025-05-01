@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class UratQuestionDto {
   @IsNumber()
@@ -22,4 +28,44 @@ export class UratQuestionDto {
   score: number;
 }
 
-export class CalculatorQuestionDto {}
+class CalculatorQuestionAnswer {
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  startupId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  calculatorQuestionId: number;
+}
+
+export class CalculatorQuestionAnswerDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CalculatorQuestionAnswer)
+  calculatorAnswers: CalculatorQuestionAnswer[];
+}
+
+class UratQuestionnswer {
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  startupId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  uratQuestionId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => String)
+  response: string;
+}
+
+export class UratQuestionAnswerDto {
+  @IsArray()
+  @Type(() => UratQuestionnswer)
+  answers: UratQuestionnswer[];
+}

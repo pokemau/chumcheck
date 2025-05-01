@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { AuthDto } from './dto';
+import { AuthDto, AuthSignInDto } from './dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -21,6 +21,8 @@ export class AuthService {
       const user = new User();
       user.email = dto.email;
       user.hash = hash;
+      user.firstName = dto.firstName;
+      user.lastName = dto.lastName;
 
       await this.em.persistAndFlush(user);
       return this.signToken(user.id, user.email, user.role);
@@ -29,7 +31,7 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto) {
+  async signin(dto: AuthSignInDto) {
     const user = await this.em.findOne(User, { email: dto.email });
     if (!user) throw new ForbiddenException('User not found.');
 
