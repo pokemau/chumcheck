@@ -8,6 +8,7 @@ import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { ReadinessLevel } from 'src/entities/readiness_level.entity';
+import { LevelCriterion } from 'src/entities/level_criterion.entity';
 
 @Injectable()
 export class ReadinesslevelService {
@@ -49,8 +50,8 @@ export class ReadinesslevelService {
     return await this.em.findAll(ReadinessLevel);
   }
 
-  async getReadinessLevelCriterionAnswers(){
-
+  async getReadinessLevelCriterion(){
+    return await this.em.findAll(LevelCriterion);
   }
 
   async createUratQuestionAnswers(dto: UratQuestionAnswerDto) {

@@ -1,5 +1,6 @@
-import { Entity, Enum, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { ReadinessType } from './enums/readiness-type.enum';
+import { ReadinessLevel } from './readiness_level.entity';
 
 @Entity({ tableName: 'level_criteria' })
 export class LevelCriterion {
@@ -10,8 +11,20 @@ export class LevelCriterion {
   criteria!: string;
 
   @Property()
-  level!:number; 
+  excellent_description!: string;
 
   @Property()
-  name!: string;
+  good_description!: string;
+
+  @Property()
+  fair_description!: string;
+
+  @Property()
+  poor_description!: string;
+
+  @Property()
+  very_poor_description!: string;
+
+  @ManyToOne(() => ReadinessLevel)
+  readinessLevel!: ReadinessLevel;
 }
