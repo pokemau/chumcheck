@@ -130,4 +130,9 @@ export class StartupController {
       cohortId,
     );
   }
+
+  @Get(':startupId/allow-rnas')
+  async allowRNAs(@Param('startupId') startupId: number): Promise<boolean> {
+    return this.startupService.allowRNAs(startupId);
+  }
 }
