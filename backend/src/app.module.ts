@@ -13,13 +13,18 @@ import { Startup } from './entities/startup.entity';
 import { CapsuleProposal } from './entities/capsule-proposal.entity';
 import { UratQuestion } from './entities/urat-question.entity';
 import { AppController } from './app.controller';
+import { RoadblockModule } from './roadblock/roadblock.module';
+import { RnaModule } from './rna/rna.module';
+import { RnsModule } from './rns/rns.module';
+import { InitiativeModule } from './initiative/initiative.module';
+import { ProgressModule } from './progress/progress.module';
+import { OverviewModule } from './overview/overview.module';
 
 @Module({
   controllers: [AppController],
   imports: [
     AiModule,
     AuthModule,
-    ReadinesslevelModule,
     StartupModule,
     UserModule,
     MikroOrmModule.forRoot(),
@@ -29,6 +34,13 @@ import { AppController } from './app.controller';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ReadinesslevelModule,
+    RnaModule,
+    RnsModule,
+    InitiativeModule,
+    RoadblockModule,
+    ProgressModule,
+    OverviewModule,
   ],
   providers: [AppService],
 })

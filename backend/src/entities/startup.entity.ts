@@ -8,10 +8,12 @@ import {
   PrimaryKey,
   Property,
   DateTimeType,
+  OneToMany,
 } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { CapsuleProposal } from './capsule-proposal.entity';
 import { QualificationStatus } from './enums/qualification-status.enum';
+import { Roadblock } from './roadblock.entity';
 
 @Entity({ tableName: 'startups' })
 export class Startup {
@@ -52,4 +54,7 @@ export class Startup {
 
   @Property({ type: DateTimeType, nullable: true })
   datetimeDeleted?: Date;
+
+  @OneToMany(() => Roadblock, (roadblock) => roadblock.startup)
+  roadblocks = new Collection<Roadblock>(this);
 }
