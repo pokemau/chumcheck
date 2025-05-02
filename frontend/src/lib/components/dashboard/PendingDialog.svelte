@@ -27,42 +27,42 @@
     toggleDialog,
     access;
 
-    const calculatorCategoryLabels = [
-      CalculatorCategory.Technology,
-      CalculatorCategory.Product_Development,
-      CalculatorCategory.Product_Definition,
-      CalculatorCategory.Competitive_Landscape,
-      CalculatorCategory.Team,
-      CalculatorCategory.Go_To_Market,
-      CalculatorCategory.Supply_Chain
-    ];
+  const calculatorCategoryLabels = [
+    CalculatorCategory.Technology,
+    CalculatorCategory.Product_Development,
+    CalculatorCategory.Product_Definition,
+    CalculatorCategory.Competitive_Landscape,
+    CalculatorCategory.Team,
+    CalculatorCategory.Go_To_Market,
+    CalculatorCategory.Supply_Chain
+  ];
 
-    const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
-      const apiKeyMapping: Record<string, string> = {
-        [CalculatorCategory.Technology]: "Technology",
-        [CalculatorCategory.Product_Development]: "Product Development",
-        [CalculatorCategory.Product_Definition]: "Product Definition/Design",
-        [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
-        [CalculatorCategory.Team]: "Team",
-        [CalculatorCategory.Go_To_Market]: "Go-To-Market",
-        [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
-      };
+  const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
+    const apiKeyMapping: Record<string, string> = {
+      [CalculatorCategory.Technology]: "Technology",
+      [CalculatorCategory.Product_Development]: "Product Development",
+      [CalculatorCategory.Product_Definition]: "Product Definition/Design",
+      [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
+      [CalculatorCategory.Team]: "Team",
+      [CalculatorCategory.Go_To_Market]: "Go-To-Market",
+      [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
+    };
 
-      const apiKey = apiKeyMapping[label];
-      return calc[apiKey] || 0;
-    });
+    const apiKey = apiKeyMapping[label];
+    return calc[apiKey] || 0;
+  });
 
-    let scores: { readinessType: string; questionId: number; score: number }[] = [];
+  let scores: { readinessType: string; questionId: number; score: number }[] = [];
 
-    function updateScore({ readinessType, questionId, score }: { readinessType: string; questionId: number; score: number }) {
-      // Update or add the score for the given questionId
-      const existingIndex = scores.findIndex((s) => s.questionId === questionId);
-      if (existingIndex !== -1) {
-        scores[existingIndex] = { readinessType, questionId, score };
-      } else {
-        scores.push({ readinessType, questionId, score });
-      }
+  function updateScore({ readinessType, questionId, score }: { readinessType: string; questionId: number; score: number }) {
+    // Update or add the score for the given questionId
+    const existingIndex = scores.findIndex((s) => s.questionId === questionId);
+    if (existingIndex !== -1) {
+      scores[existingIndex] = { readinessType, questionId, score };
+    } else {
+      scores.push({ readinessType, questionId, score });
     }
+  }
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
@@ -123,7 +123,7 @@
               id="email"
               type="email"
               placeholder="m@example.com"
-              value={inf.group_name}
+              value={inf.groupName}
             />
           </div>
 
@@ -136,7 +136,7 @@
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={inf.leader_email}
+                value={inf.user.email}
               />
               <Input
                 readonly
@@ -144,7 +144,7 @@
                 id="email"
                 type="text"
                 placeholder="m@example.com"
-                value={inf.leader_first_name}
+                value={inf.user.firstName}
               />
               <Input
                 readonly
@@ -152,7 +152,7 @@
                 id="email"
                 type="text"
                 placeholder="m@example.com"
-                value={inf.leader_last_name}
+                value={inf.user.lastName}
               />
             </div>
           </div>

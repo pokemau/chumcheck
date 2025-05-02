@@ -456,12 +456,12 @@
                   dialogLoading = false;
                 }}
               >
+                {console.log('applicant:', applicant)}
                 <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
                 <Table.Cell>{applicant.groupName}</Table.Cell>
                 <Table.Cell class=""
-                  >{applicant.leader_first_name}
-                  {applicant.leader_last_name}</Table.Cell
-                >
+                  >{applicant.user.firstName} {applicant.user.lastName}
+                </Table.Cell>
                 {#if selectedTab === 'qualified'}
                   <Table.Cell
                     >{applicant?.mentors[0]?.firstName}
