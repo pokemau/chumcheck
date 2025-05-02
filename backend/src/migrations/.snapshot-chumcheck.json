@@ -1130,6 +1130,135 @@
         }
       },
       "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "risk_number": {
+          "name": "risk_number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "fix": {
+          "name": "fix",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "New",
+            "Scheduled",
+            "On Track",
+            "Completed",
+            "Delayed",
+            "Discontinued",
+            "Long Term"
+          ],
+          "mappedType": "enum"
+        },
+        "assignee_id": {
+          "name": "assignee_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "is_ai_generated": {
+          "name": "is_ai_generated",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        }
+      },
+      "name": "roadblocks",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "roadblocks_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "roadblocks_assignee_id_foreign": {
+          "constraintName": "roadblocks_assignee_id_foreign",
+          "columnNames": [
+            "assignee_id"
+          ],
+          "localTableName": "public.roadblocks",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.users",
+          "updateRule": "cascade"
+        },
+        "roadblocks_startup_id_foreign": {
+          "constraintName": "roadblocks_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.roadblocks",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
     }
   ],
   "nativeEnums": {}
