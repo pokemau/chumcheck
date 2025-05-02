@@ -11,11 +11,11 @@ import { Role } from 'src/entities/enums/role.enum';
 import { StartupCriterionAnswer } from 'src/entities/startup-criterion-answer.entity';
 import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';
-import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { QualificationStatus } from 'src/entities/enums/qualification-status.enum';
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
+import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 
 @Injectable()
 export class StartupService {
@@ -456,16 +456,20 @@ export class StartupService {
   async getReadinessLevelCriterionAnswers(startupId: number) {
     return this.em.find(StartupCriterionAnswer, {
       startup: startupId, 
-    }, {
-      populate: ['criterion'],
+    },{populate: ['criterion'],
+      orderBy: {
+        id: 'ASC',
+      },
     });
   }
 
   async getStartupReadinessLevel(startupId: number) {
     return this.em.find(StartupReadinessLevel, {
-      startup: startupId, 
-    }, {
-      populate: ['readinessLevel'],
+    startup: startupId ,
+    },{populate: ['readinessLevel'],
+      orderBy: {
+        id: 'ASC',
+      },
     });
   }
 
