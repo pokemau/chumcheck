@@ -171,12 +171,12 @@
               min={0}
               max={9}
               data={[
-                lev.filter((r) => r.readiness_type === 'Technology')[0].readiness_level,
-                lev.filter((r) => r.readiness_type === 'Organizational')[0].readiness_level,
-                lev.filter((r) => r.readiness_type === 'Market')[0].readiness_level,
-                lev.filter((r) => r.readiness_type === 'Regulatory')[0].readiness_level,
-                lev.filter((r) => r.readiness_type === 'Acceptance')[0].readiness_level,
-                lev.filter((r) => r.readiness_type === 'Investment')[0].readiness_level
+                lev.filter((r) => r.readinessLevel.readinessType === 'Technology')[0].readinessLevel.level,
+                lev.filter((r) => r.readinessLevel.readinessType === 'Organizational')[0].readinessLevel.level,
+                lev.filter((r) => r.readinessLevel.readinessType === 'Market')[0].readinessLevel.level,
+                lev.filter((r) => r.readinessLevel.readinessType === 'Regulatory')[0].readinessLevel.level,
+                lev.filter((r) => r.readinessLevel.readinessType === 'Acceptance')[0].readinessLevel.level,
+                lev.filter((r) => r.readinessLevel.readinessType === 'Investment')[0].readinessLevel.level
               ]}
               labels={[
                 'Technology',

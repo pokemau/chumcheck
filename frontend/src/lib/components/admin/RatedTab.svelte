@@ -57,7 +57,7 @@
       const questions_data = await urat_questions.json();
 
       const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startup_id=${startupId}`,
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/?startup_id=${startupId}`,
         {
           method: 'get',
           headers: {

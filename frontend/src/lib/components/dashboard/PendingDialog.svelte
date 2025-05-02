@@ -11,6 +11,7 @@
   import { Label } from '$lib/components/ui/label/index.js';
   import * as Dialog from '$lib/components/ui/dialog';
   import Assessment from '$lib/components/admin/Assessment.svelte';
+  import { CalculatorCategory } from '$lib/utils';
 
   let showCapsule = false;
 
@@ -25,6 +26,43 @@
     showDialog,
     toggleDialog,
     access;
+
+    const calculatorCategoryLabels = [
+      CalculatorCategory.Technology,
+      CalculatorCategory.Product_Development,
+      CalculatorCategory.Product_Definition,
+      CalculatorCategory.Competitive_Landscape,
+      CalculatorCategory.Team,
+      CalculatorCategory.Go_To_Market,
+      CalculatorCategory.Supply_Chain
+    ];
+
+    const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
+      const apiKeyMapping: Record<string, string> = {
+        [CalculatorCategory.Technology]: "Technology",
+        [CalculatorCategory.Product_Development]: "Product Development",
+        [CalculatorCategory.Product_Definition]: "Product Definition/Design",
+        [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
+        [CalculatorCategory.Team]: "Team",
+        [CalculatorCategory.Go_To_Market]: "Go-To-Market",
+        [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
+      };
+
+      const apiKey = apiKeyMapping[label];
+      return calc[apiKey] || 0;
+    });
+
+    let scores: { readinessType: string; questionId: number; score: number }[] = [];
+
+    function updateScore({ readinessType, questionId, score }: { readinessType: string; questionId: number; score: number }) {
+      // Update or add the score for the given questionId
+      const existingIndex = scores.findIndex((s) => s.questionId === questionId);
+      if (existingIndex !== -1) {
+        scores[existingIndex] = { readinessType, questionId, score };
+      } else {
+        scores.push({ readinessType, questionId, score });
+      }
+    }
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
@@ -173,25 +211,9 @@
             <RadarChart
               id={inf.id}
               min={0}
-              max={9}
-              data={[
-                calc.technology_score,
-                calc.product_development,
-                calc.product_definition,
-                calc.competitive_landscape,
-                calc.team,
-                calc.go_to_market,
-                calc.supply_chain
-              ]}
-              labels={[
-                'Technology',
-                'Product Development',
-                'Product Definition',
-                'Competitive Landscape',
-                'Team',
-                'Go-To-Market',
-                'Supply Chain'
-              ]}
+              max={5}
+              data={calculatorScoresByCategory}
+              labels={calculatorCategoryLabels}
             />
           </div>
         </div>
@@ -204,24 +226,28 @@
               answers={ans.filter((d) => d.readinessType === 'Technology')}
               type="Technology"
               {access}
+              onScoreChange={updateScore}
             />
             <Assessment
               questions={que.filter((d) => d.readinessType === 'Market')}
               answers={ans.filter((d) => d.readinessType === 'Market')}
               type="Market"
               {access}
+              onScoreChange={updateScore}
             />
             <Assessment
               questions={que.filter((d) => d.readinessType === 'Regulatory')}
               answers={ans.filter((d) => d.readinessType === 'Regulatory')}
               type="Regulatory"
               {access}
+              onScoreChange={updateScore}
             />
             <Assessment
               questions={que.filter((d) => d.readinessType === 'Acceptance')}
               answers={ans.filter((d) => d.readinessType === 'Acceptance')}
               type="Acceptance"
               {access}
+              onScoreChange={updateScore}
             />
             <Assessment
               questions={que.filter(
@@ -230,17 +256,19 @@
               answers={ans.filter((d) => d.readinessType === 'Organizational')}
               type="Organizational"
               {access}
+              onScoreChange={updateScore}
             />
             <Assessment
               questions={que.filter((d) => d.readinessType === 'Investment')}
               answers={ans.filter((d) => d.readinessType === 'Investment')}
               type="Investment"
               {access}
+              onScoreChange={updateScore}
             />
           </div>
         </div>
         <div class="flex justify-end">
-          <Button onclick={() => saveRating(inf.id)}>Save Rating</Button>
+          <Button onclick={() => saveRating(inf.id, scores)}>Save Rating</Button>
         </div>
       </div>
     </div></Dialog.Content

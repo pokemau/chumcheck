@@ -20,127 +20,109 @@
       queryFn: () => getData(`/startups/${startupId}/`, access!)
     },
     {
-      queryKey: ['readinessLevelsPage1'],
-      queryFn: () => getData(`/readinesslevel/readiness-levels/?page_size=54`, access!)
+      queryKey: ['readinessLevels'],
+      queryFn: () => getData(`/readinesslevel/readiness-levels`, access!)
     },
     {
       queryKey: ['haveScores', startupId],
       queryFn: () =>
         getData(
-          `/readiness-level-criterion-answers/?page_size=324&startup_id=${startupId}`,
-          access!
+          `/startups/criterion-answers?startupId=${startupId}`, access!
         )
     },
     {
       queryKey: ['readinessLevel', startupId],
-      queryFn: () => getData(`/startup-readiness-levels/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/startups/startup-readiness-level?startupId=${startupId}`, access!)
     }
   ]);
   const { isLoading, isError } = $derived(useQueriesState($readinessLevelQueries));
-  const isRated: boolean = $derived(
-    $readinessLevelQueries[2].isSuccess
-      ? $readinessLevelQueries[2].data.results.length != 0
-        ? true
-        : false
-      : false
-  );
+
+  const isRated = $derived(() => {
+  const q = $readinessLevelQueries[2];
+  return q.isSuccess && q.data?.length > 0;
+  });
+
   let selectedTab = $state('chart');
   let selectedReadinessTab = $state('technology');
-  const rubrics = $derived(
-    $readinessLevelQueries[1].isSuccess
-      ? {
-          technology: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Technology'
-          ),
-          market: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Market'
-          ),
-          acceptance: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Acceptance'
-          ),
-          organizational: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Organizational'
-          ),
-          regulatory: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Regulatory'
-          ),
-          investment: $readinessLevelQueries[1].data.results.filter(
-            (r: any) => r.readiness_type === 'Investment'
-          )
-        }
-      : {
-          technology: [],
-          market: [],
-          acceptance: [],
-          organizational: [],
-          regulatory: [],
-          investment: []
-        }
-  );
 
-  const scores = $derived(
-    $readinessLevelQueries[1].isSuccess
-      ? {
-          technology: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Technology'
-          ),
-          market: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Market'
-          ),
-          acceptance: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Acceptance'
-          ),
-          organizational: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Organizational'
-          ),
-          regulatory: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Regulatory'
-          ),
-          investment: $readinessLevelQueries[2].data.results.filter(
-            (r: any) => r.readiness_type === 'Investment'
-          )
-        }
-      : {
-          technology: [],
-          market: [],
-          acceptance: [],
-          organizational: [],
-          regulatory: [],
-          investment: []
-        }
-  );
+  const rubrics = $derived(() => {
+    const query = $readinessLevelQueries[1];
+    if (!query.isSuccess || !query.data) {
+      return {
+        technology: [],
+        market: [],
+        acceptance: [],
+        organizational: [],
+        regulatory: [],
+        investment: []
+      };
+    }
 
-  const readiness = $derived(
-    $readinessLevelQueries[3].isSuccess
-      ? {
-          technology: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Technology')[0].readiness_level,
-          organizational: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Organizational')[0].readiness_level,
-          acceptance: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Acceptance')[0].readiness_level,
-          market: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Market')[0].readiness_level,
-          regulatory: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Regulatory')[0].readiness_level,
-          investment: $readinessLevelQueries[3].data.results
-            .slice(-6)
-            .filter((r: any) => r.readiness_type === 'Investment')[0].readiness_level
-        }
-      : {
-          technology: 0,
-          organizational: 0,
-          acceptance: 0,
-          market: 0,
-          regulatory: 0,
-          investment: 0
-        }
-  );
+    return {
+      technology: query.data.filter((r: any) => r.readiness_type === 'Technology'),
+      market: query.data.filter((r: any) => r.readiness_type === 'Market'),
+      acceptance: query.data.filter((r: any) => r.readiness_type === 'Acceptance'),
+      organizational: query.data.filter((r: any) => r.readiness_type === 'Organizational'),
+      regulatory: query.data.filter((r: any) => r.readiness_type === 'Regulatory'),
+      investment: query.data.filter((r: any) => r.readiness_type === 'Investment')
+    };
+  });
+
+  const scores = $derived(() => {
+  const query = $readinessLevelQueries[2];
+  if (!query.isSuccess || !query.data) {
+    return {
+      technology: [],
+      market: [],
+      acceptance: [],
+      organizational: [],
+      regulatory: [],
+      investment: []
+    };
+  }
+
+  return {
+    technology: query.data.filter((r: any) => r.readiness_type === 'Technology'),
+    market: query.data.filter((r: any) => r.readiness_type === 'Market'),
+    acceptance: query.data.filter((r: any) => r.readiness_type === 'Acceptance'),
+    organizational: query.data.filter((r: any) => r.readiness_type === 'Organizational'),
+    regulatory: query.data.filter((r: any) => r.readiness_type === 'Regulatory'),
+    investment: query.data.filter((r: any) => r.readiness_type === 'Investment')
+  };
+  });
+
+  const readiness = $derived(() => {
+    const query = $readinessLevelQueries[3];
+    const latest = query.data.slice(-6) ?? [];
+
+    if (!query.isSuccess || latest.length === 0) {
+      return {
+        technology: 0,
+        organizational: 0,
+        acceptance: 0,
+        market: 0,
+        regulatory: 0,
+        investment: 0
+      };
+    }
+
+    console.log("LATEST: ", latest);
+    const getLevel = (type: string) => {
+    const match = latest.find(
+        (r: any) => r.readinessLevel.readinessType === type
+      );
+      return match?.readinessLevel.level ?? 0;
+    };
+
+    return {
+      technology: getLevel('Technology'),
+      organizational: getLevel('Organizational'),
+      acceptance: getLevel('Acceptance'),
+      market: getLevel('Market'),
+      regulatory: getLevel('Regulatory'),
+      investment: getLevel('Investment')
+    };
+  });
 
   let current = $state(0);
 
@@ -180,7 +162,7 @@
     {@render loading()}
   {:else if isError}
     {@render error()}
-  {:else if isRated}
+  {:else if isRated()}
     {@render rated()}
   {:else if isMentor(role)}
     {@render mentor()}
@@ -205,7 +187,7 @@
 {/snippet}
 
 {#snippet error()}
-  hello
+  ERROR
 {/snippet}
 
 {#snippet rated()}
@@ -277,12 +259,12 @@
             min={1}
             max={9}
             data={[
-              readiness.technology,
-              readiness.market,
-              readiness.acceptance,
-              readiness.regulatory,
-              readiness.organizational,
-              readiness.investment
+              readiness().technology,
+              readiness().market,
+              readiness().acceptance,
+              readiness().regulatory,
+              readiness().organizational,
+              readiness().investment
             ]}
             labels={[
               'Technology',
@@ -310,40 +292,40 @@
         <div class="flex h-full flex-col overflow-scroll">
           <div class="flex h-0 flex-col">
             <RatedRubric
-              questionnaires={rubrics.technology}
+              questionnaires={rubrics().technology}
               type={'technology'}
               current={selectedReadinessTab}
-              scores={scores.technology}
+              scores={scores().technology}
             />
             <RatedRubric
-              questionnaires={rubrics.acceptance}
+              questionnaires={rubrics().acceptance}
               type={'acceptance'}
               current={selectedReadinessTab}
-              scores={scores.acceptance}
+              scores={scores().acceptance}
             />
             <RatedRubric
-              questionnaires={rubrics.market}
+              questionnaires={rubrics().market}
               type={'market'}
               current={selectedReadinessTab}
-              scores={scores.market}
+              scores={scores().market}
             />
             <RatedRubric
-              questionnaires={rubrics.regulatory}
+              questionnaires={rubrics().regulatory}
               type={'regulatory'}
               current={selectedReadinessTab}
-              scores={scores.regulatory}
+              scores={scores().regulatory}
             />
             <RatedRubric
-              questionnaires={rubrics.organizational}
+              questionnaires={rubrics().organizational}
               type={'organizational'}
               current={selectedReadinessTab}
-              scores={scores.organizational}
+              scores={scores().organizational}
             />
             <RatedRubric
-              questionnaires={rubrics.investment}
+              questionnaires={rubrics().investment}
               type={'investment'}
               current={selectedReadinessTab}
-              scores={scores.investment}
+              scores={scores().investment}
             />
           </div>
         </div>
@@ -354,20 +336,20 @@
 
 {#snippet mentor()}
   <div class="flex h-full flex-col gap-3">
-    <Stepper {current} />
+    <Stepper {current} />    
     <div class="flex h-full flex-col overflow-scroll">
       <form method="post" bind:this={form} class="flex h-0 flex-col">
-        <Rubric questionnaires={rubrics.technology} step={1} {current} type={'technology'} />
-        <Rubric questionnaires={rubrics.acceptance} step={2} {current} type={'acceptance'} />
-        <Rubric questionnaires={rubrics.market} step={3} {current} type={'market'} />
-        <Rubric questionnaires={rubrics.regulatory} step={4} {current} type={'regulatory'} />
+        <Rubric questionnaires={rubrics().technology} step={1} {current} type={'technology'} />
+        <Rubric questionnaires={rubrics().acceptance} step={2} {current} type={'acceptance'} />
+        <Rubric questionnaires={rubrics().market} step={3} {current} type={'market'} />
+        <Rubric questionnaires={rubrics().regulatory} step={4} {current} type={'regulatory'} />
         <Rubric
-          questionnaires={rubrics.organizational}
+          questionnaires={rubrics().organizational}
           step={5}
           {current}
           type={'organizational'}
         />
-        <Rubric questionnaires={rubrics.investment} step={6} {current} type={'investment'} />
+        <Rubric questionnaires={rubrics().investment} step={6} {current} type={'investment'} />
       </form>
     </div>
     <div class="ml-auto flex gap-2">

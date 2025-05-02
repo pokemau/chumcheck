@@ -7,4 +7,4 @@ windows:
   - editor: nvim
   - term:
   - server: cd backend && npm run dev
-  - frontend: cd frontend && BROWSER=brave pnpm dev --open
+  - frontend: cd frontend && pnpm dev --open

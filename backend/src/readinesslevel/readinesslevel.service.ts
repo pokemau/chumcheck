@@ -7,6 +7,10 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
+import { ReadinessLevel } from 'src/entities/readiness-level.entity';
+import { LevelCriterion } from 'src/entities/level-criterion.entity';
+import { StartupCriterionAnswer } from 'src/entities/startup-criterion-answer.entity';
+import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 
 @Injectable()
 export class ReadinesslevelService {
@@ -15,6 +19,7 @@ export class ReadinesslevelService {
   async getUratQuestions() {
     return await this.em.findAll(UratQuestion);
   }
+
   async getCalculatorQuestions() {
     const calcQuestions = await this.em.findAll(CalculatorQuestion);
 
@@ -41,6 +46,30 @@ export class ReadinesslevelService {
     });
 
     return res;
+  }
+
+  async getReadinessLevels(){
+    return await this.em.findAll(ReadinessLevel);
+  }
+
+  async getReadinessLevelCriterion(){
+    return await this.em.findAll(LevelCriterion);
+  }
+  
+  async getReadinessLevelCriterionAnswers(startupId: number) {
+    return this.em.find(StartupCriterionAnswer, {
+      startup: startupId, 
+    }, {
+      populate: ['criterion'],
+    });
+  }
+
+  async getStartupReadinessLevel(startupId: number) {
+    return this.em.find(StartupReadinessLevel, {
+      startup: startupId, 
+    }, {
+      populate: ['readinessLevel'],
+    });
   }
 
   async createUratQuestionAnswers(dto: UratQuestionAnswerDto) {
