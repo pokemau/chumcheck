@@ -48,12 +48,12 @@ export class StartupController {
     return this.startupService.getStartupReadinessLevel(startupId);
   }
 
-  @Get('/ranking-by-urat/')
+  @Get('/ranking-by-urat')
   async getStartupsByUrat() {
     return await this.startupService.getPendingStartupsRankingByUrat();
   }
 
-  @Get('/ranking-by-rubrics/')
+  @Get('/ranking-by-rubrics')
   async getStartupsByRubrics() {
     return await this.startupService.getQualifiedStartupsRankingByRubrics();
   }
@@ -102,7 +102,8 @@ export class StartupController {
   @Post(':startupId/rate-applicant')
   async rateApplicant(
     @Param('startupId') startupId: number,
-    @Body('scores') scores: { readinessType: string; questionId: number; score: number }[]
+    @Body('scores')
+    scores: { readinessType: string; questionId: number; score: number }[],
   ) {
     return this.startupService.rateApplicant(startupId, scores);
   }
@@ -121,8 +122,12 @@ export class StartupController {
   async appointMentors(
     @Param('startupId') startupId: number,
     @Body('mentor_ids') mentorIds: number[],
-    @Body('cohort_id') cohortId: number
+    @Body('cohort_id') cohortId: number,
   ) {
-    return await this.startupService.appointMentors(startupId, mentorIds, cohortId);
+    return await this.startupService.appointMentors(
+      startupId,
+      mentorIds,
+      cohortId,
+    );
   }
 }

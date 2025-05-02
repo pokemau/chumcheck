@@ -8,7 +8,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { PUBLIC_API_URL } from '$env/static/public';
   import type { PageData } from './$types';
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
   import RatedDialog from '$lib/components/dashboard/RatedDialog.svelte';
   import QualifiedDialog from '$lib/components/dashboard/QualifiedDialog.svelte';
@@ -20,7 +20,7 @@
 
   let access = data.access;
 
-  $: selectedTab = page.url.searchParams.get('tab') || 'pending';
+  $: selectedTab = $page.url.searchParams.get('tab') || 'pending';
   let applicants: any = [];
 
   let dialogReady = false;
@@ -86,7 +86,12 @@
       } catch (error) {
         console.error('Error parsing calculator JSON:', error);
       }
-      if (urat_questions.ok && urat_answers.ok && calculator.ok && calculator_data) {
+      if (
+        urat_questions.ok &&
+        urat_answers.ok &&
+        calculator.ok &&
+        calculator_data
+      ) {
         inf = data;
         que = questions_data;
         ans = answers_data;
@@ -120,13 +125,13 @@
   }
   // rated
   const uratReadinessScores: Record<ReadinessType, number> = {
-        [ReadinessType.Technology]: 0,
-        [ReadinessType.Organizational]: 0,
-        [ReadinessType.Market]: 0,
-        [ReadinessType.Regulatory]: 0,
-        [ReadinessType.Acceptance]: 0,
-        [ReadinessType.Investment]: 0,
-      };
+    [ReadinessType.Technology]: 0,
+    [ReadinessType.Organizational]: 0,
+    [ReadinessType.Market]: 0,
+    [ReadinessType.Regulatory]: 0,
+    [ReadinessType.Acceptance]: 0,
+    [ReadinessType.Investment]: 0
+  };
   async function getRatedStartupInformation(startupId: number) {
     const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
       method: 'get',
@@ -180,8 +185,13 @@
         console.error('Error parsing calculator JSON:', error);
       }
 
-      if (urat_questions.ok && urat_answers.ok && calculator.ok && calculator_data) {
-        inf = data; 
+      if (
+        urat_questions.ok &&
+        urat_answers.ok &&
+        calculator.ok &&
+        calculator_data
+      ) {
+        inf = data;
         que = questions_data.results || [];
         ans = answers_data.results || [];
         calc = calculator_data;
@@ -292,6 +302,10 @@
       if (level.ok) {
         inf = data;
         lev = levels;
+        console.log('LEVELS');
+        console.log('LEVELS');
+        console.log('LEVELS');
+        console.log(levels);
         // return {
         // 	info: data,
         // 	lev: levels.results,
@@ -308,7 +322,7 @@
       queryKey: ['pendingRatedRanking'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/startups/ranking-by-urat/`, {
+          await axiosInstance.get(`/startups/ranking-by-urat`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -321,7 +335,7 @@
       queryKey: ['mentors'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/users/?userRole=Mentor`, {
+          await axiosInstance.get(`/users?userRole=Mentor`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -334,7 +348,7 @@
       queryKey: ['qualifiedRanking'],
       queryFn: async () =>
         (
-          await axiosInstance.get(`/startups/ranking-by-rubrics/`, {
+          await axiosInstance.get(`/startups/ranking-by-rubrics`, {
             headers: {
               Authorization: `Bearer ${data.access}`
             }
@@ -379,26 +393,6 @@
 <svelte:head>
   <title>ChumCheck - Applications</title>
 </svelte:head>
-
-<style>
-  .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-</style>
 
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
   <div>Fetching...</div>
@@ -450,7 +444,7 @@
               <Table.Row
                 class="h-14 cursor-pointer"
                 onclick={async () => {
-                  dialogReady = false
+                  dialogReady = false;
                   dialogLoading = true;
                   if (selectedTab === 'pending') {
                     await getPendingStartupInformation(applicant.id);
@@ -485,8 +479,10 @@
   </div>
 
   {#if dialogLoading}
-    <div class="fixed inset-0 flex items-center justify-center bg-background bg-opacity-90 z-50">
-      <div class="p-5 rounded-lg shadow-lg flex items-center gap-3">
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-background bg-opacity-90"
+    >
+      <div class="flex items-center gap-3 rounded-lg p-5 shadow-lg">
         <div class="loader"></div>
         <span>Loading...</span>
       </div>
@@ -497,16 +493,16 @@
   {#if dialogReady}
     {#if selectedTab === 'pending'}
       <!-- {#if calc} -->
-        <PendingDialog
-          {inf}
-          {que}
-          {ans}
-          {calc}
-          {saveRating}
-          {showDialog}
-          {toggleDialog}
-          {access}
-        />
+      <PendingDialog
+        {inf}
+        {que}
+        {ans}
+        {calc}
+        {saveRating}
+        {showDialog}
+        {toggleDialog}
+        {access}
+      />
       <!-- {/if} -->
     {:else if selectedTab === 'rated'}
       {#if calc}
@@ -528,3 +524,23 @@
     {/if}
   {/if}
 {/if}
+
+<style>
+  .loader {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+</style>

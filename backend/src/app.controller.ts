@@ -9,7 +9,7 @@ export class AppController {
   // generateUratQuestions() {
   //  this.appService.generateUratQuestions();
   // }
-  
+
   // @Post('/b')
   // generateCalculatorQuestions() {
   //  this.appService.generateCalculatorQuestions();
