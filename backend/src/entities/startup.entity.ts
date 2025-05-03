@@ -57,4 +57,7 @@ export class Startup {
 
   @OneToMany(() => Roadblock, (roadblock) => roadblock.startup)
   roadblocks = new Collection<Roadblock>(this);
+
+  @ManyToMany(() => User)
+  members = new Collection<User>(this);
 }
