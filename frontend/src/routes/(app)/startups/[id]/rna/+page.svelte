@@ -31,11 +31,11 @@
     },
     {
       queryKey: ['rnaData'],
-      queryFn: () => getData(`/startup-rna/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/rna?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['readinessData'],
-      queryFn: () => getData(`/startup-readiness-levels/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/startups/startup-readiness-level?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['startupData'],
@@ -55,11 +55,6 @@
   };
 
   const views = $derived(selectedTab === 'rna' ? readiness : aiReadiness);
-
-  $effect(() => {
-    const searchParam = $page.url.searchParams.get('tab');
-    selectedTab = getSavedTab('rna', searchParam);
-  });
 
   let open = $state(false);
   let action: Actions = $state('View');
@@ -86,10 +81,10 @@
   };
 
   const checkIfExist = (id: number) => {
-    const toBeAdded = $rnaQueries[1].data.results.find((item: any) => item.id === id);
-    const existingItem = $rnaQueries[1].data.results.find(
+    const toBeAdded = $rnaQueries[1].data.find((item: any) => item.id === id);
+    const existingItem = $rnaQueries[1].data.find(
       (d: any) =>
-        d.is_ai_generated === false && d.readiness_type_rl_type === toBeAdded.readiness_type_rl_type
+        d.isAiGenerated === false && d.readinessLevel.readinessType === toBeAdded.readinessLevel.readinessType
     );
 
     if (existingItem) {
@@ -100,10 +95,10 @@
   };
 
   const addToRNA = async (id: number) => {
-    const toBeAdded = $rnaQueries[1].data.results.find((item: any) => item.id === id);
-    const existingItem = $rnaQueries[1].data.results.find(
+    const toBeAdded = $rnaQueries[1].data.find((item: any) => item.id === id);
+    const existingItem = $rnaQueries[1].data.find(
       (d: any) =>
-        d.is_ai_generated === false && d.readiness_type_rl_type === toBeAdded.readiness_type_rl_type
+        d.isAiGenerated  === false && d.readinessLevel.readinessType === toBeAdded.readinessLevel.readinessType
     );
 
     if (existingItem) {
@@ -118,7 +113,7 @@
     await axiosInstance.patch(
       `/startup-rna/${id}/`,
       {
-        is_ai_generated: false
+        isAiGenerated : false
       },
       {
         headers: {
@@ -148,7 +143,7 @@
 
   const editRNA = async (id: number, description: string) => {
     await axiosInstance.patch(
-      `/startup-rna/${id}/`,
+      `/rna/${id}/`,
       {
         rna: description
       },
@@ -174,11 +169,11 @@
   };
 
   $effect(() => {
-    console.log($rnaQueries[1].data);
+    console.log( $rnaQueries[1].data);
   });
 
   const currentCondition = $derived(selectedTab === 'rna' ? false : true);
-  // is_ai_generated, readiness_level_id, startup_id, rna, readiness_type_rl_type
+  // isAiGenerated , readiness_level_id, startup_id, rna, readinessLevel.readinessType
   $effect(() => {
     if ($rnaQueries[1].isSuccess) {
       console.log($rnaQueries[1].data);
@@ -187,18 +182,24 @@
 
   const readinessData = $derived(
     $rnaQueries[2].isSuccess
-      ? $rnaQueries[2].data.results
+      ? $rnaQueries[2].data
           .slice(-6)
-          .sort((a: any, b: any) => a.readiness_type.localeCompare(b.readiness_type))
+          .sort(
+          (a: any, b: any) =>
+            a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
+        )
       : []
   );
 
   $effect(() => {
     if ($rnaQueries[2].isSuccess) {
       console.log(
-        $rnaQueries[2].data.results
+        $rnaQueries[2].data
           .slice(-6)
-          .sort((a: any, b: any) => a.readiness_type.localeCompare(b.readiness_type))
+          .sort(
+          (a: any, b: any) =>
+            a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
+        )
       );
     }
   });
@@ -277,8 +278,9 @@
       {/if}
     </div>
   </div>
+
   <div class="grid w-full grid-cols-4 gap-5 overflow-scroll">
-    {#each $rnaQueries[1].data.results.filter((d: any) => d.is_ai_generated === currentCondition) as rna, index}
+    {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) as rna, index}
       <RnaCard
         {rna}
         ai={selectedTab === 'rna' ? false : true}

@@ -16,6 +16,7 @@ import { QualificationStatus } from 'src/entities/enums/qualification-status.enu
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
+import { StartupRNA } from 'src/entities/startup-rnas.entity';
 
 @Injectable()
 export class StartupService {
@@ -386,6 +387,13 @@ export class StartupService {
   async allowRNAs(startupId: number): Promise<boolean>{
     return await this.em.count(StartupCriterionAnswer,
       { startup: startupId }) > 0;
+  }
+
+  async allowTasks(startupId: number): Promise<boolean> {
+    const count = await this.em.count(StartupRNA, {
+      startup: startupId,
+    });
+    return count > 0;
   }
 
   private async calculateTechnologyLevel(startupId: number): Promise<number> {

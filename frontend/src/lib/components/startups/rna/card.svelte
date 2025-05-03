@@ -21,12 +21,13 @@
   class="h-full min-w-[calc(25%-1.25rem*3/4)] cursor-pointer"
   onclick={() => {
     open = true;
+    console.log(rna);
   }}
 >
   <Card.Content class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-[15px] font-semibold leading-none tracking-tight">
-        {rna.readiness_type_rl_type}
+        {rna.readinessLevel.readinessType}
       </h2>
     </div>
     <div class="text-sm text-muted-foreground">
@@ -34,8 +35,8 @@
     </div>
     <div class="text-sm text-muted-foreground">
       Current Level: <Badge variant="secondary"
-        >{readinessData?.filter((d: any) => d?.readiness_type === rna?.readiness_type_rl_type)[0]
-          ?.readiness_level}</Badge
+        >{rna.readinessLevel.level}
+        </Badge
       >
     </div>
   </Card.Content>

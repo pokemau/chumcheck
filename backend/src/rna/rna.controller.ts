@@ -5,13 +5,13 @@ import {
     Get,
     Param,
     ParseIntPipe,
+    Patch,
     Post,
     Query,
     UseGuards,
   } from '@nestjs/common';
-  import { JwtGuard } from 'src/auth/guard';
-  import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { RnaService } from './rna.service';
+import { UpdateStartupRnaDto } from './dto/rna.dto';
 
 @Controller('rna')
 export class RnaController {
@@ -23,5 +23,13 @@ export class RnaController {
       ) {
         return this.rnaService.getRNAbyId(startupId);
       }
+    
+    @Patch(':id')
+    async update(
+      @Param('id') id: number,
+      @Body() dto: UpdateStartupRnaDto
+    ) {
+      return this.rnaService.update(id, dto);
+    }
     
 }

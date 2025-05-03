@@ -135,4 +135,11 @@ export class StartupController {
   async allowRNAs(@Param('startupId') startupId: number): Promise<boolean> {
     return this.startupService.allowRNAs(startupId);
   }
+
+  @Get(':startupId/allow-tasks')
+  async allowTasks(
+    @Param('startupId', ParseIntPipe) startupId: number
+  ): Promise<boolean> {
+    return this.startupService.allowTasks(startupId);
+  }
 }
