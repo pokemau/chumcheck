@@ -29,9 +29,9 @@ import { Startup } from './startup.entity';
     rna!: string;
   
     @Property({ fieldName: 'created_at' })
-    createdAt: Date = new Date();
+    createdAt?: Date = new Date();
   
     @Property({ fieldName: 'updated_at', onUpdate: () => new Date() })
-    updatedAt: Date = new Date();
+    updatedAt?: Date = new Date();
   }
   

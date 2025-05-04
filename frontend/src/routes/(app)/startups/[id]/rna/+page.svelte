@@ -126,17 +126,26 @@
   };
 
   const createRna = async (payload: any) => {
-    console.log(payload);
+
+
+    const cleanPayload = {
+      ...payload,
+      readiness_level_id: Number(payload.readiness_level_id),
+      startup_id: Number(payload.startup_id),
+    };
+
+    console.log(cleanPayload);
+
     await axiosInstance.post(
-      '/startup-rna/',
-      { ...payload, status },
+      '/rna',
+      { ...cleanPayload, status },
       {
         headers: {
           Authorization: `Bearer ${data.access}`
         }
       }
     );
-    toast.success('Successfully created the Roadblocks');
+    toast.success('Successfully created the RNA');
     open = false;
     $rnaQueries[1].refetch();
   };
@@ -201,7 +210,9 @@
             a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
         )
       );
+      console.log(readinessData)
     }
+  
   });
 </script>
 

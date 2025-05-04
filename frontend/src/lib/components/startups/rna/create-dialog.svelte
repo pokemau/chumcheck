@@ -46,14 +46,14 @@
         <Select.Root type="single" bind:value={data.readiness_level_id}>
           <Select.Trigger class="w-[180px]">
             {data.readiness_level_id
-              ? readinessData.filter(
-                  (d: any) => d.readiness_level_id === Number(data.readiness_level_id)
-                )[0].readiness_type
+              ? readinessData.find(
+                  (d: any) => d.readinessLevel.id === Number(data.readiness_level_id)
+                )?.readinessLevel.readinessType
               : ''}
           </Select.Trigger>
           <Select.Content>
             {#each readinessData as type}
-              <Select.Item value={`${type.readiness_level_id}`}>{type.readiness_type}</Select.Item>
+              <Select.Item value={`${type.readinessLevel.id}`}>{type.readinessLevel.readinessType}</Select.Item>
             {/each}
           </Select.Content>
         </Select.Root>
@@ -64,15 +64,16 @@
       </div>
     </div>
     <div class="flex flex-col gap-4">
-      <Label for="name">Curent Level</Label>
+      <Label for="name">Current Level</Label>
       <Select.Root type="single">
         <Select.Trigger class="w-[50px]"
-          >{data.readiness_level_id
-            ? readinessData.filter(
-                (d: any) => d.readiness_level_id === Number(data.readiness_level_id)
-              )[0].readiness_level
-            : ''}</Select.Trigger
-        >
+          >
+          {data.readiness_level_id
+            ? readinessData.find(
+                (d: any) => d.readinessLevel.id === Number(data.readiness_level_id)
+              )?.readinessLevel.level
+            : ''}
+          </Select.Trigger>
       </Select.Root>
     </div>
     <Dialog.Footer>
