@@ -15,12 +15,14 @@
     easing: cubicInOut
   });
   const currentModule = $derived(
-    $page.url.pathname.slice(1).split('/')[$page.url.pathname.slice(1).split('/').length - 1]
+    $page.url.pathname.slice(1).split('/')[
+      $page.url.pathname.slice(1).split('/').length - 1
+    ]
   );
 
   const modules =
-    access.roles[`${data.user?.role as 'Startup' | 'Mentor' | 'Manager'}`].modules[0].subModule[6]
-      .subModule;
+    access.roles[`${data.user?.role as 'Startup' | 'Mentor' | 'Manager'}`]
+      .modules[0].subModule[6].subModule;
 
   console.log(role);
 </script>
@@ -34,8 +36,12 @@
     <div class="grid w-full grid-cols-[250px_1fr] gap-14">
       <nav class="flex flex-1 flex-col gap-3 text-sm text-muted-foreground">
         {#each modules as item}
+          {console.log(item)}
           {@const isActive = currentModule === item.link}
-          <a href={`/startups/${data.startupId}/overview/${item.link}`} class="w-full">
+          <a
+            href={`/startups/${data.startupId}/overview/${item.link}`}
+            class="w-full"
+          >
             <Button
               variant="ghost"
               class={cn(
