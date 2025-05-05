@@ -63,7 +63,7 @@
           type="lastName"
           required
           readonly
-          value={$queryResult.data.group_name}
+          value={$queryResult.data.groupName}
         />
       {/if}
     </div>

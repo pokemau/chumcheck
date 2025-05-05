@@ -2,6 +2,7 @@ import {
   Collection,
   Entity,
   Enum,
+  ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
@@ -35,4 +36,7 @@ export class User {
 
   @OneToMany(() => Startup, (startup) => startup.user)
   startups = new Collection<Startup>(this);
+
+  @ManyToMany(() => Startup, (startup) => startup.members)
+  startupsAsMember = new Collection<Startup>(this);
 }

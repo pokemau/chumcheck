@@ -19,9 +19,9 @@
   const data = $state({
     description: '',
     fix: '',
-    assignee_id: '',
-    startup_id: startupId,
-    is_ai_generated: false,
+    assigneeId: '',
+    startupId: startupId,
+    isAiGenerated: false,
     status: 4
   });
 </script>
@@ -39,26 +39,33 @@
       <div class="flex flex-col gap-4">
         <Label for="username">Fix</Label>
         <Textarea rows={4} bind:value={data.fix} />
+        {console.log(members)}
       </div>
     </div>
     <div class="flex flex-col gap-4">
       <Label for="name">Assignee</Label>
-      <Select.Root type="single" bind:value={data.assignee_id}>
-        <Select.Trigger class="w-[180px]"
-          >{data.assignee_id
-            ? `${members.filter((member: any) => member.user_id === data.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === data.assignee_id)[0].last_name}`
+      <Select.Root type="single" bind:value={data.assigneeId}>
+        <Select.Trigger class="w-[180px]">
+          {console.log(
+            members.filter((member: any) => member.userId === data.assigneeId)
+          )}
+          {data.assigneeId
+            ? `${members.filter((member: any) => member.userId === data.assigneeId)[0].firstName} ${members.filter((member: any) => member.userId === data.assigneeId)[0].lastName}`
             : ''}</Select.Trigger
         >
         <Select.Content>
           {#each members as member}
-            <Select.Item value={member.user_id}>{member.first_name} {member.last_name}</Select.Item>
+            <Select.Item value={member.userId}
+              >{member.firstName} {member.lastName}</Select.Item
+            >
           {/each}
         </Select.Content>
       </Select.Root>
     </div>
     <Dialog.Footer>
-      <Button onclick={() => create(data)} disabled={data.description === '' || data.fix === ''}
-        >Create</Button
+      <Button
+        onclick={() => create(data)}
+        disabled={data.description === '' || data.fix === ''}>Create</Button
       >
     </Dialog.Footer>
   </Dialog.Content>

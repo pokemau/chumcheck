@@ -7,12 +7,22 @@
   import { getProfileColor, zIndex } from '$lib/utils';
   import { RoadblocksCreateDialog, RoadblocksViewEditDialog } from '.';
   import type { Actions } from '$lib/types';
-  let { roadblocks, members, update, ai, addToRoadblocks, deleteRoadblocks, role, index } =
-    $props();
+  let {
+    roadblocks,
+    members,
+    update,
+    ai,
+    addToRoadblocks,
+    deleteRoadblocks,
+    role,
+    index
+  } = $props();
 
   let assignee = $derived(roadblocks.assignee_id);
 
-  const assignedMember = $derived(members.filter((member: any) => member.user_id === assignee)[0]);
+  const assignedMember = $derived(
+    members.filter((member: any) => member.user_id === assignee)[0]
+  );
 
   let open = $state(false);
   const onOpenChange = () => {
@@ -51,7 +61,9 @@
           {assignedMember.first_name.charAt(0)}
         </div>
       {:else}
-        <div class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}>
+        <div
+          class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}
+        >
           <User class="h-4 w-4" />
         </div>
       {/if}
