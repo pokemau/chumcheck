@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, Body, Injectable, Param, Patch } from '@nestjs/common';
+import { BadRequestException, Body, Injectable, NotFoundException, Param, Patch } from '@nestjs/common';
 import { StartupRNA } from 'src/entities/startup-rnas.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { CreateStartupRnaDto, UpdateStartupRnaDto  } from './dto/rna.dto';
@@ -45,4 +45,13 @@ export class RnaService {
       await this.em.flush();
       return rna;
     }
+
+    async delete(id: number) {
+      const rna = await this.em.findOne(StartupRNA, { id });
+      if (!rna) throw new NotFoundException(`RNA with ID ${id} not found`);
+    
+      await this.em.removeAndFlush(rna);
+      return rna;
+    }
+    
 }

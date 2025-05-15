@@ -102,7 +102,7 @@
     );
 
     if (existingItem) {
-      await axiosInstance.delete(`/startup-rna/${existingItem.id}/`, {
+      await axiosInstance.delete(`/rna/${existingItem.id}/`, {
         headers: {
           Authorization: `Bearer ${data.access}`
         }
@@ -111,7 +111,7 @@
     }
 
     await axiosInstance.patch(
-      `/startup-rna/${id}/`,
+      `/rna/${id}/`,
       {
         isAiGenerated : false
       },

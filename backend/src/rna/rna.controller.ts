@@ -2,6 +2,7 @@ import {
     BadRequestException,
     Body,
     Controller,
+    Delete,
     Get,
     Param,
     ParseIntPipe,
@@ -37,5 +38,10 @@ export class RnaController {
       @Body() dto: UpdateStartupRnaDto
     ) {
       return this.rnaService.update(id, dto);
+    }
+
+    @Delete(':id')
+    async delete(@Param('id', ParseIntPipe) id: number) {
+      return this.rnaService.delete(id);
     }
 }
