@@ -10,7 +10,9 @@
 
   let assignee = $derived(rns.assignee_id);
 
-  const assignedMember = $derived(members.filter((member: any) => member.user_id === assignee)[0]);
+  const assignedMember = $derived(
+    members.filter((member: any) => member.userId === assignee)[0]
+  );
 
   let open = $state(false);
   const onOpenChange = () => {
@@ -34,35 +36,36 @@
   <Card.Content class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-[15px] font-semibold leading-none tracking-tight">
-        Priority #{rns.priority_number ? rns.priority_number : ''}
+        Priority #{rns.priorityNumber ? rns.priorityNumber : ''}
       </h2>
     </div>
     <div class="text-sm text-muted-foreground">
-      {rns.description.substring(0, 150) + `${rns.description.length > 150 ? '...' : ''}`}
+      {rns.description.substring(0, 150) +
+        `${rns.description.length > 150 ? '...' : ''}`}
     </div>
     <div class="flex items-center gap-1 text-sm text-muted-foreground">
       <Target class="h-4 w-4" /> Target Level: <Badge variant="secondary"
-        >{rns.target_level_level}</Badge
+        >{rns.targetLevel}</Badge
       >
     </div>
     <div class="flex items-center justify-between">
       <div class="flex flex-wrap items-center gap-2">
-        <Badge class={`${getReadinessStyles(rns.readiness_type_rl_type)}`}
-          >{rns.readiness_type_rl_type}</Badge
-        >
-        <Badge
-          class={`${rns.task_type === 1 ? 'bg-blue-700 hover:bg-blue-800' : 'bg-rose-700 hover:bg-rose-800'}`}
-          >{rns.task_type === 1 ? 'Short' : 'Long'} Term</Badge
-        >
+        <Badge class={`${rns.readinessType}`}>{rns.readinessType}</Badge>
+        <!-- <Badge -->
+        <!--   class={`${rns.task_type === 1 ? 'bg-blue-700 hover:bg-blue-800' : 'bg-rose-700 hover:bg-rose-800'}`} -->
+        <!--   >{rns.task_type === 1 ? 'Short' : 'Long'} Term</Badge -->
+        <!-- > -->
       </div>
       {#if assignedMember}
         <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}
+          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
         >
-          {assignedMember.first_name.charAt(0)}
+          {assignedMember.firstName.charAt(0)}
         </div>
       {:else}
-        <div class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}>
+        <div
+          class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}
+        >
           <User class="h-4 w-4" />
         </div>
       {/if}

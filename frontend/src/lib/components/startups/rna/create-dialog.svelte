@@ -47,13 +47,16 @@
           <Select.Trigger class="w-[180px]">
             {data.readiness_level_id
               ? readinessData.filter(
-                  (d: any) => d.readiness_level_id === Number(data.readiness_level_id)
+                  (d: any) =>
+                    d.readiness_level_id === Number(data.readiness_level_id)
                 )[0].readiness_type
               : ''}
           </Select.Trigger>
           <Select.Content>
             {#each readinessData as type}
-              <Select.Item value={`${type.readiness_level_id}`}>{type.readiness_type}</Select.Item>
+              <Select.Item value={`${type.readiness_level_id}`}
+                >{type.readiness_type}</Select.Item
+              >
             {/each}
           </Select.Content>
         </Select.Root>
@@ -69,7 +72,8 @@
         <Select.Trigger class="w-[50px]"
           >{data.readiness_level_id
             ? readinessData.filter(
-                (d: any) => d.readiness_level_id === Number(data.readiness_level_id)
+                (d: any) =>
+                  d.readiness_level_id === Number(data.readiness_level_id)
               )[0].readiness_level
             : ''}</Select.Trigger
         >
@@ -78,7 +82,8 @@
     <Dialog.Footer>
       <Button
         onclick={() => create(data)}
-        disabled={data.readiness_level_id === '' || data.rna === ''}>Create</Button
+        disabled={data.readiness_level_id === '' || data.rna === ''}
+        >Create</Button
       >
     </Dialog.Footer>
   </Dialog.Content>

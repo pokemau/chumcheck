@@ -15,7 +15,7 @@ export enum CalculatorCategory {
   Competitive_Landscape = 'Competitive Landscape',
   Team = 'Team',
   Go_To_Market = 'Go-To-Market',
-  Supply_Chain = 'Supply Chain',
+  Supply_Chain = 'Supply Chain'
 }
 
 export enum ReadinessType {
@@ -24,14 +24,14 @@ export enum ReadinessType {
   Acceptance = 'Acceptance',
   Regulatory = 'Regulatory',
   Organizational = 'Organizational',
-  Investment = 'Investment',
+  Investment = 'Investment'
 }
 
 export enum Role {
   Manager = 'Manager',
   Mentor = 'Mentor',
   Startup = 'Startup',
-  Manager_as_Mentor = 'Manager as Mentor',
+  Manager_as_Mentor = 'Manager as Mentor'
 }
 
 export const getRole = (
@@ -62,36 +62,81 @@ export const getLocal = (name: string) => {
 export const getColumns = () => {
   return [
     {
-      name: 'Discontinued',
-      value: 2,
+      name: 'New',
       items: [],
-      show: true
+      show: true,
+      value: 1
     },
     {
       name: 'Scheduled',
-      value: 4,
       items: [],
-      show: true
+      show: true,
+      value: 2
     },
     {
-      name: 'Track',
-      value: 5,
+      name: 'On Track',
       items: [],
-      show: true
-    },
-    {
-      name: 'Delayed',
-      value: 3,
-      items: [],
-      show: true
+      show: true,
+      value: 3
     },
     {
       name: 'Completed',
-      value: 6,
       items: [],
-      show: true
+      show: true,
+      value: 4
+    },
+    {
+      name: 'Delayed',
+      items: [],
+      show: true,
+      value: 5
+    },
+    {
+      name: 'Discontinued',
+      items: [],
+      show: true,
+      value: 6
+    },
+    {
+      name: 'Long Term',
+      items: [],
+      show: true,
+      value: 7
     }
   ];
+
+  // return [
+  //   {
+  //     name: 'Discontinued',
+  //     value: 2,
+  //     items: [],
+  //     show: true
+  //   },
+  //   {
+  //     name: 'Scheduled',
+  //     value: 3,
+  //     items: [],
+  //     show: true
+  //   },
+  //   {
+  //     name: 'Track',
+  //     value: 4,
+  //     items: [],
+  //     show: true
+  //   },
+  //   {
+  //     name: 'Delayed',
+  //     value: 5,
+  //     items: [],
+  //     show: true
+  //   },
+  //   {
+  //     name: 'Completed',
+  //     value: 6,
+  //     items: [],
+  //     show: true
+  //   }
+  // ];
 };
 
 export const getReadiness = () => {

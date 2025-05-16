@@ -33,7 +33,9 @@
   const levels = $derived(
     getReadinessLevels(
       rns.readiness_type_id
-        ? (getReadinessTypes().filter((d) => d.id === Number(rns.readiness_type_id))[0].name as
+        ? (getReadinessTypes().filter(
+            (d) => d.id === Number(rns.readiness_type_id)
+          )[0].name as
             | 'Technology'
             | 'Market'
             | 'Acceptance'
@@ -71,38 +73,49 @@
   const deleteDialogOnOpenChange = () => {
     deleteDialogOpen = !deleteDialogOnOpenChange;
   };
-
-  const getLevel = (id: any) => {
-    if (id === 0) return '';
-    return levels.filter((level: any) => Number(level.id) === Number(id))[0].level;
-  };
-
-  const getLevelId = (id: any) => {
-    if (id === 0) return '';
-    return levels.filter((level: any) => Number(level.id) === Number(id))[0].id;
-  };
-
-  $effect(() => {
-    if (rnsCopy.priority_number === 3) console.log(rnsCopy);
-  });
+  //
+  // const getLevel = (id: any) => {
+  //   if (id === 0) return '';
+  //   return levels.filter((level: any) => Number(level.id) === Number(id))[0]
+  //     .level;
+  // };
+  //
+  // const getLevelId = (id: any) => {
+  //   if (id === 0) return '';
+  //   return levels.filter((level: any) => Number(level.id) === Number(id))[0].id;
+  // };
+  //
+  // $effect(() => {
+  //   if (rnsCopy.priorityNumber === 3) console.log(rnsCopy);
+  // });
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
     <div class="flex gap-10">
       <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">Priority #{rnsCopy.priority_number}</h1>
+        <h1 class="text-2xl font-semibold">
+          Priority #{rnsCopy.priorityNumber}
+        </h1>
         <div class="flex flex-col gap-3">
           <Label for="username">Description</Label>
           {#if editDescription && role !== 'Startup'}
-            <Textarea rows={12} bind:value={rnsCopy.description} class="text-justify text-base" />
+            <Textarea
+              rows={12}
+              bind:value={rnsCopy.description}
+              class="text-justify text-base"
+            />
             <div class="ml-auto flex gap-2">
-              <Button size="sm" variant="outline" onclick={() => (editDescription = false)}
-                >Cancel</Button
+              <Button
+                size="sm"
+                variant="outline"
+                onclick={() => (editDescription = false)}>Cancel</Button
               ><Button
                 size="sm"
                 onclick={async () => {
-                  await update(rnsCopy.id, { description: rnsCopy.description });
+                  await update(rnsCopy.id, {
+                    description: rnsCopy.description
+                  });
                   editDescription = false;
                 }}>Save</Button
               >
@@ -119,7 +132,10 @@
       <div class="flex h-fit flex-1 flex-col gap-3">
         <div class="flex gap-3">
           {#if role !== 'Startup'}
-            <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
+            <Button
+              size="sm"
+              variant="destructive"
+              onclick={() => (deleteDialogOpen = true)}
               ><Trash class="h-4 w-4" /> Delete</Button
             >
           {/if}
@@ -150,8 +166,11 @@
                           (d) => d.id === Number(rnsCopy.readiness_type_id)
                         )[0];
 
-                        const newLevelId = getReadinessLevels(newReadiness.name).filter(
-                          (d: any) => d.level === getLevel(rnsCopy.target_level_id)
+                        const newLevelId = getReadinessLevels(
+                          newReadiness.name
+                        ).filter(
+                          (d: any) =>
+                            d.level === getLevel(rnsCopy.target_level_id)
                         )[0].id;
 
                         update(rnsCopy.id, {
@@ -169,12 +188,16 @@
                       >
                       <Select.Content class="border-none">
                         {#each getReadinessTypes() as type}
-                          <Select.Item value={`${type.id}`}>{type.name}</Select.Item>
+                          <Select.Item value={`${type.id}`}
+                            >{type.name}</Select.Item
+                          >
                         {/each}
                       </Select.Content>
                     </Select.Root>
                   {:else}
-                    <p class="w-[200px] p-3">{rnsCopy.readiness_type_rl_type}</p>
+                    <p class="w-[200px] p-3">
+                      {rnsCopy.readiness_type_rl_type}
+                    </p>
                   {/if}
                 </div>
 
@@ -185,19 +208,25 @@
                       type="single"
                       bind:value={rnsCopy.target_level_id}
                       onValueChange={() =>
-                        update(rnsCopy.id, { target_level_id: rnsCopy.target_level_id })}
+                        update(rnsCopy.id, {
+                          target_level_id: rnsCopy.target_level_id
+                        })}
                     >
                       <Select.Trigger class="w-[200px] border-none"
                         >{getLevel(rnsCopy.target_level_id)}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each levels as item}
-                          <Select.Item value={`${item.id}`}>{item.level}</Select.Item>
+                          <Select.Item value={`${item.id}`}
+                            >{item.level}</Select.Item
+                          >
                         {/each}
                       </Select.Content>
                     </Select.Root>
                   {:else}
-                    <p class="w-[200px] p-3">{getLevel(rnsCopy.target_level_id)}</p>
+                    <p class="w-[200px] p-3">
+                      {getLevel(rnsCopy.target_level_id)}
+                    </p>
                   {/if}
                 </div>
                 <div class="flex h-9 items-center justify-between text-sm">
@@ -211,7 +240,9 @@
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.task_type === 1 ? 'Short Term' : 'Long Term'}</Select.Trigger
+                        >{rnsCopy.task_type === 1
+                          ? 'Short Term'
+                          : 'Long Term'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         <Select.Item value="1">Short Term</Select.Item>
@@ -231,7 +262,9 @@
                       type="single"
                       bind:value={rnsCopy.assignee_id}
                       onValueChange={() => {
-                        update(rnsCopy.id, { assignee_id: rnsCopy.assignee_id });
+                        update(rnsCopy.id, {
+                          assignee_id: rnsCopy.assignee_id
+                        });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
@@ -264,7 +297,10 @@
   </Dialog.Content>
 </Dialog.Root>
 
-<AlertDialog.Root bind:open={deleteDialogOpen} onOpenChange={deleteDialogOnOpenChange}>
+<AlertDialog.Root
+  bind:open={deleteDialogOpen}
+  onOpenChange={deleteDialogOnOpenChange}
+>
   <AlertDialog.Content>
     <AlertDialog.Header>
       <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>

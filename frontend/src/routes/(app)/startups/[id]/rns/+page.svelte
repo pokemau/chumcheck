@@ -30,7 +30,10 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import * as Avatar from '$lib/components/ui/avatar';
   import { Badge } from '$lib/components/ui/badge/index.js';
-  import { RnsCard, RnsCreateDialog } from '$lib/components/startups/rns/index.js';
+  import {
+    RnsCard,
+    RnsCreateDialog
+  } from '$lib/components/startups/rns/index.js';
   import { Ellipsis, Kanban, TableIcon } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -47,7 +50,7 @@
     },
     {
       queryKey: ['rnsData'],
-      queryFn: () => getData(`/tasks/tasks/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/rns/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['readinessData'],
@@ -58,6 +61,18 @@
       queryFn: () => getData(`/startups/${startupId}`, access!)
     }
   ]);
+
+  $effect(() => {
+    // if ($rnsQueries[1].isSuccess) {
+    //   console.log($rnsQueries[1].data);
+    // }
+    // if ($rnsQueries[2].isSuccess) {
+    //   console.log($rnsQueries[2].data);
+    // }
+    // if ($rnsQueries[3].isSuccess) {
+    //   console.log($rnsQueries[3].data);
+    // }
+  });
 
   const { isLoading, isError } = $derived(useQueriesState($rnsQueries));
   const isAccessible = $derived($rnsQueries[0].data);
@@ -73,15 +88,22 @@
   const members = $derived(
     $rnsQueries[3].isSuccess
       ? [
-          ...$rnsQueries[3].data.members.map(({ id, ...rest }) => ({
-            ...rest
-          })),
+          ...$rnsQueries[3].data.members.map(
+            ({ id, email, firstName, lastName }) => ({
+              userId: id,
+              startupId: $rnsQueries[3].data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          ),
           {
-            user_id: $rnsQueries[3].data.user_id,
-            startup_id: $rnsQueries[3].data.id,
-            first_name: $rnsQueries[3].data.leader_first_name,
-            last_name: $rnsQueries[3].data.leader_last_name,
-            email: $rnsQueries[3].data.leader_email,
+            userId: $rnsQueries[3].data.user.id,
+            startupId: $rnsQueries[3].data.id,
+            firstName: $rnsQueries[3].data.user.firstName,
+            lastName: $rnsQueries[3].data.user.lastName,
+            email: $rnsQueries[3].data.user.email,
             selected: false
           }
         ]
@@ -168,10 +190,10 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results
+          column.items = res.data
             .filter(
               (data: any) =>
-                data.is_ai_generated === false &&
+                data.isAiGenerated === false &&
                 data.status === column.value &&
                 data.task_type === 1
             )
@@ -182,9 +204,22 @@
   };
 
   const createRns = async (payload: any) => {
-    const statuses = ['Discontinued', 'Scheduled', 'Track', 'Delayed', 'Completed'];
+    const statuses = [
+      'Discontinued',
+      'Scheduled',
+      'Track',
+      'Delayed',
+      'Completed'
+    ];
+
+    console.log('====');
+    console.log('====');
+    console.log(payload);
+    console.log('====');
+    console.log('====');
+
     await axiosInstance.post(
-      '/tasks/tasks/',
+      '/rns',
       {
         ...payload,
         status
@@ -201,14 +236,12 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results
+          column.items = res.data
             .filter(
               (data: any) =>
-                data.is_ai_generated === false &&
-                data.status === column.value &&
-                data.task_type === 1
+                data.isAiGenerated === false && data.status === column.value
             )
-            .sort((a: any, b: any) => a.priority_number - b.priority_number);
+            .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
         });
       })
       .finally(async () => {
@@ -231,7 +264,9 @@
         column.items = res.data.results
           .filter(
             (data: any) =>
-              data.is_ai_generated === false && data.status === column.value && data.task_type === 1
+              data.is_ai_generated === false &&
+              data.status === column.value &&
+              data.task_type === 1
           )
           .sort((a: any, b: any) => a.order - b.order);
       });
@@ -540,17 +575,17 @@
   $effect(() => {
     if (!isLoading) {
       columns.forEach((column) => {
-        column.items = $rnsQueries[1].data.results
+        column.items = $rnsQueries[1].data
           .filter(
             (data: any) =>
-              data.is_ai_generated === false && data.status === column.value && data.task_type === 1
+              data.isAiGenerated === false && data.status === column.value
           )
-          .sort((a: any, b: any) => a.priority_number - b.priority_number);
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
 
-      longTerms = $rnsQueries[1].data.results.filter(
-        (data: any) => data.is_ai_generated === false && data.task_type === 2
-      );
+      // longTerms = $rnsQueries[1].data.filter(
+      //   (data: any) => data.isAiGenerated === false && data.task_type === 2
+      // );
     }
   });
 
@@ -567,7 +602,7 @@
     open = true;
   };
 
-  let status = $state(4);
+  let status = $state(1);
 
   const updateStatus = (newStatus: number) => {
     status = newStatus;
@@ -621,7 +656,14 @@
   >
 </svelte:head>
 
-<RnsCreateDialog {open} {onOpenChange} create={createRns} {startupId} {members} {status} />
+<RnsCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRns}
+  {startupId}
+  {members}
+  {status}
+/>
 {#snippet card(rns: any, ai = false, index: number)}
   <RnsCard
     {rns}
@@ -752,8 +794,12 @@
               {#each $rnsQueries[1].data.results.filter((data) => data.is_ai_generated === false) as item}
                 {#if selectedMembers.includes(item.assignee_id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
-                    <Table.Cell class="pl-5">{item.readiness_type_rl_type}</Table.Cell>
-                    <Table.Cell class="">{item.description.substring(0, 100)}</Table.Cell>
+                    <Table.Cell class="pl-5"
+                      >{item.readiness_type_rl_type}</Table.Cell
+                    >
+                    <Table.Cell class=""
+                      >{item.description.substring(0, 100)}</Table.Cell
+                    >
                     <Table.Cell class="">{item.target_level_level}</Table.Cell>
                     <Table.Cell class=""
                       ><Badge
@@ -762,10 +808,12 @@
                       ></Table.Cell
                     >
                     <Table.Cell class=""
-                      >{members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.first_name}
-                      {members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.last_name}</Table.Cell
+                      >{members.filter(
+                        (member: any) => member.user_id === item.assignee_id
+                      )[0]?.first_name}
+                      {members.filter(
+                        (member: any) => member.user_id === item.assignee_id
+                      )[0]?.last_name}</Table.Cell
                     >
                   </Table.Row>
                 {/if}
