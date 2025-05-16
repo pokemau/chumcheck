@@ -4,6 +4,10 @@ export class UpdateStartupRnaDto {
   @IsOptional()
   @IsString()
   rna?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isAiGenerated?: boolean;
 }
 
 export class CreateStartupRnaDto {

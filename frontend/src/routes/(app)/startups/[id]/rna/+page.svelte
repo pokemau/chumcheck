@@ -110,6 +110,9 @@
       toast.info('Existing RNA data with the same readiness type deleted');
     }
 
+    console.log("ID:");
+    console.log(id);
+
     await axiosInstance.patch(
       `/rna/${id}/`,
       {
@@ -185,6 +188,7 @@
   // isAiGenerated , readiness_level_id, startup_id, rna, readinessLevel.readinessType
   $effect(() => {
     if ($rnaQueries[1].isSuccess) {
+      console.log("RNA QUERIES: ")
       console.log($rnaQueries[1].data);
     }
   });
@@ -202,15 +206,15 @@
 
   $effect(() => {
     if ($rnaQueries[2].isSuccess) {
-      console.log(
-        $rnaQueries[2].data
-          .slice(-6)
-          .sort(
-          (a: any, b: any) =>
-            a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
-        )
-      );
-      console.log(readinessData)
+      // console.log(
+      //   $rnaQueries[2].data
+      //     .slice(-6)
+      //     .sort(
+      //     (a: any, b: any) =>
+      //       a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
+      //   )
+      // );
+      // console.log(readinessData)
     }
   
   });

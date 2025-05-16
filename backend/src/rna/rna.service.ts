@@ -41,7 +41,11 @@ export class RnaService {
       if (dto.rna !== undefined) {
         rna.rna = dto.rna;
       }
-    
+
+      if (dto.isAiGenerated !== undefined) {
+        rna.isAiGenerated = dto.isAiGenerated;
+      }
+
       await this.em.flush();
       return rna;
     }
