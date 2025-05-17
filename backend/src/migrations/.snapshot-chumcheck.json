@@ -1357,8 +1357,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "target_level": {
-          "name": "target_level",
+        "target_level_id": {
+          "name": "target_level_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -1437,6 +1437,18 @@
       ],
       "checks": [],
       "foreignKeys": {
+        "rns_target_level_id_foreign": {
+          "constraintName": "rns_target_level_id_foreign",
+          "columnNames": [
+            "target_level_id"
+          ],
+          "localTableName": "public.rns",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.readiness_levels",
+          "updateRule": "cascade"
+        },
         "rns_startup_id_foreign": {
           "constraintName": "rns_startup_id_foreign",
           "columnNames": [

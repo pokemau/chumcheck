@@ -30,21 +30,7 @@
 
   let rnsCopy = $state({ ...rns });
 
-  const levels = $derived(
-    getReadinessLevels(
-      rns.readiness_type_id
-        ? (getReadinessTypes().filter(
-            (d) => d.id === Number(rns.readiness_type_id)
-          )[0].name as
-            | 'Technology'
-            | 'Market'
-            | 'Acceptance'
-            | 'Organizational'
-            | 'Regulatory'
-            | 'Investment')
-        : 'Technology'
-    )
-  );
+  const levels = $derived(getReadinessLevels(rns.readinessType));
 
   $effect(() => {
     if (!open) {
@@ -73,21 +59,16 @@
   const deleteDialogOnOpenChange = () => {
     deleteDialogOpen = !deleteDialogOnOpenChange;
   };
-  //
-  // const getLevel = (id: any) => {
-  //   if (id === 0) return '';
-  //   return levels.filter((level: any) => Number(level.id) === Number(id))[0]
-  //     .level;
-  // };
-  //
-  // const getLevelId = (id: any) => {
-  //   if (id === 0) return '';
-  //   return levels.filter((level: any) => Number(level.id) === Number(id))[0].id;
-  // };
-  //
-  // $effect(() => {
-  //   if (rnsCopy.priorityNumber === 3) console.log(rnsCopy);
-  // });
+
+  const getLevel = (id: any) => {
+    if (!id || id === 0 || !levels || levels.length === 0) return '';
+
+    const matchingLevels = levels.filter(
+      (level: any) => Number(level.id) === Number(id)
+    );
+
+    return matchingLevels.length > 0 ? matchingLevels[0].level : '';
+  };
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
@@ -160,35 +141,23 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.readiness_type_id}
+                      bind:value={rnsCopy.readinessType}
                       onValueChange={() => {
                         const newReadiness: any = getReadinessTypes().filter(
-                          (d) => d.id === Number(rnsCopy.readiness_type_id)
+                          (d) => d.name === rnsCopy.readinessType
                         )[0];
 
-                        const newLevelId = getReadinessLevels(
-                          newReadiness.name
-                        ).filter(
-                          (d: any) =>
-                            d.level === getLevel(rnsCopy.target_level_id)
-                        )[0].id;
-
                         update(rnsCopy.id, {
-                          target_level_id: newLevelId,
-                          readiness_type_id: newReadiness.id
+                          readinessType: newReadiness.name
                         });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.readiness_type_id
-                          ? getReadinessTypes().filter(
-                              (d) => d.id === Number(rnsCopy.readiness_type_id)
-                            )[0].name
-                          : ''}</Select.Trigger
+                        >{rnsCopy.readinessType}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each getReadinessTypes() as type}
-                          <Select.Item value={`${type.id}`}
+                          <Select.Item value={`${type.name}`}
                             >{type.name}</Select.Item
                           >
                         {/each}
@@ -206,14 +175,15 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.target_level_id}
-                      onValueChange={() =>
+                      bind:value={rnsCopy.targetLevelId}
+                      onValueChange={() => {
                         update(rnsCopy.id, {
-                          target_level_id: rnsCopy.target_level_id
-                        })}
+                          targetLevel: rnsCopy.targetLevelId
+                        });
+                      }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{getLevel(rnsCopy.target_level_id)}</Select.Trigger
+                        >{getLevel(rnsCopy.targetLevelId)}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each levels as item}
@@ -225,57 +195,57 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {getLevel(rnsCopy.target_level_id)}
+                      {rnsCopy.targetLevelId}
                     </p>
                   {/if}
                 </div>
-                <div class="flex h-9 items-center justify-between text-sm">
-                  <p class="w-[130px]">Term</p>
-                  {#if role !== 'Startup'}
-                    <Select.Root
-                      type="single"
-                      bind:value={rnsCopy.task_type}
-                      onValueChange={() => {
-                        update(rnsCopy.id, { task_type: rnsCopy.task_type });
-                      }}
-                    >
-                      <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.task_type === 1
-                          ? 'Short Term'
-                          : 'Long Term'}</Select.Trigger
-                      >
-                      <Select.Content class="border-none">
-                        <Select.Item value="1">Short Term</Select.Item>
-                        <Select.Item value="2">Long Term</Select.Item>
-                      </Select.Content>
-                    </Select.Root>
-                  {:else}
-                    <p class="w-[200px] p-3">
-                      {rnsCopy.task_type === '1' ? 'Short Term' : 'Long Term'}
-                    </p>
-                  {/if}
-                </div>
+                <!-- <div class="flex h-9 items-center justify-between text-sm"> -->
+                <!--   <p class="w-[130px]">Term</p> -->
+                <!--   {#if role !== 'Startup'} -->
+                <!--     <Select.Root -->
+                <!--       type="single" -->
+                <!--       bind:value={rnsCopy.task_type} -->
+                <!--       onValueChange={() => { -->
+                <!--         update(rnsCopy.id, { task_type: rnsCopy.task_type }); -->
+                <!--       }} -->
+                <!--     > -->
+                <!--       <Select.Trigger class="w-[200px] border-none" -->
+                <!--         >{rnsCopy.task_type === 1 -->
+                <!--           ? 'Short Term' -->
+                <!--           : 'Long Term'}</Select.Trigger -->
+                <!--       > -->
+                <!--       <Select.Content class="border-none"> -->
+                <!--         <Select.Item value="1">Short Term</Select.Item> -->
+                <!--         <Select.Item value="2">Long Term</Select.Item> -->
+                <!--       </Select.Content> -->
+                <!--     </Select.Root> -->
+                <!--   {:else} -->
+                <!--     <p class="w-[200px] p-3"> -->
+                <!--       {rnsCopy.task_type === '1' ? 'Short Term' : 'Long Term'} -->
+                <!--     </p> -->
+                <!--   {/if} -->
+                <!-- </div> -->
                 <div class="flex h-9 items-center justify-between text-sm">
                   <p class="w-[130px]">Assignee</p>
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.assignee_id}
-                      onValueChange={() => {
+                      bind:value={rnsCopy.user.id}
+                      onValueChange={(newVal) => {
                         update(rnsCopy.id, {
-                          assignee_id: rnsCopy.assignee_id
+                          assigneeId: newVal
                         });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee_id
-                          ? `${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].last_name}`
+                        >{rnsCopy.user.id
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each members as member}
-                          <Select.Item value={member.user_id}
-                            >{member.first_name} {member.last_name}</Select.Item
+                          <Select.Item value={member.userId}
+                            >{member.firstName} {member.lastName}</Select.Item
                           >
                         {/each}
                       </Select.Content>

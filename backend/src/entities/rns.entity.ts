@@ -3,6 +3,8 @@ import { Startup } from './startup.entity';
 import { User } from './user.entity';
 import { RnsStatus } from './enums/rns.enum';
 import { ReadinessType } from './enums/readiness-type.enum';
+import { ReadinessLevel } from './readiness-level.entity';
+import { getReadinessLevels } from 'src/utils';
 
 @Entity({ tableName: 'rns' })
 export class Rns {
@@ -15,8 +17,8 @@ export class Rns {
   @Property()
   description!: string;
 
-  @Property()
-  targetLevel!: number;
+  @ManyToOne(() => ReadinessLevel)
+  targetLevel!: ReadinessLevel;
 
   @Property()
   isAiGenerated!: boolean;
@@ -32,4 +34,14 @@ export class Rns {
 
   @ManyToOne(() => User)
   user!: User;
+
+  getTargetLevelScore(): number {
+    const levels = getReadinessLevels(this.readinessType);
+
+    const matchingLevels = levels.filter(
+      (level: any) => Number(level.id) === Number(this.targetLevel.id),
+    );
+
+    return matchingLevels.length > 0 ? Number(matchingLevels[0].level) : -1;
+  }
 }

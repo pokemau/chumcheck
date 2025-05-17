@@ -1,13 +1,16 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
 import { RnsService } from './rns.service';
-import { CreateRnsDto } from './dto';
+import { CreateRnsDto, UpdateRnsDto } from './dto';
 
 @Controller('rns')
 export class RnsController {
@@ -21,5 +24,18 @@ export class RnsController {
   @Post()
   async createRns(@Body() dto: CreateRnsDto) {
     return await this.rnsService.createRns(dto);
+  }
+
+  @Delete(':id')
+  async deleteRns(@Param('id', ParseIntPipe) id: number) {
+    return await this.rnsService.deleteRns(id);
+  }
+
+  @Patch(':id')
+  async updateRns(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateRnsDto,
+  ) {
+    return await this.rnsService.updateRns(id, dto);
   }
 }

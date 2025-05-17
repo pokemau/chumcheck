@@ -212,12 +212,6 @@
       'Completed'
     ];
 
-    console.log('====');
-    console.log('====');
-    console.log(payload);
-    console.log('====');
-    console.log('====');
-
     await axiosInstance.post(
       '/rns',
       {
@@ -249,8 +243,13 @@
       });
   };
 
-  const updatedEditRNS = async (id: number, payload: any) => {
-    await axiosInstance.patch(`/tasks/tasks/${id}/`, payload, {
+  const updatedEditRNS = async (
+    id: number,
+    payload: { readinessType: string }
+  ) => {
+    console.log(payload);
+
+    await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -259,14 +258,12 @@
     toast.success('Successfully updated the RNS');
     open = false;
     $rnsQueries[1].refetch().then((res) => {
-      console.log({ hannah: res.data });
+      // console.log({ hannah: res.data });
       columns.forEach((column) => {
-        column.items = res.data.results
+        column.items = res.data
           .filter(
             (data: any) =>
-              data.is_ai_generated === false &&
-              data.status === column.value &&
-              data.task_type === 1
+              data.isAiGenerated === false && data.status === column.value
           )
           .sort((a: any, b: any) => a.order - b.order);
       });
@@ -276,7 +273,7 @@
   const deleteRNS = async (id: number, index: number) => {
     console.log({ deleteIndex: index });
 
-    await axiosInstance.delete(`/tasks/tasks/${id}/`, {
+    await axiosInstance.delete(`/rns/${id}/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -791,8 +788,8 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {#each $rnsQueries[1].data.results.filter((data) => data.is_ai_generated === false) as item}
-                {#if selectedMembers.includes(item.assignee_id) || selectedMembers.length === 0}
+              {#each $rnsQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+                {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5"
                       >{item.readiness_type_rl_type}</Table.Cell
@@ -825,7 +822,7 @@
     {:else}
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.results.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>

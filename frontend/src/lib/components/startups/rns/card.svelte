@@ -45,7 +45,7 @@
     </div>
     <div class="flex items-center gap-1 text-sm text-muted-foreground">
       <Target class="h-4 w-4" /> Target Level: <Badge variant="secondary"
-        >{rns.targetLevel}</Badge
+        >{rns.targetLevelScore}</Badge
       >
     </div>
     <div class="flex items-center justify-between">

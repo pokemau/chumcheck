@@ -17,38 +17,57 @@
   let { open, onOpenChange, create, members, startupId, status } = $props();
 
   const data = $state({
-    priorityNumber: null,
-    readinessTypeId: '',
-    targetLevelId: '',
-    targetLevelScoreId: 2,
+    readinessType: '',
     description: '',
+    assigneeId: '',
+    targetLevelId: '',
     startupId: startupId,
-    taskType: '1',
-    dueDate: null,
-    isAiGenerated: false,
-    assigneeId: ''
+    priorityNumber: 1,
+    isAiGenerated: false
   });
 
-  const levels = $derived(
-    getReadinessLevels(
-      data.readinessTypeId
-        ? (getReadinessTypes().filter(
-            (d) => d.id === Number(data.readinessTypeId)
-          )[0].name as
-            | 'Technology'
-            | 'Market'
-            | 'Acceptance'
-            | 'Organizational'
-            | 'Regulatory'
-            | 'Investment')
-        : 'Technology'
-    )
+  // const levels = $derived(getReadinessLevels(data.readinessType));
+
+  // const levels = $derived(
+  //   getReadinessLevels(
+  //     data.readinessType
+  //       ? (getReadinessTypes().filter((d) => d.name === data.readinessType)[0]
+  //           .name as
+  //           | 'Technology'
+  //           | 'Market'
+  //           | 'Acceptance'
+  //           | 'Organizational'
+  //           | 'Regulatory'
+  //           | 'Investment')
+  //       : 'Technology'
+  //   )
+  // );
+
+  const readinessType = $derived(
+    data.readinessType
+      ? (getReadinessTypes().filter((d) => d.name === data.readinessType)[0]
+          .name as
+          | 'Technology'
+          | 'Market'
+          | 'Acceptance'
+          | 'Organizational'
+          | 'Regulatory'
+          | 'Investment')
+      : 'Technology'
   );
 
+  const levels = $derived(getReadinessLevels(readinessType));
+
   const getLevel = (id: any) => {
-    if (id === 0) return '';
-    return levels.filter((level: any) => Number(level.id) === Number(id))[0]
-      .level;
+    if (!id || id === 0 || !levels.length) return '';
+
+    const matchingLevel = levels.find(
+      (level: any) => Number(level.id) === Number(id)
+    );
+    return matchingLevel ? matchingLevel.level : '';
+
+    // return levels.filter((level: any) => Number(level.id) === Number(id))[0]
+    //   .level;
   };
 </script>
 
@@ -60,17 +79,17 @@
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
         <Label for="name">Type</Label>
-        <Select.Root type="single" bind:value={data.readinessTypeId}>
+        <Select.Root type="single" bind:value={data.readinessType}>
           <Select.Trigger class="w-[180px]"
-            >{data.readinessTypeId
+            >{data.readinessType
               ? getReadinessTypes().filter(
-                  (d) => d.id === Number(data.readinessTypeId)
+                  (d) => d.name === data.readinessType
                 )[0].name
               : ''}</Select.Trigger
           >
           <Select.Content>
             {#each getReadinessTypes() as type}
-              <Select.Item value={`${type.id}`}>{type.name}</Select.Item>
+              <Select.Item value={`${type.name}`}>{type.name}</Select.Item>
             {/each}
           </Select.Content>
         </Select.Root>
@@ -101,10 +120,13 @@
       <Label for="name">Target Level</Label>
       <Select.Root type="single" bind:value={data.targetLevelId}>
         <Select.Trigger class="w-[50px]"
-          >{data.targetLevelId
-            ? getLevel(data.targetLevelId)
-            : ''}</Select.Trigger
+          >{getLevel(data.targetLevelId)}</Select.Trigger
         >
+        <!-- <Select.Trigger class="w-[50px]" -->
+        <!--   >{data.target -->
+        <!--     ? getLevel(data.targetLevel) -->
+        <!--     : ''}</Select.Trigger -->
+        <!-- > -->
         <Select.Content>
           {#each levels as item}
             <Select.Item value={`${item.id}`}>{item.level}</Select.Item>
@@ -112,18 +134,18 @@
         </Select.Content>
       </Select.Root>
     </div>
-    <div class="flex flex-col gap-4">
-      <Label for="name">Term</Label>
-      <Select.Root type="single" bind:value={data.taskType}>
-        <Select.Trigger class="w-[120px]"
-          >{data.taskType === '1' ? 'Short Term' : 'Long Term'}</Select.Trigger
-        >
-        <Select.Content>
-          <Select.Item value="1">Short Term</Select.Item>
-          <Select.Item value="2">Long Term</Select.Item>
-        </Select.Content>
-      </Select.Root>
-    </div>
+    <!-- <div class="flex flex-col gap-4"> -->
+    <!--   <Label for="name">Term</Label> -->
+    <!--   <Select.Root type="single" bind:value={data.taskType}> -->
+    <!--     <Select.Trigger class="w-[120px]" -->
+    <!--       >{data.taskType === '1' ? 'Short Term' : 'Long Term'}</Select.Trigger -->
+    <!--     > -->
+    <!--     <Select.Content> -->
+    <!--       <Select.Item value="1">Short Term</Select.Item> -->
+    <!--       <Select.Item value="2">Long Term</Select.Item> -->
+    <!--     </Select.Content> -->
+    <!--   </Select.Root> -->
+    <!-- </div> -->
     <Dialog.Footer>
       <Button
         onclick={() => create(data)}
