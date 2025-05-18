@@ -153,6 +153,10 @@
                       type="single"
                       bind:value={rnsCopy.readinessType}
                       onValueChange={(newType) => {
+                        if (!newType) {
+                          newType = 'Technology';
+                        }
+
                         const newLevels = getReadinessLevels(newType);
 
                         const newTargetLevel = getLevelId(
