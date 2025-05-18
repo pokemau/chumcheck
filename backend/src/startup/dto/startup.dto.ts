@@ -39,3 +39,15 @@ export class StartupApplicationDto {
   @IsOptional()
   universityName?: string;
 }
+
+export class AddStartupMemberDto {
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  userId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  startupId: number;
+}

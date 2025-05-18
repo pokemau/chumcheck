@@ -2,12 +2,14 @@ import {
   Collection,
   Entity,
   Enum,
+  ManyToMany,
   OneToMany,
   PrimaryKey,
   Property,
 } from '@mikro-orm/core';
 import { Role } from './enums/role.enum';
 import { Startup } from './startup.entity';
+import { Roadblock } from './roadblock.entity';
 
 @Entity({ tableName: 'users' })
 export class User {
@@ -29,6 +31,12 @@ export class User {
   @Enum(() => Role)
   role: Role = Role.Startup;
 
+  @OneToMany(() => Roadblock, (roadblock) => roadblock.assignee)
+  assignedRoadblocks = new Collection<Roadblock>(this);
+
   @OneToMany(() => Startup, (startup) => startup.user)
   startups = new Collection<Startup>(this);
+
+  @ManyToMany(() => Startup, (startup) => startup.members)
+  startupsAsMember = new Collection<Startup>(this);
 }

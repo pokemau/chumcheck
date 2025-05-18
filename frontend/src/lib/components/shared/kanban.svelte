@@ -27,7 +27,13 @@
 
 {#each columns as column, index}
   {#if column.show}
-    <Column name={column.name} {showDialog} {updateStatus} statusId={column.value} {role}>
+    <Column
+      name={column.name}
+      {showDialog}
+      {updateStatus}
+      statusId={column.value}
+      {role}
+    >
       {#if role !== 'Startup'}
         <div
           use:dndzone={{

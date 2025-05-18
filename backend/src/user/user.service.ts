@@ -12,4 +12,10 @@ export class UserService {
       role: userRole,
     });
   }
+
+  async getUserByString(query: string) {
+    return await this.em.find(User, {
+      email: { $ilike: `%${query}%` },
+    });
+  }
 }
