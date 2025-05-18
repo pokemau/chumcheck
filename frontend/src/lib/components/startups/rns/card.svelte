@@ -50,7 +50,9 @@
     </div>
     <div class="flex items-center justify-between">
       <div class="flex flex-wrap items-center gap-2">
-        <Badge class={`${rns.readinessType}`}>{rns.readinessType}</Badge>
+        <Badge class={`${getReadinessStyles(rns.readinessType)}`}
+          >{rns.readinessType}</Badge
+        >
         <!-- <Badge -->
         <!--   class={`${rns.task_type === 1 ? 'bg-blue-700 hover:bg-blue-800' : 'bg-rose-700 hover:bg-rose-800'}`} -->
         <!--   >{rns.task_type === 1 ? 'Short' : 'Long'} Term</Badge -->

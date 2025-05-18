@@ -69,6 +69,16 @@
 
     return matchingLevels.length > 0 ? matchingLevels[0].level : '';
   };
+
+  const getLevelId = (targetLevel: any, levels: any) => {
+    if (targetLevel === 0) return '';
+
+    const matchingLevels = levels.filter(
+      (level: any) => Number(level.level) === Number(targetLevel)
+    );
+
+    return matchingLevels.length > 0 ? matchingLevels[0].id : '';
+  };
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
@@ -142,13 +152,20 @@
                     <Select.Root
                       type="single"
                       bind:value={rnsCopy.readinessType}
-                      onValueChange={() => {
-                        const newReadiness: any = getReadinessTypes().filter(
-                          (d) => d.name === rnsCopy.readinessType
-                        )[0];
+                      onValueChange={(newType) => {
+                        const newLevels = getReadinessLevels(newType);
+
+                        const newTargetLevel = getLevelId(
+                          rnsCopy.targetLevelScore,
+                          newLevels
+                        );
+
+                        rnsCopy.readinessType = newType;
+                        rnsCopy.targetLevelId = newTargetLevel;
 
                         update(rnsCopy.id, {
-                          readinessType: newReadiness.name
+                          readinessType: newType,
+                          targetLevel: newTargetLevel
                         });
                       }}
                     >
@@ -176,7 +193,7 @@
                     <Select.Root
                       type="single"
                       bind:value={rnsCopy.targetLevelId}
-                      onValueChange={() => {
+                      onValueChange={(newLevel) => {
                         update(rnsCopy.id, {
                           targetLevel: rnsCopy.targetLevelId
                         });
