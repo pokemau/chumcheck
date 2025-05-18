@@ -79,6 +79,14 @@ export class RnsService {
       rns.description = dto.description;
     }
 
+    if (dto.status) {
+      rns.status = dto.status;
+    }
+
+    if (dto.priorityNumber) {
+      rns.priorityNumber = dto.priorityNumber;
+    }
+
     await this.em.flush();
     return rns;
   }

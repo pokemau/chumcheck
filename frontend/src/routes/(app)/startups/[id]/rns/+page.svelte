@@ -173,7 +173,7 @@
     const length = columns[1].items.length;
 
     await axiosInstance.patch(
-      `/tasks/tasks/${id}/`,
+      `/rns/tasks/${id}/`,
       {
         status: 4,
         is_ai_generated: false,
@@ -271,138 +271,22 @@
   };
 
   const deleteRNS = async (id: number, index: number) => {
-    console.log({ deleteIndex: index });
-
-    await axiosInstance.delete(`/rns/${id}/`, {
-      headers: {
-        Authorization: `Bearer ${data.access}`
-      }
-    });
-    toast.success('Successfuly deleted a task');
-    $rnsQueries[1].refetch();
-    const updatePromises: any = [];
-    let counter = 1;
-
-    // Completed
-    columns[4].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (4 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Delayed
-    columns[3].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (3 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Track
-    columns[2].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (2 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Scheduled
-    columns[1].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (1 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Discontinued
-    columns[0].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (0 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-
     try {
-      // Execute all update requests concurrently
-      await Promise.all(updatePromises);
-      $rnsQueries[1].refetch();
-      console.log('All tasks updated successfully');
+      await axiosInstance.delete(`/rns/${id}/`, {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      });
+      toast.success('Successfuly deleted a task');
+      columns.forEach((column) => {
+        column.items = column.items.filter((item: any) => item.id !== id);
+      });
+
+      await $rnsQueries[1].refetch();
+      await updatePriorityNumber();
     } catch (error) {
-      $rnsQueries[1].refetch();
-      toast.error('Error updating');
-      console.error('Failed to update tasks', error);
+      console.error('Error deleting RNS: ', error);
+      toast.error('Failed to delete RNS');
     }
   };
 
@@ -415,7 +299,7 @@
     if (e.detail.info.trigger === 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/tasks/tasks/${task.id}/`,
+        `/rns/${task.id}/`,
         {
           status
         },
@@ -431,125 +315,96 @@
   }
 
   const updatePriorityNumber = async () => {
-    console.log('i am here');
     const updatePromises: any = [];
 
     let counter = 1;
-    // Completed
-    columns[4].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Delayed
-    columns[3].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Track
-    columns[2].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Scheduled
-    columns[1].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Discontinued
-    columns[0].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
 
-    // Long Terms
-    longTerms.map((item: any) => {
-      item.priority_number = counter;
+    // New (value: 1)
+    columns[0].items.forEach((item: any) => {
+      item.priorityNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/tasks/${item.id}/`,
-          {
-            priority_number: counter
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          }
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Scheduled (value: 2)
+    columns[1].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // On Track (value: 3)
+    columns[2].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Completed (value: 4)
+    columns[3].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Delayed (value: 5)
+    columns[4].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Discontinued (value: 6)
+    columns[5].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Long Term (value: 7)
+    columns[6].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
         )
       );
       counter++;
