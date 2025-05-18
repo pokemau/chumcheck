@@ -247,8 +247,6 @@
     id: number,
     payload: { readinessType: string }
   ) => {
-    console.log(payload);
-
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
@@ -258,7 +256,6 @@
     toast.success('Successfully updated the RNS');
     open = false;
     $rnsQueries[1].refetch().then((res) => {
-      // console.log({ hannah: res.data });
       columns.forEach((column) => {
         column.items = res.data
           .filter(
@@ -443,9 +440,6 @@
 
   const showLongTerm = $derived(views[0].show);
 
-  $effect(() => {
-    console.log(showLongTerm);
-  });
   const onOpenChange = () => {
     open = !open;
   };
