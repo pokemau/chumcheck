@@ -65,6 +65,9 @@ export class StartupService {
     startup.user = user;
     startup.dataPrivacy = dto.dataPrivacy;
     startup.eligibility = dto.eligibility;
+    if (dto.links) startup.links = dto.links;
+    if (dto.groupName) startup.groupName = dto.groupName;
+    if (dto.universityName) startup.universityName = dto.universityName;
 
     await this.em.persistAndFlush(startup);
     return startup;
@@ -157,9 +160,11 @@ export class StartupService {
 
     // Fetch the startups
     const startupIds = finalScores.map((ranking) => ranking.startup_id);
-    const startups = await this.em.find(Startup, {
-      id: { $in: startupIds },
-    });
+    const startups = await this.em.find(
+      Startup,
+      { id: { $in: startupIds } },
+      { populate: ['user'] },
+    );
     if (!startups || startups.length === 0) {
       console.warn('No startups found for the calculated IDs.');
       return [];
@@ -255,9 +260,7 @@ export class StartupService {
         id: { $in: startupIds },
         qualificationStatus: QualificationStatus.QUALIFIED,
       },
-      {
-        populate: ['mentors'], // Populate mentors for each startup
-      },
+      { populate: ['mentors', 'user'], },
     );
 
     if (!startups || startups.length === 0) {

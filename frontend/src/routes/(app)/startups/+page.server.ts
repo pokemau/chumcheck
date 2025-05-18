@@ -29,10 +29,7 @@ export const actions: Actions = {
 
     newFormData.append('links', formData.get('links') as string);
     newFormData.append('groupName', formData.get('group_name') as string);
-    newFormData.append(
-      'universityName',
-      formData.get('universityName') as string
-    );
+    newFormData.append('universityName', formData.get('university_name') as string);
 
     for (let i = 2; i < 5; i++) {
       if (formData.get(`member_${i}`) !== null) {
