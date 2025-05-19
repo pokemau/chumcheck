@@ -83,7 +83,7 @@
               id="email"
               type="email"
               placeholder="m@example.com"
-              value={inf.group_name}
+              value={inf.groupName}
             />
           </div>
 
@@ -96,7 +96,7 @@
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={inf.leader_email}
+                value={inf.user.email}
               />
               <Input
                 readonly
@@ -104,7 +104,7 @@
                 id="email"
                 type="text"
                 placeholder="m@example.com"
-                value={inf.leader_first_name}
+                value={inf.user.firstName}
               />
               <Input
                 readonly
@@ -112,7 +112,7 @@
                 id="email"
                 type="text"
                 placeholder="m@example.com"
-                value={inf.leader_last_name}
+                value={inf.user.lastName}
               />
             </div>
           </div>

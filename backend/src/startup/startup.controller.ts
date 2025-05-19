@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -15,7 +16,7 @@ import { readFile } from 'fs/promises';
 
 import * as PdfParse from 'pdf-parse';
 import { AiService } from 'src/ai/ai.service';
-import { StartupApplicationDto } from './dto';
+import { AddStartupMemberDto, StartupApplicationDto } from './dto';
 import { StartupService } from './startup.service';
 import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -65,6 +66,19 @@ export class StartupController {
     //@UploadedFile() file: Express.Multer.File,
   ) {
     return await this.startupService.createStartup(dto);
+  }
+
+  @Post('add-member')
+  async addMemberToStartup(@Body() dto: AddStartupMemberDto) {
+    return await this.startupService.addMemberToStartup(dto);
+  }
+
+  @Delete('remove-member/:userId')
+  async removeMemberFromStartup(
+    @Param('userId') userId: number,
+    @Body('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return await this.startupService.removeMemberFromStartup(userId, startupId);
   }
 
   @Post('/capsule-proposal')

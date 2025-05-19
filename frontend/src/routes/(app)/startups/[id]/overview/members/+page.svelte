@@ -33,35 +33,37 @@
   );
 
   $: if ($queryResult.isSuccess) {
-    console.log($queryResult.data);
+    // console.log($queryResult.data);
   }
+
   let members: any = [];
   let search: string;
   let searchedUsers: any[] = [];
 
   async function searchUsers() {
-    const response = await fetch(`${PUBLIC_API_URL}/users/?search=${search}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${data.access}`
+    const response = await fetch(
+      `${PUBLIC_API_URL}/users/search?search=${search}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
       }
-    });
-    console.log(response);
+    );
     const d = await response.json();
-    console.log({ d });
     if (response.ok) {
       const membersSet = new Set(members.map((member: any) => member.id)); // Assuming each user has a unique id
-      searchedUsers = d.results.filter((user: any) => !membersSet.has(user.id));
+      searchedUsers = d.filter((user: any) => !membersSet.has(user.id));
       search = '';
     }
   }
 
   async function addMember(userId: any) {
     const { data } = await axiosInstance.post(
-      '/startup-members/',
+      '/startups/add-member',
       {
-        user_id: userId,
-        startup_id: startupId
+        userId: userId,
+        startupId: startupId
       },
       {
         headers: {
@@ -82,9 +84,9 @@
     const { data } = await axiosInstance.post(
       '/startup-contracted-members/',
       {
-        startup_id: startupId,
-        first_name: first,
-        last_name: last
+        startupId: startupId,
+        firstName: first,
+        lastName: last
       },
       {
         headers: {
@@ -102,24 +104,34 @@
   }
 
   async function removeMember(memberId: number) {
-    const res = await axiosInstance.delete(`/startup-members/${memberId}/`, {
-      headers: {
-        Authorization: `Bearer ${access}`
+    // const res = await axiosInstance.delete(`/startup-members/${memberId}/`, {
+    const res = await axiosInstance.delete(
+      `/startups/remove-member/${memberId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${access}`
+        },
+        data: {
+          startupId
+        }
       }
-    });
+    );
 
-    if (res.status === 204) {
+    if (res.status === 200) {
       toast.success('Successfully removed member');
       $queryResult.refetch();
     }
   }
 
   async function removeContractedMember(contractedMemberId: number) {
-    const res = await axiosInstance.delete(`/startup-contracted-members/${contractedMemberId}/`, {
-      headers: {
-        Authorization: `Bearer ${access}`
+    const res = await axiosInstance.delete(
+      `/startup-contracted-members/${contractedMemberId}/`,
+      {
+        headers: {
+          Authorization: `Bearer ${access}`
+        }
       }
-    });
+    );
 
     if (res.status === 204) {
       toast.success('Successfully removed contracted member');
@@ -168,7 +180,9 @@
               bind:value={lastName}
             />
           </div>
-          <Button class="w-24" onclick={() => addContractedMember(firstName, lastName)}
+          <Button
+            class="w-24"
+            onclick={() => addContractedMember(firstName, lastName)}
             ><Plus class="h-4 w-4" /> Add</Button
           >
         </div>
@@ -185,14 +199,16 @@
               bind:value={search}
             />
           </div>
-          <Button class="w-24" onclick={searchUsers}><Search class="h-4 w-4" /> Search</Button>
+          <Button class="w-24" onclick={searchUsers}
+            ><Search class="h-4 w-4" /> Search</Button
+          >
         </div>
         {#if searchedUsers.length !== 0}
           <div class="text-sm">Results</div>
           {#each searchedUsers as user}
             <div>
-              {user.first_name}
-              {user.last_name}
+              {user.firstName}
+              {user.lastName}
 
               <Button onclick={() => addMember(user.id)}>Add</Button>
             </div>
@@ -217,15 +233,17 @@
         <Table.Body>
           <Table.Row class="h-14 cursor-pointer">
             <Table.Cell class="pl-5"
-              >{$queryResult.data.leader_first_name}
-              {$queryResult.data.leader_last_name}</Table.Cell
+              >{$queryResult.data.user.firstName}
+              {$queryResult.data.user.lastName}</Table.Cell
             >
             <Table.Cell class="">Leader</Table.Cell>
             <Table.Cell class=""></Table.Cell>
           </Table.Row>
           {#each $queryResult.data.members as member}
             <Table.Row class="h-14 cursor-pointer">
-              <Table.Cell class="pl-5">{member.first_name} {member.last_name}</Table.Cell>
+              <Table.Cell class="pl-5"
+                >{member.firstName} {member.lastName}</Table.Cell
+              >
               <Table.Cell class="">Member</Table.Cell>
               <Table.Cell class="">
                 {#if data.role === 'Mentor' || data.role === 'Manager as Mentor' || data.user.id === $queryResult.data.user_id}
@@ -242,7 +260,9 @@
           {/each}
           {#each $queryResult.data.contracted_members as member, index}
             <Table.Row class="h-14 cursor-pointer">
-              <Table.Cell class="pl-5">{member.first_name} {member.last_name}</Table.Cell>
+              <Table.Cell class="pl-5"
+                >{member.first_name} {member.last_name}</Table.Cell
+              >
               <Table.Cell class="">Contracted Member</Table.Cell>
               <Table.Cell class="">
                 {#if data.role === 'Mentor' || data.role === 'Manager as Mentor' || data.user.id === $queryResult.data.user_id}
@@ -265,13 +285,18 @@
 <AlertDialog.Root bind:open onOpenChange={() => (open = !open)}>
   <AlertDialog.Content>
     <AlertDialog.Header>
-      <AlertDialog.Title>Are you absolutely sure to remove this member?</AlertDialog.Title>
+      <AlertDialog.Title
+        >Are you absolutely sure to remove this member?</AlertDialog.Title
+      >
       <AlertDialog.Description>
-        This action cannot be undone. This will permanently remove this member in your startup.
+        This action cannot be undone. This will permanently remove this member
+        in your startup.
       </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer>
-      <AlertDialog.Cancel onclick={() => (open = false)}>Cancel</AlertDialog.Cancel>
+      <AlertDialog.Cancel onclick={() => (open = false)}
+        >Cancel</AlertDialog.Cancel
+      >
       <AlertDialog.Action
         class="bg-red-500 hover:bg-red-600"
         onclick={async () => {

@@ -18,4 +18,9 @@ export class UserController {
   async getUsers(@Query('userRole', new ParseEnumPipe(Role)) userRole: Role) {
     return await this.userService.getUserByRole(userRole);
   }
+
+  @Get('search')
+  async getUserByString(@Query('search') query: string) {
+    return await this.userService.getUserByString(query);
+  }
 }

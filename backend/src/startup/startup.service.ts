@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { StartupApplicationDto } from './dto';
+import { AddStartupMemberDto, StartupApplicationDto } from './dto';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
@@ -17,6 +17,7 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { start } from 'repl';
 
 @Injectable()
 export class StartupService {
@@ -45,7 +46,11 @@ export class StartupService {
   }
 
   async getStartupById(startupId: number) {
-    return await this.em.findOne(Startup, { id: startupId });
+    return await this.em.findOne(
+      Startup,
+      { id: startupId },
+      { populate: ['user', 'members'] },
+    );
   }
 
   async createStartup(dto: StartupApplicationDto) {
@@ -61,9 +66,53 @@ export class StartupService {
     startup.user = user;
     startup.dataPrivacy = dto.dataPrivacy;
     startup.eligibility = dto.eligibility;
+    if (dto.links) startup.links = dto.links;
+    if (dto.groupName) startup.groupName = dto.groupName;
+    if (dto.universityName) startup.universityName = dto.universityName;
 
     await this.em.persistAndFlush(startup);
     return startup;
+  }
+
+  async removeMemberFromStartup(userId: number, startupId: number) {
+    const startup = await this.em.findOne(
+      Startup,
+      { id: startupId },
+      { populate: ['members'] },
+    );
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found.`);
+    }
+
+    const user = await this.em.findOne(User, { id: userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found.`);
+    }
+
+    startup.members.remove(user);
+    await this.em.flush();
+  }
+
+  async addMemberToStartup(dto: AddStartupMemberDto) {
+    const startup = await this.em.findOne(Startup, { id: dto.startupId });
+    if (!startup) {
+      throw new NotFoundException(
+        `Startup with ID ${dto.startupId} does not exist.`,
+      );
+    }
+
+    const user = await this.em.findOne(User, { id: dto.userId });
+    if (!user) {
+      throw new NotFoundException(
+        `User with ID ${dto.startupId} does not exist.`,
+      );
+    }
+
+    startup.members.add(user);
+    await this.em.flush();
+    return {
+      message: `User with ID ${dto.userId} has been added to Startup ID ${dto.startupId}.`,
+    };
   }
 
   async getPendingStartupsRankingByUrat() {
@@ -112,9 +161,11 @@ export class StartupService {
 
     // Fetch the startups
     const startupIds = finalScores.map((ranking) => ranking.startup_id);
-    const startups = await this.em.find(Startup, {
-      id: { $in: startupIds },
-    });
+    const startups = await this.em.find(
+      Startup,
+      { id: { $in: startupIds } },
+      { populate: ['user'] },
+    );
     if (!startups || startups.length === 0) {
       console.warn('No startups found for the calculated IDs.');
       return [];
@@ -210,9 +261,7 @@ export class StartupService {
         id: { $in: startupIds },
         qualificationStatus: QualificationStatus.QUALIFIED,
       },
-      {
-        populate: ['mentors'], // Populate mentors for each startup
-      },
+      { populate: ['mentors', 'user'], },
     );
 
     if (!startups || startups.length === 0) {
