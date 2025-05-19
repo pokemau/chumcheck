@@ -10,6 +10,7 @@ import {
 import { Role } from './enums/role.enum';
 import { Startup } from './startup.entity';
 import { Roadblock } from './roadblock.entity';
+import { Rns } from './rns.entity';
 
 @Entity({ tableName: 'users' })
 export class User {
@@ -39,4 +40,7 @@ export class User {
 
   @ManyToMany(() => Startup, (startup) => startup.members)
   startupsAsMember = new Collection<Startup>(this);
+
+  @OneToMany(() => Rns, (rns) => rns.user)
+  assignedRns = new Collection<Rns>(this);
 }

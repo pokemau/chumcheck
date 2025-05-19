@@ -50,7 +50,7 @@ export const actions = {
           path: '/',
           httpOnly: true,
           sameSite: 'strict',
-          maxAge: 3600, // 1 hour cookie
+          maxAge: 60 * 5 * 60,
           secure: !dev
         });
 

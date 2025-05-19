@@ -108,6 +108,12 @@ export class StartupController {
     return await this.startupService.getStartupById(id);
   }
 
+  @Get(':startupId/allow-tasks')
+  async getStartupAllowTasksById(@Param('startupId') startupId: string) {
+    // IDK para unsa
+    return true;
+  }
+
   @Get(':startupId/calculator-final-scores')
   async getCalculatorFinalScores(@Param('startupId') startupId: number) {
     return await this.startupService.getCalculatorFinalScores(startupId);

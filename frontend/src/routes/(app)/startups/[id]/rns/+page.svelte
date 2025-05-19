@@ -30,7 +30,10 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import * as Avatar from '$lib/components/ui/avatar';
   import { Badge } from '$lib/components/ui/badge/index.js';
-  import { RnsCard, RnsCreateDialog } from '$lib/components/startups/rns/index.js';
+  import {
+    RnsCard,
+    RnsCreateDialog
+  } from '$lib/components/startups/rns/index.js';
   import { Ellipsis, Kanban, TableIcon } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -47,7 +50,7 @@
     },
     {
       queryKey: ['rnsData'],
-      queryFn: () => getData(`/tasks/tasks/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/rns/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['readinessData'],
@@ -58,6 +61,18 @@
       queryFn: () => getData(`/startups/${startupId}`, access!)
     }
   ]);
+
+  $effect(() => {
+    // if ($rnsQueries[1].isSuccess) {
+    //   console.log($rnsQueries[1].data);
+    // }
+    // if ($rnsQueries[2].isSuccess) {
+    //   console.log($rnsQueries[2].data);
+    // }
+    // if ($rnsQueries[3].isSuccess) {
+    //   console.log($rnsQueries[3].data);
+    // }
+  });
 
   const { isLoading, isError } = $derived(useQueriesState($rnsQueries));
   const isAccessible = $derived($rnsQueries[0].data);
@@ -73,15 +88,22 @@
   const members = $derived(
     $rnsQueries[3].isSuccess
       ? [
-          ...$rnsQueries[3].data.members.map(({ id, ...rest }) => ({
-            ...rest
-          })),
+          ...$rnsQueries[3].data.members.map(
+            ({ id, email, firstName, lastName }) => ({
+              userId: id,
+              startupId: $rnsQueries[3].data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          ),
           {
-            user_id: $rnsQueries[3].data.user_id,
-            startup_id: $rnsQueries[3].data.id,
-            first_name: $rnsQueries[3].data.leader_first_name,
-            last_name: $rnsQueries[3].data.leader_last_name,
-            email: $rnsQueries[3].data.leader_email,
+            userId: $rnsQueries[3].data.user.id,
+            startupId: $rnsQueries[3].data.id,
+            firstName: $rnsQueries[3].data.user.firstName,
+            lastName: $rnsQueries[3].data.user.lastName,
+            email: $rnsQueries[3].data.user.email,
             selected: false
           }
         ]
@@ -151,7 +173,7 @@
     const length = columns[1].items.length;
 
     await axiosInstance.patch(
-      `/tasks/tasks/${id}/`,
+      `/rns/tasks/${id}/`,
       {
         status: 4,
         is_ai_generated: false,
@@ -168,10 +190,10 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results
+          column.items = res.data
             .filter(
               (data: any) =>
-                data.is_ai_generated === false &&
+                data.isAiGenerated === false &&
                 data.status === column.value &&
                 data.task_type === 1
             )
@@ -182,9 +204,16 @@
   };
 
   const createRns = async (payload: any) => {
-    const statuses = ['Discontinued', 'Scheduled', 'Track', 'Delayed', 'Completed'];
+    const statuses = [
+      'Discontinued',
+      'Scheduled',
+      'Track',
+      'Delayed',
+      'Completed'
+    ];
+
     await axiosInstance.post(
-      '/tasks/tasks/',
+      '/rns',
       {
         ...payload,
         status
@@ -201,14 +230,12 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results
+          column.items = res.data
             .filter(
               (data: any) =>
-                data.is_ai_generated === false &&
-                data.status === column.value &&
-                data.task_type === 1
+                data.isAiGenerated === false && data.status === column.value
             )
-            .sort((a: any, b: any) => a.priority_number - b.priority_number);
+            .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
         });
       })
       .finally(async () => {
@@ -216,8 +243,11 @@
       });
   };
 
-  const updatedEditRNS = async (id: number, payload: any) => {
-    await axiosInstance.patch(`/tasks/tasks/${id}/`, payload, {
+  const updatedEditRNS = async (
+    id: number,
+    payload: { readinessType: string }
+  ) => {
+    await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -226,12 +256,11 @@
     toast.success('Successfully updated the RNS');
     open = false;
     $rnsQueries[1].refetch().then((res) => {
-      console.log({ hannah: res.data });
       columns.forEach((column) => {
-        column.items = res.data.results
+        column.items = res.data
           .filter(
             (data: any) =>
-              data.is_ai_generated === false && data.status === column.value && data.task_type === 1
+              data.isAiGenerated === false && data.status === column.value
           )
           .sort((a: any, b: any) => a.order - b.order);
       });
@@ -239,138 +268,22 @@
   };
 
   const deleteRNS = async (id: number, index: number) => {
-    console.log({ deleteIndex: index });
-
-    await axiosInstance.delete(`/tasks/tasks/${id}/`, {
-      headers: {
-        Authorization: `Bearer ${data.access}`
-      }
-    });
-    toast.success('Successfuly deleted a task');
-    $rnsQueries[1].refetch();
-    const updatePromises: any = [];
-    let counter = 1;
-
-    // Completed
-    columns[4].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (4 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Delayed
-    columns[3].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (3 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Track
-    columns[2].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (2 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Scheduled
-    columns[1].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (1 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-    // Discontinued
-    columns[0].items
-      .filter((item: any) => item.id !== id)
-      .map((item: any) => {
-        item.priority_number = counter;
-        if (0 <= index) {
-          updatePromises.push(
-            axiosInstance.patch(
-              `/tasks/tasks/${item.id}/`,
-              {
-                priority_number: counter
-              },
-              {
-                headers: {
-                  Authorization: `Bearer ${data.access}`
-                }
-              }
-            )
-          );
-        }
-        counter++;
-      });
-
     try {
-      // Execute all update requests concurrently
-      await Promise.all(updatePromises);
-      $rnsQueries[1].refetch();
-      console.log('All tasks updated successfully');
+      await axiosInstance.delete(`/rns/${id}/`, {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      });
+      toast.success('Successfuly deleted a task');
+      columns.forEach((column) => {
+        column.items = column.items.filter((item: any) => item.id !== id);
+      });
+
+      await $rnsQueries[1].refetch();
+      await updatePriorityNumber();
     } catch (error) {
-      $rnsQueries[1].refetch();
-      toast.error('Error updating');
-      console.error('Failed to update tasks', error);
+      console.error('Error deleting RNS: ', error);
+      toast.error('Failed to delete RNS');
     }
   };
 
@@ -383,7 +296,7 @@
     if (e.detail.info.trigger === 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/tasks/tasks/${task.id}/`,
+        `/rns/${task.id}/`,
         {
           status
         },
@@ -399,125 +312,96 @@
   }
 
   const updatePriorityNumber = async () => {
-    console.log('i am here');
     const updatePromises: any = [];
 
     let counter = 1;
-    // Completed
-    columns[4].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Delayed
-    columns[3].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Track
-    columns[2].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Scheduled
-    columns[1].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
-    // Discontinued
-    columns[0].items
-      .filter((item: any) => item.task_type === 1)
-      .map((item: any) => {
-        item.priority_number = counter;
-        updatePromises.push(
-          axiosInstance.patch(
-            `/tasks/tasks/${item.id}/`,
-            {
-              priority_number: counter
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${data.access}`
-              }
-            }
-          )
-        );
-        counter++;
-      });
 
-    // Long Terms
-    longTerms.map((item: any) => {
-      item.priority_number = counter;
+    // New (value: 1)
+    columns[0].items.forEach((item: any) => {
+      item.priorityNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/tasks/${item.id}/`,
-          {
-            priority_number: counter
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          }
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Scheduled (value: 2)
+    columns[1].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // On Track (value: 3)
+    columns[2].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Completed (value: 4)
+    columns[3].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Delayed (value: 5)
+    columns[4].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Discontinued (value: 6)
+    columns[5].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
+        )
+      );
+      counter++;
+    });
+
+    // Long Term (value: 7)
+    columns[6].items.forEach((item: any) => {
+      item.priorityNumber = counter;
+      updatePromises.push(
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: counter },
+          { headers: { Authorization: `Bearer ${data.access}` } }
         )
       );
       counter++;
@@ -540,25 +424,22 @@
   $effect(() => {
     if (!isLoading) {
       columns.forEach((column) => {
-        column.items = $rnsQueries[1].data.results
+        column.items = $rnsQueries[1].data
           .filter(
             (data: any) =>
-              data.is_ai_generated === false && data.status === column.value && data.task_type === 1
+              data.isAiGenerated === false && data.status === column.value
           )
-          .sort((a: any, b: any) => a.priority_number - b.priority_number);
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
 
-      longTerms = $rnsQueries[1].data.results.filter(
-        (data: any) => data.is_ai_generated === false && data.task_type === 2
-      );
+      // longTerms = $rnsQueries[1].data.filter(
+      //   (data: any) => data.isAiGenerated === false && data.task_type === 2
+      // );
     }
   });
 
   const showLongTerm = $derived(views[0].show);
 
-  $effect(() => {
-    console.log(showLongTerm);
-  });
   const onOpenChange = () => {
     open = !open;
   };
@@ -567,7 +448,7 @@
     open = true;
   };
 
-  let status = $state(4);
+  let status = $state(1);
 
   const updateStatus = (newStatus: number) => {
     status = newStatus;
@@ -621,7 +502,14 @@
   >
 </svelte:head>
 
-<RnsCreateDialog {open} {onOpenChange} create={createRns} {startupId} {members} {status} />
+<RnsCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRns}
+  {startupId}
+  {members}
+  {status}
+/>
 {#snippet card(rns: any, ai = false, index: number)}
   <RnsCard
     {rns}
@@ -749,11 +637,15 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {#each $rnsQueries[1].data.results.filter((data) => data.is_ai_generated === false) as item}
-                {#if selectedMembers.includes(item.assignee_id) || selectedMembers.length === 0}
+              {#each $rnsQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+                {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
-                    <Table.Cell class="pl-5">{item.readiness_type_rl_type}</Table.Cell>
-                    <Table.Cell class="">{item.description.substring(0, 100)}</Table.Cell>
+                    <Table.Cell class="pl-5"
+                      >{item.readiness_type_rl_type}</Table.Cell
+                    >
+                    <Table.Cell class=""
+                      >{item.description.substring(0, 100)}</Table.Cell
+                    >
                     <Table.Cell class="">{item.target_level_level}</Table.Cell>
                     <Table.Cell class=""
                       ><Badge
@@ -762,10 +654,12 @@
                       ></Table.Cell
                     >
                     <Table.Cell class=""
-                      >{members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.first_name}
-                      {members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.last_name}</Table.Cell
+                      >{members.filter(
+                        (member: any) => member.user_id === item.assignee_id
+                      )[0]?.first_name}
+                      {members.filter(
+                        (member: any) => member.user_id === item.assignee_id
+                      )[0]?.last_name}</Table.Cell
                     >
                   </Table.Row>
                 {/if}
@@ -777,7 +671,7 @@
     {:else}
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.results.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>
