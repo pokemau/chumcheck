@@ -14,6 +14,7 @@ import { User } from './user.entity';
 import { CapsuleProposal } from './capsule-proposal.entity';
 import { QualificationStatus } from './enums/qualification-status.enum';
 import { Roadblock } from './roadblock.entity';
+import { Rns } from './rns.entity';
 
 @Entity({ tableName: 'startups' })
 export class Startup {
@@ -60,4 +61,7 @@ export class Startup {
 
   @ManyToMany(() => User)
   members = new Collection<User>(this);
+
+  @OneToMany(() => Rns, (rns) => rns.startup)
+  rns = new Collection<Rns>(this);
 }

@@ -79,7 +79,8 @@
     <Dialog.Footer>
       <Button
         onclick={() => create(data)}
-        disabled={data.readiness_level_id === '' || data.rna === ''}>Create</Button
+        disabled={data.readiness_level_id === '' || data.rna === ''}
+        >Create</Button
       >
     </Dialog.Footer>
   </Dialog.Content>
