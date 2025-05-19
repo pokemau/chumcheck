@@ -8,8 +8,6 @@
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
-  console.log(rns);
-
   let assignee = $derived(rns.assignee.id);
 
   const assignedMember = $derived(
