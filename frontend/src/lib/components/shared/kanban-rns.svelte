@@ -2,6 +2,8 @@
   import { dndzone } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
   import { Column } from '.';
+  import type { RNSItem } from '$lib/types';
+
   let {
     handleDndConsider,
     handleDndFinalize,
@@ -10,98 +12,85 @@
     showDialog,
     role,
     updateStatus,
-    selectedMembers,
-    taskType,
-    longTerms
+    // selectedMembers,
   }: {
     handleDndConsider: any;
     handleDndFinalize: any;
-    columns: any;
-    card: any;
+    columns: Array<{ name: string; value: number; show: boolean; items: any[] }>;
+    card: (item: any, ai?: boolean, idx?: number) => any;
     showDialog: any;
     role: any;
     updateStatus: any;
-    selectedMembers: any;
-    taskType: any;
-    longTerms: any;
+    // selectedMembers: any;
   } = $props();
 
   const flipDurationMs = 300;
+
+  const getColIdx = (name: string) => columns.findIndex(c => c.name === name);
 </script>
 
-<!-- {#if columns[0].show} -->
-<!--   <Column -->
-<!--     name="Long Terms" -->
-<!--     showDialog={() => {}} -->
-<!--     updateStatus={() => {}} -->
-<!--     statusId={1} -->
-<!--     {role} -->
-<!--   > -->
-<!--     {#each longTerms as item, index} -->
-<!--       <div> -->
-<!--         {@render card(item, false, index)} -->
-<!--       </div> -->
-<!--     {/each} -->
-<!--   </Column> -->
-<!-- {/if} -->
-
-{#each columns as column, index}
-  {#if column.show}
-    <Column
-      name={column.name}
-      {showDialog}
-      {updateStatus}
-      statusId={column.value}
-      {role}
-    >
-      {#if role !== 'Startup'}
-        <div
-          use:dndzone={{
-            items: column.items,
-            flipDurationMs,
-            dropTargetStyle: {
-              outline: 'rgba(255, 255, 255, ) solid 2px'
-            }
-          }}
-          onconsider={(e) => handleDndConsider(e, index)}
-          onfinalize={(e) => handleDndFinalize(e, index, column.value)}
-          class="flex h-[700px] flex-col gap-3 overflow-scroll"
+<div
+  class="
+    grid
+    gap-4
+    w-full
+    mb-4
+    grid-cols-4
+    grid-rows-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]
+    auto-rows-fr
+  "
+>
+  {#each columns as column, index}
+    {#if column.show}
+      <div
+        class={
+          column.name === 'Long Term'
+            ? 'col-span-4 row-start-3'
+            : column.name === 'Delayed'
+            ? 'col-span-2 row-start-2 col-start-1'
+            : column.name === 'Discontinued'
+            ? 'col-span-2 row-start-2 col-start-3'
+            : 'row-start-1'
+        }
+      >
+        <Column
+          name={column.name}
+          itemCount={column.items.length}
+          {showDialog}
+          {updateStatus}
+          statusId={column.value}
+          {role}
         >
-          {#if column.items.length === 0}
-            <div class="h-40"></div>
-          {:else}
-            {#each column.items as item (item.id)}
-              <div
-                animate:flip={{ duration: flipDurationMs }}
-                class:hidden={!selectedMembers.includes(
-                  item.assigneeId ? item.assigneeId : 999
-                ) && selectedMembers.length !== 0}
-              >
-                {@render card(item, false, index)}
-              </div>
-            {/each}
-          {/if}
-        </div>
-      {:else}
-        <div class="flex h-[700px] flex-col gap-3 overflow-scroll">
-          {#if column.items.length === 0}
-            <div class="h-40"></div>
-          {:else}
-            {#each column.items
-              .slice()
-              .sort((a, b) => a.order - b.order) as item (item.id)}
-              <div
-                animate:flip={{ duration: flipDurationMs }}
-                class:hidden={!selectedMembers.includes(
-                  item.assigneeId ? item.assigneeId : 999
-                ) && selectedMembers.length !== 0}
-              >
-                {@render card(item, false, index)}
-              </div>
-            {/each}
-          {/if}
-        </div>
-      {/if}
-    </Column>
-  {/if}
-{/each}
+          <div
+            use:dndzone={{
+              items: column.items,
+              flipDurationMs: flipDurationMs,
+              dropTargetStyle: {
+                outline: 'rgba(255, 255, 255, 0.5) solid 2px'
+              }
+            }}
+            onconsider={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndConsider(e, index)}
+            onfinalize={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndFinalize(e, index, column.value)}
+            class="flex h-[700px] flex-col gap-3 overflow-scroll"
+          >
+            {#if column.items.length === 0}
+              <div class="h-40"></div>
+            {:else}
+              {#each column.items as item (item.id)}
+                <div
+                  animate:flip={{ duration: flipDurationMs }}
+                >
+                <!-- <div
+                  animate:flip={{ duration: flipDurationMs }}
+                  class:hidden={!selectedMembers.includes(item.assigneeId ? item.assigneeId : 999) && selectedMembers.length !== 0}
+                > -->
+                  {@render card(item, false, index)}
+                </div>
+              {/each}
+            {/if}
+          </div>
+        </Column>
+      </div>
+    {/if}
+  {/each}
+</div>

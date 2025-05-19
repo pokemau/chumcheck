@@ -1,18 +1,14 @@
 <script lang="ts">
   import { Badge } from '$lib/components/ui/badge';
   import * as Card from '$lib/components/ui/card';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { Edit, Ellipsis, Plus, Target, Trash, User } from 'lucide-svelte';
+  import { Target, User } from 'lucide-svelte';
   import { getProfileColor, getReadinessStyles, zIndex } from '$lib/utils';
   import { RnsViewEditDeleteDialog } from '.';
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
-  let assignee = $derived(rns.assignee_id);
-
-  const assignedMember = $derived(
-    members.filter((member: any) => member.userId === assignee)[0]
-  );
+  let assignee = rns.assignee_id;
+  const assignedMember = members.find((member: any) => member.userId === assignee);
 
   let open = $state(false);
   const onOpenChange = () => {
@@ -27,48 +23,49 @@
 </script>
 
 <Card.Root
-  class="h-full min-w-[calc(25%-1.25rem*3/4)] cursor-pointer"
+  class="bg-gray-900 border border-gray-700 rounded-lg shadow-sm cursor-pointer"
   onclick={() => {
     open = true;
     action = 'View';
   }}
 >
-  <Card.Content class="flex flex-col gap-2">
-    <div class="flex items-center justify-between">
-      <h2 class="text-[15px] font-semibold leading-none tracking-tight">
-        Priority #{rns.priorityNumber ? rns.priorityNumber : ''}
-      </h2>
+  <Card.Content class="flex flex-col gap-2 p-4">
+    <div class="flex items-center justify-between mb-1">
+      <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</span>
+      <Badge class={`text-xs font-medium ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
     <div class="text-sm text-muted-foreground">
       {rns.description.substring(0, 150) +
         `${rns.description.length > 150 ? '...' : ''}`}
     </div>
-    <div class="flex items-center gap-1 text-sm text-muted-foreground">
-      <Target class="h-4 w-4" /> Target Level: <Badge variant="secondary"
-        >{rns.targetLevelScore}</Badge
-      >
-    </div>
     <div class="flex items-center justify-between">
-      <div class="flex flex-wrap items-center gap-2">
-        <Badge class={`${rns.readinessType}`}>{rns.readinessType}</Badge>
-        <!-- <Badge -->
-        <!--   class={`${rns.task_type === 1 ? 'bg-blue-700 hover:bg-blue-800' : 'bg-rose-700 hover:bg-rose-800'}`} -->
-        <!--   >{rns.task_type === 1 ? 'Short' : 'Long'} Term</Badge -->
-        <!-- > -->
+      <div class="flex items-center gap-1 text-xs text-muted-foreground ">
+        <Target class="h-4 w-4" /> Target Level: {rns.targetLevelScore}
       </div>
-      {#if assignedMember}
-        <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
-        >
-          {assignedMember.firstName.charAt(0)}
-        </div>
-      {:else}
-        <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}
-        >
-          <User class="h-4 w-4" />
-        </div>
-      {/if}
+
+      <div class="flex items-center gap-1 text-xs">
+        {#if assignedMember}
+          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
+            {assignedMember.firstName.charAt(0)}
+          </div>
+          <span class="text-muted-foreground">
+            {#if (assignedMember.firstName.length + assignedMember.lastName.length + 1) > 15}
+              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(0, 15) + '...'}
+            {:else}
+              {assignedMember.firstName} {assignedMember.lastName}
+            {/if}
+          </span>
+        {:else}
+          <div class="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
+            <User class="h-4 w-4" />
+          </div>
+          <span>Unassigned</span>
+        {/if}
+      </div>
+    </div>
+    <div class="flex items-center gap-1 text-xs text-muted-foreground">
+      <img src="/clock.png" alt="Clock" class="h-4 w-4" />
+      <span>{rns.status === 7 ? "Long Term" : "Short Term"}</span>
     </div>
   </Card.Content>
 </Card.Root>

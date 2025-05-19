@@ -39,11 +39,12 @@
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
   import { log10 } from 'chart.js/helpers';
+  import type { RNSItem } from '$lib/types.js';
 
   const { data } = $props();
   const { access, startupId } = data;
 
-  const rnsQueries = useQueries([
+  const queryArray = [
     {
       queryKey: ['allowRNS', startupId],
       queryFn: () => getData(`/startups/${startupId}/allow-tasks/`, access!)
@@ -60,21 +61,9 @@
       queryKey: ['startupData'],
       queryFn: () => getData(`/startups/${startupId}`, access!)
     }
-  ]);
-
-  $effect(() => {
-    // if ($rnsQueries[1].isSuccess) {
-    //   console.log($rnsQueries[1].data);
-    // }
-    // if ($rnsQueries[2].isSuccess) {
-    //   console.log($rnsQueries[2].data);
-    // }
-    // if ($rnsQueries[3].isSuccess) {
-    //   console.log($rnsQueries[3].data);
-    // }
-  });
-
-  const { isLoading, isError } = $derived(useQueriesState($rnsQueries));
+  ];
+  const rnsQueries = useQueries(queryArray);
+  const { isLoading, isError } = $derived(useQueriesState(queryArray));
   const isAccessible = $derived($rnsQueries[0].data);
   let selectedTab = $state(getSelectedTab('rns'));
 
@@ -82,19 +71,19 @@
     selectedTab = updateTab('rns', tab);
   };
 
-  const columns = $state(getColumns());
+  let columns = $state(getColumns());
   const readiness = $state(getReadiness());
 
   const members = $derived(
     $rnsQueries[3].isSuccess
       ? [
           ...$rnsQueries[3].data.members.map(
-            ({ id, email, firstName, lastName }) => ({
-              userId: id,
+            (member: { id: number; email: string; firstName: string; lastName: string }) => ({
+              userId: member.id,
               startupId: $rnsQueries[3].data.id,
-              firstName,
-              lastName,
-              email,
+              firstName: member.firstName,
+              lastName: member.lastName,
+              email: member.email,
               selected: false
             })
           ),
@@ -108,6 +97,24 @@
           }
         ]
       : []
+  );
+
+  const normalizedRnsData = $derived(
+    $rnsQueries[1].isSuccess
+      ? $rnsQueries[1].data.map((item: any) => ({
+          ...item,
+          assignee_id: item.assignee_id || item.assigneeId || item.user?.id || item.user_id || null
+        }))
+      : []
+  );
+
+  const kanbanColumns = $derived(
+    columns.map((col) => ({
+      ...col,
+      items: normalizedRnsData
+        .filter((data) => data.isAiGenerated === false && data.status === col.value)
+        .sort((a, b) => a.priorityNumber - b.priorityNumber)
+    }))
   );
 
   const views = $derived(
@@ -287,14 +294,22 @@
     }
   };
 
-  function handleDndConsider(e: any, x: number) {
+  function handleDndConsider(e: CustomEvent<DndEvent<RNSItem>>, x: number) {
     columns[x].items = e.detail.items;
   }
 
-  async function handleDndFinalize(e: any, x: number, status: number) {
+  async function handleDndFinalize(e: CustomEvent<DndEvent<RNSItem>>, x: number, status: number) {
     columns[x].items = e.detail.items;
     if (e.detail.info.trigger === 'droppedIntoZone') {
-      const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
+      let task;
+      for (const col of columns) {
+        task = col.items.find((t: any) => String(t.id) === String(e.detail.info.id));
+        if (task) break;
+      }
+      if (!task) {
+        console.warn('Dropped task not found in items', e.detail);
+        return;
+      }
       await axiosInstance.patch(
         `/rns/${task.id}/`,
         {
@@ -308,6 +323,7 @@
       );
 
       updatePriorityNumber();
+      setTimeout(() => $rnsQueries[1].refetch(), 250);
     }
   }
 
@@ -316,101 +332,22 @@
 
     let counter = 1;
 
-    // New (value: 1)
-    columns[0].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // Scheduled (value: 2)
-    columns[1].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // On Track (value: 3)
-    columns[2].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // Completed (value: 4)
-    columns[3].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // Delayed (value: 5)
-    columns[4].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // Discontinued (value: 6)
-    columns[5].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
-    });
-
-    // Long Term (value: 7)
-    columns[6].items.forEach((item: any) => {
-      item.priorityNumber = counter;
-      updatePromises.push(
-        axiosInstance.patch(
-          `/rns/${item.id}/`,
-          { priorityNumber: counter },
-          { headers: { Authorization: `Bearer ${data.access}` } }
-        )
-      );
-      counter++;
+    columns.forEach((column) => {
+      column.items.forEach((item: any) => {
+        item.priorityNumber = counter;
+        updatePromises.push(
+          axiosInstance.patch(
+            `/rns/${item.id}/`,
+            { priorityNumber: counter },
+            { headers: { Authorization: `Bearer ${data.access}` } }
+          )
+        );
+        counter++;
+      });
     });
 
     try {
-      // Execute all update requests concurrently
       await Promise.all(updatePromises);
-      // $rnsQueries[1].refetch();
       console.log('All tasks updated successfully');
     } catch (error) {
       $rnsQueries[1].refetch();
@@ -419,26 +356,6 @@
     }
   };
 
-  let longTerms = $state([]);
-
-  $effect(() => {
-    if (!isLoading) {
-      columns.forEach((column) => {
-        column.items = $rnsQueries[1].data
-          .filter(
-            (data: any) =>
-              data.isAiGenerated === false && data.status === column.value
-          )
-          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
-      });
-
-      // longTerms = $rnsQueries[1].data.filter(
-      //   (data: any) => data.isAiGenerated === false && data.task_type === 2
-      // );
-    }
-  });
-
-  const showLongTerm = $derived(views[0].show);
 
   const onOpenChange = () => {
     open = !open;
@@ -464,7 +381,7 @@
         selectedMembers.push(index);
       }
     } else {
-      const userId = members[index].user_id;
+      const userId = members[index].userId;
       const userIndex = selectedMembers.indexOf(userId);
 
       if (userIndex !== -1) {
@@ -603,27 +520,37 @@
         <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
       {/if}
     </div>
-    {#if selectedFormat !== 'table'}
-      <div class="flex gap-2">
+    <div class="flex gap-2 items-center">
+      {#if selectedFormat !== 'table'}
         <ShowHideColumns {views} />
-      </div>
-    {/if}
+      {/if}
+      {#if data.role !== 'Startup'}
+      <button
+        class="ml-2 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
+        onclick={showDialog}
+        type="button"
+      >
+        + Add
+      </button>
+      {/if}
+    </div>
   </div>
-  <div class="flex h-full gap-5 overflow-scroll">
+  <div class="block w-full">
     {#if selectedTab === 'rns'}
       {#if selectedFormat === 'board'}
         <KanbanBoardRns
-          {columns}
-          {handleDndFinalize}
-          {handleDndConsider}
-          {card}
-          {showDialog}
+          columns={kanbanColumns}
+          handleDndFinalize={handleDndFinalize}
+          handleDndConsider={handleDndConsider}
+          card={(item, ai = false, idx = 0) => card(item, ai, idx)}
           role={data.role}
-          {updateStatus}
-          {selectedMembers}
-          {taskType}
-          {longTerms}
-        />
+          showDialog={showDialog}
+          updateStatus={updateStatus}
+        >
+          <span slot="tabs">
+            <AITabs {selectedTab} name="rns" updateTab={updateRnsTab} />
+          </span>
+        </KanbanBoardRns>
       {:else}
         <div class="h-fit w-full rounded-md border">
           <Table.Root class="rounded-lg bg-background">
@@ -637,7 +564,7 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {#each $rnsQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+              {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
                 {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5"
@@ -655,11 +582,11 @@
                     >
                     <Table.Cell class=""
                       >{members.filter(
-                        (member: any) => member.user_id === item.assignee_id
-                      )[0]?.first_name}
+                          (member: any) => member.userId === item.assignee_id
+                      )[0]?.firstName}
                       {members.filter(
-                        (member: any) => member.user_id === item.assignee_id
-                      )[0]?.last_name}</Table.Cell
+                          (member: any) => member.userId === item.assignee_id
+                      )[0]?.lastName}</Table.Cell
                     >
                   </Table.Row>
                 {/if}
@@ -671,7 +598,7 @@
     {:else}
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>

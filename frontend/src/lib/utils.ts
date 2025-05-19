@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { browser } from '$app/environment';
+import type { RNSItem } from './types';
 // import type { Role } from './types';
 import axiosInstance from './axios';
 
@@ -59,7 +60,12 @@ export const getLocal = (name: string) => {
   }
 };
 
-export const getColumns = () => {
+export const getColumns = (): Array<{
+  name: string;
+  items: RNSItem[];
+  show: boolean;
+  value: number;
+}> => {
   return [
     {
       name: 'New',
