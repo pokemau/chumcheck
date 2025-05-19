@@ -445,6 +445,13 @@ export class StartupService {
     return count > 0;
   }
 
+  async allowInitiatives(startupId: number): Promise<boolean> {
+    const count = await this.em.count(StartupRNA, {
+      startup: startupId,
+    });
+    return count > 0;
+  }
+
   private async calculateTechnologyLevel(startupId: number): Promise<number> {
     const { technologyLevel } = await this.calculateLevels(startupId);
     return technologyLevel;

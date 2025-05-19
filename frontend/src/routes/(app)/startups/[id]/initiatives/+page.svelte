@@ -40,11 +40,11 @@
     },
     {
       queryKey: ['rnsDataInitiative'],
-      queryFn: () => getData(`/tasks/tasks/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/rns/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['initiativesData'],
-      queryFn: () => getData(`/tasks/initiatives/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/initiatives/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['startupData'],
