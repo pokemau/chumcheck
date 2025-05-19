@@ -14,7 +14,7 @@ export class RnsService {
     const rns = await this.em.find(
       Rns,
       { startup: { id: startupId } },
-      { populate: ['user', 'targetLevel'] },
+      { populate: ['assignee', 'targetLevel'] },
     );
 
     return rns.map((r: Rns) => ({
@@ -26,7 +26,7 @@ export class RnsService {
       status: r.status,
       readinessType: r.readinessType,
       startup: r.startup.id,
-      user: r.user,
+      assignee: r.assignee,
       targetLevelScore: r.getTargetLevelScore(),
     }));
   }
@@ -39,7 +39,7 @@ export class RnsService {
     rns.isAiGenerated = dto.isAiGenerated;
     rns.readinessType = dto.readinessType;
     rns.startup = this.em.getReference(Startup, dto.startupId);
-    rns.user = this.em.getReference(User, dto.assigneeId);
+    rns.assignee = this.em.getReference(User, dto.assigneeId);
     rns.status = dto.status;
 
     await this.em.persistAndFlush(rns);
@@ -68,7 +68,7 @@ export class RnsService {
     }
 
     if (dto.assigneeId) {
-      rns.user = this.em.getReference(User, dto.assigneeId);
+      rns.assignee = this.em.getReference(User, dto.assigneeId);
     }
 
     if (dto.targetLevel) {
