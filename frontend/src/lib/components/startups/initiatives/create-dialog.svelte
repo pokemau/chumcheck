@@ -28,14 +28,16 @@
     assignee_id: ''
   });
   $effect(() => {
-    console.log(data.task_id);
+    console.log("yuhh")
+    console.log(members);
+    console.log(data);
   });
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/5 max-w-[600px] overflow-scroll">
     <Dialog.Header>
-      <Dialog.Title>Create {getStatusName(status)} Roadblock</Dialog.Title>
+      <Dialog.Title>Create {getStatusName(status)} Initiative</Dialog.Title>
     </Dialog.Header>
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
@@ -77,12 +79,12 @@
       <Select.Root type="single" bind:value={data.assignee_id}>
         <Select.Trigger class="w-[180px]"
           >{data.assignee_id
-            ? `${members.filter((member: any) => member.user_id === data.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === data.assignee_id)[0].last_name}`
+            ? `${members.filter((member: any) => member.userId === data.assignee_id)[0].first_name} ${members.filter((member: any) => member.userId === data.assignee_id)[0].last_name}`
             : ''}</Select.Trigger
         >
         <Select.Content>
           {#each members as member}
-            <Select.Item value={member.user_id}>{member.first_name} {member.last_name}</Select.Item>
+            <Select.Item value={member.userId}>{member.firstName} {member.lastName}</Select.Item>
           {/each}
         </Select.Content>
       </Select.Root>

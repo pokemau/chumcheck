@@ -70,18 +70,18 @@
             ...rest
           })),
           {
-            user_id: $initiativesQueries[3].data.user_id,
-            startup_id: $initiativesQueries[3].data.id,
-            first_name: $initiativesQueries[3].data.leader_first_name,
-            last_name: $initiativesQueries[3].data.leader_last_name,
-            email: $initiativesQueries[3].data.leader_email,
+            userId: $initiativesQueries[3].data.user.id,
+            startupId: $initiativesQueries[3].data.id,
+            firstName: $initiativesQueries[3].data.user.firstName,
+            lastName: $initiativesQueries[3].data.user.lastName,
+            email: $initiativesQueries[3].data.user.email,
             selected: false
           }
         ]
       : []
   );
 
-  $effect(() => {
+  $effect(() => {    
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
   });
@@ -233,7 +233,7 @@
   $effect(() => {
     if (!isLoading) {
       columns.forEach((column) => {
-        column.items = $initiativesQueries[2].data.results.filter(
+        column.items = $initiativesQueries[2].data.filter(
           (data: any) => data.is_ai_generated === false && data.status === column.value
         );
       });
