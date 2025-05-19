@@ -251,7 +251,7 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.user.id}
+                      bind:value={rnsCopy.assignee.id}
                       onValueChange={(newVal) => {
                         update(rnsCopy.id, {
                           assigneeId: newVal
@@ -259,8 +259,8 @@
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.user.id
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].lastName}`
+                        >{rnsCopy.assignee.id
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">

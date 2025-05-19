@@ -8,7 +8,9 @@
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
-  let assignee = $derived(rns.assignee_id);
+  console.log(rns);
+
+  let assignee = $derived(rns.assignee.id);
 
   const assignedMember = $derived(
     members.filter((member: any) => member.userId === assignee)[0]
@@ -39,11 +41,11 @@
         Priority #{rns.priorityNumber ? rns.priorityNumber : ''}
       </h2>
     </div>
-    <div class="text-sm text-muted-foreground">
+    <div class="text-muted-foreground text-sm">
       {rns.description.substring(0, 150) +
         `${rns.description.length > 150 ? '...' : ''}`}
     </div>
-    <div class="flex items-center gap-1 text-sm text-muted-foreground">
+    <div class="text-muted-foreground flex items-center gap-1 text-sm">
       <Target class="h-4 w-4" /> Target Level: <Badge variant="secondary"
         >{rns.targetLevelScore}</Badge
       >
@@ -66,7 +68,7 @@
         </div>
       {:else}
         <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}
+          class={`bg-muted flex h-8 w-8 items-center justify-center rounded-full ${zIndex[1]}`}
         >
           <User class="h-4 w-4" />
         </div>
