@@ -788,6 +788,117 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "is_ai_generated": {
+          "name": "is_ai_generated",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        },
+        "rna": {
+          "name": "rna",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "startup_rnas",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "startup_rnas_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "startup_rnas_readiness_level_id_foreign": {
+          "constraintName": "startup_rnas_readiness_level_id_foreign",
+          "columnNames": [
+            "readiness_level_id"
+          ],
+          "localTableName": "public.startup_rnas",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.readiness_levels",
+          "updateRule": "cascade"
+        },
+        "startup_rnas_startup_id_foreign": {
+          "constraintName": "startup_rnas_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.startup_rnas",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "readiness_level_id": {
+          "name": "readiness_level_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "remark": {
           "name": "remark",
           "type": "text",
@@ -1411,8 +1522,8 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "user_id": {
-          "name": "user_id",
+        "assignee_id": {
+          "name": "assignee_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -1461,16 +1572,193 @@
           "referencedTableName": "public.startups",
           "updateRule": "cascade"
         },
-        "rns_user_id_foreign": {
-          "constraintName": "rns_user_id_foreign",
+        "rns_assignee_id_foreign": {
+          "constraintName": "rns_assignee_id_foreign",
           "columnNames": [
-            "user_id"
+            "assignee_id"
           ],
           "localTableName": "public.rns",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.users",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "initiative_number": {
+          "name": "initiative_number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "status": {
+          "name": "status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "rns_id": {
+          "name": "rns_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "is_ai_generated": {
+          "name": "is_ai_generated",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        },
+        "assignee_id": {
+          "name": "assignee_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "measures": {
+          "name": "measures",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "targets": {
+          "name": "targets",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "remarks": {
+          "name": "remarks",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "datetime_created": {
+          "name": "datetime_created",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "datetime_updated": {
+          "name": "datetime_updated",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "initiatives",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "initiatives_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "initiatives_rns_id_foreign": {
+          "constraintName": "initiatives_rns_id_foreign",
+          "columnNames": [
+            "rns_id"
+          ],
+          "localTableName": "public.initiatives",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.rns",
+          "updateRule": "cascade"
+        },
+        "initiatives_assignee_id_foreign": {
+          "constraintName": "initiatives_assignee_id_foreign",
+          "columnNames": [
+            "assignee_id"
+          ],
+          "localTableName": "public.initiatives",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.users",
+          "updateRule": "cascade"
+        },
+        "initiatives_startup_id_foreign": {
+          "constraintName": "initiatives_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.initiatives",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
           "updateRule": "cascade"
         }
       },

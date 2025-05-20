@@ -108,11 +108,11 @@ export class StartupController {
     return await this.startupService.getStartupById(id);
   }
 
-  @Get(':startupId/allow-tasks')
-  async getStartupAllowTasksById(@Param('startupId') startupId: string) {
-    // IDK para unsa
-    return true;
-  }
+  // @Get(':startupId/allow-tasks')
+  // async getStartupAllowTasksById(@Param('startupId') startupId: string) {
+  //   // IDK para unsa
+  //   return true;
+  // }
 
   @Get(':startupId/calculator-final-scores')
   async getCalculatorFinalScores(@Param('startupId') startupId: number) {
@@ -149,5 +149,24 @@ export class StartupController {
       mentorIds,
       cohortId,
     );
+  }
+
+  @Get(':startupId/allow-rnas')
+  async allowRNAs(@Param('startupId') startupId: number): Promise<boolean> {
+    return this.startupService.allowRNAs(startupId);
+  }
+
+  @Get(':startupId/allow-tasks')
+  async allowTasks(
+    @Param('startupId', ParseIntPipe) startupId: number
+  ): Promise<boolean> {
+    return this.startupService.allowTasks(startupId);
+  }
+
+    @Get(':startupId/allow-initiatives')
+  async allowInitiatives(
+    @Param('startupId', ParseIntPipe) startupId: number
+  ): Promise<boolean> {
+    return this.startupService.allowInitiatives(startupId);
   }
 }

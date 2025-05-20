@@ -17,34 +17,32 @@
   let { open, onOpenChange, create, members, startupId, tasks, status } = $props();
 
   const data = $state({
-    initiative_number: '',
+    initiativeNumber: '',
     description: '',
     measures: '',
     targets: '',
     remarks: '',
-    task_id: '',
-    status: 4,
-    is_ai_generated: false,
-    assignee_id: ''
+    rnsId: '',
+    assigneeId: '',
   });
   $effect(() => {
-    console.log(data.task_id);
+ 
   });
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/5 max-w-[600px] overflow-scroll">
     <Dialog.Header>
-      <Dialog.Title>Create {getStatusName(status)} Roadblock</Dialog.Title>
+      <Dialog.Title>Create {getStatusName(status)} Initiative</Dialog.Title>
     </Dialog.Header>
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
         <Label for="name">Task</Label>
-        <Select.Root type="single" bind:value={data.task_id}>
+        <Select.Root type="single" bind:value={data.rnsId}>
           <Select.Trigger class="h-20 text-wrap text-start"
-            >{data.task_id
+            >{data.rnsId
               ? tasks
-                  .filter((task: any) => task.id == data.task_id)[0]
+                  .filter((task: any) => task.id == data.rnsId)[0]
                   .description.substring(0, 100)
               : ''}</Select.Trigger
           >
@@ -74,23 +72,23 @@
     </div>
     <div class="flex flex-col gap-4">
       <Label for="name">Assignee</Label>
-      <Select.Root type="single" bind:value={data.assignee_id}>
+      <Select.Root type="single" bind:value={data.assigneeId}>
         <Select.Trigger class="w-[180px]"
-          >{data.assignee_id
-            ? `${members.filter((member: any) => member.user_id === data.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === data.assignee_id)[0].last_name}`
+          >{data.assigneeId
+            ? `${members.filter((member: any) => member.userId === data.assigneeId)[0].firstName} ${members.filter((member: any) => member.userId === data.assigneeId)[0].lastName}`
             : ''}</Select.Trigger
         >
         <Select.Content>
           {#each members as member}
-            <Select.Item value={member.user_id}>{member.first_name} {member.last_name}</Select.Item>
+            <Select.Item value={member.userId}>{member.firstName} {member.lastName}</Select.Item>
           {/each}
         </Select.Content>
       </Select.Root>
     </div>
     <div class="flex flex-col gap-4">
       <Label for="name">Initiative No.</Label>
-      <Select.Root type="single" bind:value={data.initiative_number}>
-        <Select.Trigger class="w-[180px]">{data.initiative_number}</Select.Trigger>
+      <Select.Root type="single" bind:value={data.initiativeNumber}>
+        <Select.Trigger class="w-[180px]">{data.initiativeNumber}</Select.Trigger>
         <Select.Content>
           {#each [1, 2, 3, 4, 5] as item}
             <Select.Item value={`${item}`}>{item}</Select.Item>
@@ -100,13 +98,35 @@
     </div>
     <Dialog.Footer>
       <Button
-        onclick={() => create(data)}
-        disabled={data.description === '' ||
+        onclick={() =>{
+          create({
+            ...data,
+            initiativeNumber: data.initiativeNumber ? Number(data.initiativeNumber) : undefined,
+            rnsId: data.rnsId ? Number(data.rnsId) : undefined,
+            assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
+            startupId: Number(startupId),
+            status: status,
+            isAiGenerated: false,
+          })
+
+          data.initiativeNumber = '';
+          data.description = '';
+          data.measures = '';
+          data.targets = '';
+          data.remarks = '';
+          data.rnsId = '';
+          data.assigneeId = '';
+        }}
+        disabled={
+          data.description === '' ||
           data.measures === '' ||
           data.targets === '' ||
           data.remarks === '' ||
-          data.task_id === ''}>Create</Button
+          data.rnsId === ''
+        }
       >
+        Create
+      </Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

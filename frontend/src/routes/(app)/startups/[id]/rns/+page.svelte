@@ -443,7 +443,7 @@
         <div class="flex">
           {#each [1, 2] as item, index}
             <Skeleton
-              class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
+              class={`border-background flex h-9 w-9 items-center justify-center rounded-full border-2 ${
                 index !== 2 - 1 ? '-mr-1' : ''
               } `}
             >
@@ -452,22 +452,22 @@
           {/each}
         </div>
       </div>
-      <div class="ml-auto bg-background">
+      <div class="bg-background ml-auto">
         <Skeleton class="h-9 w-[90px]" />
       </div>
     </div>
 
     <div class="grid h-full grid-cols-4 gap-5">
-      <div class="h-full w-full bg-background">
+      <div class="bg-background h-full w-full">
         <Skeleton class="h-full" />
       </div>
-      <div class="h-full w-full bg-background">
+      <div class="bg-background h-full w-full">
         <Skeleton class="h-full" />
       </div>
-      <div class="h-full w-full bg-background">
+      <div class="bg-background h-full w-full">
         <Skeleton class="h-full" />
       </div>
-      <div class="h-full w-full bg-background">
+      <div class="bg-background h-full w-full">
         <Skeleton class="h-full" />
       </div>
     </div>
@@ -480,14 +480,14 @@
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
       <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
-        <div class="flex h-fit justify-between rounded-lg bg-background">
+        <div class="bg-background flex h-fit justify-between rounded-lg">
           <AITabs {selectedTab} name="rns" updateTab={updateRnsTab} />
         </div>
       </Can>
       {#if selectedTab === 'rns'}
-        <div class="flex h-fit justify-between rounded-lg bg-background">
+        <div class="bg-background flex h-fit justify-between rounded-lg">
           <Tabs.Root value={selectedFormat}>
-            <Tabs.List class="border bg-flutter-gray/20">
+            <Tabs.List class="bg-flutter-gray/20 border">
               <Tabs.Trigger
                 class="flex items-center gap-1"
                 value="board"
@@ -542,7 +542,7 @@
         />
       {:else}
         <div class="h-fit w-full rounded-md border">
-          <Table.Root class="rounded-lg bg-background">
+          <Table.Root class="bg-background rounded-lg">
             <Table.Header>
               <Table.Row class="text-centery h-12">
                 <Table.Head class="pl-5">Type</Table.Head>
@@ -553,6 +553,7 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
+              {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
               {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
                 {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
@@ -588,6 +589,7 @@
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
           {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>
@@ -598,4 +600,6 @@
   </div>
 {/snippet}
 
-{#snippet fallback()}{/snippet}
+{#snippet fallback()}
+  <h1>Huh</h1>
+{/snippet}

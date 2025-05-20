@@ -41,6 +41,6 @@ export class User {
   @ManyToMany(() => Startup, (startup) => startup.members)
   startupsAsMember = new Collection<Startup>(this);
 
-  @OneToMany(() => Rns, (rns) => rns.user)
+  @OneToMany(() => Rns, (rns) => rns.assignee)
   assignedRns = new Collection<Rns>(this);
 }

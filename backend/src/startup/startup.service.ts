@@ -16,6 +16,7 @@ import { QualificationStatus } from 'src/entities/enums/qualification-status.enu
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
+import { StartupRNA } from 'src/entities/startup-rnas.entity';
 import { start } from 'repl';
 
 @Injectable()
@@ -65,6 +66,9 @@ export class StartupService {
     startup.user = user;
     startup.dataPrivacy = dto.dataPrivacy;
     startup.eligibility = dto.eligibility;
+    if (dto.links) startup.links = dto.links;
+    if (dto.groupName) startup.groupName = dto.groupName;
+    if (dto.universityName) startup.universityName = dto.universityName;
 
     await this.em.persistAndFlush(startup);
     return startup;
@@ -157,9 +161,11 @@ export class StartupService {
 
     // Fetch the startups
     const startupIds = finalScores.map((ranking) => ranking.startup_id);
-    const startups = await this.em.find(Startup, {
-      id: { $in: startupIds },
-    });
+    const startups = await this.em.find(
+      Startup,
+      { id: { $in: startupIds } },
+      { populate: ['user'] },
+    );
     if (!startups || startups.length === 0) {
       console.warn('No startups found for the calculated IDs.');
       return [];
@@ -255,9 +261,7 @@ export class StartupService {
         id: { $in: startupIds },
         qualificationStatus: QualificationStatus.QUALIFIED,
       },
-      {
-        populate: ['mentors'], // Populate mentors for each startup
-      },
+      { populate: ['mentors', 'user'], },
     );
 
     if (!startups || startups.length === 0) {
@@ -427,6 +431,25 @@ export class StartupService {
     return {
       message: `Mentors have been successfully assigned to Startup ID ${startupId}.`,
     };
+  }
+
+  async allowRNAs(startupId: number): Promise<boolean>{
+    return await this.em.count(StartupCriterionAnswer,
+      { startup: startupId }) > 0;
+  }
+
+  async allowTasks(startupId: number): Promise<boolean> {
+    const count = await this.em.count(StartupRNA, {
+      startup: startupId,
+    });
+    return count > 0;
+  }
+
+  async allowInitiatives(startupId: number): Promise<boolean> {
+    const count = await this.em.count(StartupRNA, {
+      startup: startupId,
+    });
+    return count > 0;
   }
 
   private async calculateTechnologyLevel(startupId: number): Promise<number> {

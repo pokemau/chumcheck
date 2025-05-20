@@ -4,7 +4,7 @@ import { User } from './user.entity';
 import { RnsStatus } from './enums/rns.enum';
 import { ReadinessType } from './enums/readiness-type.enum';
 import { ReadinessLevel } from './readiness-level.entity';
-import { getReadinessLevels } from 'src/utils';
+import { getReadinessLevels } from '../utils';
 
 @Entity({ tableName: 'rns' })
 export class Rns {
@@ -33,7 +33,7 @@ export class Rns {
   startup!: Startup;
 
   @ManyToOne(() => User)
-  user!: User;
+  assignee!: User;
 
   getTargetLevelScore(): number {
     const levels = getReadinessLevels(this.readinessType);
