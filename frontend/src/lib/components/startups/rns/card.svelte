@@ -7,8 +7,7 @@
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
-  let assignee = rns.assignee_id;
-  const assignedMember = members.find((member: any) => member.userId === assignee);
+  const assignedMember = rns.user;
 
   let open = $state(false);
   const onOpenChange = () => {

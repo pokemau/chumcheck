@@ -12,12 +12,12 @@
     showDialog,
     role,
     updateStatus,
-    // selectedMembers,
+    // selectedMembers
   }: {
     handleDndConsider: any;
     handleDndFinalize: any;
-    columns: Array<{ name: string; value: number; show: boolean; items: any[] }>;
-    card: (item: any, ai?: boolean, idx?: number) => any;
+    columns: any;
+    card: any;
     showDialog: any;
     role: any;
     updateStatus: any;
@@ -25,8 +25,6 @@
   } = $props();
 
   const flipDurationMs = 300;
-
-  const getColIdx = (name: string) => columns.findIndex(c => c.name === name);
 </script>
 
 <div

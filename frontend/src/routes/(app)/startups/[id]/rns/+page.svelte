@@ -71,7 +71,7 @@
     selectedTab = updateTab('rns', tab);
   };
 
-  let columns = $state(getColumns());
+  const columns = $state(getColumns());
   const readiness = $state(getReadiness());
 
   const members = $derived(
@@ -97,24 +97,6 @@
           }
         ]
       : []
-  );
-
-  const normalizedRnsData = $derived(
-    $rnsQueries[1].isSuccess
-      ? $rnsQueries[1].data.map((item: any) => ({
-          ...item,
-          assignee_id: item.assignee_id || item.assigneeId || item.user?.id || item.user_id || null
-        }))
-      : []
-  );
-
-  const kanbanColumns = $derived(
-    columns.map((col) => ({
-      ...col,
-      items: normalizedRnsData
-        .filter((data) => data.isAiGenerated === false && data.status === col.value)
-        .sort((a, b) => a.priorityNumber - b.priorityNumber)
-    }))
   );
 
   const views = $derived(
@@ -301,15 +283,7 @@
   async function handleDndFinalize(e: CustomEvent<DndEvent<RNSItem>>, x: number, status: number) {
     columns[x].items = e.detail.items;
     if (e.detail.info.trigger === 'droppedIntoZone') {
-      let task;
-      for (const col of columns) {
-        task = col.items.find((t: any) => String(t.id) === String(e.detail.info.id));
-        if (task) break;
-      }
-      if (!task) {
-        console.warn('Dropped task not found in items', e.detail);
-        return;
-      }
+      const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
         `/rns/${task.id}/`,
         {
@@ -356,6 +330,22 @@
     }
   };
 
+  let longTerms = $state([]);
+
+  $effect(() => {
+    if (!isLoading && $rnsQueries[1].isSuccess && Array.isArray($rnsQueries[1].data)) {
+      columns.forEach((column) => {
+        column.items = $rnsQueries[1].data
+          ? $rnsQueries[1].data
+              .filter(
+                (data: any) =>
+                  data.isAiGenerated === false && data.status === column.value
+              )
+              .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber)
+          : [];
+      });
+    }
+  });
 
   const onOpenChange = () => {
     open = !open;
@@ -539,18 +529,17 @@
     {#if selectedTab === 'rns'}
       {#if selectedFormat === 'board'}
         <KanbanBoardRns
-          columns={kanbanColumns}
-          handleDndFinalize={handleDndFinalize}
-          handleDndConsider={handleDndConsider}
-          card={(item, ai = false, idx = 0) => card(item, ai, idx)}
+          {columns}
+          {handleDndFinalize}
+          {handleDndConsider}
+          {card}
+          {showDialog}
           role={data.role}
-          showDialog={showDialog}
-          updateStatus={updateStatus}
-        >
-          <span slot="tabs">
-            <AITabs {selectedTab} name="rns" updateTab={updateRnsTab} />
-          </span>
-        </KanbanBoardRns>
+          {updateStatus}
+          {selectedMembers}
+          {taskType}
+          {longTerms}
+        />
       {:else}
         <div class="h-fit w-full rounded-md border">
           <Table.Root class="rounded-lg bg-background">
