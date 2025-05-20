@@ -79,8 +79,6 @@
 
     return matchingLevels.length > 0 ? matchingLevels[0].id : '';
   };
-
-  console.log(rnsCopy);
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
