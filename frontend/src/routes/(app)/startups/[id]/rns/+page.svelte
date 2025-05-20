@@ -69,9 +69,9 @@
     // if ($rnsQueries[2].isSuccess) {
     //   console.log($rnsQueries[2].data);
     // }
-    if ($rnsQueries[3].isSuccess) {
-      console.log($rnsQueries[3].data);
-    }
+    // if ($rnsQueries[3].isSuccess) {
+    //   console.log($rnsQueries[3].data);
+    // }
   });
 
   const { isLoading, isError } = $derived(useQueriesState($rnsQueries));
@@ -692,4 +692,6 @@
   </div>
 {/snippet}
 
-{#snippet fallback()}{/snippet}
+{#snippet fallback()}
+  <h1>Huh</h1>
+{/snippet}
