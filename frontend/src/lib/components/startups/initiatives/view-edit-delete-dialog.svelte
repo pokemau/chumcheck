@@ -33,6 +33,7 @@
     if (!open) {
       rnsCopy = { ...rns };
     }
+    console.log(rnsCopy);
   });
 
   let editDescription = $state(false);
@@ -182,14 +183,14 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.assigneeId}
+                      bind:value={rnsCopy.assignee}
                       onValueChange={() => {
-                        update(rnsCopy.id, { assigneeId: rnsCopy.assigneeId });
+                        update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assigneeId
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.assigneeId)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assigneeId)[0].lastName}`
+                        >{rnsCopy.assignee
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
@@ -202,14 +203,14 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.assigneeId
+                      {rnsCopy.assignee
                         ? `${
                             members.filter(
-                              (member: any) => member.userId === rnsCopy.assigneeId
+                              (member: any) => member.userId === rnsCopy.assignee
                             )[0].firstName
                           } ${
                             members.filter(
-                              (member: any) => member.userId === rnsCopy.assigneeId
+                              (member: any) => member.userId === rnsCopy.assignee
                             )[0].lastName
                           }`
                         : 'None'}

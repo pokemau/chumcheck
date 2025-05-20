@@ -23,15 +23,10 @@
     targets: '',
     remarks: '',
     rnsId: '',
-    status: 4,
-    isAiGenerated: false,
     assigneeId: '',
-    startupId: startupId
   });
   $effect(() => {
-    console.log("yuhh")
-    // console.log(tasks);
-    console.log(data);
+ 
   });
 </script>
 
@@ -103,15 +98,25 @@
     </div>
     <Dialog.Footer>
       <Button
-        onclick={() =>
+        onclick={() =>{
           create({
             ...data,
             initiativeNumber: data.initiativeNumber ? Number(data.initiativeNumber) : undefined,
             rnsId: data.rnsId ? Number(data.rnsId) : undefined,
             assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
-            startupId: data.startupId ? Number(data.startupId) : undefined,
+            startupId: Number(startupId),
+            status: status,
+            isAiGenerated: false,
           })
-        }
+
+          data.initiativeNumber = '';
+          data.description = '';
+          data.measures = '';
+          data.targets = '';
+          data.remarks = '';
+          data.rnsId = '';
+          data.assigneeId = '';
+        }}
         disabled={
           data.description === '' ||
           data.measures === '' ||

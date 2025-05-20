@@ -21,8 +21,8 @@
 
   let action: Actions = $state('View');
 
-  console.log(tasks);
-  console.log(initiative);
+  // console.log(tasks);
+  // console.log(initiative);
 
   const closeDialog = () => {
     open = false;

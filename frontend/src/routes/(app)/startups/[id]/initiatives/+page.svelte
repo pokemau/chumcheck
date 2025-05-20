@@ -65,109 +65,58 @@
   const views = $derived(selectedTab === 'initiatives' ? columns : readiness);
   const members = $derived(
     $initiativesQueries[3].isSuccess
-      ? [
-          ...$initiativesQueries[3].data.members.map(
-            ({ id, email, firstName, lastName }) => ({
-              userId: id,
-              startupId: $initiativesQueries[3].data.id,
-              firstName,
-              lastName,
-              email,
-              selected: false
-            })
-          ),
-          {
-            userId: $initiativesQueries[3].data.user.id,
-            startupId: $initiativesQueries[3].data.id,
-            firstName: $initiativesQueries[3].data.user.firstName,
-            lastName: $initiativesQueries[3].data.user.lastName,
-            email: $initiativesQueries[3].data.user.email,
+      ? (() => {
+          const data = $initiativesQueries[3].data;
+          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+            userId: id,
+            startupId: data.id,
+            firstName,
+            lastName,
+            email,
             selected: false
+          }));
+
+          // Check if user is already in members
+          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+
+          if (!isUserInMembers) {
+            baseMembers.push({
+              userId: data.user.id,
+              startupId: data.id,
+              firstName: data.user.firstName,
+              lastName: data.user.lastName,
+              email: data.user.email,
+              selected: false
+            });
           }
-        ]
+
+          return baseMembers;
+        })()
       : []
   );
+  const tasks = $derived(
+    $initiativesQueries[1].isSuccess ? $initiativesQueries[1].data : []
+  );
+
+  let status = $state(1);
+  let selectedFormat = $state('board');
+  const selectedMembers: any = $state([]);
 
   $effect(() => {    
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
-    console.log($initiativesQueries[2].data)
-    // console.log("YARR")
-    // console.log($initiativesQueries[1].data)
-  });
-
-  let generatingInitiatives = false;
-  let generatingType = 'Technology';
-  let open = $state(false);
-  const generateInitiatives = async (type: string) => {
-    generatingInitiatives = true;
-    let ids = $initiativesQueries[1].data
-      .filter(
-        (data: any) =>
-          data.readiness_type_rl_type.slice(0, 1) === type &&
-          data.is_ai_generated === false &&
-          data.task_type === 1
-      )
-      .map((d: any) => d.id);
-
-    if (ids.length > 0) {
-      const requests = ids.map(async (id: any) => {
-        return await axiosInstance.post(
-          `/initiatives/generate-initiatives/`,
-          {
-            task_id: id,
-            no_of_initiatives_to_create: 3
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          }
+    if (!isLoading) {
+      columns.forEach((column) => {
+        column.items = $initiativesQueries[2].data.filter(
+          (data: any) => data.isAiGenerated === false && data.status === column.value
         );
       });
-
-      await axios.all(requests);
-      $initiativesQueries[2].refetch();
-      $initiativesQueries[1].refetch();
-      toast.success(`Successfully generated initiatives`);
-    } else {
-      toast.error('No initiatives to generate');
     }
+  });
 
-    generatingInitiatives = false;
-  };
-
-  const addToInitiatives = async (id: number) => {
-    await axiosInstance.patch(
-      `/initiatives/${id}/`,
-      {
-        status: 1,
-        isAiGenerated: false
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    toast.success('Successfuly added to Initiatives');
-    $initiativesQueries[1].refetch().then(() => {
-      $initiativesQueries[2]
-        .refetch()
-        .then((res) => {
-          columns.forEach((column) => {
-            column.items = res.data.filter(
-              (data: any) => data.isAiGenerated === false && data.status === column.value
-            );
-          });
-        })
-        .finally(async () => await updateInitiativeNumber());
-    });
-  };
 
   const createInitiative = async (payload: any) => {
-    console.log(payload);
     await axiosInstance.post(
       '/initiatives/',
       {
@@ -181,6 +130,7 @@
     );
     toast.success('Successfully created the Initiative');
     open = false;
+
     $initiativesQueries[2]
       .refetch()
       .then((res) => {
@@ -191,29 +141,27 @@
         });
       })
       .finally(async () => await updateInitiativeNumber());
+      
   };
 
   const deleteInitiative = async (id: number) => {
-    console.log(id);
     await axiosInstance.delete(`/initiatives/${id}/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
     toast.success('Successfuly deleted a task');
-    $initiativesQueries[1].refetch();
-    $initiativesQueries[2].refetch();
-
+    
     $initiativesQueries[2]
-    .refetch()
-    .then((res) => {
-      columns.forEach((column) => {
-        column.items = res.data.filter(
-          (data: any) => data.isAiGenerated === false && data.status === column.value
-        );
-      });
-    })
-    .finally(async () => await updateInitiativeNumber());
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = res.data.filter(
+            (data: any) => data.isAiGenerated === false && data.status === column.value
+          );
+        });
+      })
+      .finally(async () => await updateInitiativeNumber());
   };
 
   const updatedEditInitiative = async (id: number, payload: any) => {
@@ -252,17 +200,6 @@
 
     updateInitiativeNumber();
   }
-
-  $effect(() => {
-    console.log($initiativesQueries[2].data)
-    if (!isLoading) {
-      columns.forEach((column) => {
-        column.items = $initiativesQueries[2].data.filter(
-          (data: any) => data.isAiGenerated === false && data.status === column.value
-        );
-      });
-    }
-  });
 
   const updateInitiativeNumber = async () => {
     const updatePromises: any = [];
@@ -432,26 +369,87 @@
     }
   };
 
+  const addToInitiatives = async (id: number) => {
+    await axiosInstance.patch(
+      `/initiatives/${id}/`,
+      {
+        status: 1,
+        isAiGenerated: false
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    toast.success('Successfuly added to Initiatives');
+    $initiativesQueries[1].refetch().then(() => {
+      $initiativesQueries[2]
+        .refetch()
+        .then((res) => {
+          columns.forEach((column) => {
+            column.items = res.data.filter(
+              (data: any) => data.isAiGenerated === false && data.status === column.value
+            );
+          });
+        })
+        .finally(async () => await updateInitiativeNumber());
+    });
+  };
+
+  let generatingInitiatives = false;
+  let generatingType = 'Technology';
+  let open = $state(false);
+  const generateInitiatives = async (type: string) => {
+    generatingInitiatives = true;
+    let ids = $initiativesQueries[1].data
+      .filter(
+        (data: any) =>
+          data.readiness_type_rl_type.slice(0, 1) === type &&
+          data.is_ai_generated === false &&
+          data.task_type === 1
+      )
+      .map((d: any) => d.id);
+
+    if (ids.length > 0) {
+      const requests = ids.map(async (id: any) => {
+        return await axiosInstance.post(
+          `/initiatives/generate-initiatives/`,
+          {
+            task_id: id,
+            no_of_initiatives_to_create: 3
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${data.access}`
+            }
+          }
+        );
+      });
+
+      await axios.all(requests);
+      $initiativesQueries[2].refetch();
+      $initiativesQueries[1].refetch();
+      toast.success(`Successfully generated initiatives`);
+    } else {
+      toast.error('No initiatives to generate');
+    }
+
+    generatingInitiatives = false;
+  };
+
+
   const showDialog = () => {
     open = true;
-    console.log('test');
   };
 
   const onOpenChange = () => {
     open = !open;
   };
 
-  const tasks = $derived(
-    $initiativesQueries[1].isSuccess ? $initiativesQueries[1].data : []
-  );
-
-  let status = $state(1);
-
   const updateStatus = (newStatus: number) => {
     status = newStatus;
   };
-
-  const selectedMembers: any = $state([]);
 
   const toggleMemberSelection = (index: number) => {
     if (index === 999) {
@@ -472,8 +470,6 @@
       }
     }
   };
-
-  let selectedFormat = $state('board');
 </script>
 
 <svelte:head>
