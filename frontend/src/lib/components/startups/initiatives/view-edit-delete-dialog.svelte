@@ -33,7 +33,6 @@
     if (!open) {
       rnsCopy = { ...rns };
     }
-    console.log(rnsCopy);
   });
 
   let editDescription = $state(false);
