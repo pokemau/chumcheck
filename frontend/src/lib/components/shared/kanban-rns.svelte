@@ -89,7 +89,7 @@
           {:else}
             {#each column.items
               .slice()
-              .sort((a, b) => a.order - b.order) as item (item.id)}
+              .sort((a: any, b: any) => a.order - b.order) as item (item.id)}
               <div
                 animate:flip={{ duration: flipDurationMs }}
                 class:hidden={!selectedMembers.includes(

@@ -186,7 +186,7 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.readiness_type_rl_type}
+                      {rnsCopy.readinessType}
                     </p>
                   {/if}
                 </div>
@@ -216,7 +216,7 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.targetLevelId}
+                      {getLevel(rnsCopy.targetLevelId)}
                     </p>
                   {/if}
                 </div>
@@ -251,7 +251,7 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.user.id}
+                      bind:value={rnsCopy.assignee.id}
                       onValueChange={(newVal) => {
                         update(rnsCopy.id, {
                           assigneeId: newVal
@@ -259,8 +259,8 @@
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.user.id
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.user.id)[0].lastName}`
+                        >{rnsCopy.assignee.id
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
@@ -273,8 +273,8 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.assignee_id
-                        ? `${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].last_name}`
+                      {rnsCopy.assignee.id
+                        ? `${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].lastName}`
                         : 'None'}
                     </p>
                   {/if}

@@ -1522,8 +1522,8 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "user_id": {
-          "name": "user_id",
+        "assignee_id": {
+          "name": "assignee_id",
           "type": "int",
           "unsigned": false,
           "autoincrement": false,
@@ -1572,10 +1572,10 @@
           "referencedTableName": "public.startups",
           "updateRule": "cascade"
         },
-        "rns_user_id_foreign": {
-          "constraintName": "rns_user_id_foreign",
+        "rns_assignee_id_foreign": {
+          "constraintName": "rns_assignee_id_foreign",
           "columnNames": [
-            "user_id"
+            "assignee_id"
           ],
           "localTableName": "public.rns",
           "referencedColumnNames": [

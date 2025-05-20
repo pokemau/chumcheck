@@ -33,7 +33,7 @@ export class Rns {
   startup!: Startup;
 
   @ManyToOne(() => User)
-  user!: User;
+  assignee!: User;
 
   getTargetLevelScore(): number {
     const levels = getReadinessLevels(this.readinessType);
