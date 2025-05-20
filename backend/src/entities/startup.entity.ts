@@ -15,6 +15,7 @@ import { CapsuleProposal } from './capsule-proposal.entity';
 import { QualificationStatus } from './enums/qualification-status.enum';
 import { Roadblock } from './roadblock.entity';
 import { Rns } from './rns.entity';
+import { StartupReadinessLevel } from './startup-readiness-level.entity';
 
 @Entity({ tableName: 'startups' })
 export class Startup {
@@ -64,4 +65,7 @@ export class Startup {
 
   @OneToMany(() => Rns, (rns) => rns.startup)
   rns = new Collection<Rns>(this);
+
+  @OneToMany(() => StartupReadinessLevel, (s) => s.startup)
+  readinessLevels = new Collection<StartupReadinessLevel>(this);
 }
