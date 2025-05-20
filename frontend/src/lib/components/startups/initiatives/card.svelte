@@ -10,9 +10,9 @@
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
-  let assignee = $derived(initiative.assignee_id);
+  let assignee = $derived(initiative.assigneeId);
 
-  const assignedMember = $derived(members.filter((member: any) => member.user_id === assignee)[0]);
+  const assignedMember = $derived(members.filter((member: any) => member.userId === assignee)[0]);
 
   let open = $state(false);
   const onOpenChange = () => {
@@ -21,6 +21,7 @@
 
   let action: Actions = $state('View');
 
+  console.log(tasks);
   console.log(initiative);
 
   const closeDialog = () => {
@@ -38,7 +39,7 @@
   <Card.Content class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-[15px] font-semibold leading-none tracking-tight">
-        Initiative #{initiative.initiative_number ? initiative.initiative_number : ''}
+        Initiative #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
       </h2>
     </div>
     <div class="text-sm text-muted-foreground">
@@ -48,10 +49,10 @@
     <div class="flex items-center justify-between">
       <Badge
         class={`${getPriorityStyles(
-          tasks.filter((task: any) => task.id === initiative.task_id)[0].priority_number
+          tasks.filter((task: any) => task.id === initiative.rns)[0].priorityNumber
         )}`}
-        >RNS Priority #{tasks.filter((task: any) => task.id === initiative.task_id)[0]
-          .priority_number}</Badge
+        >RNS Priority #{tasks.filter((task: any) => task.id === initiative.rns)[0]
+          .priorityNumber}</Badge
       >
       {#if assignedMember}
         <div

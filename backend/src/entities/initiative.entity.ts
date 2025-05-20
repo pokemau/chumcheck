@@ -8,7 +8,7 @@ import {
 import { User } from './user.entity';
 import { Startup } from './startup.entity';
 import { Rns } from './rns.entity';
-import { RnsStatus } from './enums/rns.enum'; // you'll need to define this
+import { RnsStatus } from './enums/rns.enum'; 
 
 @Entity({ tableName: 'initiatives' })
 export class Initiative {
@@ -45,9 +45,9 @@ export class Initiative {
   @Property({ type: 'text' })
   remarks!: string;
 
-  @Property({ fieldName: 'datetime_created' })
+  @Property({ fieldName: 'datetime_created', onCreate: () => new Date() })
   createdAt!: Date;
 
   @Property({ fieldName: 'datetime_updated', onUpdate: () => new Date() })
-  updatedAt!: Date;
+  updatedAt: Date  = new Date();
 }

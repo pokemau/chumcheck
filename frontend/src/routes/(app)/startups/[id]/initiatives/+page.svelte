@@ -66,9 +66,16 @@
   const members = $derived(
     $initiativesQueries[3].isSuccess
       ? [
-          ...$initiativesQueries[3].data.members.map(({ id, ...rest }) => ({
-            ...rest
-          })),
+          ...$initiativesQueries[3].data.members.map(
+            ({ id, email, firstName, lastName }) => ({
+              userId: id,
+              startupId: $initiativesQueries[3].data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          ),
           {
             userId: $initiativesQueries[3].data.user.id,
             startupId: $initiativesQueries[3].data.id,
@@ -84,6 +91,10 @@
   $effect(() => {    
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
+
+    console.log($initiativesQueries[2].data)
+    // console.log("YARR")
+    // console.log($initiativesQueries[1].data)
   });
 
   let generatingInitiatives = false;
@@ -91,7 +102,7 @@
   let open = $state(false);
   const generateInitiatives = async (type: string) => {
     generatingInitiatives = true;
-    let ids = $initiativesQueries[1].data.results
+    let ids = $initiativesQueries[1].data
       .filter(
         (data: any) =>
           data.readiness_type_rl_type.slice(0, 1) === type &&
@@ -103,7 +114,7 @@
     if (ids.length > 0) {
       const requests = ids.map(async (id: any) => {
         return await axiosInstance.post(
-          `/tasks/initiatives/generate-initiatives/`,
+          `/initiatives/generate-initiatives/`,
           {
             task_id: id,
             no_of_initiatives_to_create: 3
@@ -129,10 +140,10 @@
 
   const addToInitiatives = async (id: number) => {
     await axiosInstance.patch(
-      `/tasks/initiatives/${id}/`,
+      `/initiatives/${id}/`,
       {
-        status: 4,
-        is_ai_generated: false
+        status: 1,
+        isAiGenerated: false
       },
       {
         headers: {
@@ -146,8 +157,8 @@
         .refetch()
         .then((res) => {
           columns.forEach((column) => {
-            column.items = res.data.results.filter(
-              (data: any) => data.is_ai_generated === false && data.status === column.value
+            column.items = res.data.filter(
+              (data: any) => data.isAiGenerated === false && data.status === column.value
             );
           });
         })
@@ -158,10 +169,9 @@
   const createInitiative = async (payload: any) => {
     console.log(payload);
     await axiosInstance.post(
-      '/tasks/initiatives/',
+      '/initiatives/',
       {
-        ...payload,
-        status
+        ...payload
       },
       {
         headers: {
@@ -175,28 +185,17 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results.filter(
-            (data: any) => data.is_ai_generated === false && data.status === column.value
+          column.items = res.data.filter(
+            (data: any) => data.isAiGenerated === false && data.status === column.value
           );
         });
       })
       .finally(async () => await updateInitiativeNumber());
   };
 
-  const updatedEditInitiative = async (id: number, payload: any) => {
-    await axiosInstance.patch(`/tasks/initiatives/${id}/`, payload, {
-      headers: {
-        Authorization: `Bearer ${data.access}`
-      }
-    });
-    toast.success('Successfuly updated Initiatives');
-    $initiativesQueries[1].refetch();
-    $initiativesQueries[2].refetch();
-  };
-
   const deleteInitiative = async (id: number) => {
     console.log(id);
-    await axiosInstance.delete(`/tasks/initiatives/${id}/`, {
+    await axiosInstance.delete(`/initiatives/${id}/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -204,6 +203,30 @@
     toast.success('Successfuly deleted a task');
     $initiativesQueries[1].refetch();
     $initiativesQueries[2].refetch();
+
+    $initiativesQueries[2]
+    .refetch()
+    .then((res) => {
+      columns.forEach((column) => {
+        column.items = res.data.filter(
+          (data: any) => data.isAiGenerated === false && data.status === column.value
+        );
+      });
+    })
+    .finally(async () => await updateInitiativeNumber());
+  };
+
+  const updatedEditInitiative = async (id: number, payload: any) => {
+    await axiosInstance.patch(`/initiatives/${id}/`, payload, {
+      headers: {
+        Authorization: `Bearer ${data.access}`
+      }
+    });
+    toast.success('Successfuly updated Initiatives');
+    $initiativesQueries[1].refetch();
+    $initiativesQueries[2].refetch();
+
+    updateInitiativeNumber();
   };
 
   function handleDndConsider(e: any, x: number) {
@@ -215,7 +238,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/tasks/initiatives/${task.id}/`,
+        `/initiatives/${task.id}/`,
         {
           status
         },
@@ -231,10 +254,11 @@
   }
 
   $effect(() => {
+    console.log($initiativesQueries[2].data)
     if (!isLoading) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
-          (data: any) => data.is_ai_generated === false && data.status === column.value
+          (data: any) => data.isAiGenerated === false && data.status === column.value
         );
       });
     }
@@ -243,27 +267,27 @@
   const updateInitiativeNumber = async () => {
     const updatePromises: any = [];
 
-    let task_ids: any = [];
+    let taskIds: any = [];
     let counters: any = [];
     // Completed
-    columns[4].items.map((item: any) => {
-      let indexOf = task_ids.indexOf(item.task_id);
+    columns[0].items.map((item: any) => {
+      let indexOf = taskIds.indexOf(item.rns);
 
       if (indexOf === -1) {
-        // New task_id, initialize it
-        task_ids.push(item.task_id);
+        // New taskId, initialize it
+        taskIds.push(item.rns);
         counters.push(1); // Start counter at 1
-        indexOf = task_ids.length - 1; // Get the last index
+        indexOf = taskIds.length - 1; // Get the last index
       }
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
-      item.initiative_number = initiativeNumber;
+      item.initiativeNumber = initiativeNumber;
 
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/initiatives/${item.id}/`,
+          `/initiatives/${item.id}/`,
           {
-            initiative_number: initiativeNumber
+            initiativeNumber: initiativeNumber
           },
           {
             headers: {
@@ -276,24 +300,24 @@
       counters[indexOf] += 1;
     });
     // Delayed
-    columns[3].items.map((item: any) => {
-      let indexOf = task_ids.indexOf(item.task_id);
+    columns[1].items.map((item: any) => {
+      let indexOf = taskIds.indexOf(item.rns);
 
       if (indexOf === -1) {
-        // New task_id, initialize it
-        task_ids.push(item.task_id);
+        // New taskId, initialize it
+        taskIds.push(item.rns);
         counters.push(1); // Start counter at 1
-        indexOf = task_ids.length - 1; // Get the last index
+        indexOf = taskIds.length - 1; // Get the last index
       }
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
-      item.initiative_number = initiativeNumber;
+      item.initiativeNumber = initiativeNumber;
 
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/initiatives/${item.id}/`,
+          `/initiatives/${item.id}/`,
           {
-            initiative_number: initiativeNumber
+            initiativeNumber: initiativeNumber
           },
           {
             headers: {
@@ -307,23 +331,23 @@
     });
     // Track
     columns[2].items.map((item: any) => {
-      let indexOf = task_ids.indexOf(item.task_id);
+      let indexOf = taskIds.indexOf(item.rns);
 
       if (indexOf === -1) {
-        // New task_id, initialize it
-        task_ids.push(item.task_id);
+        // New taskId, initialize it
+        taskIds.push(item.rns);
         counters.push(1); // Start counter at 1
-        indexOf = task_ids.length - 1; // Get the last index
+        indexOf = taskIds.length - 1; // Get the last index
       }
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
-      item.initiative_number = initiativeNumber;
+      item.initiativeNumber = initiativeNumber;
 
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/initiatives/${item.id}/`,
+          `/initiatives/${item.id}/`,
           {
-            initiative_number: initiativeNumber
+            initiativeNumber: initiativeNumber
           },
           {
             headers: {
@@ -336,24 +360,24 @@
       counters[indexOf] += 1;
     });
     // Scheduled
-    columns[1].items.map((item: any) => {
-      let indexOf = task_ids.indexOf(item.task_id);
+    columns[3].items.map((item: any) => {
+      let indexOf = taskIds.indexOf(item.rns);
 
       if (indexOf === -1) {
-        // New task_id, initialize it
-        task_ids.push(item.task_id);
+        // New taskId, initialize it
+        taskIds.push(item.rns);
         counters.push(1); // Start counter at 1
-        indexOf = task_ids.length - 1; // Get the last index
+        indexOf = taskIds.length - 1; // Get the last index
       }
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
-      item.initiative_number = initiativeNumber;
-
+      item.initiativeNumber = initiativeNumber;
+      
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/initiatives/${item.id}/`,
+          `/initiatives/${item.id}/`,
           {
-            initiative_number: initiativeNumber
+            initiativeNumber: initiativeNumber
           },
           {
             headers: {
@@ -366,24 +390,24 @@
       counters[indexOf] += 1;
     });
     // Discontinued
-    columns[0].items.map((item: any) => {
-      let indexOf = task_ids.indexOf(item.task_id);
+    columns[4].items.map((item: any) => {
+      let indexOf = taskIds.indexOf(item.rns);
 
       if (indexOf === -1) {
-        // New task_id, initialize it
-        task_ids.push(item.task_id);
+        // New taskId, initialize it
+        taskIds.push(item.rns);
         counters.push(1); // Start counter at 1
-        indexOf = task_ids.length - 1; // Get the last index
+        indexOf = taskIds.length - 1; // Get the last index
       }
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
-      item.initiative_number = initiativeNumber;
+      item.initiativeNumber = initiativeNumber;
 
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/initiatives/${item.id}/`,
+          `/initiatives/${item.id}/`,
           {
-            initiative_number: initiativeNumber
+            initiativeNumber: initiativeNumber
           },
           {
             headers: {
@@ -418,10 +442,10 @@
   };
 
   const tasks = $derived(
-    $initiativesQueries[1].isSuccess ? $initiativesQueries[1].data.results : []
+    $initiativesQueries[1].isSuccess ? $initiativesQueries[1].data : []
   );
 
-  let status = $state(4);
+  let status = $state(1);
 
   const updateStatus = (newStatus: number) => {
     status = newStatus;
@@ -438,7 +462,7 @@
         selectedMembers.push(index);
       }
     } else {
-      const userId = members[index].user_id;
+      const userId = members[index].userId;
       const userIndex = selectedMembers.indexOf(userId);
 
       if (userIndex !== -1) {
@@ -602,20 +626,20 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {#each $initiativesQueries[2].data.results.filter((data) => data.is_ai_generated === false) as item}
-                {#if selectedMembers.includes(item.assignee_id) || selectedMembers.length === 0}
+              {#each $initiativesQueries[2].data.filter((data) => data.isAiGenerated === false) as item}
+                {#if selectedMembers.includes(item.assigneeId) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
                     <Table.Cell class=""
-                      >{tasks.filter((task) => task.id === item.task_id)[0]
-                        .priority_number}</Table.Cell
+                      >{tasks.filter((task) => task.id === item.rns)[0]
+                        .priorityNumber}</Table.Cell
                     >
-                    <Table.Cell class="">{item?.initiative_number}</Table.Cell>
+                    <Table.Cell class="">{item?.initiativeNumber}</Table.Cell>
                     <Table.Cell class="">
-                      {members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.first_name}
-                      {members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                        ?.last_name}
+                      {members.filter((member: any) => member.userId === item.assigneeId)[0]
+                        ?.firstName}
+                      {members.filter((member: any) => member.userId === item.assigneeId)[0]
+                        ?.lastName}
                     </Table.Cell>
                   </Table.Row>
                 {/if}
@@ -628,20 +652,20 @@
       {#each readiness as readiness}
         {#if readiness.show}
           <AIColumn name={readiness.name} generate={generateInitiatives} role={data.role}>
-            {#each $initiativesQueries[2].data.results.filter((data) => data.is_ai_generated === true) as item, index}
-              {@const ids = $initiativesQueries[1].data.results
+            {#each $initiativesQueries[2].data.filter((data) => data.isAiGenerated === true) as item, index}
+              {@const ids = $initiativesQueries[1].data
                 .filter(
                   (data) =>
-                    data.readiness_type_rl_type === readiness.name && data.is_ai_generated === false
+                    data.readiness_type_rl_type === readiness.name && data.isAiGenerated === false
                 )
                 .map((d) => d.id)}
-              {@const cur = $initiativesQueries[1].data.results.filter(
+              {@const cur = $initiativesQueries[1].data.filter(
                 (data) =>
                   data.readiness_type_rl_type === readiness.name &&
                   data.is_ai_generated === false &&
                   data.id === item.task_id
               )[0]}
-              {#if ids.includes(item.task_id)}
+              {#if ids.includes(item.rns)}
                 <div>
                   {@render card(item, true, index)}
                 </div>

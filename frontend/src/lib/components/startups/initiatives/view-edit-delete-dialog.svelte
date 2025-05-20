@@ -50,13 +50,13 @@
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
     <div class="flex gap-10">
       <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">Initiative #{rnsCopy.initiative_number}</h1>
+        <h1 class="text-2xl font-semibold">Initiative #{rnsCopy.initiativeNumber}</h1>
         <div class="flex h-[550px] flex-col gap-5 overflow-scroll">
           <div class="flex flex-col gap-3">
             <Label for="username">Task</Label>
             <div class="text-justify">
-              {rnsCopy.task_id
-                ? tasks.filter((task: any) => task.id === rnsCopy.task_id)[0].description
+              {rnsCopy.rns
+                ? tasks.filter((task: any) => task.id === rnsCopy.rns)[0].description
                 : ''}
             </div>
           </div>
@@ -182,35 +182,35 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.assignee_id}
+                      bind:value={rnsCopy.assigneeId}
                       onValueChange={() => {
-                        update(rnsCopy.id, { assignee_id: rnsCopy.assignee_id });
+                        update(rnsCopy.id, { assigneeId: rnsCopy.assigneeId });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee_id
-                          ? `${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].last_name}`
+                        >{rnsCopy.assigneeId
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.assigneeId)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assigneeId)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each members as member}
-                          <Select.Item value={member.user_id}
-                            >{member.first_name} {member.last_name}</Select.Item
+                          <Select.Item value={member.userId}
+                            >{member.firstName} {member.lastName}</Select.Item
                           >
                         {/each}
                       </Select.Content>
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.assignee_id
+                      {rnsCopy.assigneeId
                         ? `${
                             members.filter(
-                              (member: any) => member.user_id === rnsCopy.assignee_id
-                            )[0].first_name
+                              (member: any) => member.userId === rnsCopy.assigneeId
+                            )[0].firstName
                           } ${
                             members.filter(
-                              (member: any) => member.user_id === rnsCopy.assignee_id
-                            )[0].last_name
+                              (member: any) => member.userId === rnsCopy.assigneeId
+                            )[0].lastName
                           }`
                         : 'None'}
                     </p>
@@ -219,7 +219,7 @@
                 <div class="flex h-9 items-center justify-between text-sm">
                   <p class="w-[130px]">RNS Priority No.</p>
                   <p class="w-[200px] p-3">
-                    {tasks.filter((task: any) => task.id === rnsCopy.task_id)[0].priority_number}
+                    {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].priorityNumber}
                   </p>
                 </div>
               </div>

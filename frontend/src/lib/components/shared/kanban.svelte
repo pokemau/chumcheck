@@ -23,6 +23,7 @@
   } = $props();
 
   const flipDurationMs = 300;
+  console.log('columns:', columns);
 </script>
 
 {#each columns as column, index}
