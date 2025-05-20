@@ -69,9 +69,9 @@
     // if ($rnsQueries[2].isSuccess) {
     //   console.log($rnsQueries[2].data);
     // }
-    // if ($rnsQueries[3].isSuccess) {
-    //   console.log($rnsQueries[3].data);
-    // }
+    if ($rnsQueries[3].isSuccess) {
+      console.log($rnsQueries[3].data);
+    }
   });
 
   const { isLoading, isError } = $derived(useQueriesState($rnsQueries));
@@ -89,7 +89,17 @@
     $rnsQueries[3].isSuccess
       ? [
           ...$rnsQueries[3].data.members.map(
-            ({ id, email, firstName, lastName }) => ({
+            ({
+              id,
+              email,
+              firstName,
+              lastName
+            }: {
+              id: number;
+              email: string;
+              firstName: string;
+              lastName: string;
+            }) => ({
               userId: id,
               startupId: $rnsQueries[3].data.id,
               firstName,
@@ -637,7 +647,7 @@
               </Table.Row>
             </Table.Header>
             <Table.Body>
-              {#each $rnsQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+              {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
                 {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5"
@@ -671,7 +681,7 @@
     {:else}
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.filter((data) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>
