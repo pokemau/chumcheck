@@ -20,10 +20,15 @@
     description: '',
     fix: '',
     assigneeId: '',
-    startupId: startupId,
-    isAiGenerated: false,
-    status: 4
+    // startupId: startupId,
+    // isAiGenerated: false,
+    // status: 4
   });
+
+  $effect(() => {
+      // console.log($state.snapshot(data))
+  });
+
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
@@ -64,7 +69,19 @@
     </div>
     <Dialog.Footer>
       <Button
-        onclick={() => create(data)}
+        onclick={() => {
+         create({
+                ...data,
+                assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
+                startupId: Number(startupId),
+                status: status,
+                isAiGenerated: false,
+          })
+          
+          data.description = '';
+          data.fix = '';
+          data.assigneeId = '';
+          }}
         disabled={data.description === '' || data.fix === ''}>Create</Button
       >
     </Dialog.Footer>

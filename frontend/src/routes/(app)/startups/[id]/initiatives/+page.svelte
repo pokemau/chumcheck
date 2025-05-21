@@ -672,7 +672,7 @@
               {@const cur = $initiativesQueries[1].data.filter(
                 (data) =>
                   data.readiness_type_rl_type === readiness.name &&
-                  data.is_ai_generated === false &&
+                  data.isAiGenerated === false &&
                   data.id === item.task_id
               )[0]}
               {#if ids.includes(item.rns)}

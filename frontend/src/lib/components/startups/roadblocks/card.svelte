@@ -18,10 +18,12 @@
     index
   } = $props();
 
-  let assignee = $derived(roadblocks.assignee_id);
+  let assignee = $derived(roadblocks.assignee);
+
+  // console.log($state.snapshot(roadblocks));
 
   const assignedMember = $derived(
-    members.filter((member: any) => member.user_id === assignee)[0]
+    members.filter((member: any) => member.userId === assignee)[0]
   );
 
   let open = $state(false);
@@ -45,7 +47,7 @@
   <Card.Content class="flex flex-col gap-2">
     <div class="flex items-center justify-between">
       <h2 class="text-[15px] font-semibold leading-none tracking-tight">
-        Risk #{roadblocks.risk_number}
+        Risk #{roadblocks.riskNumber}
       </h2>
     </div>
     <div class="text-sm text-muted-foreground">
@@ -56,9 +58,9 @@
       <div class="flex flex-wrap items-center gap-2"></div>
       {#if assignedMember}
         <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}
+          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
         >
-          {assignedMember.first_name.charAt(0)}
+          {assignedMember.firstName.charAt(0)}
         </div>
       {:else}
         <div

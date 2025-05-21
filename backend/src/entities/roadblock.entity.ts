@@ -1,24 +1,18 @@
-import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
-import { Status } from './enums/status.enum';
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  ManyToOne,
+  Enum,
+} from '@mikro-orm/core';
 import { User } from './user.entity';
 import { Startup } from './startup.entity';
+import { RnsStatus } from './enums/rns.enum'; 
 
 @Entity({ tableName: 'roadblocks' })
 export class Roadblock {
   @PrimaryKey({ autoincrement: true })
   id!: number;
-
-  @Property()
-  riskNumber!: number;
-
-  @Property()
-  description!: string;
-
-  @Property()
-  fix!: string;
-
-  @Enum(() => Status)
-  status!: Status;
 
   @ManyToOne(() => User)
   assignee!: User;
@@ -28,4 +22,22 @@ export class Roadblock {
 
   @Property()
   isAiGenerated!: boolean;
+
+  @Enum(() => RnsStatus)
+  status!: RnsStatus;
+
+  @Property()
+  riskNumber!: number;
+
+  @Property({ type: 'text' })
+  description!: string;
+
+  @Property({ type: 'text' })
+  fix!: string;
+
+  @Property({ fieldName: 'datetime_created', onCreate: () => new Date() })
+  createdAt!: Date;
+
+  @Property({ fieldName: 'datetime_updated', onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
 }

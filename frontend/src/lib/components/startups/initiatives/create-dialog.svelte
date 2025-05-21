@@ -17,7 +17,6 @@
   let { open, onOpenChange, create, members, startupId, tasks, status } = $props();
 
   const data = $state({
-    initiativeNumber: '',
     description: '',
     measures: '',
     targets: '',
@@ -85,23 +84,12 @@
         </Select.Content>
       </Select.Root>
     </div>
-    <div class="flex flex-col gap-4">
-      <Label for="name">Initiative No.</Label>
-      <Select.Root type="single" bind:value={data.initiativeNumber}>
-        <Select.Trigger class="w-[180px]">{data.initiativeNumber}</Select.Trigger>
-        <Select.Content>
-          {#each [1, 2, 3, 4, 5] as item}
-            <Select.Item value={`${item}`}>{item}</Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
-    </div>
     <Dialog.Footer>
       <Button
         onclick={() =>{
           create({
             ...data,
-            initiativeNumber: data.initiativeNumber ? Number(data.initiativeNumber) : undefined,
+            initiativeNumber: 1,
             rnsId: data.rnsId ? Number(data.rnsId) : undefined,
             assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
             startupId: Number(startupId),
@@ -109,7 +97,6 @@
             isAiGenerated: false,
           })
 
-          data.initiativeNumber = '';
           data.description = '';
           data.measures = '';
           data.targets = '';

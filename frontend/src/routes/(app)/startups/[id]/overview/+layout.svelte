@@ -23,8 +23,6 @@
   const modules =
     access.roles[`${data.user?.role as 'Startup' | 'Mentor' | 'Manager'}`]
       .modules[0].subModule[6].subModule;
-
-  console.log(role);
 </script>
 
 <Card.Root class="h-full">
@@ -34,9 +32,8 @@
   </Card.Header>
   <Card.Content class="mt-1 grid w-full grid-cols-[250px_1fr] gap-10">
     <div class="grid w-full grid-cols-[250px_1fr] gap-14">
-      <nav class="flex flex-1 flex-col gap-3 text-sm text-muted-foreground">
+      <nav class="text-muted-foreground flex flex-1 flex-col gap-3 text-sm">
         {#each modules as item}
-          {console.log(item)}
           {@const isActive = currentModule === item.link}
           <a
             href={`/startups/${data.startupId}/overview/${item.link}`}
@@ -52,7 +49,7 @@
             >
               {#if isActive}
                 <div
-                  class="absolute inset-0 rounded-md bg-muted"
+                  class="bg-muted absolute inset-0 rounded-md"
                   in:send={{ key: 'active-sidebar-tab' }}
                   out:receive={{ key: 'active-sidebar-tab' }}
                 ></div>
