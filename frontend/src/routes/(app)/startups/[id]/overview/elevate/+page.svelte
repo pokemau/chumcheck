@@ -37,11 +37,14 @@
     'readinessData',
     async () =>
       (
-        await axiosInstance.get(`/startup-readiness-levels/?startup_id=${data.startupId}`, {
-          headers: {
-            Authorization: `Bearer ${data.access}`
+        await axiosInstance.get(
+          `/startup-readiness-levels/?startup_id=${data.startupId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${data.access}`
+            }
           }
-        })
+        )
       ).data,
     {
       cacheTime: 0,
@@ -71,21 +74,24 @@
     }
   );
 
-  $: if ($readinessData.isSuccess) {
-    console.log($readinessData.data.results);
-  }
+  // $: if ($readinessData.isSuccess) {
+  //   console.log($readinessData.data.results);
+  // }
 
-  $: if ($rnaData.isSuccess) {
-    console.log($rnaData.data.results.filter((d) => d.is_ai_generated === false));
-  }
+  // $: if ($rnaData.isSuccess) {
+  //   console.log($rnaData.data.results.filter((d) => d.is_ai_generated === false));
+  // }
 
   let elevatedReadiness: any = [0, 0, 0, 0, 0, 0];
   let elevatedRemark: any = ['', '', '', '', '', ''];
 
   async function elevate() {
-    console.log(elevatedReadiness);
+    // console.log(elevatedReadiness);
     const readinessToUpdate = elevatedReadiness
-      .map((r: any, index: number) => ({ readinessLevel: r, remark: elevatedRemark[index] }))
+      .map((r: any, index: number) => ({
+        readinessLevel: r,
+        remark: elevatedRemark[index]
+      }))
       .filter((item: any) => item.readinessLevel !== 0);
 
     if (readinessToUpdate.length > 0) {
@@ -115,7 +121,9 @@
           res.data.results
             .slice(-6)
             .sort((a, b) => a.readiness_type.localeCompare(b.readiness_type))
-            .map((x, index) => (elevatedReadiness[index] = x.readiness_level_id));
+            .map(
+              (x, index) => (elevatedReadiness[index] = x.readiness_level_id)
+            );
         });
       } catch (error) {
         console.error('Error updating readiness levels:', error);
@@ -127,7 +135,8 @@
 
   const getLevel = (levels: any, id) => {
     if (id === 0) return '';
-    return levels.filter((level: any) => Number(level.id) === Number(id))[0].level;
+    return levels.filter((level: any) => Number(level.id) === Number(id))[0]
+      .level;
   };
 
   let t = false;
@@ -142,7 +151,7 @@
         elevatedRemark[index] = x.remark;
       });
 
-    console.log(elevatedReadiness);
+    // console.log(elevatedReadiness);
   }
 </script>
 
@@ -156,7 +165,7 @@
       <Skeleton class="h-10" />
     {:else}
       <div class="w-3/4 rounded-md border">
-        <Table.Root class="rounded-lg bg-background">
+        <Table.Root class="bg-background rounded-lg">
           <Table.Header>
             <Table.Row class="text-centery h-12">
               <Table.Head class="pl-5">Type</Table.Head>
@@ -174,17 +183,22 @@
             {:else}
               {#each $readinessData.data.results
                 .slice(-6)
-                .sort((a, b) => a.readiness_type.localeCompare(b.readiness_type)) as r, index}
+                .sort( (a, b) => a.readiness_type.localeCompare(b.readiness_type) ) as r, index}
                 {@const initial = $readinessData.data.results
                   .slice(0, 6)
-                  .sort((a, b) => a.readiness_type.localeCompare(b.readiness_type))[index]}
+                  .sort((a, b) =>
+                    a.readiness_type.localeCompare(b.readiness_type)
+                  )[index]}
                 <Table.Row class="h-14 cursor-pointer">
                   <Table.Cell class="pl-5">{r.readiness_type}</Table.Cell>
                   <Table.Cell class="">{initial.readiness_level}</Table.Cell>
                   <Table.Cell class="">{r.readiness_level}</Table.Cell>
                   {#if data.role !== 'Startup'}
                     <Table.Cell class="">
-                      <Select.Root type="single" bind:value={elevatedReadiness[index]}>
+                      <Select.Root
+                        type="single"
+                        bind:value={elevatedReadiness[index]}
+                      >
                         <Select.Trigger class="w-[100px]">
                           {#if elevatedReadiness[index] !== r.readiness_level_id}
                             {getLevel(
@@ -195,7 +209,9 @@
                         </Select.Trigger>
                         <Select.Content>
                           {#each getReadinessLevels(r.readiness_type) as item}
-                            <Select.Item value={`${item.id}`}>{item.level}</Select.Item>
+                            <Select.Item value={`${item.id}`}
+                              >{item.level}</Select.Item
+                            >
                           {/each}
                         </Select.Content>
                       </Select.Root>

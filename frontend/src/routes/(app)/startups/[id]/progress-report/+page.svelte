@@ -103,11 +103,11 @@
 
   let divRef: HTMLDivElement;
 
-  $effect(() => {
-    if ($queryResult.isSuccess) {
-      console.log($queryResult.data);
-    }
-  });
+  // $effect(() => {
+  //   if ($queryResult.isSuccess) {
+  //     console.log($queryResult.data);
+  //   }
+  // });
 
   let titleState = $state(false);
 
