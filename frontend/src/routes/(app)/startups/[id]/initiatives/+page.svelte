@@ -30,6 +30,7 @@
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
+  import HoveredRNSCard from '$lib/components/shared/hovered-rns-card.svelte';
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -488,6 +489,8 @@
 {:else}
   {@render fallback()}
 {/if}
+
+<HoveredRNSCard />
 
 <InitiativeCreateDialog
   {open}

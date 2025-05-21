@@ -6,6 +6,7 @@
   import { InitiativeViewEditDeleteDialog } from '.';
   import type { Actions } from '$lib/types';
   import { goto } from '$app/navigation';
+  import { hoveredRNSCard } from '$lib/stores/hoveredRNSCard';
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
@@ -22,7 +23,18 @@
     open = false;
   };
 
-  console.log("initiative", initiative);
+  function handleMouseEnter(event: MouseEvent) {
+    const rect = (event.target as HTMLElement).getBoundingClientRect();
+    hoveredRNSCard.set({
+      rns: assignedRNS,
+      coords: { x: rect.left + rect.width / 2, y: rect.top },
+      visible: true
+    });
+  }
+  function handleMouseLeave() {
+    hoveredRNSCard.set({ rns: null, coords: null, visible: false });
+  }
+
 </script>
 
 <Card.Root
@@ -33,14 +45,20 @@
   }}
 >
   <Card.Content class="flex flex-col gap-2 p-4">
-    <div class="flex items-center justify-between mb-1">
-      <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
+    <div class="flex items-center justify-between mb-1 relative">
+      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
-      </span>
-      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
-        onclick={() => goto(`rns?tab=rns`)}>
-        RNS #{assignedRNS?.priorityNumber ?? ''}
       </Badge>
+      <span class="relative inline-block">
+        <Badge
+          class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
+          onmouseenter={handleMouseEnter}
+          onmouseleave={handleMouseLeave}
+          onclick={() => goto(`rns?tab=rns`)}
+        >
+          RNS #{assignedRNS?.priorityNumber ?? ''}
+        </Badge>
+      </span>
       <Badge class={`text-xs font-bold ${getReadinessStyles(assignedRNS.readinessType)}`}>
         {assignedRNS.readinessType}
       </Badge>
