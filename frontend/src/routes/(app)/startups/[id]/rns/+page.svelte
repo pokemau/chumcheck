@@ -554,28 +554,27 @@
             </Table.Header>
             <Table.Body>
               {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
-                {console.log("Item: ", item)}
                 {#if selectedMembers.includes(item.assignee.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5"
-                      >{item.readiness_type_rl_type}</Table.Cell
+                      >{item.readinessType}</Table.Cell
                     >
                     <Table.Cell class=""
                       >{item.description.substring(0, 100)}</Table.Cell
                     >
-                    <Table.Cell class="">{item.target_level_level}</Table.Cell>
+                    <Table.Cell class="">{item.targetLevelScore}</Table.Cell>
                     <Table.Cell class=""
                       ><Badge
-                        class={`${item.task_type === 1 ? 'bg-gray-700 hover:bg-gray-800' : 'bg-rose-700 hover:bg-rose-800'}`}
-                        >{item.task_type === 1 ? 'Short' : 'Long'} Term</Badge
+                        class={`${item.status !== 7 ? 'bg-gray-700 hover:bg-gray-800' : 'bg-rose-700 hover:bg-rose-800'}`}
+                        >{item.status !== 7 ? 'Short' : 'Long'} Term</Badge
                       ></Table.Cell
                     >
                     <Table.Cell class=""
                       >{members.filter(
-                          (member: any) => member.userId === item.assignee_id
+                          (member: any) => member.userId === item.assignee.id
                       )[0]?.firstName}
                       {members.filter(
-                          (member: any) => member.userId === item.assignee_id
+                          (member: any) => member.userId === item.assignee.id
                       )[0]?.lastName}</Table.Cell
                     >
                   </Table.Row>
