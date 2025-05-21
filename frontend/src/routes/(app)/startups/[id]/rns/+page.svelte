@@ -5,7 +5,7 @@
     Can,
     Column,
     KanbanBoard,
-    KanbanBoardRns,
+    KanbanBoardNew,
     MembersFilter,
     ShowHideColumns,
     TaskTypeFilter
@@ -510,25 +510,25 @@
         <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
       {/if}
     </div>
-    <div class="flex gap-2 items-center">
+    <div class="flex gap-4 items-center">
       {#if selectedFormat !== 'table'}
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
-      <button
-        class="ml-2 rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
-        onclick={showDialog}
-        type="button"
-      >
-        + Add
-      </button>
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
+          onclick={showDialog}
+          type="button"
+        >
+          + Add
+        </button>
       {/if}
     </div>
   </div>
   <div class="block w-full">
     {#if selectedTab === 'rns'}
       {#if selectedFormat === 'board'}
-        <KanbanBoardRns
+        <KanbanBoardNew
           {columns}
           {handleDndFinalize}
           {handleDndConsider}
@@ -554,8 +554,8 @@
             </Table.Header>
             <Table.Body>
               {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
-              {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
-                {#if selectedMembers.includes(item.user.id) || selectedMembers.length === 0}
+                {console.log("Item: ", item)}
+                {#if selectedMembers.includes(item.assignee.id) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5"
                       >{item.readiness_type_rl_type}</Table.Cell
@@ -588,7 +588,6 @@
     {:else}
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
           {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
             <div>
               {@render card(item, true, index)}

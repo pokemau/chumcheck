@@ -7,7 +7,12 @@
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
-  const assignedMember = rns.user;
+  let assignee = $derived(rns.assignee.id);
+
+  const assignedMember = $derived(
+    members.filter((member: any) => member.userId === assignee)[0]
+  );
+
 
   let open = $state(false);
   const onOpenChange = () => {

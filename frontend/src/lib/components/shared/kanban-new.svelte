@@ -69,10 +69,10 @@
             }}
             onconsider={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndConsider(e, index)}
             onfinalize={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndFinalize(e, index, column.value)}
-            class="flex h-[700px] flex-col gap-3 overflow-scroll"
+            class="flex h-[700px] flex-col gap-3 overflow-y-scroll"
           >
             {#if column.items.length === 0}
-              <div class="h-40"></div>
+              <div class="empty-placeholder" style="pointer-events: none;"></div>
             {:else}
               {#each column.items as item (item.id)}
                 <div
