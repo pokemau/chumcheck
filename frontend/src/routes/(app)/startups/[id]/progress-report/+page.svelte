@@ -22,11 +22,11 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
-      console.log('--------')
-      console.log('--------')
-      console.log($queryResult.data);
-      console.log('--------')
-      console.log('--------')
+      // console.log('--------');
+      // console.log('--------');
+      // console.log($queryResult.data);
+      // console.log('--------');
+      // console.log('--------');
     }
   });
 
@@ -105,7 +105,7 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
-      console.log($queryResult.data.tasks);
+      console.log($queryResult.data);
     }
   });
 
@@ -113,26 +113,28 @@
 
   const titleIndex = $derived(
     $queryResult.isSuccess
-      ? $queryResult.data.tasks
-          .sort((a, b) => a.priority_number - b.priority_number)
-          .findIndex((task) => task.initiatives && task.initiatives.length > 0)
+      ? $queryResult.data.rns
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber)
+          .findIndex(
+            (task: any) => task.initiatives && task.initiatives.length > 0
+          )
       : 0
   );
 
   const statuses = [
-    '',
-    'Discontinued',
-    'Delayed',
+    'New',
     'Scheduled',
-    'Track',
-    'Completed'
+    'On Track',
+    'Completed',
+    'Delayed',
+    'Discontinued'
   ];
 </script>
 
 <svelte:head>
   <title
     >{$queryResult.isSuccess
-      ? `${$queryResult.data.name} - Readiness and Needs Assessment`
+      ? `${$queryResult.data.startup.name} - Readiness and Needs Assessment`
       : 'Loading'}</title
   >
 </svelte:head>
@@ -185,39 +187,39 @@
         </div>
       </Card.Content>
     </Card.Root>
-    <!-- <Card.Root class="pdf-page mt-3 h-full "> -->
-    <!--   <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10"> -->
-    <!--     <div class="mt-10 flex flex-col gap-2"> -->
-    <!--       <p>II. RNA Result Summary(Based on Readiness and Needs Assessment)</p> -->
-    <!--       <div class="rounded-md border"> -->
-    <!--         <Table.Root class="pdf-table rounded-lg"> -->
-    <!--           <Table.Header> -->
-    <!--             <Table.Row class="h-12 text-center"> -->
-    <!--               <Table.Head class="pl-5">Readiness Type</Table.Head> -->
-    <!--               <Table.Head>Current Level</Table.Head> -->
-    <!--               <Table.Head class="pr-5">Details</Table.Head> -->
-    <!--             </Table.Row> -->
-    <!--           </Table.Header> -->
-    <!--           <Table.Body> -->
-    <!--             {#each $queryResult.data.rnas as rna, index} -->
-    <!--               {#if index < 6} -->
-    <!--                 <Table.Row class="h-14 cursor-pointer"> -->
-    <!--                   <Table.Cell class="w-48 pl-5" -->
-    <!--                     >{rna.readiness_type_rl_type}</Table.Cell -->
-    <!--                   > -->
-    <!--                   <Table.Cell class="w-40" -->
-    <!--                     >{rna.readiness_level_level}</Table.Cell -->
-    <!--                   > -->
-    <!--                   <Table.Cell class="pr-5">{rna.rna}</Table.Cell> -->
-    <!--                 </Table.Row> -->
-    <!--               {/if} -->
-    <!--             {/each} -->
-    <!--           </Table.Body> -->
-    <!--         </Table.Root> -->
-    <!--       </div> -->
-    <!--     </div> -->
-    <!--   </Card.Content> -->
-    <!-- </Card.Root> -->
+    <Card.Root class="pdf-page mt-3 h-full ">
+      <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
+        <div class="mt-10 flex flex-col gap-2">
+          <p>II. RNA Result Summary(Based on Readiness and Needs Assessment)</p>
+          <div class="rounded-md border">
+            <Table.Root class="pdf-table rounded-lg">
+              <Table.Header>
+                <Table.Row class="h-12 text-center">
+                  <Table.Head class="pl-5">Readiness Type</Table.Head>
+                  <Table.Head>Current Level</Table.Head>
+                  <Table.Head class="pr-5">Details</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {#each $queryResult.data.rna as rna, index}
+                  {#if index < 6}
+                    <Table.Row class="h-14 cursor-pointer">
+                      <Table.Cell class="w-48 pl-5"
+                        >{rna.readinessType}</Table.Cell
+                      >
+                      <Table.Cell class="w-40"
+                        >{rna.readinessLevel.level}</Table.Cell
+                      >
+                      <Table.Cell class="pr-5">{rna.rna}</Table.Cell>
+                    </Table.Row>
+                  {/if}
+                {/each}
+              </Table.Body>
+            </Table.Root>
+          </div>
+        </div>
+      </Card.Content>
+    </Card.Root>
 
     <Card.Root class="pdf-page mt-3 h-full">
       <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
@@ -235,14 +237,12 @@
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {#each $queryResult.data.rns.filter((task: any) => task.isAiGenerated=== false) as rns, index}
+                {#each $queryResult.data.rns.filter((task: any) => task.isAiGenerated === false) as rns, index}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="w-48 pl-5"
                       >{rns.priorityNumber}</Table.Cell
                     >
-                    <Table.Cell class="w-40"
-                      >{rns.readinessType}</Table.Cell
-                    >
+                    <Table.Cell class="w-40">{rns.readinessType}</Table.Cell>
                     <Table.Cell>{rns.targetLevelScore}</Table.Cell>
                     <Table.Cell>{rns.description}</Table.Cell>
                     <Table.Cell class="pr-5">{rns.status}</Table.Cell>
@@ -255,50 +255,50 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- {#each $queryResult.data.tasks.sort((a, b) => a.priority_number - b.priority_number) as item, index} -->
-    <!--   {#if item.initiatives.length !== 0} -->
-    <!--     <Card.Root class="pdf-page mt-3 h-full"> -->
-    <!--       <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10"> -->
-    <!--         <div class="mt-10 flex flex-col gap-2"> -->
-    <!--           {#if titleIndex === index} -->
-    <!--             <p>III. PRIORITIES</p> -->
-    <!--           {/if} -->
-    <!--           <p>PRIORITY {item.priority_number}</p> -->
-    <!--           <div class="rounded-md border"> -->
-    <!--             <Table.Root class="pdf-table rounded-lg"> -->
-    <!--               <Table.Header> -->
-    <!--                 <Table.Row class="h-12 text-center"> -->
-    <!--                   <Table.Head class="pl-5">Initiative Number</Table.Head> -->
-    <!--                   <Table.Head>Description</Table.Head> -->
-    <!--                   <Table.Head>Measures</Table.Head> -->
-    <!--                   <Table.Head>Targets</Table.Head> -->
-    <!--                   <Table.Head class="pr-5">Status</Table.Head> -->
-    <!--                 </Table.Row> -->
-    <!--               </Table.Header> -->
-    <!--               <Table.Body> -->
-    <!--                 {#each item.initiatives.filter((initiative: any) => initiative.is_ai_generated === false) as rns, index} -->
-    <!--                   <Table.Row class="h-14 cursor-pointer"> -->
-    <!--                     <Table.Cell class="w-48 pl-5" -->
-    <!--                       >{rns.initiative_number}</Table.Cell -->
-    <!--                     > -->
-    <!--                     <Table.Cell class="w-40" -->
-    <!--                       >{rns.description.substring(0, 100)}</Table.Cell -->
-    <!--                     > -->
-    <!--                     <Table.Cell>{rns.measures}</Table.Cell> -->
-    <!--                     <Table.Cell>{rns.targets}</Table.Cell> -->
-    <!--                     <Table.Cell class="pr-5" -->
-    <!--                       >{statuses[rns.status - 1]}</Table.Cell -->
-    <!--                     > -->
-    <!--                   </Table.Row> -->
-    <!--                 {/each} -->
-    <!--               </Table.Body> -->
-    <!--             </Table.Root> -->
-    <!--           </div> -->
-    <!--         </div> -->
-    <!--       </Card.Content> -->
-    <!--     </Card.Root> -->
-    <!--   {/if} -->
-    <!-- {/each} -->
+    {#each $queryResult.data.rns.sort((a, b) => a.priorityNumber - b.priorityNumber) as item, index}
+      {#if item.initiatives.length !== 0}
+        <Card.Root class="pdf-page mt-3 h-full">
+          <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
+            <div class="mt-10 flex flex-col gap-2">
+              {#if titleIndex === index}
+                <p>III. PRIORITIES</p>
+              {/if}
+              <p>PRIORITY {item.priorityNumber}</p>
+              <div class="rounded-md border">
+                <Table.Root class="pdf-table rounded-lg">
+                  <Table.Header>
+                    <Table.Row class="h-12 text-center">
+                      <Table.Head class="pl-5">Initiative Number</Table.Head>
+                      <Table.Head>Description</Table.Head>
+                      <Table.Head>Measures</Table.Head>
+                      <Table.Head>Targets</Table.Head>
+                      <Table.Head class="pr-5">Status</Table.Head>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {#each item.initiatives.filter((initiative: any) => initiative.isAiGenerated === false) as rns, index}
+                      <Table.Row class="h-14 cursor-pointer">
+                        <Table.Cell class="w-48 pl-5"
+                          >{rns.initiativeNumber}</Table.Cell
+                        >
+                        <Table.Cell class="w-40"
+                          >{rns.description.substring(0, 100)}</Table.Cell
+                        >
+                        <Table.Cell>{rns.measures}</Table.Cell>
+                        <Table.Cell>{rns.targets}</Table.Cell>
+                        <Table.Cell class="pr-5"
+                          >{statuses[rns.status - 1]}</Table.Cell
+                        >
+                      </Table.Row>
+                    {/each}
+                  </Table.Body>
+                </Table.Root>
+              </div>
+            </div>
+          </Card.Content>
+        </Card.Root>
+      {/if}
+    {/each}
 
     <Card.Root class="pdf-page mt-3 h-full ">
       <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10">
@@ -312,21 +312,19 @@
                   <Table.Head>Readiness Type</Table.Head>
                   <Table.Head>Target Level</Table.Head>
                   <Table.Head>Description</Table.Head>
-                  <Table.Head class="pr-5">Status</Table.Head>
+                  <!-- <Table.Head class="pr-5">Status</Table.Head> -->
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {#each $queryResult.data.tasks.filter((task: any) => task.task_type === 2 && task.is_ai_generated === false) as rns, index}
+                {#each $queryResult.data.rns.filter((task: any) => task.status === 7 && task.isAiGenerated === false) as rns, index}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="w-48 pl-5"
-                      >{rns.priority_number}</Table.Cell
+                      >{rns.priorityNumber}</Table.Cell
                     >
-                    <Table.Cell class="w-40"
-                      >{rns.readiness_type_rl_type}</Table.Cell
-                    >
-                    <Table.Cell>{rns.target_level_level}</Table.Cell>
+                    <Table.Cell class="w-40">{rns.readinessType}</Table.Cell>
+                    <Table.Cell>{rns.targetLevelScore}</Table.Cell>
                     <Table.Cell>{rns.description}</Table.Cell>
-                    <Table.Cell class="pr-5">{rns.status}</Table.Cell>
+                    <!-- <Table.Cell class="pr-5">{rns.status}</Table.Cell> -->
                   </Table.Row>
                 {/each}
               </Table.Body>
@@ -336,40 +334,40 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- <Card.Root class="pdf-page mt-3 h-full "> -->
-    <!--   <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10"> -->
-    <!--     <div class="mt-10 flex flex-col gap-2"> -->
-    <!--       <p>V. RISKS AND ROADBLOCKS - SHORT TERM AND LONG TERM</p> -->
-    <!--       <div class="rounded-md border"> -->
-    <!--         <Table.Root class="pdf-table rounded-lg"> -->
-    <!--           <Table.Header> -->
-    <!--             <Table.Row class="h-12 text-center"> -->
-    <!--               <Table.Head class="pl-5">Risk Number</Table.Head> -->
-    <!--               <Table.Head>Description</Table.Head> -->
-    <!--               <Table.Head>Fix/Mitigation</Table.Head> -->
-    <!--               <Table.Head class="pr-5">Assignee</Table.Head> -->
-    <!--             </Table.Row> -->
-    <!--           </Table.Header> -->
-    <!--           <Table.Body> -->
-    <!--             {#each $queryResult.data.roadblocks as roadblock, index} -->
-    <!--               {#if index < 3} -->
-    <!--                 <Table.Row class="h-14 cursor-pointer"> -->
-    <!--                   <Table.Cell class="w-40 pl-5" -->
-    <!--                     >{roadblock.risk_number}</Table.Cell -->
-    <!--                   > -->
-    <!--                   <Table.Cell class="">{roadblock.description}</Table.Cell> -->
-    <!--                   <Table.Cell>{roadblock.fix}</Table.Cell> -->
-    <!--                   <Table.Cell class="pr-5" -->
-    <!--                     >{roadblock.assignee_last_name}</Table.Cell -->
-    <!--                   > -->
-    <!--                 </Table.Row> -->
-    <!--               {/if} -->
-    <!--             {/each} -->
-    <!--           </Table.Body> -->
-    <!--         </Table.Root> -->
-    <!--       </div> -->
-    <!--     </div> -->
-    <!--   </Card.Content> -->
-    <!-- </Card.Root> -->
+    <Card.Root class="pdf-page mt-3 h-full ">
+      <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10">
+        <div class="mt-10 flex flex-col gap-2">
+          <p>V. RISKS AND ROADBLOCKS - SHORT TERM AND LONG TERM</p>
+          <div class="rounded-md border">
+            <Table.Root class="pdf-table rounded-lg">
+              <Table.Header>
+                <Table.Row class="h-12 text-center">
+                  <Table.Head class="pl-5">Risk Number</Table.Head>
+                  <Table.Head>Description</Table.Head>
+                  <Table.Head>Fix/Mitigation</Table.Head>
+                  <Table.Head class="pr-5">Assignee</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {#each $queryResult.data.roadblocks as roadblock, index}
+                  {#if index < 3}
+                    <Table.Row class="h-14 cursor-pointer">
+                      <Table.Cell class="w-40 pl-5"
+                        >{roadblock.riskNumber}</Table.Cell
+                      >
+                      <Table.Cell class="">{roadblock.description}</Table.Cell>
+                      <Table.Cell>{roadblock.fix}</Table.Cell>
+                      <Table.Cell class="pr-5"
+                        >{roadblock.assignee.lastName}</Table.Cell
+                      >
+                    </Table.Row>
+                  {/if}
+                {/each}
+              </Table.Body>
+            </Table.Root>
+          </div>
+        </div>
+      </Card.Content>
+    </Card.Root>
   </div>
 {/if}
