@@ -2,6 +2,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
 import { Rns } from 'src/entities/rns.entity';
+import { Roadblock } from 'src/entities/roadblock.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/startup-rnas.entity';
 import { Startup } from 'src/entities/startup.entity';
@@ -41,6 +42,14 @@ export class ProgressService {
       {
         populate: ['targetLevel', 'assignee'],
         orderBy: { priorityNumber: 'ASC' },
+      },
+    );
+
+    const roadblocks = await this.em.find(
+      Roadblock,
+      { startup: { id: startupId } },
+      {
+        populate: ['assignee'],
       },
     );
 
@@ -86,6 +95,23 @@ export class ProgressService {
               lastName: r.assignee.lastName,
             }
           : null,
+      })),
+      roadblocks: roadblocks.map((rb) => ({
+        id: rb.id,
+        description: rb.description,
+        fix: rb.fix,
+        status: rb.status,
+        riskNumber: rb.riskNumber,
+        isAiGenerated: rb.isAiGenerated,
+        assignee: rb.assignee
+          ? {
+              id: rb.assignee.id,
+              firstName: rb.assignee.firstName,
+              lastName: rb.assignee.lastName,
+            }
+          : null,
+        createdAt: rb.createdAt,
+        updatedAt: rb.updatedAt,
       })),
     };
   }

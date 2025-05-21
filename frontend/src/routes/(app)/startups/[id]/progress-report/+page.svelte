@@ -22,11 +22,11 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
-      console.log('--------');
-      console.log('--------');
-      console.log($queryResult.data);
-      console.log('--------');
-      console.log('--------');
+      // console.log('--------');
+      // console.log('--------');
+      // console.log($queryResult.data);
+      // console.log('--------');
+      // console.log('--------');
     }
   });
 
@@ -253,50 +253,50 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- {#each $queryResult.data.tasks.sort((a, b) => a.priority_number - b.priority_number) as item, index} -->
-    <!--   {#if item.initiatives.length !== 0} -->
-    <!--     <Card.Root class="pdf-page mt-3 h-full"> -->
-    <!--       <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10"> -->
-    <!--         <div class="mt-10 flex flex-col gap-2"> -->
-    <!--           {#if titleIndex === index} -->
-    <!--             <p>III. PRIORITIES</p> -->
-    <!--           {/if} -->
-    <!--           <p>PRIORITY {item.priority_number}</p> -->
-    <!--           <div class="rounded-md border"> -->
-    <!--             <Table.Root class="pdf-table rounded-lg"> -->
-    <!--               <Table.Header> -->
-    <!--                 <Table.Row class="h-12 text-center"> -->
-    <!--                   <Table.Head class="pl-5">Initiative Number</Table.Head> -->
-    <!--                   <Table.Head>Description</Table.Head> -->
-    <!--                   <Table.Head>Measures</Table.Head> -->
-    <!--                   <Table.Head>Targets</Table.Head> -->
-    <!--                   <Table.Head class="pr-5">Status</Table.Head> -->
-    <!--                 </Table.Row> -->
-    <!--               </Table.Header> -->
-    <!--               <Table.Body> -->
-    <!--                 {#each item.initiatives.filter((initiative: any) => initiative.is_ai_generated === false) as rns, index} -->
-    <!--                   <Table.Row class="h-14 cursor-pointer"> -->
-    <!--                     <Table.Cell class="w-48 pl-5" -->
-    <!--                       >{rns.initiative_number}</Table.Cell -->
-    <!--                     > -->
-    <!--                     <Table.Cell class="w-40" -->
-    <!--                       >{rns.description.substring(0, 100)}</Table.Cell -->
-    <!--                     > -->
-    <!--                     <Table.Cell>{rns.measures}</Table.Cell> -->
-    <!--                     <Table.Cell>{rns.targets}</Table.Cell> -->
-    <!--                     <Table.Cell class="pr-5" -->
-    <!--                       >{statuses[rns.status - 1]}</Table.Cell -->
-    <!--                     > -->
-    <!--                   </Table.Row> -->
-    <!--                 {/each} -->
-    <!--               </Table.Body> -->
-    <!--             </Table.Root> -->
-    <!--           </div> -->
-    <!--         </div> -->
-    <!--       </Card.Content> -->
-    <!--     </Card.Root> -->
-    <!--   {/if} -->
-    <!-- {/each} -->
+    <!-- {#each $queryResult.data.rns.sort((a, b) => a.priority_number - b.priority_number) as item, index}
+      {#if item.initiatives.length !== 0}
+        <Card.Root class="pdf-page mt-3 h-full">
+          <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
+            <div class="mt-10 flex flex-col gap-2">
+              {#if titleIndex === index}
+                <p>III. PRIORITIES</p>
+              {/if}
+              <p>PRIORITY {item.priorityNumber}</p>
+              <div class="rounded-md border">
+                <Table.Root class="pdf-table rounded-lg">
+                  <Table.Header>
+                    <Table.Row class="h-12 text-center">
+                      <Table.Head class="pl-5">Initiative Number</Table.Head>
+                      <Table.Head>Description</Table.Head>
+                      <Table.Head>Measures</Table.Head>
+                      <Table.Head>Targets</Table.Head>
+                      <Table.Head class="pr-5">Status</Table.Head>
+                    </Table.Row>
+                  </Table.Header>
+                  <Table.Body>
+                    {#each item.initiatives.filter((initiative: any) => initiative.is_ai_generated === false) as rns, index}
+                      <Table.Row class="h-14 cursor-pointer">
+                        <Table.Cell class="w-48 pl-5"
+                          >{rns.initiative_number}</Table.Cell
+                        >
+                        <Table.Cell class="w-40"
+                          >{rns.description.substring(0, 100)}</Table.Cell
+                        >
+                        <Table.Cell>{rns.measures}</Table.Cell>
+                        <Table.Cell>{rns.targets}</Table.Cell>
+                        <Table.Cell class="pr-5"
+                          >{statuses[rns.status - 1]}</Table.Cell
+                        >
+                      </Table.Row>
+                    {/each}
+                  </Table.Body>
+                </Table.Root>
+              </div>
+            </div>
+          </Card.Content>
+        </Card.Root>
+      {/if}
+    {/each} -->
 
     <Card.Root class="pdf-page mt-3 h-full ">
       <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10">
@@ -332,40 +332,40 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- <Card.Root class="pdf-page mt-3 h-full "> -->
-    <!--   <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10"> -->
-    <!--     <div class="mt-10 flex flex-col gap-2"> -->
-    <!--       <p>V. RISKS AND ROADBLOCKS - SHORT TERM AND LONG TERM</p> -->
-    <!--       <div class="rounded-md border"> -->
-    <!--         <Table.Root class="pdf-table rounded-lg"> -->
-    <!--           <Table.Header> -->
-    <!--             <Table.Row class="h-12 text-center"> -->
-    <!--               <Table.Head class="pl-5">Risk Number</Table.Head> -->
-    <!--               <Table.Head>Description</Table.Head> -->
-    <!--               <Table.Head>Fix/Mitigation</Table.Head> -->
-    <!--               <Table.Head class="pr-5">Assignee</Table.Head> -->
-    <!--             </Table.Row> -->
-    <!--           </Table.Header> -->
-    <!--           <Table.Body> -->
-    <!--             {#each $queryResult.data.roadblocks as roadblock, index} -->
-    <!--               {#if index < 3} -->
-    <!--                 <Table.Row class="h-14 cursor-pointer"> -->
-    <!--                   <Table.Cell class="w-40 pl-5" -->
-    <!--                     >{roadblock.risk_number}</Table.Cell -->
-    <!--                   > -->
-    <!--                   <Table.Cell class="">{roadblock.description}</Table.Cell> -->
-    <!--                   <Table.Cell>{roadblock.fix}</Table.Cell> -->
-    <!--                   <Table.Cell class="pr-5" -->
-    <!--                     >{roadblock.assignee_last_name}</Table.Cell -->
-    <!--                   > -->
-    <!--                 </Table.Row> -->
-    <!--               {/if} -->
-    <!--             {/each} -->
-    <!--           </Table.Body> -->
-    <!--         </Table.Root> -->
-    <!--       </div> -->
-    <!--     </div> -->
-    <!--   </Card.Content> -->
-    <!-- </Card.Root> -->
+    <Card.Root class="pdf-page mt-3 h-full ">
+      <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10">
+        <div class="mt-10 flex flex-col gap-2">
+          <p>V. RISKS AND ROADBLOCKS - SHORT TERM AND LONG TERM</p>
+          <div class="rounded-md border">
+            <Table.Root class="pdf-table rounded-lg">
+              <Table.Header>
+                <Table.Row class="h-12 text-center">
+                  <Table.Head class="pl-5">Risk Number</Table.Head>
+                  <Table.Head>Description</Table.Head>
+                  <Table.Head>Fix/Mitigation</Table.Head>
+                  <Table.Head class="pr-5">Assignee</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {#each $queryResult.data.roadblocks as roadblock, index}
+                  {#if index < 3}
+                    <Table.Row class="h-14 cursor-pointer">
+                      <Table.Cell class="w-40 pl-5"
+                        >{roadblock.riskNumber}</Table.Cell
+                      >
+                      <Table.Cell class="">{roadblock.description}</Table.Cell>
+                      <Table.Cell>{roadblock.fix}</Table.Cell>
+                      <Table.Cell class="pr-5"
+                        >{roadblock.assignee.lastName}</Table.Cell
+                      >
+                    </Table.Row>
+                  {/if}
+                {/each}
+              </Table.Body>
+            </Table.Root>
+          </div>
+        </div>
+      </Card.Content>
+    </Card.Root>
   </div>
 {/if}
