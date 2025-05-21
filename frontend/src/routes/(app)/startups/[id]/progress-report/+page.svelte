@@ -22,11 +22,11 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
-      console.log('--------');
-      console.log('--------');
-      console.log($queryResult.data);
-      console.log('--------');
-      console.log('--------');
+      // console.log('--------');
+      // console.log('--------');
+      // console.log($queryResult.data);
+      // console.log('--------');
+      // console.log('--------');
     }
   });
 
