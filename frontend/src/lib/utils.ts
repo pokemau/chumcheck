@@ -293,16 +293,16 @@ export const getReadinessStyles = (
     | 'Investment'
 ) => {
   const readinessClasses = {
-    Technology: 'bg-sky-700 hover:bg-sky-800', // Neutral
-    Market: 'bg-cyan-700 hover:bg-cyan-800', // Bright cyan
-    Acceptance: 'bg-amber-700 hover:bg-amber-800', // Amber
-    Regulatory: 'bg-fuchsia-700 hover:bg-fuchsia-800', // Fuchsia
-    Organizational: 'bg-emerald-700 hover:bg-emerald-800', // Emerald
-    Investment: 'bg-green-700 hover:bg-green-800' // Slate
+    Technology: 'text-sky-300 bg-sky-700 hover:text-sky-400 hover:bg-sky-800',
+    Market: 'text-teal-300 bg-teal-700 hover:text-teal-400 hover:bg-teal-800',
+    Acceptance: 'text-orange-300 bg-orange-700 hover:text-orange-400 hover:bg-orange-800',
+    Regulatory: 'text-fuchsia-300 bg-fuchsia-700 hover:text-fuchsia-400 hover:bg-fuchsia-800',
+    Organizational: 'text-green-300 bg-green-700 hover:text-green-400 hover:bg-green-800',
+    Investment: 'text-yellow-300 bg-yellow-600 hover:text-yellow-400 hover:bg-yellow-700'
   };
 
   // Default styles if type is unrecognized
-  return readinessClasses[type] || 'bg-zinc-500 hover:bg-zinc-600'; // Backup gray
+  return readinessClasses[type] || 'text-zinc-300 bg-zinc-500 hover:text-zinc-400 hover:bg-zinc-600'; // Backup gray
 };
 
 export function getProfileColor(firstName: string) {

@@ -2,14 +2,15 @@
   import { Badge } from '$lib/components/ui/badge';
   import * as Card from '$lib/components/ui/card';
   import { User } from 'lucide-svelte';
-  import { getProfileColor, zIndex } from '$lib/utils';
+  import { getProfileColor, getReadinessStyles, zIndex } from '$lib/utils';
   import { InitiativeViewEditDeleteDialog } from '.';
   import type { Actions } from '$lib/types';
+  import { goto } from '$app/navigation';
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
-  let assignee = $derived(initiative.assigneeId);
-  const assignedMember = $derived(members.filter((member: any) => member.userId === assignee)[0]);
+  const assignedRNS = tasks.filter((task: any) => task.id === initiative.rns)[0];
+  const assignedMember = assignedRNS.assignee;
 
   let open = $state(false);
   const onOpenChange = () => {
@@ -20,6 +21,8 @@
   const closeDialog = () => {
     open = false;
   };
+
+  console.log("initiative", initiative);
 </script>
 
 <Card.Root
@@ -34,18 +37,17 @@
       <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
       </span>
-      <Badge class="text-xs font-medium bg-gray-800 text-white border border-gray-600">
-        RNS #{tasks.filter((task: any) => task.id === initiative.rns)[0]?.priorityNumber ?? ''}
+      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
+        onclick={() => goto(`rns?tab=rns`)}>
+        RNS #{assignedRNS?.priorityNumber ?? ''}
       </Badge>
-      {#if initiative.type}
-        <Badge class="text-xs font-medium bg-blue-900 text-blue-300 border border-blue-700">
-          {initiative.type}
-        </Badge>
-      {/if}
+      <Badge class={`text-xs font-bold ${getReadinessStyles(assignedRNS.readinessType)}`}>
+        {assignedRNS.readinessType}
+      </Badge>
     </div>
     <div class="text-[13px] font-semibold text-white mb-1">
-      Task: {initiative.title ?? initiative.description?.substring(0, 60) + (initiative.description?.length > 60 ? '...' : '')}
-    </div>
+      Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
+    </div>  
     {#if initiative.description}
       <div class="text-muted-foreground text-sm mb-1">
         Description: {initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}
@@ -70,13 +72,13 @@
       <div class="flex items-center gap-1">
         {#if assignedMember}
           <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}>
-            {assignedMember.first_name.charAt(0)}
+            {assignedMember.firstName.charAt(0)}
           </div>
           <span class="text-muted-foreground">
-            {#if (assignedMember.first_name.length + assignedMember.last_name.length + 1) > 15}
-              {(assignedMember.first_name + ' ' + assignedMember.last_name).slice(0, 15) + '...'}
+            {#if (assignedMember.firstName.length + assignedMember.lastName.length + 1) > 15}
+              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(0, 15) + '...'}
             {:else}
-              {assignedMember.first_name} {assignedMember.last_name}
+              {assignedMember.firstName} {assignedMember.lastName}
             {/if}
           </span>
         {:else}

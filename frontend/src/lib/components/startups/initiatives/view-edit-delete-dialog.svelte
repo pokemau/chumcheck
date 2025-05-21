@@ -55,9 +55,17 @@
           <div class="flex flex-col gap-3">
             <Label for="username">Task</Label>
             <div class="text-justify">
-              {rnsCopy.rns
-                ? tasks.filter((task: any) => task.id === rnsCopy.rns)[0].description
-                : ''}
+              {#if rnsCopy.rns}
+                {#if typeof rnsCopy.rns === 'object'}
+                  {rnsCopy.rns?.title ?? ''}
+                {:else}
+                  {#if tasks.filter((task: any) => task.id === rnsCopy.rns)[0]}
+                    {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].title}
+                  {:else}
+                    None
+                  {/if}
+                {/if}
+              {/if}
             </div>
           </div>
           <div class="flex flex-col gap-3">
@@ -188,9 +196,19 @@
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
-                          : 'None'}</Select.Trigger
+                        >{#if rnsCopy.assignee}
+                          {#if typeof rnsCopy.assignee === 'object'}
+                            {rnsCopy.assignee.firstName} {rnsCopy.assignee.lastName}
+                          {:else}
+                            {#if members.filter((member: any) => member.userId === rnsCopy.assignee)[0]}
+                              {members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} {members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}
+                            {:else}
+                              None
+                            {/if}
+                          {/if}
+                        {:else}
+                          None
+                        {/if}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each members as member}
@@ -202,24 +220,38 @@
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.assignee
-                        ? `${
-                            members.filter(
-                              (member: any) => member.userId === rnsCopy.assignee
-                            )[0].firstName
-                          } ${
-                            members.filter(
-                              (member: any) => member.userId === rnsCopy.assignee
-                            )[0].lastName
-                          }`
-                        : 'None'}
+                      {#if rnsCopy.assignee}
+                        {#if typeof rnsCopy.assignee === 'object'}
+                          {rnsCopy.assignee.firstName} {rnsCopy.assignee.lastName}
+                        {:else}
+                          {#if members.filter((member: any) => member.userId === rnsCopy.assignee)[0]}
+                            {members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} {members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}
+                          {:else}
+                            None
+                          {/if}
+                        {/if}
+                      {:else}
+                        None
+                      {/if}
                     </p>
                   {/if}
                 </div>
                 <div class="flex h-9 items-center justify-between text-sm">
                   <p class="w-[130px]">RNS Priority No.</p>
                   <p class="w-[200px] p-3">
-                    {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].priorityNumber}
+                    {#if rnsCopy.rns}
+                      {#if typeof rnsCopy.rns === 'object'}
+                        {rnsCopy.rns.priorityNumber ?? '—'}
+                      {:else}
+                        {#if tasks.filter((task: any) => task.id === rnsCopy.rns)[0]}
+                          {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].priorityNumber}
+                        {:else}
+                          —
+                        {/if}
+                      {/if}
+                    {:else}
+                      —
+                    {/if}
                   </p>
                 </div>
               </div>
