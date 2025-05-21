@@ -22,11 +22,11 @@
 
   $effect(() => {
     if ($queryResult.isSuccess) {
-      // console.log('--------');
-      // console.log('--------');
-      // console.log($queryResult.data);
-      // console.log('--------');
-      // console.log('--------');
+      console.log('--------');
+      console.log('--------');
+      console.log($queryResult.data);
+      console.log('--------');
+      console.log('--------');
     }
   });
 
@@ -113,19 +113,21 @@
 
   const titleIndex = $derived(
     $queryResult.isSuccess
-      ? $queryResult.data.tasks
-          .sort((a, b) => a.priority_number - b.priority_number)
-          .findIndex((task) => task.initiatives && task.initiatives.length > 0)
+      ? $queryResult.data.rns
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber)
+          .findIndex(
+            (task: any) => task.initiatives && task.initiatives.length > 0
+          )
       : 0
   );
 
   const statuses = [
-    '',
-    'Discontinued',
-    'Delayed',
+    'New',
     'Scheduled',
-    'Track',
-    'Completed'
+    'On Track',
+    'Completed',
+    'Delayed',
+    'Discontinued'
   ];
 </script>
 
@@ -253,7 +255,7 @@
       </Card.Content>
     </Card.Root>
 
-    <!-- {#each $queryResult.data.rns.sort((a, b) => a.priority_number - b.priority_number) as item, index}
+    {#each $queryResult.data.rns.sort((a, b) => a.priorityNumber - b.priorityNumber) as item, index}
       {#if item.initiatives.length !== 0}
         <Card.Root class="pdf-page mt-3 h-full">
           <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
@@ -274,10 +276,10 @@
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {#each item.initiatives.filter((initiative: any) => initiative.is_ai_generated === false) as rns, index}
+                    {#each item.initiatives.filter((initiative: any) => initiative.isAiGenerated === false) as rns, index}
                       <Table.Row class="h-14 cursor-pointer">
                         <Table.Cell class="w-48 pl-5"
-                          >{rns.initiative_number}</Table.Cell
+                          >{rns.initiativeNumber}</Table.Cell
                         >
                         <Table.Cell class="w-40"
                           >{rns.description.substring(0, 100)}</Table.Cell
@@ -296,7 +298,7 @@
           </Card.Content>
         </Card.Root>
       {/if}
-    {/each} -->
+    {/each}
 
     <Card.Root class="pdf-page mt-3 h-full ">
       <Card.Content class="mt-1 flex w-full flex-col gap-5  px-10">
