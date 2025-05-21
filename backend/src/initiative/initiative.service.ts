@@ -10,6 +10,7 @@ import { Startup } from 'src/entities/startup.entity';
 export class InitiativeService {
     constructor(private readonly em: EntityManager) {}
 
+    //find one ra guro ni dapat?
     async getStartupInitiative(startupId: number): Promise<Initiative[]> {
         return this.em.find(Initiative, { startup: startupId }, { orderBy: { id: 'ASC' } });
     }

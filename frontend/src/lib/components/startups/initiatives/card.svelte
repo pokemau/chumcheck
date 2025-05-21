@@ -10,7 +10,7 @@
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
-  let assignee = $derived(initiative.assigneeId);
+  let assignee = $derived(initiative.assignee);
 
   const assignedMember = $derived(members.filter((member: any) => member.userId === assignee)[0]);
 
@@ -56,9 +56,9 @@
       >
       {#if assignedMember}
         <div
-          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}
+          class={`flex h-8 w-8 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
         >
-          {assignedMember.first_name.charAt(0)}
+          {assignedMember.firstName.charAt(0)}
         </div>
       {:else}
         <div class={`flex h-8 w-8 items-center justify-center rounded-full bg-muted ${zIndex[1]}`}>

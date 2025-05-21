@@ -49,7 +49,7 @@
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
     <div class="flex gap-10">
       <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">Risk #{rnsCopy.risk_number}</h1>
+        <h1 class="text-2xl font-semibold">Risk #{rnsCopy.riskNumber}</h1>
         <div class="flex flex-col gap-3">
           <Label for="username">Description</Label>
           {#if editDescription && role !== 'Startup'}
@@ -128,28 +128,28 @@
                   {#if role !== 'Startup'}
                     <Select.Root
                       type="single"
-                      bind:value={rnsCopy.assignee_id}
+                      bind:value={rnsCopy.assignee}
                       onValueChange={() => {
-                        update(rnsCopy.id, { assignee_id: rnsCopy.assignee_id });
+                        update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
                       }}
                     >
                       <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee_id
-                          ? `${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].last_name}`
+                        >{rnsCopy.assignee
+                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
                           : 'None'}</Select.Trigger
                       >
                       <Select.Content class="border-none">
                         {#each members as member}
-                          <Select.Item value={member.user_id}
-                            >{member.first_name} {member.last_name}</Select.Item
+                          <Select.Item value={member.userId}
+                            >{member.firstName} {member.lastName}</Select.Item
                           >
                         {/each}
                       </Select.Content>
                     </Select.Root>
                   {:else}
                     <p class="w-[200px] p-3">
-                      {rnsCopy.assignee_id
-                        ? `${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].first_name} ${members.filter((member: any) => member.user_id === rnsCopy.assignee_id)[0].last_name}`
+                      {rnsCopy.assignee
+                        ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
                         : 'None'}
                     </p>
                   {/if}
