@@ -163,10 +163,17 @@ export class StartupController {
     return this.startupService.allowTasks(startupId);
   }
 
-    @Get(':startupId/allow-initiatives')
+  @Get(':startupId/allow-initiatives')
   async allowInitiatives(
     @Param('startupId', ParseIntPipe) startupId: number
   ): Promise<boolean> {
     return this.startupService.allowInitiatives(startupId);
+  }
+
+  @Get(':startupId/allow-roadblocks')
+  async allowRoadblocks(
+    @Param('startupId', ParseIntPipe) startupId: number
+  ): Promise<boolean> {
+    return this.startupService.allowRoadblocks(startupId);
   }
 }

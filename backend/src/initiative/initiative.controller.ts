@@ -12,7 +12,7 @@ export class InitiativeController {
     }
 
     @Post()
-    async createRns(@Body() dto: CreateInitiativeDto) {
+    async createInitiative(@Body() dto: CreateInitiativeDto) {
     return await this.initiativeService.createInitiative(dto);
     }
 

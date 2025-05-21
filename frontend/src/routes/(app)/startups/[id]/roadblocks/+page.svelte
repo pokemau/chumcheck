@@ -41,7 +41,7 @@
     },
     {
       queryKey: ['roadblocksData'],
-      queryFn: () => getData(`/tasks/roadblocks/?startup_id=${startupId}`, access!)
+      queryFn: () => getData(`/roadblocks/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['startupData'],
@@ -59,81 +59,64 @@
 
   const columns = $state(getColumns());
   const readiness = $state(getReadiness());
-
   const members = $derived(
     $roadblocksQueries[2].isSuccess
-      ? [
-          ...$roadblocksQueries[2].data.members.map(({ id, ...rest }) => ({
-            ...rest
-          })),
-          {
-            user_id: $roadblocksQueries[2].data.user_id,
-            startup_id: $roadblocksQueries[2].data.id,
-            first_name: $roadblocksQueries[2].data.leader_first_name,
-            last_name: $roadblocksQueries[2].data.leader_last_name,
-            email: $roadblocksQueries[2].data.leader_email
+      ? (() => {
+          const data = $roadblocksQueries[2].data;
+          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+            userId: id,
+            startupId: data.id,
+            firstName,
+            lastName,
+            email,
+            selected: false
+          }));
+
+          // Check if user is already in members
+          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+
+          if (!isUserInMembers) {
+            baseMembers.push({
+              userId: data.user.id,
+              startupId: data.id,
+              firstName: data.user.firstName,
+              lastName: data.user.lastName,
+              email: data.user.email,
+              selected: false
+            });
           }
-        ]
+
+          return baseMembers;
+        })()
       : []
   );
 
   $effect(() => {
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('roadblocks', searchParam);
+
+    // console.log(members)
+
+    if ($roadblocksQueries[1].isSuccess) {
+      // console.log($roadblocksQueries[1].data);
+    }
+
+    if (!isLoading) {
+      columns.forEach((column) => {
+        column.items = $roadblocksQueries[1].data.filter(
+          (data) => data.isAiGenerated === false && data.status === column.value
+        );
+      });
+    }
+
+    // console.log($roadblocksQueries[1].data)
   });
 
-  let generatingRoadblocks: boolean = $state(false);
-
-  const generateRoadblocks = async () => {
-    generatingRoadblocks = true;
-    await axiosInstance.post(
-      `/tasks/roadblocks/generate-roadblocks/`,
-      {
-        startup_id: data.startupId,
-        no_of_roadblocks_to_create: 3
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    generatingRoadblocks = false;
-    $roadblocksQueries[1].refetch();
-    toast.success('Successfully generated Roadblocks');
-  };
-
-  const addToRoadblocks = async (id: number) => {
-    await axiosInstance.patch(
-      `/tasks/roadblocks/${id}/`,
-      {
-        status: 4,
-        is_ai_generated: false
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    toast.success('Successfuly added to RNA');
-    $roadblocksQueries[1]
-      .refetch()
-      .then((res) => {
-        columns.forEach((column) => {
-          column.items = res.data.results.filter(
-            (data) => data.is_ai_generated === false && data.status === column.value
-          );
-        });
-      })
-      .finally(async () => await updateRiskNumber());
-  };
-
   const createRoadblocks = async (payload: any) => {
-    console.log(payload);
+    // console.log(payload);
     await axiosInstance.post(
-      '/tasks/roadblocks/',
-      { ...payload, status },
+      '/roadblocks/',
+      { ...payload, riskNumber: 1 },
       {
         headers: {
           Authorization: `Bearer ${data.access}`
@@ -146,8 +129,8 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.results.filter(
-            (data) => data.is_ai_generated === false && data.status === column.value
+          column.items = res.data.filter(
+            (data) => data.isAiGenerated === false && data.status === column.value
           );
         });
       })
@@ -162,9 +145,9 @@
     assigneeId: number
   ) => {
     await axiosInstance.patch(
-      `/tasks/roadblocks/${id}/`,
+      `/roadblocks/${id}/`,
       {
-        risk_number: riskNumber,
+        riskNumber: riskNumber,
         description,
         fix,
         assignee_id: assigneeId
@@ -181,7 +164,7 @@
   };
 
   const updatedEditRoadblock = async (id: number, payload: any) => {
-    await axiosInstance.patch(`/tasks/roadblocks/${id}/`, payload, {
+    await axiosInstance.patch(`/roadblocks/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -190,21 +173,30 @@
     // open = false;
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
-        column.items = res.data.results.filter(
-          (data) => data.is_ai_generated === false && data.status === column.value
+        column.items = res.data.filter(
+          (data) => data.isAiGenerated === false && data.status === column.value
         );
       });
     });
   };
 
   const deleteRoadblock = async (id: number) => {
-    await axiosInstance.delete(`/tasks/roadblocks/${id}/`, {
+    await axiosInstance.delete(`/roadblocks/${id}/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
     toast.success('Successfuly deleted a task');
-    $roadblocksQueries[1].refetch();
+    $roadblocksQueries[1]
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = res.data.filter(
+            (data: any) => data.isAiGenerated === false && data.status === column.value
+          );
+        });
+      })
+      .finally(async () => await updateRiskNumber());
   };
 
   function handleDndConsider(e: any, x: number) {
@@ -216,7 +208,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/tasks/roadblocks/${task.id}/`,
+        `/roadblocks/${task.id}/`,
         {
           status
         },
@@ -236,13 +228,13 @@
 
     let counter = 1;
     // Completed
-    columns[4].items.map((item: any) => {
-      item.risk_number = counter;
+    columns[0].items.map((item: any) => {
+      item.riskNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/roadblocks/${item.id}/`,
+          `/roadblocks/${item.id}/`,
           {
-            risk_number: counter
+            riskNumber: counter
           },
           {
             headers: {
@@ -254,13 +246,13 @@
       counter++;
     });
     // Delayed
-    columns[3].items.map((item: any) => {
-      item.risk_number = counter;
+    columns[1].items.map((item: any) => {
+      item.riskNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/roadblocks/${item.id}/`,
+          `/roadblocks/${item.id}/`,
           {
-            risk_number: counter
+            riskNumber: counter
           },
           {
             headers: {
@@ -273,12 +265,12 @@
     });
     // Track
     columns[2].items.map((item: any) => {
-      item.risk_number = counter;
+      item.riskNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/roadblocks/${item.id}/`,
+          `/roadblocks/${item.id}/`,
           {
-            risk_number: counter
+            riskNumber: counter
           },
           {
             headers: {
@@ -290,13 +282,13 @@
       counter++;
     });
     // Scheduled
-    columns[1].items.map((item: any) => {
-      item.risk_number = counter;
+    columns[3].items.map((item: any) => {
+      item.riskNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/roadblocks/${item.id}/`,
+          `/roadblocks/${item.id}/`,
           {
-            risk_number: counter
+            riskNumber: counter
           },
           {
             headers: {
@@ -308,13 +300,13 @@
       counter++;
     });
     // Discontinued
-    columns[0].items.map((item: any) => {
-      item.risk_number = counter;
+    columns[4].items.map((item: any) => {
+      item.riskNumber = counter;
       updatePromises.push(
         axiosInstance.patch(
-          `/tasks/roadblocks/${item.id}/`,
+          `/roadblocks/${item.id}/`,
           {
-            risk_number: counter
+            riskNumber: counter
           },
           {
             headers: {
@@ -338,38 +330,64 @@
     }
   };
 
-  $effect(() => {
-    if ($roadblocksQueries[1].isSuccess) {
-      console.log($roadblocksQueries[1].data);
-    }
-  });
+  let generatingRoadblocks: boolean = $state(false);
+  const generateRoadblocks = async () => {
+    generatingRoadblocks = true;
+    await axiosInstance.post(
+      `/roadblocks/generate-roadblocks/`,
+      {
+        startup_id: data.startupId,
+        no_of_roadblocks_to_create: 3
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    generatingRoadblocks = false;
+    $roadblocksQueries[1].refetch();
+    toast.success('Successfully generated Roadblocks');
+  };
 
-  $effect(() => {
-    if (!isLoading) {
-      columns.forEach((column) => {
-        column.items = $roadblocksQueries[1].data.results.filter(
-          (data) => data.is_ai_generated === false && data.status === column.value
-        );
-      });
-    }
-  });
+  const addToRoadblocks = async (id: number) => {
+    await axiosInstance.patch(
+      `/roadblocks/${id}/`,
+      {
+        //status change
+        status: 4,
+        isAiGenerated: false
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    toast.success('Successfuly added to RNA');
+    $roadblocksQueries[1]
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = res.data.filter(
+            (data) => data.isAiGenerated === false && data.status === column.value
+          );
+        });
+      })
+      .finally(async () => await updateRiskNumber());
+  };
 
   let open = $state(false);
-
   const showDialog = () => {
     open = true;
   };
-
   const onOpenChange = () => {
     open = !open;
   };
-
   let status = $state(4);
-
   const updateStatus = (newStatus: number) => {
     status = newStatus;
   };
-
   const selectedMembers: any = $state([]);
 
   const toggleMemberSelection = (index: number) => {
@@ -391,7 +409,6 @@
       }
     }
   };
-
   let selectedFormat = $state('board');
 </script>
 
@@ -560,16 +577,16 @@
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {#each $roadblocksQueries[1].data.results.filter((data) => data.is_ai_generated === false) as item}
-              {#if selectedMembers.includes(item.assignee_id) || selectedMembers.length === 0}
+            {#each $roadblocksQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+              {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
                 <Table.Row class="h-14 cursor-pointer">
                   <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
-                  <Table.Cell class="">{item.target_level_level}</Table.Cell>
+                  <Table.Cell class="">{item.riskNumber}</Table.Cell>
                   <Table.Cell class=""
-                    >{members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                      ?.first_name}
-                    {members.filter((member: any) => member.user_id === item.assignee_id)[0]
-                      ?.last_name}</Table.Cell
+                    >{members.filter((member: any) => member.userId === item.assignee)[0]
+                      ?.firstName}
+                    {members.filter((member: any) => member.userId === item.assignee)[0]
+                      ?.lastName}</Table.Cell
                   >
                 </Table.Row>
               {/if}
@@ -580,7 +597,7 @@
     {/if}
   {:else}
     <div class="grid w-full grid-cols-4 gap-5 overflow-scroll">
-      {#each $roadblocksQueries[1].data.results.filter((data: any) => data.is_ai_generated === true) as r, index}
+      {#each $roadblocksQueries[1].data.filter((data: any) => data.isAiGenerated === true) as r, index}
         <RoadblocksCard
           roadblocks={r}
           update={updatedEditRoadblock}
