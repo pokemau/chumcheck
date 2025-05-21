@@ -55,7 +55,7 @@
               <div
                 animate:flip={{ duration: flipDurationMs }}
                 class:hidden={!selectedMembers.includes(
-                  item.assignee_id ? item.assignee_id : 999
+                  item.assignee ? item.assignee : 999
                 ) && selectedMembers.length !== 0}
               >
                 {@render card(item)}
@@ -72,7 +72,7 @@
               <div
                 animate:flip={{ duration: flipDurationMs }}
                 class:hidden={!selectedMembers.includes(
-                  item.assignee_id ? item.assignee_id : 999
+                  item.assignee ? item.assignee : 999
                 ) && selectedMembers.length !== 0}
               >
                 {@render card(item)}

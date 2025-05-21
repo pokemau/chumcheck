@@ -623,7 +623,7 @@
             </Table.Header>
             <Table.Body>
               {#each $initiativesQueries[2].data.filter((data) => data.isAiGenerated === false) as item}
-                {#if selectedMembers.includes(item.assigneeId) || selectedMembers.length === 0}
+                {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
                   <Table.Row class="h-14 cursor-pointer">
                     <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
                     <Table.Cell class=""
@@ -632,9 +632,9 @@
                     >
                     <Table.Cell class="">{item?.initiativeNumber}</Table.Cell>
                     <Table.Cell class="">
-                      {members.filter((member: any) => member.userId === item.assigneeId)[0]
+                      {members.filter((member: any) => member.userId === item.assignee)[0]
                         ?.firstName}
-                      {members.filter((member: any) => member.userId === item.assigneeId)[0]
+                      {members.filter((member: any) => member.userId === item.assignee)[0]
                         ?.lastName}
                     </Table.Cell>
                   </Table.Row>
@@ -658,7 +658,7 @@
               {@const cur = $initiativesQueries[1].data.filter(
                 (data) =>
                   data.readiness_type_rl_type === readiness.name &&
-                  data.is_ai_generated === false &&
+                  data.isAiGenerated === false &&
                   data.id === item.task_id
               )[0]}
               {#if ids.includes(item.rns)}
