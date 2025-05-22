@@ -5,6 +5,7 @@
     Can,
     Column,
     KanbanBoard,
+    KanbanBoardNew,
     MembersFilter,
     ShowHideColumns
   } from '$lib/components/shared';
@@ -435,7 +436,7 @@
   {members}
   {startupId}
   create={createRoadblocks}
-  {status}
+  status={1}
 />
 
 {#snippet card(roadblocks: any, index: number)}
@@ -550,12 +551,21 @@
       {:else}
         <ShowHideColumns views={columns} />
       {/if}
+      {#if data.role !== 'Startup'}
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
+          onclick={showDialog}
+          type="button"
+        >
+          + Add
+        </button>
+      {/if}
     </div>
   </div>
   {#if selectedTab === 'roadblocks'}
     {#if selectedFormat === 'board'}
-      <div class="flex h-full gap-5 overflow-scroll">
-        <KanbanBoard
+      <div class="block w-full">
+        <KanbanBoardNew
           {columns}
           {handleDndFinalize}
           {handleDndConsider}

@@ -38,14 +38,48 @@
 </script>
 
 <Card.Root
-  class="h-full min-w-[calc(25%-1.25rem*3/4)] cursor-pointer"
+  class="bg-gray-900 border border-gray-700 rounded-lg shadow-sm cursor-pointer"
   onclick={() => {
     open = true;
     action = 'View';
   }}
 >
   <Card.Content class="flex flex-col gap-2">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-1 relative">
+      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
+        Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
+      </Badge>
+    </div>
+    <div class="text-[13px] font-semibold text-white mb-1">
+      Description: {roadblocks?.description?.substring(0, 60) + (roadblocks?.description?.length > 60 ? '...' : '')}
+    </div>
+    <div class="text-[13px] font-semibold text-white mb-1">
+      Fix: {roadblocks?.fix?.substring(0, 60) + (roadblocks?.fix?.length > 60 ? '...' : '')}
+    </div>  
+    <div class="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+      <div class="flex items-center gap-1">
+        {#if assignedMember}
+          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}>
+            {assignedMember.firstName.charAt(0)}
+          </div>
+          <span class="text-muted-foreground">
+            {#if (assignedMember.firstName.length + assignedMember.lastName.length + 1) > 15}
+              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(0, 15) + '...'}
+            {:else}
+              {assignedMember.firstName} {assignedMember.lastName}
+            {/if}
+          </span>
+        {:else}
+          <div class="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
+            <User class="h-4 w-4" />
+          </div>
+          <span>Unassigned</span>
+        {/if}
+      </div>
+    </div>
+
+
+    <!-- <div class="flex items-center justify-between">
       <h2 class="text-[15px] font-semibold leading-none tracking-tight">
         Risk #{roadblocks.riskNumber}
       </h2>
@@ -69,7 +103,7 @@
           <User class="h-4 w-4" />
         </div>
       {/if}
-    </div>
+    </div> -->
   </Card.Content>
 </Card.Root>
 
