@@ -17,10 +17,12 @@ import { readFile } from 'fs/promises';
 import * as PdfParse from 'pdf-parse';
 import { AiService } from 'src/ai/ai.service';
 import { AddStartupMemberDto, StartupApplicationDto } from './dto';
+import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { StartupService } from './startup.service';
 import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request } from 'express';
+import { UploadedFile } from '@nestjs/common';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -63,9 +65,48 @@ export class StartupController {
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async createStartup(
     @Body() dto: StartupApplicationDto,
-    //@UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return await this.startupService.createStartup(dto);
+    // Create startup
+    const startup = await this.startupService.createStartup(dto);
+
+    // If a capsule proposal file is uploaded, parse and create CapsuleProposal
+    if (file) {
+      try {
+        console.log('Capsule proposal file received:', file.originalname);
+        const data = await PdfParse(file.buffer);
+        let res = await this.aiService.getCapsuleProposalInfo(data.text);
+        console.log('AI service result:', res);
+        if (res) {
+          res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+          const parsed = JSON.parse(res);
+          console.log('Parsed capsule proposal:', parsed);
+          
+          const capsuleProposalDto = {
+            title: parsed.title,
+            description: parsed.startup_description,
+            problemStatement: parsed.problem_statement,
+            targetMarket: parsed.target_market,
+            solutionDescription: parsed.solution_description,
+            objectives: parsed.objectives,
+            scope: parsed.scope,
+            methodology: parsed.methodology,
+            startupId: startup.id
+          };
+          console.log('Creating CapsuleProposal with DTO:', capsuleProposalDto);
+          await this.startupService.createCapsuleProposal(capsuleProposalDto);
+          console.log('CapsuleProposal created successfully');
+        } else {
+          console.log('AI service did not return a result');
+        }
+      } catch (error) {
+        console.error('Failed to parse and create capsule proposal:', error);
+      }
+    } else {
+      console.log('No capsule proposal file uploaded');
+    }
+
+    return startup;
   }
 
   @Post('add-member')
@@ -81,23 +122,24 @@ export class StartupController {
     return await this.startupService.removeMemberFromStartup(userId, startupId);
   }
 
-  @Post('/capsule-proposal')
-  async getCapsuleProposal() {
+  @Post('/parse-capsule-proposal')
+  @UseInterceptors(FileInterceptor('capsuleProposal'))
+  async getCapsuleProposal(@UploadedFile() file: Express.Multer.File) {
     try {
-      const dbuffer = await readFile('/home/mau/Downloads/a.pdf');
+      if (!file) {
+        throw new BadRequestException('No file uploaded');
+      }
 
-      const data = await PdfParse(dbuffer);
+      const data = await PdfParse(file.buffer);
       let res = await this.aiService.getCapsuleProposalInfo(data.text);
 
       if (res) {
-        // remove trailing ````
         res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-
         return JSON.parse(res);
       }
     } catch (error) {
       console.error(error);
-      return error;
+      throw new BadRequestException('Failed to process PDF');
     }
   }
 

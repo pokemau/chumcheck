@@ -9,25 +9,25 @@ export class CapsuleProposal {
   @Property()
   title!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   description!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   problemStatement!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   targetMarket!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   solutionDescription!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   objectives!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   scope!: string;
 
-  @Property()
+  @Property({ type: 'text' })
   methodology!: string;
 
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
