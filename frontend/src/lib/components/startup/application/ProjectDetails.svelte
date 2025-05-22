@@ -26,10 +26,10 @@
     }
 
     const formData = new FormData();
-    formData.append('capsule_proposal', files[0]);
+    formData.append('capsuleProposal', files[0]);
 
     const response = await fetch(
-      `${PUBLIC_API_URL}/startups/capsule-proposal`,
+      `${PUBLIC_API_URL}/startups/parse-capsule-proposal`,
       {
         method: 'POST',
         headers: {
@@ -41,8 +41,6 @@
 
     const data = await response.json();
 
-    console.log('DATA');
-    console.log('DATA');
     console.log('DATA');
     console.log(data);
 
@@ -74,7 +72,7 @@
     <div class="grid gap-2">
       <Label>Capsule Proposal</Label>
       <label
-        for="capsule_proposal"
+        for="capsuleProposal"
         class="flex h-32 items-center justify-center rounded-lg border border-dashed text-sm"
       >
         {#if files}
@@ -91,8 +89,8 @@
         {/if}
       </label>
       <input
-        id="capsule_proposal"
-        name="capsule_proposal"
+        id="capsuleProposal"
+        name="capsuleProposal"
         class="hidden"
         type="file"
         accept=".pdf"

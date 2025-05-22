@@ -22,10 +22,10 @@ export const actions: Actions = {
     newFormData.append('name', formData.get('startup_name') as string);
     newFormData.append('userId', locals.user.id.toString());
 
-    newFormData.append(
-      'capsuleProposal',
-      formData.get('capsuleProposal') as File
-    );
+    const capsuleProposalFile = formData.get('capsuleProposal');
+    if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
+      newFormData.append('capsuleProposal', capsuleProposalFile);
+    }
 
     newFormData.append('links', formData.get('links') as string);
     newFormData.append('groupName', formData.get('group_name') as string);

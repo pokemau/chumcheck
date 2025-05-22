@@ -17,6 +17,8 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
+import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { start } from 'repl';
 
 @Injectable()
@@ -685,5 +687,24 @@ export class StartupService {
     await this.em.flush();
 
     return startupReadinessLevels;
+  }
+
+  async createCapsuleProposal(dto: CreateCapsuleProposalDto) {
+    const startup = await this.em.findOne(Startup, { id: dto.startupId });
+    if (!startup) {
+      throw new Error('Startup not found');
+    }
+    const proposal = new CapsuleProposal();
+    proposal.title = dto.title;
+    proposal.description = dto.description;
+    proposal.problemStatement = dto.problemStatement;
+    proposal.targetMarket = dto.targetMarket;
+    proposal.solutionDescription = dto.solutionDescription;
+    proposal.objectives = dto.objectives;
+    proposal.scope = dto.scope;
+    proposal.methodology = dto.methodology;
+    proposal.startup = startup;
+    await this.em.persistAndFlush(proposal);
+    return proposal;
   }
 }
