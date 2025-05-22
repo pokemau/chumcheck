@@ -4,7 +4,7 @@
     AITabs,
     Can,
     Column,
-    KanbanBoard,
+    KanbanBoardNew,
     MembersFilter,
     ShowHideColumns
   } from '$lib/components/shared';
@@ -30,6 +30,7 @@
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
+  import HoveredRNSCard from '$lib/components/shared/hovered-rns-card.svelte';
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -489,6 +490,8 @@
   {@render fallback()}
 {/if}
 
+<HoveredRNSCard />
+
 <InitiativeCreateDialog
   {open}
   {onOpenChange}
@@ -593,14 +596,25 @@
         <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
       {/if}
     </div>
-    {#if selectedFormat === 'board'}
+    <div class="flex gap-4 items-center">
+      {#if selectedFormat === 'board'}
       <ShowHideColumns {views} />
     {/if}
+      {#if data.role !== 'Startup'}
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
+          onclick={showDialog}
+          type="button"
+        >
+          + Add
+        </button>
+      {/if}
+    </div>
   </div>
-  <div class="flex h-full gap-5 overflow-scroll">
+  <div class="block w-full">
     {#if selectedTab === 'initiatives'}
       {#if selectedFormat === 'board'}
-        <KanbanBoard
+        <KanbanBoardNew
           {columns}
           {handleDndFinalize}
           {handleDndConsider}
