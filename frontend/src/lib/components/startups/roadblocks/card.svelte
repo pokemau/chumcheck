@@ -50,16 +50,16 @@
         Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
       </Badge>
     </div>
-    <div class="text-[13px] font-semibold text-white mb-1">
+    <div class="text-sm font-semibold text-white mb-1">
       Description: {roadblocks?.description?.substring(0, 60) + (roadblocks?.description?.length > 60 ? '...' : '')}
     </div>
-    <div class="text-[13px] font-semibold text-white mb-1">
+    <div class="text-xs text-muted-foreground mb-1">
       Fix: {roadblocks?.fix?.substring(0, 60) + (roadblocks?.fix?.length > 60 ? '...' : '')}
     </div>  
-    <div class="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+    <div class="flex items-center gap-2 mt-2 text-xs">
       <div class="flex items-center gap-1">
         {#if assignedMember}
-          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}>
+          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
             {assignedMember.firstName.charAt(0)}
           </div>
           <span class="text-muted-foreground">

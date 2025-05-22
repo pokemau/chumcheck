@@ -63,7 +63,7 @@
         {assignedRNS.readinessType}
       </Badge>
     </div>
-    <div class="text-[13px] font-semibold text-white mb-1">
+    <div class="text-sm font-semibold text-white mb-1">
       Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
     </div>  
     {#if initiative.description}
@@ -86,10 +86,10 @@
         Remarks: {initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}
       </div>
     {/if}
-    <div class="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+    <div class="flex items-center gap-2 mt-2 text-xs">
       <div class="flex items-center gap-1">
         {#if assignedMember}
-          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.first_name)}`}>
+          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
             {assignedMember.firstName.charAt(0)}
           </div>
           <span class="text-muted-foreground">

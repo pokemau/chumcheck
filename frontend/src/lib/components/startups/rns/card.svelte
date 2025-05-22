@@ -35,10 +35,10 @@
 >
   <Card.Content class="flex flex-col gap-2 p-4">
     <div class="flex items-center justify-between mb-1">
-      <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</span>
+      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</Badge>
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
-    <div class="text-muted-foreground text-sm">
+    <div class="text-sm">
       {rns.description.substring(0, 150) +
         `${rns.description.length > 150 ? '...' : ''}`}
     </div>
