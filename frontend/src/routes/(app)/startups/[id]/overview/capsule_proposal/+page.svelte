@@ -36,7 +36,7 @@
 
 <div class="flex h-[90vh] flex-col gap-5 overflow-y-auto">
   <h1 class="text-xl font-semibold">Capsule Proposal</h1>
-  <div class="grid w-2/3 grid-cols-1 gap-5">
+  <div class="grid w-[90%] grid-cols-1 gap-5">
     <div class="grid gap-2">
       <Label for="firstName">Title</Label>
       {#if $queryResult.isLoading}
