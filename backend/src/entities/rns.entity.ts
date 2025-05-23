@@ -14,7 +14,7 @@ export class Rns {
   @Property()
   priorityNumber!: number;
 
-  @Property()
+  @Property({ type: 'text' })
   description!: string;
 
   @ManyToOne(() => ReadinessLevel)

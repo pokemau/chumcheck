@@ -9,7 +9,7 @@
 >
   <Card.Root class="h-44 cursor-pointer bg-background border border-gray-700 hover:bg-accent rounded-xl p-0 transition-colors duration-150">
     <Card.Content class="h-full">
-      <div class="flex flex-col h-full px-4 py-4 justify-between">
+      <div class="flex flex-col h-full p-3 justify-between">
         <div class="flex items-center gap-3 mb-1 w-full">
           <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563eb] text-white text-base font-bold">
             {startup.name
