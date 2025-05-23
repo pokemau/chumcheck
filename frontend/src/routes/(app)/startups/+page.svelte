@@ -12,7 +12,8 @@
   import { toast } from 'svelte-sonner';
   import * as Accordion from '$lib/components/ui/accordion/index.js';
 
-  let { data } = $props();
+  let { data, form } = $props();
+  console.log("Form: ", form);
 
   const queryResult = useQuery('startupData', () =>
     getData(`/startups/startups`, data.access!)
@@ -42,6 +43,14 @@
 
   $effect(() => {
     const success = $page.url.searchParams.get('success');
+
+    if (form?.error) {
+      console.log('Error in form');
+      let formError = form.error.length > 60
+      ? form.error.substring(0, 60) + '...'
+      : form.error;
+    toast.error(formError);
+    }
 
     if (success === 'true') {
       //console.log('Success is true');
