@@ -1,6 +1,16 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card/index.js';
-  let { startup, role }: { startup: any; role: any } = $props();
+  let { startup, role, initiatives }: { startup: any; role: any; initiatives: any[] } = $props();
+
+  const statusMap: Record<number, { label: string; border: string; text: string; bg: string }> = {
+    1: { label: 'Pending',    border: 'border-yellow-400', text: 'text-yellow-400', bg: 'bg-yellow-900' },
+    2: { label: 'Pending',    border: 'border-yellow-400', text: 'text-yellow-400', bg: 'bg-yellow-900' },
+    3: { label: 'Qualified',  border: 'border-blue-500',   text: 'text-blue-500',   bg: 'bg-slate-900'  },
+    4: { label: 'Rejected',   border: 'border-red-400',    text: 'text-red-400',    bg: 'bg-red-900'    },
+    5: { label: 'Paused',     border: 'border-gray-400',   text: 'text-gray-400',   bg: 'bg-gray-900'   },
+    6: { label: 'Completed',  border: 'border-green-500',  text: 'text-green-500',  bg: 'bg-green-900'  }
+  };
+  const status = $derived(statusMap[startup?.qualificationStatus] ?? statusMap[1]);
 </script>
 
 <a
@@ -21,21 +31,18 @@
           <span class="text-base font-semibold text-white truncate max-w-[120px]" title={startup.name}>
             {startup.name.length > 10 ? startup.name.slice(0, 10) + '...' : startup.name}
           </span>
-          <span class="ml-auto border 
-            {startup.qualificationStatus == 1 ? "border-yellow-400 text-yellow-400 bg-yellow-900" : "border-blue-500 text-blue-500 bg-slate-900"}
-            rounded px-2 py-0.5 text-xs font-semibold"
-          > 
-            {startup.qualificationStatus == 1 ? 'Pending' : 'Qualified'}
+          <span class="ml-auto border rounded px-2 py-0.5 text-xs font-semibold {status.border} {status.text} {status.bg}">
+            {status.label === 'Qualified' && role === 'Mentor' ? 'Active' : status.label}
           </span>
         </div>
         <div class="flex items-center gap-2 text-xs text-[#b3bed7] mb-1">
           Initiatives
-          <span class="ml-1 font-bold text-white">{startup.initiatives ?? '8/12'}</span>
+          <span class="ml-1 font-bold text-white">{initiatives.filter(initiative => initiative.status === 4).length} / {initiatives.length}</span>
         </div>
-        <div class="w-full h-2 bg-[#232b3b] rounded mb-2">
+        <div class="w-full h-2 bg-gray-800 rounded mb-2">
           <div
             class="h-2 bg-white rounded"
-            style="width: {startup.initiativesProgress ?? '60%'}"
+            style="width: {(initiatives.filter(initiative => initiative.status === 4).length / initiatives.length) * 100}%"
           ></div>
         </div>
         <div class="flex items-center gap-2 text-xs text-[#b3bed7]">
