@@ -28,8 +28,8 @@
       <h2 class="text-base font-semibold tracking-tight">{name}</h2>
       <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</span>
     </div>
-  </Card.Header>
-  <Card.Content class="flex flex-col gap-3 px-4 pb-4 h-[320px] overflow-y-auto">
+  </Card.Header>  
+  <Card.Content class="flex flex-col gap-3 px-4 pb-4 h-[430px] overflow-y-auto">
     {@render children()}
   </Card.Content>
 </Card.Root>

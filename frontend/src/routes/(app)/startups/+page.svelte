@@ -57,12 +57,12 @@
   });
 
   const qualifiedStartups = $derived(
-    listOfStartups.filter((startup: any) => startup.qualification_status === 3)
+    listOfStartups.filter((startup: any) => startup.qualificationStatus === 3)
   );
   const pendingStartups = $derived(
     listOfStartups.filter(
       (startup: any) =>
-        startup.qualification_status === 1 || startup.qualification_status === 2
+        startup.qualificationStatus === 1 || startup.qualificationStatus === 2
     )
   );
 
@@ -108,17 +108,13 @@
       <span class="text-2xl font-bold">{listOfStartups.length}</span>
     </div>
     <div class="flex items-center gap-2">
-      <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-green-400 text-green-400 bg-green-950">
-        <span>{listOfStartups.length}</span>
-        <span>Active</span>
-      </div>
       <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-blue-500 text-blue-500 bg-slate-900">
-        <span>0</span>
-        <span>Completed</span>
+        <span>{qualifiedStartups.length}</span>
+        <span>Qualified</span>
       </div>
       <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-yellow-400 text-yellow-400 bg-yellow-900">
-        <span>0</span>
-        <span>Paused</span>
+        <span>{pendingStartups.length}</span>
+        <span>Pending</span>
       </div>
     </div>
   </div>
@@ -175,14 +171,14 @@
       All Startups
     </button>
     <button class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Active' ? 'bg-[#2563eb] text-white font-bold' : ''}">
-      Active
+      Qualified
     </button>
     <button class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Completed' ? 'bg-[#2563eb] text-white font-bold' : ''}">
-      Completed
+      Pending
     </button>
-    <button class="px-4 py-1.5 rounded-tr-lg rounded-br-lg text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Paused' ? 'bg-[#2563eb] text-white font-bold' : ''}">
+    <!-- <button class="px-4 py-1.5 rounded-tr-lg rounded-br-lg text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Paused' ? 'bg-[#2563eb] text-white font-bold' : ''}">
       Paused
-    </button>
+    </button> -->
   </div>
 </div>
 

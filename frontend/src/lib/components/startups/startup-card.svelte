@@ -18,8 +18,15 @@
               .join('')
               .slice(0, 3)}
           </div>
-          <span class="text-base font-semibold text-white">{startup.name}</span>
-          <span class="ml-auto border border-green-400 text-green-400 bg-green-950 rounded px-2 py-0.5 text-xs font-semibold">Active</span>
+          <span class="text-base font-semibold text-white truncate max-w-[120px]" title={startup.name}>
+            {startup.name.length > 10 ? startup.name.slice(0, 10) + '...' : startup.name}
+          </span>
+          <span class="ml-auto border 
+            {startup.qualificationStatus == 1 ? "border-yellow-400 text-yellow-400 bg-yellow-900" : "border-blue-500 text-blue-500 bg-slate-900"}
+            rounded px-2 py-0.5 text-xs font-semibold"
+          > 
+            {startup.qualificationStatus == 1 ? 'Pending' : 'Qualified'}
+          </span>
         </div>
         <div class="flex items-center gap-2 text-xs text-[#b3bed7] mb-1">
           Initiatives

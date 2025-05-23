@@ -46,47 +46,45 @@
 >
   <Card.Content class="flex flex-col gap-2 p-4">
     <div class="flex items-center justify-between mb-1 relative">
-      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
+      <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
       </Badge>
-      <span class="relative inline-block">
-        <Badge
-          class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
-          onmouseenter={handleMouseEnter}
-          onmouseleave={handleMouseLeave}
-          onclick={() => goto(`rns?tab=rns`)}
-        >
-          RNS #{assignedRNS?.priorityNumber ?? ''}
-        </Badge>
-      </span>
+      <Badge
+        class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
+        onmouseenter={handleMouseEnter}
+        onmouseleave={handleMouseLeave}
+        onclick={() => goto(`rns?tab=rns`)}
+      >
+        RNS #{assignedRNS?.priorityNumber ?? ''}
+      </Badge>
       <Badge class={`text-xs font-bold ${getReadinessStyles(assignedRNS.readinessType)}`}>
         {assignedRNS.readinessType}
       </Badge>
     </div>
-    <div class="text-sm font-semibold text-white mb-1">
+    <div class="text-sm text-white">
       Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
     </div>  
     {#if initiative.description}
-      <div class="text-muted-foreground text-sm mb-1">
+      <div class="text-muted-foreground text-xs">
         Description: {initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.measures}
-      <div class="text-muted-foreground text-sm mb-1">
+      <div class="text-muted-foreground text-xs">
         Measures: {initiative.measures.substring(0, 100) + (initiative.measures.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.targets}
-      <div class="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+      <div class="text-muted-foreground text-xs">
         Targets: {initiative.targets.substring(0, 100) + (initiative.targets.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.remarks}
-      <div class="text-muted-foreground text-sm mb-1">
+      <div class="text-muted-foreground text-xs">
         Remarks: {initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}
       </div>
     {/if}
-    <div class="flex items-center gap-2 mt-2 text-xs">
+    <div class="flex items-center gap-2 mt-1 text-xs">
       <div class="flex items-center gap-1">
         {#if assignedMember}
           <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
