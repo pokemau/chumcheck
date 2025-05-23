@@ -20,21 +20,42 @@
   );
 
   const role: any = data.role;
-  const message =
-    role === 'Mentor' || role === 'Manager as Mentor'
-      ? 'Manage assigned startups'
-      : role === 'Startup'
-        ? 'Manage startups'
-        : '';
 
   const isLoading = $derived($queryResult.isLoading);
   const isError = $derived($queryResult.isError);
   const hasStartups = $derived(
     Array.isArray($queryResult.data) && $queryResult.data.length > 0
   );
-  const listOfStartups = $derived(
+  const listOfStartups = $derived(() =>
     $queryResult.isSuccess && hasStartups ? $queryResult.data : []
   );
+
+  let search = $state('');
+  let filter = $state('All Startups');
+
+  const qualifiedStartups = $derived(
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === 3)
+  );
+
+  const pendingStartups = $derived(
+    listOfStartups().filter((startup: any) =>
+      startup.qualificationStatus === 1 || startup.qualificationStatus === 2
+    )
+  );
+  const filteredStartups = $derived(() => {
+    let base =
+      filter === 'All Startups'
+        ? listOfStartups()
+        : filter === 'Qualified'
+        ? qualifiedStartups
+        : filter === 'Pending'
+        ? pendingStartups
+        : listOfStartups();
+    if (!search) return base;
+    return base.filter((startup: any) =>
+      startup.name.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   let showApplicationForm = $state(false);
   const toggleApplicationForm = () => {
@@ -62,16 +83,6 @@
     }
   });
 
-  const qualifiedStartups = $derived(
-    listOfStartups.filter((startup: any) => startup.qualification_status === 3)
-  );
-  const pendingStartups = $derived(
-    listOfStartups.filter(
-      (startup: any) =>
-        startup.qualification_status === 1 || startup.qualification_status === 2
-    )
-  );
-
   $effect(() => {
     if ($queryResult.isSuccess) {
       console.log('QUERYRESULT DATA');
@@ -80,10 +91,14 @@
   });
 </script>
 
-<div class="flex items-center justify-between">
+<svelte:head>
+  <title>ChumCheck - Startups</title>
+</svelte:head>
+
+<div class="flex items-center justify-between mb-8">
   <div>
     <h2 class="text-3xl font-bold">Startups</h2>
-    <p class="text-muted-foreground">{message}</p>
+    <p class="text-muted-foreground">Manage assigned startups</p>
   </div>
   <Can role={['Startup']} userRole={role}>
     <div class="flex gap-5">
@@ -91,78 +106,128 @@
         class="flex items-center justify-center gap-2 rounded-lg"
         onclick={toggleApplicationForm}
       >
-        <RocketIcon class="h-4 w-4" /> Apply</Button
-      >
+        <RocketIcon class="h-4 w-4" /> Apply
+      </Button>
     </div>
   </Can>
 </div>
 
-{#if isLoading}
-  {@render loading()}
-{:else if isError}
-  {@render error()}
-{:else if hasStartups}
-  {@render startups()}
-{:else}{/if}
-<svelte:head>
-  <title>ChumCheck - Startups</title>
-</svelte:head>
-{#snippet loading()}
-  <div class="mt-3 grid grid-cols-4 gap-3">
-    <div class="rounded-lg bg-background">
-      <Skeleton class="h-40 rounded-lg" />
+<!-- Statistics Cards -->
+<div class="grid grid-cols-4 gap-5 mb-8">
+  
+  <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
+    <div class="text-muted-foreground text-sm">Total Startups</div>
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-bold">{listOfStartups.length}</span>
     </div>
-    <div class="rounded-lg bg-background">
-      <Skeleton class="h-40 rounded-lg" />
-    </div>
-    <div class="rounded-lg bg-background">
-      <Skeleton class="h-40 rounded-lg" />
+    <div class="flex items-center gap-2">
+      <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-blue-500 text-blue-500 bg-slate-900">
+        <span>{qualifiedStartups.length}</span>
+        <span>Qualified</span>
+      </div>
+      <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-yellow-400 text-yellow-400 bg-yellow-900">
+        <span>{pendingStartups.length}</span>
+        <span>Pending</span>
+      </div>
     </div>
   </div>
-{/snippet}
 
-{#snippet error()}
+  <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
+    <div class="text-muted-foreground text-sm">Initiatives Progress</div>
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-bold">51/93</span>
+      <span class="ml-auto text-sm">53%</span>
+    </div>
+    <div class="w-full h-2 bg-gray-200 rounded">
+      <div class="h-2 bg-blue-500 rounded" style="width:53%"></div>
+    </div>
+  </div>
+  
+  <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
+    <div class="text-muted-foreground text-sm">Pending Consultations</div>
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-bold">4</span>
+    </div>
+    <div class="text-muted-foreground text-sm">Across 3 startups</div>
+  </div>
+  
+  <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
+    <div class="text-muted-foreground text-sm">Completion Rate</div>
+    <div class="flex items-center gap-2">
+      <span class="text-2xl font-bold">13%</span>
+    </div>
+    <div class="text-muted-foreground text-sm">1 of 7 startups completed</div>
+  </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="mb-5">
+  <div class="flex items-center gap-2 mb-2 w-[400px]">
+    <div class="relative flex-1">
+      <input
+        class="w-full rounded-lg border border-[#2a3550] bg-background px-4 py-2 pr-12 text-sm text-white placeholder-[#b3bed7] focus:outline-none focus:ring-2 focus:ring-blue-500"
+        type="text"
+        placeholder="Search startups..."  
+        bind:value={search}
+      />
+      <button
+        class="absolute right-2 top-1/2 -translate-y-1/2 bg-[#2563eb] hover:bg-[#1d4ed8] rounded-lg p-2 transition-colors"
+        tabindex="-1"
+        type="button"
+      >
+        <img src="/magnifying_glass.png" alt="Search" class="h-4 w-4" />
+      </button>
+    </div>
+  </div>
+  <div class="flex gap-0.5 border border-border rounded w-fit">
+    <button 
+      class="px-4 py-1.5 rounded-tl-lg rounded-bl-lg text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'All Startups' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'All Startups'}
+    >
+      All Startups
+    </button>
+    <button 
+      class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Active' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'Qualified'}
+    >
+      Qualified
+    </button>
+    <button 
+      class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Completed' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'Pending'}
+    >
+      Pending
+    </button>
+    <!-- <button class="px-4 py-1.5 rounded-tr-lg rounded-br-lg text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Paused' ? 'bg-[#2563eb] text-white font-bold' : ''}">
+      Paused
+    </button> -->
+  </div>
+</div>
+
+
+<!-- Startup Cards Grid -->
+{#if isLoading}
+  <div class="mt-3 grid grid-cols-4 gap-3">
+    <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
+    <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
+    <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
+  </div>
+{:else if isError}
   <div>
     <p>Error fetching data. Contact support</p>
   </div>
-{/snippet}
-
-{#snippet startups()}
-  {console.log('ROLE')}
-  {console.log(role)}
-  {#if role !== 'Startup'}
-    {console.log('HERE')}
-    <div class="mt-3 grid grid-cols-4 gap-3">
-      {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
-        {console.log(startup, role)}
-        <StartupCard {startup} {role} />
-      {/each}
-    </div>
-  {:else}
-    <Accordion.Root type="multiple" class="w-full" value={['qualified']}>
-      <Accordion.Item value="qualified">
-        <Accordion.Trigger>Qualified Startups</Accordion.Trigger>
-        <Accordion.Content>
-          <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 3) as startup}
-              <StartupCard {startup} {role} />
-            {/each}
-          </div>
-        </Accordion.Content>
-      </Accordion.Item>
-      <Accordion.Item value="pending" class="w-full">
-        <Accordion.Trigger>Pending Startups</Accordion.Trigger>
-        <Accordion.Content>
-          <div class="mt-3 grid grid-cols-4 gap-3">
-            {#each listOfStartups.filter((startup: any) => startup.qualificationStatus === 1 || startup.qualificationStatus === 2) as startup}
-              <StartupCard {startup} {role} />
-            {/each}
-          </div>
-        </Accordion.Content>
-      </Accordion.Item>
-    </Accordion.Root>
-  {/if}
-{/snippet}
+{:else if hasStartups}
+  <div class="mt-3 grid grid-cols-4 gap-5">
+    {#each filteredStartups() as startup}
+      <StartupCard 
+        {startup}
+        role={role} 
+      />
+    {/each}
+  </div>
+{:else}
+  <div class="mt-3 text-center text-muted-foreground">No startups found.</div>
+{/if}
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
   <Dialog.Content class="h-4/5 max-w-[700px]">
