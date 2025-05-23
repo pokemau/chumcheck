@@ -26,9 +26,36 @@
   const hasStartups = $derived(
     Array.isArray($queryResult.data) && $queryResult.data.length > 0
   );
-  const listOfStartups = $derived(
+  const listOfStartups = $derived(() =>
     $queryResult.isSuccess && hasStartups ? $queryResult.data : []
   );
+
+  let search = $state('');
+  let filter = $state('All Startups');
+
+  const qualifiedStartups = $derived(
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === 3)
+  );
+
+  const pendingStartups = $derived(
+    listOfStartups().filter((startup: any) =>
+      startup.qualificationStatus === 1 || startup.qualificationStatus === 2
+    )
+  );
+  const filteredStartups = $derived(() => {
+    let base =
+      filter === 'All Startups'
+        ? listOfStartups()
+        : filter === 'Qualified'
+        ? qualifiedStartups
+        : filter === 'Pending'
+        ? pendingStartups
+        : listOfStartups();
+    if (!search) return base;
+    return base.filter((startup: any) =>
+      startup.name.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
   let showApplicationForm = $state(false);
   const toggleApplicationForm = () => {
@@ -56,26 +83,12 @@
     }
   });
 
-  const qualifiedStartups = $derived(
-    listOfStartups.filter((startup: any) => startup.qualificationStatus === 3)
-  );
-  const pendingStartups = $derived(
-    listOfStartups.filter(
-      (startup: any) =>
-        startup.qualificationStatus === 1 || startup.qualificationStatus === 2
-    )
-  );
-
   $effect(() => {
     if ($queryResult.isSuccess) {
       console.log('QUERYRESULT DATA');
       console.log($queryResult.data);
     }
   });
-
-  // For search/filter UI (not functional for now)
-  let search = '';
-  let filter = 'All Startups';
 </script>
 
 <svelte:head>
@@ -167,13 +180,22 @@
     </div>
   </div>
   <div class="flex gap-0.5 border border-border rounded w-fit">
-    <button class="px-4 py-1.5 rounded-tl-lg rounded-bl-lg text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'All Startups' ? 'bg-[#2563eb] text-white font-bold' : ''}">
+    <button 
+      class="px-4 py-1.5 rounded-tl-lg rounded-bl-lg text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'All Startups' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'All Startups'}
+    >
       All Startups
     </button>
-    <button class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Active' ? 'bg-[#2563eb] text-white font-bold' : ''}">
+    <button 
+      class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Active' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'Qualified'}
+    >
       Qualified
     </button>
-    <button class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Completed' ? 'bg-[#2563eb] text-white font-bold' : ''}">
+    <button 
+      class="px-4 py-1.5 text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Completed' ? 'bg-[#2563eb] text-white font-bold' : ''}"
+      onclick={() => filter = 'Pending'}
+    >
       Pending
     </button>
     <!-- <button class="px-4 py-1.5 rounded-tr-lg rounded-br-lg text-[#b3bed7] text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 {filter === 'Paused' ? 'bg-[#2563eb] text-white font-bold' : ''}">
@@ -196,8 +218,11 @@
   </div>
 {:else if hasStartups}
   <div class="mt-3 grid grid-cols-4 gap-5">
-    {#each listOfStartups as startup}
-      <StartupCard {startup} />
+    {#each filteredStartups() as startup}
+      <StartupCard 
+        {startup}
+        role={role} 
+      />
     {/each}
   </div>
 {:else}
