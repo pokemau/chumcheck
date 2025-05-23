@@ -103,7 +103,7 @@
   let selectedFormat = $state('board');
   const selectedMembers: any = $state([]);
 
-  $effect(() => {    
+  $effect(() => {   
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
@@ -406,9 +406,9 @@
     let ids = $initiativesQueries[1].data
       .filter(
         (data: any) =>
-          data.readiness_type_rl_type.slice(0, 1) === type &&
-          data.is_ai_generated === false &&
-          data.task_type === 1
+          data.readinessType === type &&
+          data.isAiGenerated === false &&
+          data.status === 1
       )
       .map((d: any) => d.id);
 
@@ -611,8 +611,8 @@
       {/if}
     </div>
   </div>
-  <div class="block w-full">
     {#if selectedTab === 'initiatives'}
+    <div class="block w-full">
       {#if selectedFormat === 'board'}
         <KanbanBoardNew
           {columns}
@@ -658,7 +658,9 @@
           </Table.Root>
         </div>
       {/if}
+    </div>
     {:else}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 h-full overflow-auto">
       {#each readiness as readiness}
         {#if readiness.show}
           <AIColumn name={readiness.name} generate={generateInitiatives} role={data.role}>
@@ -666,12 +668,12 @@
               {@const ids = $initiativesQueries[1].data
                 .filter(
                   (data) =>
-                    data.readiness_type_rl_type === readiness.name && data.isAiGenerated === false
+                    data.readinessType === readiness.name && data.isAiGenerated === false
                 )
                 .map((d) => d.id)}
               {@const cur = $initiativesQueries[1].data.filter(
                 (data) =>
-                  data.readiness_type_rl_type === readiness.name &&
+                  data.readinessType === readiness.name &&
                   data.isAiGenerated === false &&
                   data.id === item.task_id
               )[0]}
@@ -684,8 +686,8 @@
           </AIColumn>
         {/if}
       {/each}
+    </div>
     {/if}
-  </div>
 {/snippet}
 
 {#snippet fallback()}{/snippet}

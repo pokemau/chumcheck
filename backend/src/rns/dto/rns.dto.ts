@@ -100,6 +100,7 @@ export class GenerateTasksDto {
   @IsString()
   term: string;
 
+  @Type(() => Number)
   @IsInt()
   no_of_tasks_to_create: number;
 

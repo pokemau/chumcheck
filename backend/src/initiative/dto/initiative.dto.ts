@@ -6,6 +6,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsPositive,
 } from 'class-validator';
 import { RnsStatus } from '../../entities/enums/rns.enum';
 import { Type } from 'class-transformer';
@@ -95,4 +96,19 @@ export class UpdateInitiativeDto {
   @IsString()
   @IsOptional()
   remarks: string;
+}
+
+export class GenerateInitiativeDto {
+  @Type(() => Number)
+  @IsInt()
+  task_id: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  no_of_initiatives_to_create: number;
+
+  @IsBoolean()
+  @IsOptional()
+  debug: boolean = false;
 }

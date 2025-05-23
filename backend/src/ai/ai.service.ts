@@ -64,4 +64,36 @@ export class AiService {
       throw new Error('AI returned an invalid response');
     }
   }
+
+  async generateInitiativesFromPrompt(
+    prompt: string
+  ): Promise<{ description: string; measures: string; targets: string; remarks: string }[]> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
+
+    const text = res.text;
+
+    if (!text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    try {
+      const jsonStart = text.indexOf('[');
+      const jsonEnd = text.lastIndexOf(']');
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+
+      return JSON.parse(jsonString).map((entry: any) => ({
+        description: entry.description,
+        measures: entry.measures,
+        targets: entry.targets,
+        remarks: entry.remarks,
+      }));
+    } catch (err) {
+      console.error('Failed to parse AI response:', text);
+      throw new Error('AI returned an invalid initiative response');
+    }
+  }
+
 }

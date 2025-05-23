@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { InitiativeService } from './initiative.service';
-import { CreateInitiativeDto, UpdateInitiativeDto } from './dto/initiative.dto';
+import { CreateInitiativeDto, GenerateInitiativeDto, UpdateInitiativeDto } from './dto/initiative.dto';
 
 @Controller('initiatives')
 export class InitiativeController {
@@ -27,6 +27,11 @@ export class InitiativeController {
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
     return this.initiativeService.delete(id);
+    }
+
+    @Post('generate-initiatives')
+    async generateInitiatives(@Body() dto: GenerateInitiativeDto) {
+    return await this.initiativeService.generateInitiatives(dto);
     }
 
 }
