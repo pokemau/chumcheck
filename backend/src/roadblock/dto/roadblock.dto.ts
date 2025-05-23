@@ -1,9 +1,11 @@
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -70,4 +72,19 @@ export class UpdateRoadblockDto {
   @IsString()
   @IsNotEmpty()
   fix?: string;
+}
+
+export class GenerateRoadblocksDto {
+  @Type(() => Number)
+  @IsInt()
+  startupId: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  no_of_roadblocks_to_create: number;
+
+  @IsBoolean()
+  @IsOptional()
+  debug: boolean = false;
 }

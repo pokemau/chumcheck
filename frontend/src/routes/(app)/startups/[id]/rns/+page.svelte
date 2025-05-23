@@ -142,20 +142,20 @@
           }
         }
       ),
-      // await axiosInstance.post(
-      //   `/rns/generate-tasks/`,
-      //   {
-      //     startup_id: data.startupId,
-      //     term: "long-term",
-      //     readinessType: type,
-      //     no_of_tasks_to_create: 1
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${data.access}`
-      //     }
-      //   }
-      // )
+      await axiosInstance.post(
+        `/rns/generate-tasks/`,
+        {
+          startup_id: data.startupId,
+          term: "long-term",
+          readinessType: type,
+          no_of_tasks_to_create: 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
+        }
+      )
     ]);
     test.forEach((res, index) => {
     console.log(`Response ${index}:`, res.data);
@@ -169,11 +169,11 @@
     const length = columns[1].items.length;
 
     await axiosInstance.patch(
-      `/rns/tasks/${id}/`,
+      `/rns/${id}/`,
       {
         status: 1,
         isAiGenerated: false,
-        priority_number: length
+        priorityNumber: length
       },
       {
         headers: {
