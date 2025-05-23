@@ -1,4 +1,4 @@
-import { redirect, type Actions } from '@sveltejs/kit';
+import { redirect, type Actions, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PUBLIC_API_URL } from '$env/static/public';
 
@@ -51,8 +51,8 @@ export const actions: Actions = {
     const data = await response.json();
 
     if (!response.ok) {
-      // TODO: return error
-      return;
+      let errorMessage = data?.message || 'Failed to create startup.';
+      return fail(400, { error: errorMessage });
     }
 
     const startupId = data.id;

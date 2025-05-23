@@ -12,7 +12,8 @@
   import { toast } from 'svelte-sonner';
   import * as Accordion from '$lib/components/ui/accordion/index.js';
 
-  let { data } = $props();
+  let { data, form } = $props();
+  console.log("Form: ", form);
 
   const queryResult = useQuery('startupData', () =>
     getData(`/startups/startups`, data.access!)
@@ -36,11 +37,39 @@
 
   $effect(() => {
     const success = $page.url.searchParams.get('success');
+
+    if (form?.error) {
+      console.log('Error in form');
+      let formError = form.error.length > 60
+      ? form.error.substring(0, 60) + '...'
+      : form.error;
+    toast.error(formError);
+    }
+
     if (success === 'true') {
+      //console.log('Success is true');
       toast.success('Application successfull.');
+      // Remove the 'success' parameter from the URL
       const url = new URL($page.url.href);
       url.searchParams.delete('success');
       history.replaceState(null, '', url);
+    }
+  });
+
+  const qualifiedStartups = $derived(
+    listOfStartups.filter((startup: any) => startup.qualification_status === 3)
+  );
+  const pendingStartups = $derived(
+    listOfStartups.filter(
+      (startup: any) =>
+        startup.qualification_status === 1 || startup.qualification_status === 2
+    )
+  );
+
+  $effect(() => {
+    if ($queryResult.isSuccess) {
+      console.log('QUERYRESULT DATA');
+      console.log($queryResult.data);
     }
   });
 
