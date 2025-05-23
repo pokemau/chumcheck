@@ -436,7 +436,7 @@ export class StartupService {
   }
 
   async allowRNAs(startupId: number): Promise<boolean>{
-    return await this.em.count(StartupCriterionAnswer,
+    return await this.em.count(StartupReadinessLevel,
       { startup: startupId }) > 0;
   }
 
