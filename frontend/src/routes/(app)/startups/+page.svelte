@@ -285,7 +285,7 @@
 
 <!-- Startup Cards Grid -->
 {#if isLoading}
-  <div class="mt-3 grid grid-cols-4 gap-3">
+  <div class="mt-3 pb-10 grid grid-cols-4 gap-3">
     <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
     <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
     <div class="rounded-lg bg-background"><Skeleton class="h-40 rounded-lg" /></div>
@@ -295,7 +295,7 @@
     <p>Error fetching data. Contact support</p>
   </div>
 {:else if hasStartups}
-  <div class="mt-3 grid grid-cols-4 gap-5">
+  <div class="mt-3 pb-10 grid grid-cols-4 gap-5">
     {#each filteredStartups() as startup}
       <StartupCard 
         {startup}
