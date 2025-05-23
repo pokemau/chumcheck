@@ -67,9 +67,6 @@ export class StartupController {
     @Body() dto: StartupApplicationDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Create startup
-    const startup = await this.startupService.createStartup(dto);
-
     // If a capsule proposal file is uploaded, parse and create CapsuleProposal
     if (file) {
       try {
@@ -82,8 +79,8 @@ export class StartupController {
           const parsed = JSON.parse(res);
           console.log('Parsed capsule proposal:', parsed);
           
-          const capsuleProposalDto = {
-            title: parsed.title,
+          const capsuleProposalDto: CreateCapsuleProposalDto = {
+            title: dto.name,
             description: parsed.startup_description,
             problemStatement: parsed.problem_statement,
             targetMarket: parsed.target_market,
@@ -91,22 +88,25 @@ export class StartupController {
             objectives: parsed.objectives,
             scope: parsed.scope,
             methodology: parsed.methodology,
-            startupId: startup.id
+            startupId: -1,  //placeholder
           };
-          console.log('Creating CapsuleProposal with DTO:', capsuleProposalDto);
+          const startup = await this.startupService.createStartup(dto);
+          capsuleProposalDto.startupId = startup.id;
           await this.startupService.createCapsuleProposal(capsuleProposalDto);
           console.log('CapsuleProposal created successfully');
+          return startup;
         } else {
           console.log('AI service did not return a result');
+          throw new BadRequestException('AI service did not return a result')
         }
       } catch (error) {
         console.error('Failed to parse and create capsule proposal:', error);
+        throw new BadRequestException('Failed to parse and create capsule proposal: ' + error.message);
       }
     } else {
       console.log('No capsule proposal file uploaded');
+      throw new BadRequestException('No capsule proposal file uploaded');
     }
-
-    return startup;
   }
 
   @Post('add-member')
