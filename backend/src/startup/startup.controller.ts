@@ -144,10 +144,8 @@ export class StartupController {
   }
 
   @Get(':startupId')
-  async getStartupById(@Param('startupId') startupId: string) {
-    const id = Number(startupId);
-    if (isNaN(id)) throw new BadRequestException('Invalid Startup ID');
-    return await this.startupService.getStartupById(id);
+  async getStartupById(@Param('startupId', ParseIntPipe) startupId: number) {
+    return await this.startupService.getStartupById(startupId);
   }
 
   // @Get(':startupId/allow-tasks')

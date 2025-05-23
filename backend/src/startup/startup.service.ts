@@ -48,11 +48,19 @@ export class StartupService {
   }
 
   async getStartupById(startupId: number) {
-    return await this.em.findOne(
+    const startup = await this.em.findOne(
       Startup,
       { id: startupId },
-      { populate: ['user', 'members'] },
+      { populate: ['user', 'members', 'capsuleProposal'] },
     );
+
+    if (!startup) {
+      throw new NotFoundException(
+        `Startup with ID ${startupId} does not exist!`,
+      );
+    }
+
+    return startup;
   }
 
   async createStartup(dto: StartupApplicationDto) {
@@ -263,7 +271,7 @@ export class StartupService {
         id: { $in: startupIds },
         qualificationStatus: QualificationStatus.QUALIFIED,
       },
-      { populate: ['mentors', 'user'], },
+      { populate: ['mentors', 'user'] },
     );
 
     if (!startups || startups.length === 0) {

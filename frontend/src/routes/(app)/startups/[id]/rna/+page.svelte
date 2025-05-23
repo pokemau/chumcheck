@@ -294,7 +294,7 @@
     </div>
   </div>
 
-  <div class="grid w-full grid-cols-4 gap-5 overflow-scroll">
+  <div class="grid w-full grid-cols-4 gap-5">
     {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) as rna, index}
       <RnaCard
         {rna}
