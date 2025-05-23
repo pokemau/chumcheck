@@ -19,7 +19,7 @@
         <button
           onclick={async () => {
             generating = true;
-            await generate(name.slice(0, 1));
+            await generate(name);
             generating = false;
           }}
         >

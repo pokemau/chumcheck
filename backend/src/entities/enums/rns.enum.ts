@@ -7,3 +7,8 @@ export enum RnsStatus {
   'Discontinued' = 6,
   'Long Term' = 7,
 }
+
+export enum AiRnsStatus{
+  'Short-term' = 1,
+  'Long-term' = 2,
+}

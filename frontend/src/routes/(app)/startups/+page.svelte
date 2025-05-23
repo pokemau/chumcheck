@@ -118,7 +118,7 @@
   <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
     <div class="text-muted-foreground text-sm">Total Startups</div>
     <div class="flex items-center gap-2">
-      <span class="text-2xl font-bold">{listOfStartups.length}</span>
+      <span class="text-2xl font-bold">{listOfStartups().length}</span>
     </div>
     <div class="flex items-center gap-2">
       <div class="flex flex-col items-center p-2 rounded-xl text-xs font-semibold border border-blue-500 text-blue-500 bg-slate-900">

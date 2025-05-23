@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { RnsService } from './rns.service';
-import { CreateRnsDto, UpdateRnsDto } from './dto';
+import { CreateRnsDto, UpdateRnsDto, GenerateTasksDto } from './dto';
 
 @Controller('rns')
 export class RnsController {
@@ -24,6 +24,11 @@ export class RnsController {
   @Post()
   async createRns(@Body() dto: CreateRnsDto) {
     return await this.rnsService.createRns(dto);
+  }
+
+  @Post('generate-tasks')
+  async generateTasks(@Body() dto: GenerateTasksDto) {
+    return await this.rnsService.generateTasks(dto);
   }
 
   @Delete(':id')

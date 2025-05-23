@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -85,4 +86,24 @@ export class UpdateRnsDto {
   @IsBoolean()
   @Type(() => Boolean)
   isAiGenerated?: boolean;
+}
+
+export class GenerateTasksDto {
+  @Type(() => Number)
+  @IsInt()
+  startup_id: number;
+
+  @IsString()
+  @IsEnum(ReadinessType)
+  readinessType: ReadinessType;
+
+  @IsString()
+  term: string;
+
+  @IsInt()
+  no_of_tasks_to_create: number;
+
+  @IsBoolean()
+  @IsOptional()
+  debug: boolean = false;
 }

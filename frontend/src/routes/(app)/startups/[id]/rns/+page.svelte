@@ -114,6 +114,7 @@
   );
 
   $effect(() => {
+    // console.log($rnsQueries[1].data);
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('rns', searchParam);
   });
@@ -123,36 +124,42 @@
   let open = $state(false);
   const generateRNS = async (type: string) => {
     generatingRNS = true;
-    await axios.all([
+    const payload = {
+      startup_id: data.startupId,
+      term: "short-term",
+      readinessType: type,
+      no_of_tasks_to_create: 1
+    };
+    console.log(payload);
+    const test = await axios.all([
       await axiosInstance.post(
-        `/tasks/tasks/generate-tasks/`,
-        {
-          startup_id: data.startupId,
-          term: 1,
-          readiness_type: type,
-          no_of_tasks_to_create: 1
-        },
+        `/rns/generate-tasks/`,
+          payload
+        ,
         {
           headers: {
             Authorization: `Bearer ${data.access}`
           }
         }
       ),
-      await axiosInstance.post(
-        `/tasks/tasks/generate-tasks/`,
-        {
-          startup_id: data.startupId,
-          term: 2,
-          readiness_type: type,
-          no_of_tasks_to_create: 1
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${data.access}`
-          }
-        }
-      )
+      // await axiosInstance.post(
+      //   `/rns/generate-tasks/`,
+      //   {
+      //     startup_id: data.startupId,
+      //     term: "long-term",
+      //     readinessType: type,
+      //     no_of_tasks_to_create: 1
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${data.access}`
+      //     }
+      //   }
+      // )
     ]);
+    test.forEach((res, index) => {
+    console.log(`Response ${index}:`, res.data);
+  });
     generatingRNS = false;
     $rnsQueries[1].refetch();
     toast.success(`Successfully generated ${generatingType} RNS`);
@@ -164,8 +171,8 @@
     await axiosInstance.patch(
       `/rns/tasks/${id}/`,
       {
-        status: 4,
-        is_ai_generated: false,
+        status: 1,
+        isAiGenerated: false,
         priority_number: length
       },
       {
@@ -525,8 +532,10 @@
       {/if}
     </div>
   </div>
-  <div class="block w-full">
+  <!-- <div class="flex h-full gap-5 overflow-scroll"></div> -->
+  <!-- <div class="block w-full"> -->
     {#if selectedTab === 'rns'}
+      <div class="block w-full">
       {#if selectedFormat === 'board'}
         <KanbanBoardNew
           {columns}
@@ -584,18 +593,20 @@
           </Table.Root>
         </div>
       {/if}
+      </div>
     {:else}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 h-full overflow-auto">
       {#each readiness as readiness}
         <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.filter((data: any) => data.readiness_type_rl_type === readiness.name && data.is_ai_generated === true) as item, index}
+          {#each $rnsQueries[1].data.filter((data: any) => data.readinessType === readiness.name && data.isAiGenerated === true) as item, index}
             <div>
               {@render card(item, true, index)}
             </div>
           {/each}
         </AIColumn>
       {/each}
+    </div>
     {/if}
-  </div>
 {/snippet}
 
 {#snippet fallback()}
