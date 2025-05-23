@@ -69,7 +69,7 @@
             }}
             onconsider={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndConsider(e, index)}
             onfinalize={(e: CustomEvent<DndEvent<RNSItem>>) => handleDndFinalize(e, index, column.value)}
-            class="flex h-[700px] flex-col gap-3 overflow-y-scroll"
+            class="flex h-[700px] flex-col gap-3"
           >
             {#if column.items.length === 0}
               <div class="empty-placeholder" style="pointer-events: none;"></div>

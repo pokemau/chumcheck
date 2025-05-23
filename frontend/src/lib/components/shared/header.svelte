@@ -8,16 +8,16 @@
   import { Separator } from '$lib/components/ui/separator';
   import { crossfade } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
   import { getProfileColor, getRole } from '$lib/utils';
+  import { browser } from '$app/environment';
 
-  const { user, startup } = $props();
+  const { user, startup, scrollContainer } = $props();
 
   const userRole = getRole(user.role);
   const modules =
     access.roles[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`].modules;
 
-  4;
   const currentModule = $derived(
     $page.url.pathname.slice(1).split('/')[
       $page.url.pathname.slice(1).split('/').length - 1
@@ -44,24 +44,40 @@
 
   let isBlurred = $state(false);
 
-  function handleScroll() {
-    const scrollY = window.scrollY;
-
+  function handleScroll(e?: Event) {
+    // Prefer scrollContainer if provided, fallback to window
+    let scrollY = 0;
+    if (scrollContainer) {
+      scrollY = scrollContainer.scrollTop;
+    } else {
+      scrollY = window.scrollY;
+    }
     isBlurred = scrollY > 100;
   }
 
   onMount(() => {
-    window.addEventListener('scroll', handleScroll);
+    if (!browser) return;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+    } else {
+      window.addEventListener('scroll', handleScroll);
+    }
+  });
 
-    return () => {
+  onDestroy(() => {
+    if (!browser) return;
+    if (scrollContainer) {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+    } else {
       window.removeEventListener('scroll', handleScroll);
-    };
+    }
   });
 </script>
 
 <header
-  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b text-flutter-gray backdrop-blur-lg dark:text-flutter-white"
+  class="text-flutter-gray dark:text-flutter-white fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b transition-all duration-300"
   class:backdrop-blur-lg={isBlurred}
+  style="backdrop-filter: blur(16px);"
 >
   <nav class="flex h-16 w-4/5 items-center px-0">
     <div class="flex flex-1 cursor-pointer gap-2">
@@ -82,7 +98,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${module}/${startup}/${item.link}${item.name === 'Overview' ? `/${item?.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -90,7 +106,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="bg-flutter-blue absolute bottom-0 h-[1px] w-full"
                     in:send={{ key: 'active-sidebar-tab' }}
                     out:receive={{ key: 'active-sidebar-tab' }}
                   ></div>
@@ -106,7 +122,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${item.link}${item.subModule.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -114,7 +130,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="bg-flutter-blue absolute bottom-0 h-[1px] w-full"
                   ></div>
                 {/if}
               </li>
@@ -125,7 +141,7 @@
       <Separator orientation="vertical" />
       <Badge
         variant="outline"
-        class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal"
+        class="bg-flutter-gray/20 h-8 rounded-full text-sm font-normal"
         >{user?.role ? user?.role : 'Anonymous'}</Badge
       >
       <DropdownMenu.Root>
