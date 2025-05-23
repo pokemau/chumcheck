@@ -151,7 +151,7 @@
     </div>
   </div>
 {:else}
-  <div class="h-full overflow-scroll">
+  <div class="h-full">
     <Card.Root class="pdf-page h-full">
       <Card.Content class="mt-1 flex w-full flex-col gap-5 px-10">
         <div class="w-full text-center text-3xl font-bold">
