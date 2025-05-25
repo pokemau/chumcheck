@@ -61,26 +61,26 @@
         {assignedRNS.readinessType}
       </Badge>
     </div>
-    <div class="text-sm text-white">
+    <div class="text-sm text-white break-words whitespace-pre-wrap">
       Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
     </div>  
     {#if initiative.description}
-      <div class="text-muted-foreground text-xs">
+      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
         Description: {initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.measures}
-      <div class="text-muted-foreground text-xs">
+      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
         Measures: {initiative.measures.substring(0, 100) + (initiative.measures.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.targets}
-      <div class="text-muted-foreground text-xs">
+      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
         Targets: {initiative.targets.substring(0, 100) + (initiative.targets.length > 100 ? '...' : '')}
       </div>
     {/if}
     {#if initiative.remarks}
-      <div class="text-muted-foreground text-xs">
+      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
         Remarks: {initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}
       </div>
     {/if}

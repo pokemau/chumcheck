@@ -62,13 +62,13 @@
 
   const filteredStartups = $derived(() => {
     let base;
-    if (filter === 'All Startups') base = listOfStartups();
-    else if (filter === 'Qualified') base = qualifiedStartups;
+    if (filter === 'All Startups') base = pendingStartups.concat(qualifiedStartups).concat(rejectedStartups).concat(pausedStartups).concat(completedStartups);
     else if (filter === 'Pending') base = pendingStartups;
+    else if (filter === 'Qualified') base = qualifiedStartups;
     else if (filter === 'Rejected') base = rejectedStartups;
     else if (filter === 'Paused') base = pausedStartups;
     else if (filter === 'Completed') base = completedStartups;
-    else base = listOfStartups();
+    else base = pendingStartups.concat(qualifiedStartups).concat(rejectedStartups).concat(pausedStartups).concat(completedStartups);
 
     if (role === 'Mentor') {
       base = base.filter((startup: any) => startup.qualificationStatus !== 1 && startup.qualificationStatus !== 2);

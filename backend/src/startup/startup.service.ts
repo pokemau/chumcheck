@@ -647,11 +647,17 @@ export class StartupService {
       scoresByReadinessType[readinessType] += answer.score;
     }
 
-    // Normalize scores by dividing by 3
     for (const readinessType in scoresByReadinessType) {
-      scoresByReadinessType[readinessType] = Math.ceil(
-        scoresByReadinessType[readinessType] / 3,
-      );
+      // scoresByReadinessType[readinessType] = Math.ceil(
+      //   scoresByReadinessType[readinessType] / 3,
+      // );
+
+      // Average to range of 1-5
+      const normalizedScore = Math.ceil(scoresByReadinessType[readinessType] / 3);
+      // Scale from 1-5 range to 1-9 range using the formula:
+      // newScore = (((oldScore - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin
+      const scaledScore = Math.ceil((((normalizedScore - 1) * (9 - 1)) / (5 - 1)) + 1);
+      scoresByReadinessType[readinessType] = scaledScore;
     }
 
     // Fetch all readiness levels

@@ -50,10 +50,10 @@
         Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
       </Badge>
     </div>
-    <div class="text-sm text-white mb-1">
+    <div class="text-sm text-white mb-1 break-words whitespace-pre-wrap">
       Description: {roadblocks?.description?.substring(0, 60) + (roadblocks?.description?.length > 60 ? '...' : '')}
     </div>
-    <div class="text-xs text-muted-foreground">
+    <div class="text-xs text-muted-foreground break-words whitespace-pre-wrap">
       Fix: {roadblocks?.fix?.substring(0, 60) + (roadblocks?.fix?.length > 60 ? '...' : '')}
     </div>  
     <div class="flex items-center gap-2 mt-1 text-xs">
