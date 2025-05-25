@@ -76,26 +76,33 @@
 
   const members = $derived(
     $rnsQueries[3].isSuccess
-      ? [
-          ...$rnsQueries[3].data.members.map(
-            (member: { id: number; email: string; firstName: string; lastName: string }) => ({
-              userId: member.id,
-              startupId: $rnsQueries[3].data.id,
-              firstName: member.firstName,
-              lastName: member.lastName,
-              email: member.email,
-              selected: false
-            })
-          ),
-          {
-            userId: $rnsQueries[3].data.user.id,
-            startupId: $rnsQueries[3].data.id,
-            firstName: $rnsQueries[3].data.user.firstName,
-            lastName: $rnsQueries[3].data.user.lastName,
-            email: $rnsQueries[3].data.user.email,
+      ? (() => {
+          const data = $rnsQueries[3].data;
+          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+            userId: id,
+            startupId: data.id,
+            firstName,
+            lastName,
+            email,
             selected: false
+          }));
+
+          // Check if user is already in members
+          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+
+          if (!isUserInMembers) {
+            baseMembers.push({
+              userId: data.user.id,
+              startupId: data.id,
+              firstName: data.user.firstName,
+              lastName: data.user.lastName,
+              email: data.user.email,
+              selected: false
+            });
           }
-        ]
+
+          return baseMembers;
+        })()
       : []
   );
 
@@ -159,7 +166,7 @@
     ]);
     test.forEach((res, index) => {
     console.log(`Response ${index}:`, res.data);
-  });
+    });
     generatingRNS = false;
     $rnsQueries[1].refetch();
     toast.success(`Successfully generated ${generatingType} RNS`);

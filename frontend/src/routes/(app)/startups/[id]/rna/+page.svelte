@@ -171,7 +171,7 @@
   };
 
   const deleteRNA = async (id: number, index: number) => {
-    await axiosInstance.delete(`/startup-rna/${Number(id)}/`, {
+    await axiosInstance.delete(`/rna/${Number(id)}/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
