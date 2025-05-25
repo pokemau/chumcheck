@@ -10,6 +10,7 @@ import { StartupRNA } from 'src/entities/startup-rnas.entity';
 import { ReadinessType } from 'src/entities/enums/readiness-type.enum'; // adjust import as needed
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { AiService } from 'src/ai/ai.service';
+import { RnsChatHistory } from 'src/entities/rns-chat-history.entity';
 
 @Injectable()
 export class RnsService {
@@ -92,6 +93,10 @@ export class RnsService {
       rns.priorityNumber = dto.priorityNumber;
     }
 
+    if (typeof dto.isAiGenerated === 'boolean') {
+      rns.isAiGenerated = dto.isAiGenerated;
+    }
+
     await this.em.flush();
     return rns;
   }
@@ -108,7 +113,7 @@ export class RnsService {
     if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found.');
 
     // 3. Get readiness type entity
-  const readinessType = dto.readinessType;
+    const readinessType = dto.readinessType;
 
     // 4. Get startup RNAs for this readiness type
     const startupRnas = await this.em.find(StartupRNA, {
@@ -249,5 +254,101 @@ export class RnsService {
           startup: r.startup.id,
         }));
       }
+  }
+
+  async refineRnsDescription(
+    rnsId: number, 
+    chatHistory: { role: 'User' | 'Ai'; content: string; refinedDescription: string | null }[], 
+    latestPrompt: string
+  ): Promise<{ refinedDescription: string; aiCommentary: string }> {
+    const rns = await this.em.findOne(Rns, { id: rnsId }, { populate: ['startup', 'targetLevel', 'startup.capsuleProposal'] });
+    if (!rns) throw new NotFoundException('RNS not found');
+    const startup = rns.startup;
+    const capsuleProposalInfo = startup.capsuleProposal;
+    if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+
+    const startupReadinessLevels = await this.em.find(
+      StartupReadinessLevel,
+      { startup: startup },
+      { populate: ['readinessLevel'] }
+    );
+    const trl = startupReadinessLevels[0]?.readinessLevel.level || 0;
+    const mrl = startupReadinessLevels[1]?.readinessLevel.level || 0;
+    const arl = startupReadinessLevels[2]?.readinessLevel.level || 0;
+    const orl = startupReadinessLevels[3]?.readinessLevel.level || 0;
+    const rrl = startupReadinessLevels[4]?.readinessLevel.level || 0;
+    const irl = startupReadinessLevels[5]?.readinessLevel.level || 0;
+
+    let prompt = `Given these data:
+      Acceleration Proposal Title: ${capsuleProposalInfo.title}
+      Duration: 3 months
+      I. About the startup
+      A. Startup Description
+      ${capsuleProposalInfo.description}
+      B. Problem Statement
+      ${capsuleProposalInfo.problemStatement}
+      C. Target Market
+      ${capsuleProposalInfo.targetMarket}
+      D. Solution Description
+      ${capsuleProposalInfo.solutionDescription}
+      II. About the Proposed Acceleration
+      A. Objectives
+      ${capsuleProposalInfo.objectives}
+      B. Scope of The Proposal
+      ${capsuleProposalInfo.scope}
+      C. Methodology and Expected Outputs
+      ${capsuleProposalInfo.methodology}
+      Initial Readiness Level:
+      TRL ${trl}
+      MRL ${mrl}
+      ARL ${arl}
+      ORL ${orl}
+      RRL ${rrl}
+      IRL ${irl}
+
+      Here is the current RNS task description: "${rns.description}"
+
+      Given these chat history of user:\n`;
+
+    for (const msg of chatHistory) {
+      prompt += `${msg.role}: ${msg.refinedDescription ? `Refined Description: ${msg.refinedDescription}\n` : ''} ${msg.content}\n`;
+    }
+
+    prompt += `
+      User: ${latestPrompt}\n
+      Please rewrite or refine the RNS description according to the user's instructions. Just write the refined description, no other text.
+
+      After you rewrite/refine the RNS description, write '=========' on a new line, then provide a brief AI commentary (1-2 sentences) explaining the changes or improvements you made. Example:\n<refined description>\n=========\n<ai commentary>
+    `;
+
+    const result = await this.aiService.refineRnsDescription(prompt);
+
+    const newMessages = [
+      new RnsChatHistory({
+        rns,
+        role: 'User',
+        content: latestPrompt
+      }),
+      new RnsChatHistory({
+        rns,
+        role: 'Ai',
+        content: result.aiCommentary,
+        refinedDescription: result.refinedDescription
+      })
+    ];
+
+    await this.em.persistAndFlush(newMessages);
+
+    return result;
+  }
+
+  async getRnsChatHistory(rnsId: number) {
+    const chatHistory = await this.em.find(
+      RnsChatHistory,
+      { rns: { id: rnsId } },
+      { orderBy: { createdAt: 'ASC' } }
+    );
+
+    return chatHistory;
   }
 }

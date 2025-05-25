@@ -3,7 +3,7 @@
   import * as Card from '$lib/components/ui/card';
   import { Target, User } from 'lucide-svelte';
   import { getProfileColor, getReadinessStyles, zIndex } from '$lib/utils';
-  import { RnsViewEditDeleteDialog } from '.';
+  import { RnsViewEditDeleteDialog, RnsViewEditDeleteAiDialog } from '.';
   import type { Actions } from '$lib/types';
   let { rns, members, update, ai, addToRns, deleteRns, role, index } = $props();
 
@@ -39,8 +39,8 @@
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
     <div class="text-sm">
-      {rns.description.substring(0, 150) +
-        `${rns.description.length > 150 ? '...' : ''}`}
+      {rns.description.substring(0, 100) +
+        `${rns.description.length > 100 ? '...' : ''}`}
     </div>
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-1 text-xs text-muted-foreground ">
@@ -74,18 +74,28 @@
   </Card.Content>
 </Card.Root>
 
-<RnsViewEditDeleteDialog
-  {open}
-  {onOpenChange}
-  {rns}
-  {update}
-  {action}
-  {deleteRns}
-  {members}
-  {assignedMember}
-  {closeDialog}
-  {ai}
-  {addToRns}
-  {index}
-  {role}
-/>
+{#if !ai}
+  <RnsViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    {rns}
+    {deleteRns}
+    {update}
+    {action}
+    {members}
+    {closeDialog}
+    {index}
+    {role}
+  />
+{:else}
+  <RnsViewEditDeleteAiDialog
+    {open}
+    {onOpenChange}
+    {rns}
+    {deleteRns}
+    {members}
+    {closeDialog}
+    {addToRns}
+    {index}
+  />
+{/if}

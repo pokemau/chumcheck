@@ -16,22 +16,20 @@
   let {
     open,
     onOpenChange,
-    rns,
-    deleteRns,
+    rna,
+    deleteRna,
     update,
     readinessData,
     closeDialog,
-    ai = false,
     addToRna,
-    checkIfExist,
     role
   } = $props();
 
-  let rnsCopy = $state({ ...rns });
+  let rnaCopy = $state({ ...rna });
 
   $effect(() => {
     if (!open) {
-      rnsCopy = { ...rns };
+      rnaCopy = { ...rna };
     }
   });
 
@@ -45,7 +43,7 @@
   let rnaDialog = $state(false);
 
   $effect(() => {
-    console.log(rnsCopy);
+    // console.log(rnaCopy);
   });
 </script>
 
@@ -53,18 +51,18 @@
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
     <div class="flex gap-10">
       <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">{rnsCopy.readiness_type_rl_type}</h1>
+        <h1 class="text-2xl font-semibold">{rnaCopy.readiness_type_rl_type}</h1>
         <div class="flex flex-col gap-3">
           <Label for="username">Description</Label>
           {#if editDescription}
-            <Textarea rows={12} bind:value={rnsCopy.rna} class="text-justify text-base" />
+            <Textarea rows={12} bind:value={rnaCopy.rna} class="text-justify text-base" />
             <div class="ml-auto flex gap-2">
               <Button size="sm" variant="outline" onclick={() => (editDescription = false)}
                 >Cancel</Button
               ><Button
                 size="sm"
                 onclick={async () => {
-                  await update(rnsCopy.id, rnsCopy.rna);
+                  await update(rnaCopy.id, rnaCopy.rna);
                   editDescription = false;
                 }}>Save</Button
               >
@@ -78,7 +76,7 @@
               }}
             >
               <div class="text-justify">
-                {rnsCopy.rna}
+                {rnaCopy.rna}
               </div>
             </button>
           {/if}
@@ -91,19 +89,6 @@
               ><Trash class="h-4 w-4" /> Delete</Button
             >
           {/if}
-          {#if ai}
-            <Button
-              size="sm"
-              onclick={() => {
-                if (checkIfExist(rnsCopy.id)) {
-                  rnaDialog = true;
-                } else {
-                  addToRna(rnsCopy.id);
-                  open = false;
-                }
-              }}><Check class="h-4 w-4" /> Add to RNA</Button
-            >
-          {/if}
         </div>
         <Card.Root class="rounded-md">
           <Card.Content class="p-0">
@@ -114,11 +99,11 @@
                 <!-- <div class="flex h-9 items-center justify-between text-sm">
 									<p class="w-[130px]">Readiness Type</p>
 									{#if role !== 'Startup'}
-										<Select.Root type="single" bind:value={rnsCopy.readiness_type_id}>
+										<Select.Root type="single" bind:value={rnaCopy.readiness_type_id}>
 											<Select.Trigger class="w-[200px] border-none"
-												>{rnsCopy.readiness_type_id
+												>{rnaCopy.readiness_type_id
 													? getReadinessTypes().filter(
-															(d) => d.id === Number(rnsCopy.readiness_type_id)
+															(d) => d.id === Number(rnaCopy.readiness_type_id)
 														)[0].name
 													: ''}</Select.Trigger
 											>
@@ -129,14 +114,14 @@
 											</Select.Content>
 										</Select.Root>
 									{:else}
-										<p class="w-[200px] p-3">{rnsCopy.readiness_type_rl_type}</p>
+										<p class="w-[200px] p-3">{rnaCopy.readiness_type_rl_type}</p>
 									{/if}
 								</div> -->
                 <div class="flex h-9 items-center justify-between text-sm">
                   <p class="w-[130px]">Current Level</p>
                   <p class="w-[200px] p-3">
                     {readinessData?.filter(
-                      (d: any) => d?.readiness_type === rnsCopy?.readiness_type_rl_type
+                      (d: any) => d?.readiness_type === rnaCopy?.readiness_type_rl_type
                     )[0]?.readiness_level}
                   </p>
                 </div>
@@ -163,7 +148,7 @@
       <AlertDialog.Action
         class="bg-red-500 hover:bg-red-600"
         onclick={async () => {
-          await addToRna(rnsCopy.id);
+          await addToRna(rnaCopy.id);
           rnaDialog = false;
           closeDialog();
         }}>Continue</AlertDialog.Action
@@ -185,7 +170,7 @@
       <AlertDialog.Action
         class="bg-red-500 hover:bg-red-600"
         onclick={async () => {
-          await deleteRns(rns.id, 1);
+          await deleteRna(rna.id, 1);
           deleteDialogOpen = false;
           closeDialog();
         }}>Continue</AlertDialog.Action

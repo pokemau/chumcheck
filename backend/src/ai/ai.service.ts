@@ -96,4 +96,21 @@ export class AiService {
     }
   }
 
+  async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string; aiCommentary: string }> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
+    if (!res.text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    const [refinedDescriptionRaw, aiCommentaryRaw] = res.text.split(/\n?={5,}\n?/);
+    const refinedDescription = refinedDescriptionRaw ? refinedDescriptionRaw.trim() : '';
+    const aiCommentary = aiCommentaryRaw ? aiCommentaryRaw.trim() : '';
+    return {
+      refinedDescription,
+      aiCommentary,
+    };
+  }
 }

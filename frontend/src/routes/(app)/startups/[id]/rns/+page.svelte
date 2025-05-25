@@ -39,7 +39,7 @@
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
   import { log10 } from 'chart.js/helpers';
-  import type { RNSItem } from '$lib/types.js';
+  import { goto } from '$app/navigation';
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -165,38 +165,53 @@
     toast.success(`Successfully generated ${generatingType} RNS`);
   };
 
-  const addToRNS = async (id: number) => {
-    const length = columns[1].items.length;
+  const addToRNS = async (id: number, payload: any) => {
+    const length = columns[0].items.length;
+    console.log("Length:", length);
 
-    await axiosInstance.patch(
-      `/rns/tasks/${id}/`,
-      {
-        status: 1,
-        isAiGenerated: false,
-        priority_number: length
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
+    try {
+      const response = await axiosInstance.patch(
+        `/rns/${id}/`,
+        {
+          priorityNumber: length + 1,
+          description: payload.description,
+          isAiGenerated: false,
+          assigneeId: payload.assigneeId,
+          status: 1,
+          readinessType: payload.readinessType,
+          targetLevel: payload.targetLevelId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
         }
-      }
-    );
-    toast.success('Successfuly added to RNS');
-    $rnsQueries[1]
-      .refetch()
-      .then((res) => {
-        columns.forEach((column) => {
-          column.items = res.data
-            .filter(
-              (data: any) =>
-                data.isAiGenerated === false &&
-                data.status === column.value &&
-                data.task_type === 1
-            )
-            .sort((a: any, b: any) => a.order - b.order);
-        });
-      })
-      .finally(async () => await updatePriorityNumber());
+      );
+      console.log('Patch response:', response.data);
+      toast.success('Successfully added to RNS');
+      
+      $rnsQueries[1]
+        .refetch()
+        .then((res) => {
+          console.log('Refetch response:', res.data);
+          columns.forEach((column) => {
+            const filteredItems = res.data
+              .filter(
+                (data: any) =>
+                  data.isAiGenerated === false &&
+                  data.status === column.value
+              )
+              .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
+            console.log(`Column ${column.value} items:`, filteredItems);
+            column.items = filteredItems;
+          });
+        })
+        .finally(async () => await updatePriorityNumber());
+      goto("rns?tab=rns")
+    } catch (error) {
+      console.error('Error in addToRNS:', error);
+      toast.error('Failed to add to RNS');
+    }
   };
 
   const createRns = async (payload: any) => {
@@ -241,7 +256,7 @@
 
   const updatedEditRNS = async (
     id: number,
-    payload: { readinessType: string }
+    payload: { readinessType: string, description: string, targetLevelId: number, assigneeId: number, isAiGenerated: boolean }
   ) => {
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
@@ -261,6 +276,7 @@
           .sort((a: any, b: any) => a.order - b.order);
       });
     });
+    goto("rns?tab=rns")
   };
 
   const deleteRNS = async (id: number, index: number) => {

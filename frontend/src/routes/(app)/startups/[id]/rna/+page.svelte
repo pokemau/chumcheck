@@ -128,7 +128,7 @@
     $rnaQueries[1].refetch().then(() => (open = false));
   };
 
-  const createRna = async (payload: any) => {
+  const createRNA = async (payload: any) => {
 
 
     const cleanPayload = {
@@ -238,7 +238,7 @@
   {@render fallback()}
 {/if}
 
-<RnaCreateDialog {open} {onOpenChange} create={createRna} {startupId} {readinessData} />
+<RnaCreateDialog {open} {onOpenChange} create={createRNA} {startupId} {readinessData} />
 
 {#snippet loading()}
   <div class="flex h-full flex-col gap-3">
@@ -298,7 +298,7 @@
     {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) as rna, index}
       <RnaCard
         {rna}
-        ai={selectedTab === 'rna' ? false : true}
+        ai={selectedTab === 'rna' ? false : true} 
         update={editRNA}
         deleteRna={deleteRNA}
         addToRna={addToRNA}

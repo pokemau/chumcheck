@@ -7,6 +7,7 @@ import { StartupModule } from './startup/startup.module';
 import { ReadinesslevelModule } from './readinesslevel/readinesslevel.module';
 import { AiModule } from './ai/ai.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { ChatHistoryModule } from './chat_history/chat-history.module';
 
 import { User } from './entities/user.entity';
 import { Startup } from './entities/startup.entity';
@@ -41,6 +42,7 @@ import { OverviewModule } from './overview/overview.module';
     RoadblockModule,
     ProgressModule,
     OverviewModule,
+    ChatHistoryModule,
   ],
   providers: [AppService],
 })
