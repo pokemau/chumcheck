@@ -4,6 +4,7 @@
   import { Textarea } from '$lib/components/ui/textarea';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { Badge } from '$lib/components/ui/badge';
+  import TextEditor from '$lib/components/shared/text-editor.svelte';
   import {
     getProfileColor,
     getReadinessLevels,
@@ -97,6 +98,7 @@
       <div class="flex flex-col gap-4">
         <Label for="username">Description</Label>
         <Textarea rows={10} bind:value={data.description} />
+        <!-- <TextEditor bind:value={data.description} placeholder="Description" classNames="h-[200px] w-full" /> -->
       </div>
     </div>
     <div class="flex flex-col gap-4">
