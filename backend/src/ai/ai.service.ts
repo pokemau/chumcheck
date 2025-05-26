@@ -200,4 +200,68 @@ async generateRoadblocksFromPrompt(
       IRL ${irl}
   `;
   }
+
+  async refineInitiative(prompt: string): Promise<{
+    refinedDescription?: string;
+    refinedMeasures?: string;
+    refinedTargets?: string;
+    refinedRemarks?: string;
+    aiCommentary: string;
+  }> {
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt
+    });
+
+    const content = response.text;
+    if (!content) throw new Error('No content in response');
+
+    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
+    
+    const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+    
+    try {
+      const refinements = JSON.parse(cleanJsonStr);
+
+      const hasRefinements = refinements.refinedDescription || 
+                           refinements.refinedMeasures || 
+                           refinements.refinedTargets || 
+                           refinements.refinedRemarks;
+      
+      if (!hasRefinements) {
+        console.warn('AI response contained no refinements');
+      }
+
+      return {
+        ...refinements,
+        aiCommentary: commentary || 'Changes applied successfully.'
+      };
+    } catch (err) {
+      console.error('Failed to parse AI response:', content);
+      console.error('Parse error:', err);
+      throw new Error('AI returned an invalid JSON response');
+    }
+  }
+
+  async refineRoadblock(prompt: string): Promise<{
+    refinedDescription?: string;
+    refinedFix?: string;
+    aiCommentary: string;
+  }> {
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt
+    });
+
+    const content = response.text;
+    if (!content) throw new Error('No content in response');
+
+    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
+    const refinements = JSON.parse(jsonStr);
+
+    return {
+      ...refinements,
+      aiCommentary: commentary || 'Changes applied successfully.'
+    };
+  }
 }

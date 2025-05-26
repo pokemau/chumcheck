@@ -8,6 +8,7 @@ import { Startup } from 'src/entities/startup.entity';
 import { AiService } from 'src/ai/ai.service';
 import { createBasePrompt } from 'src/ai/utils/prompt.utils';
 import { RnsStatus } from 'src/entities/enums/rns.enum';
+import { InitiativeChatHistory } from 'src/entities/initiative-chat-history.entity';
 
 @Injectable()
 export class InitiativeService {
@@ -154,4 +155,99 @@ export class InitiativeService {
         }
     }
 
+    async refineInitiative(
+        initiativeId: number,
+        chatHistory: { role: 'User' | 'Ai'; content: string }[],
+        latestPrompt: string
+    ): Promise<{ 
+        refinedDescription?: string; 
+        refinedMeasures?: string;
+        refinedTargets?: string;
+        refinedRemarks?: string;
+        aiCommentary: string 
+    }> {
+        const initiative = await this.em.findOne(Initiative, { id: initiativeId }, { 
+            populate: ['startup', 'startup.capsuleProposal', 'rns'] 
+        });
+        if (!initiative) throw new NotFoundException('Initiative not found');
+
+        const startup = initiative.startup;
+        const capsuleProposalInfo = startup.capsuleProposal;
+        if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+
+        const basePrompt = await createBasePrompt(startup, this.em);
+
+        let prompt = `${basePrompt}
+
+        Current Initiative Details:
+        Description: ${initiative.description}
+        Measures: ${initiative.measures}
+        Targets: ${initiative.targets}
+        Remarks: ${initiative.remarks}
+        
+        Related RNS Task:
+        ${initiative.rns.description}
+
+        Chat History:
+        ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+        User: ${latestPrompt}
+
+        IMPORTANT INSTRUCTIONS:
+        1. Only refine the specific fields that the user explicitly asks to modify
+        2. Do not modify any other fields
+        3. Respond with a JSON object containing ONLY the requested refinements
+        4. Use the exact field names shown in the example
+
+        Example response format:
+        If user asks to update measures only:
+        {
+            "refinedMeasures": "your refined measures here"
+        }
+        =========
+        Your commentary about the changes here.
+
+        If user asks to update description and targets:
+        {
+            "refinedDescription": "your refined description here",
+            "refinedTargets": "your refined targets here"
+        }
+        =========
+        Your commentary about the changes here.
+
+        Available fields:
+        - refinedDescription (for description updates)
+        - refinedMeasures (for measures updates)
+        - refinedTargets (for targets updates)
+        - refinedRemarks (for remarks updates)
+
+        Remember:
+        - Only include fields that the user specifically asks to refine
+        - The JSON must be valid and properly formatted
+        - Always include the ========= separator followed by your commentary`;
+
+        const result = await this.aiService.refineInitiative(prompt);
+
+        // Save chat history
+        const newMessages = [
+            new InitiativeChatHistory({
+                initiative,
+                role: 'User',
+                content: latestPrompt
+            }),
+            new InitiativeChatHistory({
+                initiative,
+                role: 'Ai',
+                content: result.aiCommentary,
+                refinedDescription: result.refinedDescription,
+                refinedMeasures: result.refinedMeasures,
+                refinedTargets: result.refinedTargets,
+                refinedRemarks: result.refinedRemarks
+            })
+        ];
+
+        await this.em.persistAndFlush(newMessages);
+
+        return result;
+    }
 }

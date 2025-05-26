@@ -8,30 +8,44 @@ export class InitiativeController {
 
     @Get()
     async getStartupInitiative(@Query('startupId', ParseIntPipe) startupId: number) {
-    return await this.initiativeService.getStartupInitiative(startupId);
+        return await this.initiativeService.getStartupInitiative(startupId);
     }
 
     @Post()
     async createInitiative(@Body() dto: CreateInitiativeDto) {
-    return await this.initiativeService.createInitiative(dto);
+        return await this.initiativeService.createInitiative(dto);
     }
 
     @Patch(':id')
     async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateInitiativeDto
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: UpdateInitiativeDto
     ) {
-    return this.initiativeService.update(id, dto);
+        return this.initiativeService.update(id, dto);
     }
 
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.initiativeService.delete(id);
+        return this.initiativeService.delete(id);
     }
 
     @Post('generate-initiatives')
     async generateInitiatives(@Body() dto: GenerateInitiativeDto) {
-    return await this.initiativeService.generateInitiatives(dto);
+        return await this.initiativeService.generateInitiatives(dto);
     }
 
+    @Post(':id/refine')
+    async refineInitiative(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: { 
+            chatHistory: { role: 'User' | 'Ai'; content: string }[]; 
+            latestPrompt: string 
+        }
+    ) {
+        return await this.initiativeService.refineInitiative(
+            id, 
+            dto.chatHistory, 
+            dto.latestPrompt
+        );
+    }
 }
