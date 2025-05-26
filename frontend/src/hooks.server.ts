@@ -48,8 +48,6 @@ export const handle: Handle = async ({ event, resolve }) => {
       lastName?: string;
     }>(accessToken, secret);
 
-    console.log(payload)
-
     event.locals.user = {
       id: Number(payload.sub),
       email: payload.email,
