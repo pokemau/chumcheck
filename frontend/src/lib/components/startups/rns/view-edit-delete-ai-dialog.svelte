@@ -168,7 +168,7 @@
 </script>
 
 <Dialog.Root bind:open={open} {onOpenChange}>
-  <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-scroll">
+  <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-auto">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->
       <div class="flex flex-col w-1/2 border-r border-border p-6">

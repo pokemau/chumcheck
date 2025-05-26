@@ -32,7 +32,7 @@
       {/if}
     </div>
   </Card.Header>
-  <Card.Content class="flex h-[700px] flex-col gap-3 overflow-scroll">
+  <Card.Content class="flex h-[700px] flex-col gap-3 overflow-auto">
     {@render children()}
   </Card.Content>
 </Card.Root>

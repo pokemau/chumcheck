@@ -606,7 +606,7 @@
       </div>
     {/if}
   {:else}
-    <div class="grid w-full grid-cols-4 gap-5 overflow-scroll">
+    <div class="grid w-full grid-cols-4 gap-5 overflow-auto">
       {#each $roadblocksQueries[1].data.filter((data: any) => data.isAiGenerated === true) as r, index}
         <RoadblocksCard
           roadblocks={r}

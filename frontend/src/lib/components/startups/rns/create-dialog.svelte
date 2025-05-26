@@ -73,7 +73,7 @@
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
-  <Dialog.Content class="h-4/5  max-w-[600px] overflow-scroll">
+  <Dialog.Content class="h-4/5  max-w-[600px] overflow-auto">
     <Dialog.Header>
       <Dialog.Title>Create {getStatusName(status)} Rns</Dialog.Title>
     </Dialog.Header>
