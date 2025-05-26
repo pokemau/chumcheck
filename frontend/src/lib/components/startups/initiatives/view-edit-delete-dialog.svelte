@@ -50,11 +50,11 @@
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
-  <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
+  <Dialog.Content class="h-4/6 max-w-[1200px] overflow-auto">
     <div class="flex gap-10 max-w-[1100px]">
       <div class="flex w-4/6 flex-col gap-5">
         <h1 class="text-2xl font-semibold">Initiative #{rnsCopy.initiativeNumber}</h1>
-        <div class="flex h-[550px] flex-col gap-5 overflow-scroll">
+        <div class="flex h-[550px] flex-col gap-5 overflow-y-scroll">
           <div class="flex flex-col gap-3">
             <Label for="username" class="text-lg">Task</Label>
             <div class="text-justify">
