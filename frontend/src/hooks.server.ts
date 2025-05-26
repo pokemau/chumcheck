@@ -3,6 +3,7 @@ import { JWT_SECRET } from '$env/static/private';
 import { getRole } from '$lib/utils';
 import type { Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
+import { Play } from 'lucide-svelte';
 
 const setUser = async (event: any, resolve: any, access: any) => {
   try {
@@ -47,12 +48,14 @@ export const handle: Handle = async ({ event, resolve }) => {
       lastName?: string;
     }>(accessToken, secret);
 
+    console.log(payload)
+
     event.locals.user = {
       id: Number(payload.sub),
       email: payload.email,
       role: payload.role!,
-      firstName: '',
-      lastName: ''
+      firstName: payload.firstName ?? undefined,
+      lastName: payload.lastName ?? undefined
     };
   } catch (error) {
     console.error(`[ HANDLE ERROR ]`);

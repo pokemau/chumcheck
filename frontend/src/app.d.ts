@@ -7,8 +7,8 @@ declare global {
         id: number;
         role: 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
         email: string;
-        firstName: string | null;
-        lastName: string | null;
+        firstName: string | undefined;
+        lastName: string | undefined;
       };
     }
     // interface Error {}
