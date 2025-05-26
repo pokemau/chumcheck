@@ -11,6 +11,7 @@ import { ReadinessType } from 'src/entities/enums/readiness-type.enum'; // adjus
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { AiService } from 'src/ai/ai.service';
 import { RnsChatHistory } from 'src/entities/rns-chat-history.entity';
+import { RnsStatus } from 'src/entities/enums/rns.enum';
 
 @Injectable()
 export class RnsService {
@@ -115,6 +116,11 @@ export class RnsService {
     // 3. Get readiness type entity
     const readinessType = dto.readinessType;
 
+  //Term/Status
+  const term = dto.term <= 6 ? "Short-term" : "Long-term";
+
+    
+
     // 4. Get startup RNAs for this readiness type
     const startupRnas = await this.em.find(StartupRNA, {
       startup: startup,
@@ -195,7 +201,7 @@ export class RnsService {
 
     ${startupRnaPrompt}
 
-    TASK: Create me ${dto.no_of_tasks_to_create} ${dto.term} tasks for the startup's personalized learning path.
+    TASK: Create me ${dto.no_of_tasks_to_create} ${term} tasks for the startup's personalized learning path.
     Requirement: The response should be in a JSON format.
     It should consist of readiness level type, target level, description
     JSON format: [{"target_level": (int), "description": ""}]
@@ -230,7 +236,8 @@ export class RnsService {
       rns.isAiGenerated = true;
       rns.readinessType = readinessType;
       rns.startup = startup;
-      rns.status = 1; // Default status, adjust as needed
+      
+      rns.status = dto.term <= 6 ? 1 : 7; // Default status, adjust as needed
       rns.assignee = startup.user;
 
       await this.em.persist(rns);

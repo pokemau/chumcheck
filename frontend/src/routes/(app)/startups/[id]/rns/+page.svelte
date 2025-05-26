@@ -133,7 +133,7 @@
     generatingRNS = true;
     const payload = {
       startup_id: data.startupId,
-      term: "short-term",
+      term: 1, //short term
       readinessType: type,
       no_of_tasks_to_create: 1
     };
@@ -153,7 +153,7 @@
         `/rns/generate-tasks/`,
         {
           startup_id: data.startupId,
-          term: "long-term",
+          term: 7, //long term
           readinessType: type,
           no_of_tasks_to_create: 1
         },
@@ -183,7 +183,6 @@
           description: payload.description,
           isAiGenerated: false,
           assigneeId: payload.assigneeId,
-          status: 1,
           readinessType: payload.readinessType,
           targetLevel: payload.targetLevelId,
         },
@@ -510,7 +509,7 @@
     <div class="flex gap-3">
       <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
         <div class="bg-background flex h-fit justify-between rounded-lg">
-          <AITabs {selectedTab} name="rns" updateTab={updateRnsTab} />
+          <AITabs {selectedTab} name="rns" realName="RNS" updateTab={updateRnsTab} />
         </div>
       </Can>
       {#if selectedTab === 'rns'}

@@ -40,6 +40,9 @@
   let editTarget = $state(false);
   let editRemarks = $state(false);
 
+    
+    // console.log(tasks)
+
   let deleteDialogOpen = $state(false);
   const deleteDialogOnOpenChange = () => {
     deleteDialogOpen = !deleteDialogOnOpenChange;
@@ -48,19 +51,19 @@
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10">
+    <div class="flex gap-10 max-w-[1100px]">
       <div class="flex w-4/6 flex-col gap-5">
         <h1 class="text-2xl font-semibold">Initiative #{rnsCopy.initiativeNumber}</h1>
         <div class="flex h-[550px] flex-col gap-5 overflow-scroll">
           <div class="flex flex-col gap-3">
-            <Label for="username">Task</Label>
+            <Label for="username" class="text-lg">Task</Label>
             <div class="text-justify">
               {#if rnsCopy.rns}
                 {#if typeof rnsCopy.rns === 'object'}
                   {rnsCopy.rns?.title ?? ''}
                 {:else}
                   {#if tasks.filter((task: any) => task.id === rnsCopy.rns)[0]}
-                    {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].title}
+                    {tasks.filter((task: any) => task.id === rnsCopy.rns)[0].description}
                   {:else}
                     None
                   {/if}
@@ -69,7 +72,7 @@
             </div>
           </div>
           <div class="flex flex-col gap-3">
-            <Label for="username">Description</Label>
+            <Label for="username" class="text-lg">Description</Label>
             {#if editDescription && role !== 'Startup'}
               <Textarea rows={12} bind:value={rnsCopy.description} class="text-justify text-base" />
               <div class="ml-auto flex gap-2">
@@ -92,7 +95,7 @@
             {/if}
           </div>
           <div class="flex flex-col gap-3">
-            <Label for="username">Measures</Label>
+            <Label for="username" class="text-lg">Measures</Label>
             {#if editMeasures && role !== 'Startup'}
               <Textarea rows={12} bind:value={rnsCopy.measures} class="text-justify text-base" />
               <div class="ml-auto flex gap-2">
@@ -115,7 +118,7 @@
             {/if}
           </div>
           <div class="flex flex-col gap-3">
-            <Label for="username">Target</Label>
+            <Label for="username" class="text-lg">Target</Label>
             {#if editTarget && role !== 'Startup'}
               <Textarea rows={12} bind:value={rnsCopy.targets} class="text-justify text-base" />
               <div class="ml-auto flex gap-2">
@@ -138,7 +141,7 @@
             {/if}
           </div>
           <div class="flex flex-col gap-3">
-            <Label for="username">Remarks</Label>
+            <Label for="username" class="text-lg">Remarks</Label>
             {#if editRemarks && role !== 'Startup'}
               <Textarea rows={12} bind:value={rnsCopy.remarks} class="text-justify text-base" />
               <div class="ml-auto flex gap-2">

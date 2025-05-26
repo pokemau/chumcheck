@@ -97,8 +97,9 @@ export class GenerateTasksDto {
   @IsEnum(ReadinessType)
   readinessType: ReadinessType;
 
-  @IsString()
-  term: string;
+  @Type(() => Number)
+  @IsInt()
+  term: number;
 
   @Type(() => Number)
   @IsInt()

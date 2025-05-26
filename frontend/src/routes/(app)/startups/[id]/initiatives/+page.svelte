@@ -407,8 +407,7 @@
       .filter(
         (data: any) =>
           data.readinessType === type &&
-          data.isAiGenerated === false &&
-          data.status === 1
+          data.isAiGenerated === false 
       )
       .map((d: any) => d.id);
 
@@ -567,7 +566,7 @@
     <div class="flex gap-3">
       <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
         <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="initiatives" updateTab={updateInitiativeTab} />
+          <AITabs {selectedTab} name="initiatives" realName="Initiatives" updateTab={updateInitiativeTab} />
         </div>
       </Can>
       {#if selectedTab === 'initiatives'}

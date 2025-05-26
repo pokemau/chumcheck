@@ -150,7 +150,13 @@
     <!-- </div> -->
     <Dialog.Footer>
       <Button
-        onclick={() => create(data)}
+        onclick={() => {
+          create(data)
+          data.readinessType = ''
+          data.description = ''
+          data.assigneeId = ''
+          data.targetLevelId = ''
+          }}
         disabled={data.targetLevelId === '' || data.description === ''
           ? true
           : false}>Create</Button

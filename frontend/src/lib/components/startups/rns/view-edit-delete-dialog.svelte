@@ -80,13 +80,13 @@
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10">
+    <div class="flex gap-10 max-w-[1100px]">
       <div class="flex w-4/6 flex-col gap-5">
         <h1 class="text-2xl font-semibold">
           Priority #{rnsCopy.priorityNumber}
         </h1>
         <div class="flex flex-col gap-3">
-          <Label for="username">Description</Label>
+          <Label for="username" class="text-lg">Description</Label>
           {#if editDescription && role !== 'Startup'}
             <Textarea
               rows={12}
