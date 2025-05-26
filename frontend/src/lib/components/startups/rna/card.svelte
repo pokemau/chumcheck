@@ -29,7 +29,7 @@
         {rna.readinessLevel.readinessType}
       </h2>
     </div>
-    <div class="text-sm text-muted-foreground">
+    <div class="text-sm text-muted-foreground break-words">
       {rna.rna.substring(0, 150) + `${rna.rna.length > 150 ? '...' : ''}`}
     </div>
     <div class="text-sm text-muted-foreground">

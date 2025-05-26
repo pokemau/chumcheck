@@ -44,11 +44,11 @@
     deleteDialogOpen = !deleteDialogOpen;
   };
 
-  console.log("readinessData:", readinessData);
-  console.log("ReadinessID: ", data.readinessLevelId);
-  console.log("Trying to print:", readinessData.find(
-                        (d: any) => String(d.readinessLevel.id) === data.readinessLevelId
-                        )?.readinessLevel.readinessType);
+  // console.log("readinessData:", readinessData);
+  // console.log("ReadinessID: ", data.readinessLevelId);
+  // console.log("Trying to print:", readinessData.find(
+  //                       (d: any) => String(d.readinessLevel.id) === data.readinessLevelId
+  //                       )?.readinessLevel.readinessType);
 
 </script>
 

@@ -43,19 +43,20 @@
   let rnaDialog = $state(false);
 
   $effect(() => {
-    // console.log(rnaCopy);
+    // console.log($state.snapshot(readinessData));
+    // console.log($state.snapshot(rnaCopy));
   });
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
-  <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10">
+  <Dialog.Content class="h-4/6 max-w-[1200px] ">
+    <div class="flex gap-10 max-w-[1100px]">
       <div class="flex w-4/6 flex-col gap-5">
         <h1 class="text-2xl font-semibold">{rnaCopy.readiness_type_rl_type}</h1>
         <div class="flex flex-col gap-3">
-          <Label for="username">Description</Label>
+          <Label for="username" class="text-lg">Description</Label>
           {#if editDescription}
-            <Textarea rows={12} bind:value={rnaCopy.rna} class="text-justify text-base" />
+            <Textarea rows={12} bind:value={rnaCopy.rna} class="text-justify text-base"/>
             <div class="ml-auto flex gap-2">
               <Button size="sm" variant="outline" onclick={() => (editDescription = false)}
                 >Cancel</Button
@@ -75,7 +76,7 @@
                 }
               }}
             >
-              <div class="text-justify">
+              <div class="text-justify break-words">
                 {rnaCopy.rna}
               </div>
             </button>
@@ -121,8 +122,16 @@
                   <p class="w-[130px]">Current Level</p>
                   <p class="w-[200px] p-3">
                     {readinessData?.filter(
-                      (d: any) => d?.readiness_type === rnaCopy?.readiness_type_rl_type
-                    )[0]?.readiness_level}
+                      (d: any) => d?.readinessLevel.readinessType === rnaCopy?.readinessLevel.readinessType
+                    )[0]?.readinessLevel.level}
+                  </p>
+                </div>
+                <div class="flex h-9 items-center justify-between text-sm">
+                  <p class="w-[130px]">Readiness Type</p>
+                  <p class="w-[200px] p-3">
+                    {readinessData?.filter(
+                      (d: any) => d?.readinessLevel.readinessType === rnaCopy?.readinessLevel.readinessType
+                    )[0]?.readinessLevel.readinessType}
                   </p>
                 </div>
               </div>

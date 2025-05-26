@@ -6,7 +6,7 @@ import { User } from 'src/entities/user.entity';
 import { CreateRnsDto, UpdateRnsDto, GenerateTasksDto } from './dto';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
-import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { StartupRNA } from 'src/entities/rna.entity';
 import { ReadinessType } from 'src/entities/enums/readiness-type.enum'; // adjust import as needed
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { AiService } from 'src/ai/ai.service';

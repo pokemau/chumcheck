@@ -888,11 +888,11 @@
           "mappedType": "datetime"
         }
       },
-      "name": "startup_rnas",
+      "name": "rna",
       "schema": "public",
       "indexes": [
         {
-          "keyName": "startup_rnas_pkey",
+          "keyName": "rna_pkey",
           "columnNames": [
             "id"
           ],
@@ -904,24 +904,24 @@
       ],
       "checks": [],
       "foreignKeys": {
-        "startup_rnas_readiness_level_id_foreign": {
-          "constraintName": "startup_rnas_readiness_level_id_foreign",
+        "rna_readiness_level_id_foreign": {
+          "constraintName": "rna_readiness_level_id_foreign",
           "columnNames": [
             "readiness_level_id"
           ],
-          "localTableName": "public.startup_rnas",
+          "localTableName": "public.rna",
           "referencedColumnNames": [
             "id"
           ],
           "referencedTableName": "public.readiness_levels",
           "updateRule": "cascade"
         },
-        "startup_rnas_startup_id_foreign": {
-          "constraintName": "startup_rnas_startup_id_foreign",
+        "rna_startup_id_foreign": {
+          "constraintName": "rna_startup_id_foreign",
           "columnNames": [
             "startup_id"
           ],
-          "localTableName": "public.startup_rnas",
+          "localTableName": "public.rna",
           "referencedColumnNames": [
             "id"
           ],

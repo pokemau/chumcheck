@@ -16,7 +16,7 @@ import { QualificationStatus } from 'src/entities/enums/qualification-status.enu
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
 import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
-import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { StartupRNA } from 'src/entities/rna.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { start } from 'repl';

@@ -7,7 +7,7 @@ import {
 import { ReadinessLevel } from './readiness-level.entity';
 import { Startup } from './startup.entity';
   
-  @Entity({ tableName: 'startup_rnas' })
+  @Entity({ tableName: 'rna' })
   export class StartupRNA {
     @PrimaryKey()
     id!: number;
