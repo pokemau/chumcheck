@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
 import { RoadblockService } from './roadblock.service';
-import { CreateRoadblockDto, UpdateRoadblockDto } from './dto/roadblock.dto';
+import { CreateRoadblockDto, GenerateRoadblocksDto, UpdateRoadblockDto } from './dto/roadblock.dto';
 
 @Controller('roadblocks')
 export class RoadblockController {
@@ -28,5 +28,10 @@ export class RoadblockController {
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
     return this.roadblockService.delete(id);
+    }
+
+    @Post('generate-roadblocks')
+    async generateRoadblocks(@Body() dto: GenerateRoadblocksDto) {
+    return this.roadblockService.generateRoadblocks(dto);
     }
 }

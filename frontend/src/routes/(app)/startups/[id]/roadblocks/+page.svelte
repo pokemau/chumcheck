@@ -337,7 +337,7 @@
     await axiosInstance.post(
       `/roadblocks/generate-roadblocks/`,
       {
-        startup_id: data.startupId,
+        startupId: data.startupId,
         no_of_roadblocks_to_create: 3
       },
       {

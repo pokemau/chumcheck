@@ -1,6 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
+import { EntityManager } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
+import { Startup } from 'src/entities/startup.entity';
 
 @Injectable()
 export class AiService {
@@ -96,11 +99,12 @@ export class AiService {
     }
   }
 
-  async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string; aiCommentary: string }> {
+async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string; aiCommentary: string }> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: prompt,
     });
+
     if (!res.text) {
       throw new Error('AI response did not contain any text');
     }
@@ -112,5 +116,88 @@ export class AiService {
       refinedDescription,
       aiCommentary,
     };
+  }
+
+async generateRoadblocksFromPrompt(
+    prompt: string
+  ): Promise<{ description: string; fix: string; riskNumber: number }[]> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
+    const text = res.text;
+
+    if (!text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    try {
+      const jsonStart = text.indexOf('[');
+      const jsonEnd = text.lastIndexOf(']');
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+
+      return JSON.parse(jsonString).map((entry: any) => ({
+        description: entry.description,
+        fix: entry.fix,
+        riskNumber: entry.riskNumber
+      }));
+    } catch (err) {
+      console.error('Failed to parse AI response:', text);
+      throw new Error('AI returned an invalid roadblock response');
+    }
+  }
+
+
+  async createBasePrompt(startup: Startup, em: EntityManager,): Promise<string | null> {
+    const capsuleProposalInfo = startup.capsuleProposal;
+    if (!capsuleProposalInfo) return null;
+  
+  const startupReadinessLevels = await em.find(
+          StartupReadinessLevel,
+          {
+          startup: startup,
+          },
+          {
+          populate: ['readinessLevel'],
+          },
+  );
+  
+  
+  const trl = startupReadinessLevels[0].readinessLevel.level;
+  const mrl = startupReadinessLevels[1].readinessLevel.level;
+  const arl = startupReadinessLevels[2].readinessLevel.level;
+  const orl = startupReadinessLevels[3].readinessLevel.level;
+  const rrl = startupReadinessLevels[4].readinessLevel.level;
+  const irl = startupReadinessLevels[5].readinessLevel.level;
+  
+  
+  return `
+      Given these data:
+      Acceleration Proposal Title: ${capsuleProposalInfo.title}
+      Duration: 3 months
+      I. About the startup
+      A. Startup Description
+      ${capsuleProposalInfo.description}
+      B. Problem Statement
+      ${capsuleProposalInfo.problemStatement}
+      C. Target Market
+      ${capsuleProposalInfo.targetMarket}
+      D. Solution Description
+      ${capsuleProposalInfo.solutionDescription}
+      II. About the Proposed Acceleration
+      A. Objectives
+      ${capsuleProposalInfo.objectives}
+      B. Scope of The Proposal
+      ${capsuleProposalInfo.scope}
+      C. Methodology and Expected Outputs
+      ${capsuleProposalInfo.methodology}
+      Initial Readiness Level:
+      TRL ${trl}
+      MRL ${mrl}
+      ARL ${arl}
+      ORL ${orl}
+      RRL ${rrl}
+      IRL ${irl}
+  `;
   }
 }
