@@ -3,9 +3,9 @@
   import * as Card from '$lib/components/ui/card';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
   import { Edit, Ellipsis, Plus, Trash } from 'lucide-svelte';
-  import { RnaCreateDialog, RnaViewEditDeleteDialog } from '.';
+  import { RnaCreateDialog, RnaViewEditDeleteDialog, RnaViewEditDeleteAiDialog } from '.';
   let { rna, update, ai, addToRna, deleteRna, role, readinessData, checkIfExist } = $props();
-
+  
   let open = $state(false);
 
   const onOpenChange = () => {
@@ -21,7 +21,6 @@
   class="h-full min-w-[calc(25%-1.25rem*3/4)] cursor-pointer"
   onclick={() => {
     open = true;
-    console.log(rna);
   }}
 >
   <Card.Content class="flex flex-col gap-2">
@@ -30,7 +29,7 @@
         {rna.readinessLevel.readinessType}
       </h2>
     </div>
-    <div class="text-sm text-muted-foreground">
+    <div class="text-sm text-muted-foreground break-words">
       {rna.rna.substring(0, 150) + `${rna.rna.length > 150 ? '...' : ''}`}
     </div>
     <div class="text-sm text-muted-foreground">
@@ -42,16 +41,25 @@
   </Card.Content>
 </Card.Root>
 
-<RnaViewEditDeleteDialog
-  {open}
-  {onOpenChange}
-  rns={rna}
-  {update}
-  deleteRns={deleteRna}
-  {readinessData}
-  {closeDialog}
-  {ai}
-  {addToRna}
-  {checkIfExist}
-  {role}
-/>
+{#if !ai}
+  <RnaViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    {rna}
+    {update}
+    {deleteRna}
+    {readinessData}
+    {closeDialog}
+    {addToRna}
+    {role}
+  />
+{:else}
+  <RnaViewEditDeleteAiDialog
+    {open}
+    {onOpenChange}
+    {rna}
+    {readinessData}
+    {closeDialog}
+    {addToRna}
+  />
+{/if}

@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { BadRequestException, Body, Injectable, NotFoundException, Param, Patch } from '@nestjs/common';
-import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { StartupRNA } from 'src/entities/rna.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { CreateStartupRnaDto, UpdateStartupRnaDto  } from './dto/rna.dto';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';

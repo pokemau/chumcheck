@@ -24,13 +24,11 @@ export class RnaController {
     ) {
       return this.rnaService.create(dto);
     }
-    
+
     @Get()
-    async getRNAbyId(
-        @Query('startupId', ParseIntPipe) startupId: number,
-      ) {
-        return this.rnaService.getRNAbyId(startupId);
-      }
+    async getStartupRna(@Query('startupId', ParseIntPipe) startupId: number) {
+      return await this.rnaService.getRNAbyId(startupId);
+    }
 
     @Patch(':id')
     async update(

@@ -25,7 +25,7 @@ export class AuthService {
       user.lastName = dto.lastName;
 
       await this.em.persistAndFlush(user);
-      return this.signToken(user.id, user.email, user.role);
+      return this.signToken(user.id, user.email, user.role, user.firstName, user.lastName);
     } catch (error) {
       throw error;
     }
@@ -38,18 +38,22 @@ export class AuthService {
     const passwordMatches = await argon.verify(user.hash, dto.password);
     if (!passwordMatches) throw new ForbiddenException('Wrong Password');
 
-    return this.signToken(user.id, user.email, user.role);
+    return this.signToken(user.id, user.email, user.role, user.firstName, user.lastName);
   }
 
   async signToken(
     userId: number,
     email: string,
     role: string,
+    firstName: string | undefined,
+    lastName: string | undefined,
   ): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,
       email,
       role,
+      firstName,
+      lastName,
     };
 
     const secret = this.configService.get('JWT_SECRET');

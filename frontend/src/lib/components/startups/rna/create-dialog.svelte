@@ -38,7 +38,7 @@
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/5  max-w-[600px] overflow-scroll">
     <Dialog.Header>
-      <Dialog.Title>Create Rna</Dialog.Title>
+      <Dialog.Title>Create RNA</Dialog.Title>
     </Dialog.Header>
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
@@ -66,14 +66,14 @@
     <div class="flex flex-col gap-4">
       <Label for="name">Current Level</Label>
       <Select.Root type="single">
-        <Select.Trigger class="w-[50px]"
+        <Select.NoTrigger class="w-[50px]"
           >
           {data.readiness_level_id
             ? readinessData.find(
                 (d: any) => d.readinessLevel.id === Number(data.readiness_level_id)
               )?.readinessLevel.level
             : ''}
-          </Select.Trigger>
+          </Select.NoTrigger>
       </Select.Root>
     </div>
     <Dialog.Footer>

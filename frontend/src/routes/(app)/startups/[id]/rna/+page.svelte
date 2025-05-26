@@ -31,7 +31,7 @@
     },
     {
       queryKey: ['rnaData'],
-      queryFn: () => getData(`/rna?startupId=${startupId}`, access!)
+      queryFn: () => getData(`/rna/?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['readinessData'],
@@ -128,7 +128,7 @@
     $rnaQueries[1].refetch().then(() => (open = false));
   };
 
-  const createRna = async (payload: any) => {
+  const createRNA = async (payload: any) => {
 
 
     const cleanPayload = {
@@ -180,16 +180,24 @@
     $rnaQueries[1].refetch();
   };
 
-  $effect(() => {
-    console.log( $rnaQueries[1].data);
-  });
-
   const currentCondition = $derived(selectedTab === 'rna' ? false : true);
   // isAiGenerated , readiness_level_id, startup_id, rna, readinessLevel.readinessType
   $effect(() => {
     if ($rnaQueries[1].isSuccess) {
       console.log("RNA QUERIES: ")
       console.log($rnaQueries[1].data);
+    }
+
+    if ($rnaQueries[2].isSuccess) {
+      // console.log(
+      //   $rnaQueries[2].data
+      //     .slice(-6)
+      //     .sort(
+      //     (a: any, b: any) =>
+      //       a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
+      //   )
+      // );
+      // console.log(readinessData)
     }
   });
 
@@ -203,21 +211,6 @@
         )
       : []
   );
-
-  $effect(() => {
-    if ($rnaQueries[2].isSuccess) {
-      // console.log(
-      //   $rnaQueries[2].data
-      //     .slice(-6)
-      //     .sort(
-      //     (a: any, b: any) =>
-      //       a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
-      //   )
-      // );
-      // console.log(readinessData)
-    }
-  
-  });
 </script>
 
 <svelte:head>
@@ -238,7 +231,7 @@
   {@render fallback()}
 {/if}
 
-<RnaCreateDialog {open} {onOpenChange} create={createRna} {startupId} {readinessData} />
+<RnaCreateDialog {open} {onOpenChange} create={createRNA} {startupId} {readinessData} />
 
 {#snippet loading()}
   <div class="flex h-full flex-col gap-3">
@@ -274,7 +267,7 @@
     <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
       <div class="flex gap-3">
         <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="rna" updateTab={updateRnaTab} />
+          <AITabs {selectedTab} name="rna" realName="RNA" updateTab={updateRnaTab} />
         </div>
       </div>
     </Can>
@@ -295,10 +288,15 @@
   </div>
 
   <div class="grid w-full grid-cols-4 gap-5">
-    {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) as rna, index}
+    {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) 
+        // .sort((a: any, b: any) => {
+        // if (a.readinessLevel.readinessType < b.readinessLevel.readinessType) return -1;
+        // if (a.readinessLevel.readinessType > b.readinessLevel.readinessType) return 1;
+        // return b.readinessLevel.level - a.readinessLevel.level;}) 
+      as rna, index}
       <RnaCard
         {rna}
-        ai={selectedTab === 'rna' ? false : true}
+        ai={selectedTab === 'rna' ? false : true} 
         update={editRNA}
         deleteRna={deleteRNA}
         addToRna={addToRNA}

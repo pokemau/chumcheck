@@ -5,7 +5,7 @@ import { Initiative } from 'src/entities/initiative.entity';
 import { Rns } from 'src/entities/rns.entity';
 import { Roadblock } from 'src/entities/roadblock.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
-import { StartupRNA } from 'src/entities/startup-rnas.entity';
+import { StartupRNA } from 'src/entities/rna.entity';
 import { Startup } from 'src/entities/startup.entity';
 
 @Injectable()

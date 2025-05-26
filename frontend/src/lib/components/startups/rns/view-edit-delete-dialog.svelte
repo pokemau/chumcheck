@@ -4,7 +4,7 @@
   import { Textarea } from '$lib/components/ui/textareav2';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
-  import { getReadinessLevels, getReadinessTypes } from '$lib/utils';
+  import { getReadinessLevels, getReadinessTypes, ReadinessType } from '$lib/utils';
   import * as Select from '$lib/components/ui/select/index.js';
   import { DeleteDialog } from '$lib/components/shared';
   import Header from '$lib/components/shared/header.svelte';
@@ -20,17 +20,14 @@
     update,
     action,
     members,
-    assignedMember,
     closeDialog,
-    ai = false,
-    addToRns,
     index,
     role
   } = $props();
 
   let rnsCopy = $state({ ...rns });
 
-  const levels = $derived(getReadinessLevels(rns.readinessType));
+  const levels = $derived(getReadinessLevels(rnsCopy.readinessType));
 
   $effect(() => {
     if (!open) {
@@ -40,7 +37,7 @@
 
   let editDescription = $state(false);
 
-  let descriptionDiv: HTMLDivElement;
+  let descriptionDiv: any = null;
 
   $effect(() => {
     if (editDescription && descriptionDiv) {
@@ -83,18 +80,19 @@
 
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10">
+    <div class="flex gap-10 max-w-[1100px]">
       <div class="flex w-4/6 flex-col gap-5">
         <h1 class="text-2xl font-semibold">
           Priority #{rnsCopy.priorityNumber}
         </h1>
         <div class="flex flex-col gap-3">
-          <Label for="username">Description</Label>
+          <Label for="username" class="text-lg">Description</Label>
           {#if editDescription && role !== 'Startup'}
             <Textarea
               rows={12}
               bind:value={rnsCopy.description}
               class="text-justify text-base"
+              bind:this={descriptionDiv}
             />
             <div class="ml-auto flex gap-2">
               <Button
@@ -130,15 +128,6 @@
               ><Trash class="h-4 w-4" /> Delete</Button
             >
           {/if}
-          {#if ai}
-            <Button
-              size="sm"
-              onclick={async () => {
-                await addToRns(rnsCopy.id);
-                closeDialog();
-              }}><Check class="h-4 w-4" /> Add to RNS</Button
-            >
-          {/if}
         </div>
         <Card.Root class="rounded-md">
           <Card.Content class="p-0">
@@ -157,7 +146,7 @@
                           newType = 'Technology';
                         }
 
-                        const newLevels = getReadinessLevels(newType);
+                        const newLevels = getReadinessLevels(newType as ReadinessType);
 
                         const newTargetLevel = getLevelId(
                           rnsCopy.targetLevelScore,

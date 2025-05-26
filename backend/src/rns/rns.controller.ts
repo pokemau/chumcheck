@@ -43,4 +43,12 @@ export class RnsController {
   ) {
     return await this.rnsService.updateRns(id, dto);
   }
+
+  @Post(':id/refine')
+  async refineRnsDescription(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { chatHistory: { role: 'User' | 'Ai'; content: string; refinedDescription: string | null; }[]; latestPrompt: string },
+  ) {
+    return await this.rnsService.refineRnsDescription(id, dto.chatHistory, dto.latestPrompt);
+  }
 }

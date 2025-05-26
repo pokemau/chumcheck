@@ -505,7 +505,7 @@
     <div class="flex gap-3">
       <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
         <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="roadblocks" updateTab={updateRoadblocksTab} />
+          <AITabs {selectedTab} name="roadblocks" realName="Roadblocks" updateTab={updateRoadblocksTab} />
         </div>
       </Can>
       {#if selectedTab === 'roadblocks'}
