@@ -108,20 +108,21 @@
   </Card.Content>
 </Card.Root>
 
-{#if ai}
-  <InitiativeViewEditDeleteAiDialog
-    {open}
-    {onOpenChange}
-    initiative={initiative}
-    {deleteInitiative}
-    {members}
-    {closeDialog}
-    {addToInitiative}
-    {index}
-    {tasks}
-  />
-{:else}
-  <InitiativeViewEditDeleteDialog
+<!-- {#if ai} -->
+<InitiativeViewEditDeleteAiDialog
+  {open}
+  {onOpenChange}
+  initiative={initiative}
+  {deleteInitiative}
+  {members}
+  {closeDialog}
+  {addToInitiative}
+  {index}
+  {tasks}
+  isEdit={!ai}
+/>
+<!-- {:else} -->
+  <!-- <InitiativeViewEditDeleteDialog
     {open}
     {onOpenChange}
     rns={initiative}
@@ -136,5 +137,5 @@
     {ai}
     {index}
     {role}
-  />
-{/if}
+  /> -->
+<!-- {/if} -->

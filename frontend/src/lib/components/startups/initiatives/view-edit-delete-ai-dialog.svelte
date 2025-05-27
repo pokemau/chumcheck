@@ -30,7 +30,8 @@
     closeDialog,
     addToInitiative,
     index,
-    tasks
+    tasks,
+    isEdit = false
   } = $props();
 
   let initiativeCopy = $state({ ...initiative });
@@ -356,7 +357,7 @@
                 assignee: initiativeCopy.assignee,
               });
               open = false;
-            }}>Add to Initiatives</Button>
+            }}>{isEdit ? "Update" : "Add to Initiatives"}</Button>
           </div>
         </div>
       </div>

@@ -30,6 +30,7 @@
     closeDialog,
     addToRns,
     index,
+    isEdit = false
   } = $props();
 
   let rnsCopy = $state({ ...rns });
@@ -327,7 +328,7 @@
             isAiGenerated: false});
             open = false;
           }}
-          >Add to RNS</Button>
+          >{isEdit ? "Update" : "Add to RNS"}</Button>
         </div>
       </div>
     </div>
