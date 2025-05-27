@@ -86,51 +86,15 @@
     return matchingLevels.length > 0 ? matchingLevels[0].id : '';
   };
 
-  // Chat functionality
-  const initialAiMessage: ChatMessage = {
-    role: 'Ai',
-    content: 'I can help you refine this Technology Recommended Next Step. How would you like to modify the description or other fields?'
-  };
-
-  let chatHistory = $state<ChatMessage[]>([initialAiMessage]);
+  let chatHistory = $state<ChatMessage[]>([]);
   let userInput = $state('');
   let isLoading = $state(false);
-
-  function getAiMessage(message: any) {
-    let messageContent = "Here's my suggestion for improving your Technology recommendation:\n\n";
-      
-    if (message.refinedDescription) {
-      messageContent += `<div class="bg-[#0a1729] my-2 p-4 rounded-lg relative group">
-        ${message.refinedDescription}
-        <button 
-          class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
-          onclick={(e) => {
-            const button = e.currentTarget as HTMLButtonElement;
-            const text = button.parentElement?.textContent?.replace('Copy', '').trim() || '';
-            navigator.clipboard.writeText(text);
-          }}
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-          </svg>
-          Copy
-        </button>
-        </div>`;
-    }
-    
-    if (message.comment) {
-      messageContent += message.comment;
-    }
-    if (message.aiCommentary) {
-      messageContent += message.aiCommentary;
-    }
-    return messageContent;
-  }
 
   async function handleSendMessage() {
     if (!userInput.trim()) return;
 
     const currentInput = userInput;
+    chatHistory = [...chatHistory, { role: 'User', content: currentInput }];
     userInput = '';
     isLoading = true;
 
@@ -179,13 +143,11 @@
               <div class="text-gray-400">Loading chat history...</div>
             </div>
           {:else}
-            {#if chatHistory.length === 0}
-              <div class="flex justify-start">
-                <div class="bg-[#1e293b] text-white p-4 rounded-lg">
-                  I can help you refine this {rns.readinessType} Recommended Next Step. How would you like to modify the description or other fields?
-                </div>
+            <div class="flex justify-start">
+              <div class="bg-[#1e293b] text-white p-4 rounded-lg">
+                I can help you refine this {rns.readinessType} Recommended Next Step. How would you like to modify the description or other fields?
               </div>
-            {/if}
+            </div>
             {#each chatHistory as message}
               <div class="flex {message.role === 'User' ? 'justify-end' : 'justify-start'}">
                 <div class="flex flex-col {message.role === 'User' ? 'items-end' : 'items-start'} max-w-[80%]">
@@ -198,7 +160,7 @@
                       <!-- {@html message.content} -->
                       Here's my suggestion for improving your {rns.readinessType} RNS description:
                       {#if message.refinedDescription}
-                        <div class="bg-[#0a1729] my-2 p-4 rounded-lg relative group">
+                        <div class="bg-[#0a1729] my-2 p-4 pb-8 rounded-lg relative group">
                           {@html message.refinedDescription}
                           <button 
                             class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
@@ -279,7 +241,7 @@
         <div class="mb-4">
           <Label>Description</Label>
           <Textarea
-            rows={4}
+            rows={8}
             class="w-full rounded bg-background border border-border text-white p-3"
             bind:value={rnsCopy.description}
           />

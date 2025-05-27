@@ -14,24 +14,39 @@ export class RoadblockController {
 
     @Post()
     async createRoadblock(@Body() dto: CreateRoadblockDto) {
-    return await this.roadblockService.createRoadblock(dto);
+        return await this.roadblockService.createRoadblock(dto);
     }
 
     @Patch(':id')
     async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateRoadblockDto
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: UpdateRoadblockDto
     ) {
-    return this.roadblockService.update(id, dto);
+        return this.roadblockService.update(id, dto);
     }
 
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
-    return this.roadblockService.delete(id);
+        return this.roadblockService.delete(id);
     }
 
     @Post('generate-roadblocks')
     async generateRoadblocks(@Body() dto: GenerateRoadblocksDto) {
-    return this.roadblockService.generateRoadblocks(dto);
+        return this.roadblockService.generateRoadblocks(dto);
+    }
+
+    @Post(':id/refine')
+    async refineRoadblock(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: { 
+            chatHistory: { role: 'User' | 'Ai'; content: string }[]; 
+            latestPrompt: string 
+        }
+    ) {
+        return await this.roadblockService.refineRoadblock(
+            id, 
+            dto.chatHistory, 
+            dto.latestPrompt
+        );
     }
 }

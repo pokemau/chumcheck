@@ -3,7 +3,7 @@
   import * as Card from '$lib/components/ui/card';
   import { User } from 'lucide-svelte';
   import { getProfileColor, getReadinessStyles, zIndex } from '$lib/utils';
-  import { InitiativeViewEditDeleteDialog } from '.';
+  import { InitiativeViewEditDeleteDialog, InitiativeViewEditDeleteAiDialog } from '.';
   import type { Actions } from '$lib/types';
   import { goto } from '$app/navigation';
   import { hoveredRNSCard } from '$lib/stores/hoveredRNSCard';
@@ -108,19 +108,33 @@
   </Card.Content>
 </Card.Root>
 
-<InitiativeViewEditDeleteDialog
-  {open}
-  {onOpenChange}
-  rns={initiative}
-  {update}
-  {action}
-  deleteRns={deleteInitiative}
-  {members}
-  {assignedMember}
-  {closeDialog}
-  {tasks}
-  {addToInitiative}
-  {ai}
-  {index}
-  {role}
-/>
+{#if ai}
+  <InitiativeViewEditDeleteAiDialog
+    {open}
+    {onOpenChange}
+    initiative={initiative}
+    {deleteInitiative}
+    {members}
+    {closeDialog}
+    {addToInitiative}
+    {index}
+    {tasks}
+  />
+{:else}
+  <InitiativeViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    rns={initiative}
+    update={update}
+    {action}
+    deleteRns={deleteInitiative}
+    {members}
+    {assignedMember}
+    {closeDialog}
+    {tasks}
+    {addToInitiative}
+    {ai}
+    {index}
+    {role}
+  />
+{/if}

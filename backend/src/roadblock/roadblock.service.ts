@@ -9,6 +9,7 @@ import { RnsStatus } from 'src/entities/enums/rns.enum';
 import { Rns } from 'src/entities/rns.entity';
 import { Initiative } from 'src/entities/initiative.entity';
 import { createBasePrompt } from 'src/ai/utils/prompt.utils';
+import { RoadblockChatHistory } from 'src/entities/roadblock-chat-history.entity';
 
 @Injectable()
 export class RoadblockService {
@@ -157,6 +158,78 @@ export class RoadblockService {
 
         return roadblocks;
         
+    }
+
+    async refineRoadblock(
+        roadblockId: number,
+        chatHistory: { role: 'User' | 'Ai'; content: string }[],
+        latestPrompt: string
+    ): Promise<{ 
+        refinedDescription?: string; 
+        refinedFix?: string;
+        aiCommentary: string 
+    }> {
+        const roadblock = await this.em.findOne(Roadblock, { id: roadblockId }, { 
+            populate: ['startup', 'startup.capsuleProposal'] 
+        });
+        if (!roadblock) throw new NotFoundException('Roadblock not found');
+
+        const startup = roadblock.startup;
+        const capsuleProposalInfo = startup.capsuleProposal;
+        if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+
+        const basePrompt = await createBasePrompt(startup, this.em);
+
+        let prompt = `${basePrompt}
+
+        Current Roadblock Details:
+        Description: ${roadblock.description}
+        Fix: ${roadblock.fix}
+        Risk Level: ${roadblock.riskNumber}
+
+        Chat History:
+        ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+        User: ${latestPrompt}
+
+        Please refine the roadblock details according to the user's instructions.
+        Format your response as JSON with these optional fields:
+        {
+            "description": "refined description if requested",
+            "fix": "refined fix if requested"
+        }
+
+        After the JSON, write '=========' on a new line, then provide a brief AI commentary (1-2 sentences) explaining your changes.`;
+
+        const result = await this.aiService.refineRoadblock(prompt);
+
+        // Save chat history
+        const newMessages = [
+            new RoadblockChatHistory({
+                roadblock,
+                role: 'User',
+                content: latestPrompt
+            }),
+            new RoadblockChatHistory({
+                roadblock,
+                role: 'Ai',
+                content: result.aiCommentary,
+                refinedDescription: result.refinedDescription,
+                refinedFix: result.refinedFix
+            })
+        ];
+
+        await this.em.persistAndFlush(newMessages);
+
+        return result;
+    }
+
+    async getRoadblockChatHistory(roadblockId: number) {
+        return this.em.find(
+            RoadblockChatHistory,
+            { roadblock: { id: roadblockId } },
+            { orderBy: { createdAt: 'ASC' } }
+        );
     }
 
 }
