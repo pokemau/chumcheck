@@ -62,26 +62,26 @@
       </Badge>
     </div>
     <div class="text-sm text-white break-words whitespace-pre-wrap">
-      Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
-    </div>  
+      Task: {@html assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
+    </div>
     {#if initiative.description}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Description: {initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Description: <span class="text-muted-foreground">{@html initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.measures}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Measures: {initiative.measures.substring(0, 100) + (initiative.measures.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Measures: <span class="text-muted-foreground">{@html initiative.measures.substring(0, 100) + (initiative.measures.length > 100 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.targets}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Targets: {initiative.targets.substring(0, 100) + (initiative.targets.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Targets: <span class="text-muted-foreground">{@html initiative.targets.substring(0, 100) + (initiative.targets.length > 100 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.remarks}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Remarks: {initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Remarks: <span class="text-muted-foreground">{@html initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}</span>
       </div>
     {/if}
     <div class="flex items-center gap-2 mt-1 text-xs">

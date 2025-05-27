@@ -370,10 +370,11 @@
     }
   };
 
-  const addToInitiatives = async (id: number) => {
+  const addToInitiatives = async (id: number, payload: any) => {
     await axiosInstance.patch(
       `/initiatives/${id}/`,
       {
+        ...payload,
         status: 1,
         isAiGenerated: false
       },

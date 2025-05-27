@@ -39,7 +39,7 @@
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
     <div class="text-sm break-words whitespace-pre-wrap">
-      {rns.description.substring(0, 100) +
+      {@html rns.description.substring(0, 100) +
         `${rns.description.length > 100 ? '...' : ''}`}
     </div>
     <div class="flex items-center justify-between">

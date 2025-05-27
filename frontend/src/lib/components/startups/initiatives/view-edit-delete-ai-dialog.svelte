@@ -8,6 +8,7 @@
   import { Card } from '$lib/components/ui/card';
   import { Separator } from '$lib/components/ui/separator';
   import { Check, Trash } from 'lucide-svelte';
+  import { TextEditor } from '$lib/components/shared';
 
   type ChatMessage = {
     id?: number;
@@ -64,10 +65,6 @@
     }
   });
 
-  let editDescription = $state(false);
-  let editMeasures = $state(false);
-  let editTargets = $state(false);
-  let editRemarks = $state(false);
   let deleteDialogOpen = $state(false);
 
   const deleteDialogOnOpenChange = () => {
@@ -252,37 +249,61 @@
         <div class="flex flex-col gap-4 overflow-y-auto">
           <div class="mb-4">
             <Label>Description</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.description}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.description}
+              rows={4}
+              placeholder="Enter initiative description..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Measures</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.measures}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.measures}
+              rows={4}
+              placeholder="Enter measures..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Targets</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.targets}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.targets}
+              rows={4}
+              placeholder="Enter targets..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Remarks</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.remarks}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.remarks}
+              rows={4}
+              placeholder="Enter remarks..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
@@ -327,7 +348,13 @@
           <div class="flex justify-end gap-2 mt-auto">
             <Button variant="outline" onclick={() => closeDialog()}>Cancel</Button>
             <Button onclick={() => {
-              addToInitiative(initiativeCopy.id);
+              addToInitiative(initiativeCopy.id, {
+                description: initiativeCopy.description,
+                measures: initiativeCopy.measures,
+                targets: initiativeCopy.targets,
+                remarks: initiativeCopy.remarks,
+                assignee: initiativeCopy.assignee,
+              });
               open = false;
             }}>Add to Initiatives</Button>
           </div>

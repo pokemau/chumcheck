@@ -10,6 +10,8 @@
   import { Separator } from '$lib/components/ui/separator';
   import { Check, Trash, Copy } from 'lucide-svelte';
   import type { ReadinessType } from '$lib/utils';
+  import { TextEditor } from '$lib/components/shared';
+
 
   type ChatMessage = {
     id?: number;
@@ -240,10 +242,15 @@
 
         <div class="mb-4">
           <Label>Description</Label>
-          <Textarea
+          <!-- <Textarea
             rows={8}
             class="w-full rounded bg-background border border-border text-white p-3"
             bind:value={rnsCopy.description}
+          /> -->
+          <TextEditor
+            bind:value={rnsCopy.description}
+            placeholder="Enter RNS description"
+            classNames="w-full rounded bg-background border border-border text-white p-3"
           />
         </div>
 
