@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        {{#if user}}
+            <p>Welcome, {{user.email}}!</p>
+        {{/if}}
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/users">Manage Users</a></li>
+            <li><a href="/admin/startups">Manage Startups</a></li> {{!-- Added this line --}}
+        </ul>
+    </nav>
+    <main>
+        <h2>{{message}}</h2>
+        {{#if success_msg}}
+            <div class="alert alert-success">
+                {{#each success_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">
+                {{#each error_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        {!-- Example: Displaying a list of users --}
+        {{#if users}}
+        <h3>Users</h3>
+        <ul>
+            {{#each users}}
+            <li>{{this.email}} - {{this.role}}</li> // Adjust properties as needed
+            {{/each}}
+        </ul>
+        {{/if}}
+    </main>
+    <footer>
+        <p>&copy; 2025 Chumcheck Admin</p>
+    </footer>
+</body>
+</html>

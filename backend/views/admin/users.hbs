@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Manage Users - Admin</title>
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+        {{#if user}}
+            <p>Welcome, {{user.email}}!</p>
+        {{/if}}
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/users">Manage Users</a></li>
+            <li><a href="/admin/startups">Manage Startups</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>{{message}}</h2>
+
+        {{#if success_msg}}
+            <div class="alert alert-success">
+                {{#each success_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">
+                {{#each error_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        {{#if users}}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each users}}
+                <tr>
+                    <td>{{this.id}}</td>
+                    <td>{{this.email}}</td>
+                    <td>{{this.role}}</td>
+                    <td>
+                        <a href="/admin/users/edit/{{this.id}}">Edit</a> |
+                        <form action="/admin/users/delete/{{this.id}}" method="POST" style="display:inline;">
+                            <button type="submit" onclick="return confirm('Are you sure?')" class="link-button">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No users found.</p>
+        {{/if}}
+        <br>
+        <a href="/admin/users/create">Create New User</a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Chumcheck Admin</p>
+    </footer>
+</body>
+</html>
