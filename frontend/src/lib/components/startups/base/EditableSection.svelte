@@ -2,6 +2,7 @@
   import { Label } from '$lib/components/ui/label/index.js';
   import { Textarea } from '$lib/components/ui/textareav2';
   import { Button } from '$lib/components/ui/button';
+  import Description from './Description.svelte';
   // export let label = '';
   // export let value = '';
   // export let rows = 12;
@@ -24,11 +25,11 @@
 
 </script>
 
-<div class="flex flex-col gap-3">
+<div class="flex flex-col gap-3 break-words">
   <Label for="username" class="text-lg font-bold">{label}</Label>
 
   {#if !isTask}
-  {#if editMode && role !== 'Startup'}
+  <!-- {#if editMode && role !== 'Startup'}
     <Textarea
       rows={12}
       bind:value={data}
@@ -51,15 +52,17 @@
           editMode = true;
         }
       }}
-    >
-      <div class="text-justify break-words">{data}</div>
-    </button>
-  {/if}
+    > -->
+    <Description>
+      {data}
+    </Description>
+    <!-- </button> -->
+  <!-- {/if} -->
   {:else}
-    <div class="text-justify break-words">
+    <Description>
     {#if data}
       {taskDescription}
     {/if}
-    </div>
+    </Description>
   {/if}
 </div>
