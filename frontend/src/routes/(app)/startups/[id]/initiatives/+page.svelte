@@ -41,7 +41,7 @@
     },
     {
       queryKey: ['rnsDataInitiative'],
-      queryFn: () => getData(`/rns/?startupId=${startupId}`, access!)
+      queryFn: () => getData(`/rns?startupId=${startupId}`, access!)
     },
     {
       queryKey: ['initiativesData'],
@@ -114,6 +114,7 @@
         );
       });
     }
+    console.log($initiativesQueries[1].data)
   });
 
 

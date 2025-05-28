@@ -153,12 +153,13 @@
     $rnaQueries[1].refetch();
   };
 
-  const editRNA = async (id: number, description: string) => {
+  const editRNA = async (id: number, payload: any) => {
+    // console.log(id)
+    // console.log(description)
+
     await axiosInstance.patch(
       `/rna/${id}/`,
-      {
-        rna: description
-      },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${data.access}`

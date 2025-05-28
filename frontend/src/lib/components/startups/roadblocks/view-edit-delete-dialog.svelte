@@ -12,6 +12,12 @@
   import { Separator } from '$lib/components/ui/separator';
   import * as Card from '$lib/components/ui/card/index.js';
   import { Check, Trash } from 'lucide-svelte';
+  import EditableSection from '../base/EditableSection.svelte';
+  import DetailsSection from '../base/DetailsSection.svelte';
+  import DetailsSectionContainer from '../base/DetailsSectionContainer.svelte';
+  import ViewEditDeleteDialog from '../base/ViewEditDeleteDialog.svelte';
+  import SectionTitle from '../base/SectionTitle.svelte';
+
   let {
     open,
     onOpenChange,
@@ -45,123 +51,63 @@
   };
 </script>
 
-<Dialog.Root bind:open {onOpenChange}>
-  <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10">
-      <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">Risk #{rnsCopy.riskNumber}</h1>
-        <div class="flex flex-col gap-3">
-          <Label for="username">Description</Label>
-          {#if editDescription && role !== 'Startup'}
-            <Textarea rows={12} bind:value={rnsCopy.description} class="text-justify text-base" />
-            <div class="ml-auto flex gap-2">
-              <Button size="sm" variant="outline" onclick={() => (editDescription = false)}
-                >Cancel</Button
-              ><Button
-                size="sm"
-                onclick={async () => {
-                  await update(rnsCopy.id, { description: rnsCopy.description });
-                  editDescription = false;
-                }}>Save</Button
-              >
-            </div>
-          {:else}
-            <button onclick={() => (editDescription = true)}>
-              <div class="text-justify">
-                {rnsCopy.description}
-              </div>
-            </button>
-          {/if}
-        </div>
-        <div class="flex flex-col gap-3">
-          <Label for="username">Fix</Label>
-          {#if editFix && role !== 'Startup'}
-            <Textarea rows={12} bind:value={rnsCopy.fix} class="text-justify text-base" />
-            <div class="ml-auto flex gap-2">
-              <Button size="sm" variant="outline" onclick={() => (editFix = false)}>Cancel</Button
-              ><Button
-                size="sm"
-                onclick={async () => {
-                  await update(rnsCopy.id, { fix: rnsCopy.fix });
-                  editFix = false;
-                }}>Save</Button
-              >
-            </div>
-          {:else}
-            <button onclick={() => (editFix = true)}>
-              <div class="text-justify">
-                {rnsCopy.fix}
-              </div>
-            </button>
-          {/if}
-        </div>
-      </div>
-      <div class="flex h-fit flex-1 flex-col gap-3">
-        <div class="flex gap-3">
-          {#if role !== 'Startup'}
-            <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
-              ><Trash class="h-4 w-4" /> Delete</Button
-            >
-          {/if}
-          {#if ai}
-            <Button
-              size="sm"
-              onclick={async () => {
-                await addToRoadblocks(rnsCopy.id);
-                closeDialog();
-              }}><Check class="h-4 w-4" /> Add to Roadblocks</Button
-            >
-          {/if}
-        </div>
-        <Card.Root class="rounded-md">
-          <Card.Content class="p-0">
-            <div class="flex flex-col">
-              <div class="p-2">Details</div>
-              <Separator />
-              <div class="flex flex-col gap-2 p-2">
-                <!-- <div class="flex h-9 items-center justify-between text-sm">
-									<p class="w-[130px]">Current Level</p>
-									<p class="w-[200px] p-3">{rnsCopy.readiness_level_level}</p>
-								</div> -->
-                <div class="flex h-9 items-center justify-between text-sm">
-                  <p class="w-[130px]">Assignee</p>
-                  {#if role !== 'Startup'}
-                    <Select.Root
-                      type="single"
-                      bind:value={rnsCopy.assignee}
-                      onValueChange={() => {
-                        update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
-                      }}
-                    >
-                      <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
-                          : 'None'}</Select.Trigger
-                      >
-                      <Select.Content class="border-none">
-                        {#each members as member}
-                          <Select.Item value={member.userId}
-                            >{member.firstName} {member.lastName}</Select.Item
-                          >
-                        {/each}
-                      </Select.Content>
-                    </Select.Root>
-                  {:else}
-                    <p class="w-[200px] p-3">
-                      {rnsCopy.assignee
-                        ? `${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee)[0].lastName}`
-                        : 'None'}
-                    </p>
-                  {/if}
-                </div>
-              </div>
-            </div>
-          </Card.Content>
-        </Card.Root>
-      </div>
+<ViewEditDeleteDialog {open} {onOpenChange}>
+  <svelte:fragment slot="editableSection">
+    <SectionTitle>Risk #{rnsCopy.riskNumber}</SectionTitle>
+    <EditableSection
+      label="Description"
+      editMode={editDescription}
+      role={role}
+      data={rnsCopy.description}
+      dataId={rnsCopy.id}
+      dataColumn="description"
+      update={update}
+    />
+    <EditableSection
+      label="Fix"
+      editMode={editFix}
+      role={role}
+      data={rnsCopy.fix}
+      dataId={rnsCopy.id}
+      dataColumn="fix"
+      update={update}
+    />      
+  </svelte:fragment>
+
+  <svelte:fragment slot="detailsSection">
+    <div class="flex gap-3">
+      {#if role !== 'Startup'}
+        <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
+          ><Trash class="h-4 w-4" /> Delete</Button
+        >
+      {/if}
+      {#if ai}
+        <Button
+          size="sm"
+          onclick={async () => {
+            await addToRoadblocks(rnsCopy.id);
+            closeDialog();
+          }}><Check class="h-4 w-4" /> Add to Roadblocks</Button
+        >
+      {/if}
     </div>
-  </Dialog.Content>
-</Dialog.Root>
+    <DetailsSectionContainer>
+      <DetailsSection
+      label="Assignee"
+      value={rnsCopy.assignee}
+      editable={true}
+      editableCondition={role !== 'Startup'}
+      options={members}
+      valueKey="userId"
+      displayFn={(member) => `${member.firstName} ${member.lastName}`}
+      onChange={() => {
+        update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
+      }}
+      />
+    </DetailsSectionContainer>
+  </svelte:fragment>
+</ViewEditDeleteDialog>
+
 <AlertDialog.Root bind:open={deleteDialogOpen} onOpenChange={deleteDialogOnOpenChange}>
   <AlertDialog.Content>
     <AlertDialog.Header>

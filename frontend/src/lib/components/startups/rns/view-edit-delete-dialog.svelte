@@ -11,6 +11,11 @@
   import { Separator } from '$lib/components/ui/separator';
   import * as Card from '$lib/components/ui/card/index.js';
   import { Check, Plus, Trash } from 'lucide-svelte';
+  import EditableSection from '../base/EditableSection.svelte';
+  import DetailsSection from '../base/DetailsSection.svelte';
+  import DetailsSectionContainer from '../base/DetailsSectionContainer.svelte';
+  import ViewEditDeleteDialog from '../base/ViewEditDeleteDialog.svelte';
+  import SectionTitle from '../base/SectionTitle.svelte';
 
   let {
     open,
@@ -75,207 +80,91 @@
     );
 
     return matchingLevels.length > 0 ? matchingLevels[0].id : '';
-  };
+};
 </script>
 
-<Dialog.Root bind:open {onOpenChange}>
-  <Dialog.Content class="h-4/6 max-w-[1200px] overflow-scroll">
-    <div class="flex gap-10 max-w-[1100px]">
-      <div class="flex w-4/6 flex-col gap-5">
-        <h1 class="text-2xl font-semibold">
-          Priority #{rnsCopy.priorityNumber}
-        </h1>
-        <div class="flex flex-col gap-3">
-          <Label for="username" class="text-lg">Description</Label>
-          {#if editDescription && role !== 'Startup'}
-            <Textarea
-              rows={12}
-              bind:value={rnsCopy.description}
-              class="text-justify text-base"
-              bind:this={descriptionDiv}
-            />
-            <div class="ml-auto flex gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onclick={() => (editDescription = false)}>Cancel</Button
-              ><Button
-                size="sm"
-                onclick={async () => {
-                  await update(rnsCopy.id, {
-                    description: rnsCopy.description
-                  });
-                  editDescription = false;
-                }}>Save</Button
-              >
-            </div>
-          {:else}
-            <button onclick={() => (editDescription = true)}>
-              <div class="text-justify">
-                {rnsCopy.description}
-              </div>
-            </button>
-          {/if}
-        </div>
-      </div>
-      <div class="flex h-fit flex-1 flex-col gap-3">
-        <div class="flex gap-3">
-          {#if role !== 'Startup'}
-            <Button
-              size="sm"
-              variant="destructive"
-              onclick={() => (deleteDialogOpen = true)}
-              ><Trash class="h-4 w-4" /> Delete</Button
-            >
-          {/if}
-        </div>
-        <Card.Root class="rounded-md">
-          <Card.Content class="p-0">
-            <div class="flex flex-col">
-              <div class="p-2">Details</div>
-              <Separator />
-              <div class="flex flex-col gap-2 p-2">
-                <div class="flex h-9 items-center justify-between text-sm">
-                  <p class="w-[130px]">Readiness Type</p>
-                  {#if role !== 'Startup'}
-                    <Select.Root
-                      type="single"
-                      bind:value={rnsCopy.readinessType}
-                      onValueChange={(newType) => {
-                        if (!newType) {
-                          newType = 'Technology';
-                        }
+<ViewEditDeleteDialog {open} {onOpenChange}>
+  <svelte:fragment slot="editableSection">
+    <SectionTitle>Priority #{rnsCopy.priorityNumber}</SectionTitle>
+    <EditableSection
+      label="Description"
+      editMode={editDescription}
+      role={role}
+      data={rnsCopy.description}
+      dataId={rnsCopy.id}
+      dataColumn="description"
+      update={update}
+    />  
+  </svelte:fragment>
 
-                        const newLevels = getReadinessLevels(newType as ReadinessType);
-
-                        const newTargetLevel = getLevelId(
-                          rnsCopy.targetLevelScore,
-                          newLevels
-                        );
-
-                        rnsCopy.readinessType = newType;
-                        rnsCopy.targetLevelId = newTargetLevel;
-
-                        update(rnsCopy.id, {
-                          readinessType: newType,
-                          targetLevel: newTargetLevel
-                        });
-                      }}
-                    >
-                      <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.readinessType}</Select.Trigger
-                      >
-                      <Select.Content class="border-none">
-                        {#each getReadinessTypes() as type}
-                          <Select.Item value={`${type.name}`}
-                            >{type.name}</Select.Item
-                          >
-                        {/each}
-                      </Select.Content>
-                    </Select.Root>
-                  {:else}
-                    <p class="w-[200px] p-3">
-                      {rnsCopy.readinessType}
-                    </p>
-                  {/if}
-                </div>
-
-                <div class="flex h-9 items-center justify-between text-sm">
-                  <p class="w-[130px]">Target Level</p>
-                  {#if role !== 'Startup'}
-                    <Select.Root
-                      type="single"
-                      bind:value={rnsCopy.targetLevelId}
-                      onValueChange={(newLevel) => {
-                        update(rnsCopy.id, {
-                          targetLevel: rnsCopy.targetLevelId
-                        });
-                      }}
-                    >
-                      <Select.Trigger class="w-[200px] border-none"
-                        >{getLevel(rnsCopy.targetLevelId)}</Select.Trigger
-                      >
-                      <Select.Content class="border-none">
-                        {#each levels as item}
-                          <Select.Item value={`${item.id}`}
-                            >{item.level}</Select.Item
-                          >
-                        {/each}
-                      </Select.Content>
-                    </Select.Root>
-                  {:else}
-                    <p class="w-[200px] p-3">
-                      {getLevel(rnsCopy.targetLevelId)}
-                    </p>
-                  {/if}
-                </div>
-                <!-- <div class="flex h-9 items-center justify-between text-sm"> -->
-                <!--   <p class="w-[130px]">Term</p> -->
-                <!--   {#if role !== 'Startup'} -->
-                <!--     <Select.Root -->
-                <!--       type="single" -->
-                <!--       bind:value={rnsCopy.task_type} -->
-                <!--       onValueChange={() => { -->
-                <!--         update(rnsCopy.id, { task_type: rnsCopy.task_type }); -->
-                <!--       }} -->
-                <!--     > -->
-                <!--       <Select.Trigger class="w-[200px] border-none" -->
-                <!--         >{rnsCopy.task_type === 1 -->
-                <!--           ? 'Short Term' -->
-                <!--           : 'Long Term'}</Select.Trigger -->
-                <!--       > -->
-                <!--       <Select.Content class="border-none"> -->
-                <!--         <Select.Item value="1">Short Term</Select.Item> -->
-                <!--         <Select.Item value="2">Long Term</Select.Item> -->
-                <!--       </Select.Content> -->
-                <!--     </Select.Root> -->
-                <!--   {:else} -->
-                <!--     <p class="w-[200px] p-3"> -->
-                <!--       {rnsCopy.task_type === '1' ? 'Short Term' : 'Long Term'} -->
-                <!--     </p> -->
-                <!--   {/if} -->
-                <!-- </div> -->
-                <div class="flex h-9 items-center justify-between text-sm">
-                  <p class="w-[130px]">Assignee</p>
-                  {#if role !== 'Startup'}
-                    <Select.Root
-                      type="single"
-                      bind:value={rnsCopy.assignee.id}
-                      onValueChange={(newVal) => {
-                        update(rnsCopy.id, {
-                          assigneeId: newVal
-                        });
-                      }}
-                    >
-                      <Select.Trigger class="w-[200px] border-none"
-                        >{rnsCopy.assignee.id
-                          ? `${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].lastName}`
-                          : 'None'}</Select.Trigger
-                      >
-                      <Select.Content class="border-none">
-                        {#each members as member}
-                          <Select.Item value={member.userId}
-                            >{member.firstName} {member.lastName}</Select.Item
-                          >
-                        {/each}
-                      </Select.Content>
-                    </Select.Root>
-                  {:else}
-                    <p class="w-[200px] p-3">
-                      {rnsCopy.assignee.id
-                        ? `${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].firstName} ${members.filter((member: any) => member.userId === rnsCopy.assignee.id)[0].lastName}`
-                        : 'None'}
-                    </p>
-                  {/if}
-                </div>
-              </div>
-            </div>
-          </Card.Content>
-        </Card.Root>
-      </div>
+  <svelte:fragment slot="detailsSection">
+    <div class="flex gap-3">
+      {#if role !== 'Startup'}
+        <Button
+          size="sm"
+          variant="destructive"
+          onclick={() => (deleteDialogOpen = true)}
+          ><Trash class="h-4 w-4" /> Delete</Button
+        >
+      {/if}
     </div>
-  </Dialog.Content>
-</Dialog.Root>
+    <DetailsSectionContainer>
+      <DetailsSection
+      label="Readiness Type"
+      value={rnsCopy.readinessType}
+      editable={true}
+      editableCondition={role !== 'Startup'}
+      options={getReadinessTypes()}
+      valueKey="name"
+      displayKey="name"
+      onChange={(newType) => {
+        if (!newType) {
+          newType = 'Technology';
+        }
+
+        const newLevels = getReadinessLevels(newType);
+        const newTargetLevel = getLevelId(rnsCopy.targetLevelScore, newLevels);
+
+        rnsCopy.readinessType = newType;
+        rnsCopy.targetLevelId = newTargetLevel;
+
+        update(rnsCopy.id, {
+          readinessType: newType,
+          targetLevel: newTargetLevel,
+        });
+      }}
+      />
+      <DetailsSection
+        label="Target Level"
+        value={rnsCopy.targetLevelId}
+        editable={true}
+        editableCondition={role !== 'Startup'}
+        options={levels}
+        valueKey="id"
+        displayKey="level"
+        onChange={(newLevel) => {
+          update(rnsCopy.id, {
+            targetLevel: newLevel,
+          });
+        }}
+      />
+      <DetailsSection
+        label="Assignee"
+        value={rnsCopy.assignee?.id}
+        editable={true}
+        editableCondition={role !== 'Startup'}
+        options={members}
+        valueKey="userId"
+        displayFn={(member) => `${member.firstName} ${member.lastName}`}
+        onChange={(newVal) => {
+          update(rnsCopy.id, {
+            assigneeId: newVal,
+          });
+        }}
+      />
+    </DetailsSectionContainer>
+  </svelte:fragment>
+</ViewEditDeleteDialog>
 
 <AlertDialog.Root
   bind:open={deleteDialogOpen}
