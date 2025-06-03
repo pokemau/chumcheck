@@ -19,7 +19,8 @@ import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.enti
 import { StartupRNA } from 'src/entities/rna.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
-import { start } from 'repl';
+import { CreateStartupDto } from '../admin/dto/create-startup.dto';
+import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
 
 @Injectable()
 export class StartupService {
@@ -47,20 +48,69 @@ export class StartupService {
     }
   }
 
-  async getStartupById(startupId: number) {
+  async findAll(): Promise<Startup[]> {
+    return this.em.findAll(Startup, { populate: ['user', 'mentors', 'members', 'capsuleProposal'] });
+  }
+
+  async getStartupById(startupId: number): Promise<Startup | null> {
     const startup = await this.em.findOne(
       Startup,
       { id: startupId },
       { populate: ['user', 'members', 'capsuleProposal'] },
     );
-
     if (!startup) {
-      throw new NotFoundException(
-        `Startup with ID ${startupId} does not exist!`,
-      );
+      throw new NotFoundException(`Startup with ID ${startupId} does not exist!`);
+    }
+    return startup;
+  }
+
+  async create(dto: CreateStartupDto): Promise<Startup> {
+    const user = await this.em.findOne(User, { id: dto.userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
     }
 
+    const startup = this.em.create(Startup, {
+      name: dto.name,
+      user: user, // Assign the fetched user entity
+      qualificationStatus: dto.qualificationStatus,
+      dataPrivacy: dto.dataPrivacy ?? false,
+      links: dto.links,
+      groupName: dto.groupName,
+      universityName: dto.universityName,
+      eligibility: dto.eligibility ?? false,
+    });
+
+    await this.em.persistAndFlush(startup);
     return startup;
+  }
+
+  async update(id: number, dto: UpdateStartupDto): Promise<Startup> {
+    const startup = await this.getStartupById(id);
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${id} not found`);
+    }
+
+    if (dto.userId) {
+      const user = await this.em.findOne(User, { id: dto.userId });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${dto.userId} not found`);
+      }
+      startup.user = user;
+    }
+
+    this.em.assign(startup, dto);
+
+    await this.em.flush();
+    return startup;
+  }
+
+  async remove(id: number): Promise<void> {
+    const startup = await this.getStartupById(id);
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${id} not found`);
+    }
+    await this.em.removeAndFlush(startup);
   }
 
   async createStartup(dto: StartupApplicationDto) {

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Startup - ChumCheck Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>ChumCheck Admin</h1>
+        {{#if user}}
+            <p>Welcome, {{user.email}}!</p>
+        {{/if}}
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="/admin/users"><i class="fas fa-users"></i> Manage Users</a></li>
+            <li><a href="/admin/startups" class="active"><i class="fas fa-rocket"></i> Manage Startups</a></li>
+        </ul>
+    </nav>
+    <main>
+        <div class="page-header">
+            <h2><i class="fas fa-edit"></i> Edit Startup: {{#if formData.name}}{{formData.name}}{{else}}{{editableStartup.name}}{{/if}}</h2>
+        </div>
+
+        {{#if error}}
+            <div class="alert alert-danger">
+                {{#each error}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <form method="POST">
+            <div class="form-section">
+                <h3>Basic Information</h3>
+                <div>
+                    <label for="name">Startup Name:</label>
+                    <input type="text" id="name" name="name" value="{{#if formData.name}}{{formData.name}}{{else}}{{editableStartup.name}}{{/if}}" required>
+                </div>
+                <div>
+                    <label for="userId">Owner (User):</label>
+                    <select id="userId" name="userId" required>
+                        <option value="">Select User</option>
+                        {{#each users}}
+                            <option value="{{this.id}}" {{#if (eq (defaultIfEmpty ../formData.userId ../editableStartup.user.id) this.id)}}selected{{/if}}>
+                                {{this.email}} {{#if this.firstName}}({{this.firstName}} {{this.lastName}}){{/if}}
+                            </option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div>
+                    <label for="qualificationStatus">Qualification Status:</label>
+                    <select id="qualificationStatus" name="qualificationStatus" required>
+                        <option value="PENDING" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "PENDING")}}selected{{/if}}>Pending</option>
+                        <option value="RATED" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "RATED")}}selected{{/if}}>Rated</option>
+                        <option value="QUALIFIED" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "QUALIFIED")}}selected{{/if}}>Qualified</option>
+                        <option value="REJECTED" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "REJECTED")}}selected{{/if}}>Rejected</option>
+                        <option value="PAUSED" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "PAUSED")}}selected{{/if}}>Paused</option>
+                        <option value="COMPLETED" {{#if (eq (defaultIfEmpty formData.qualificationStatus editableStartup.qualificationStatus) "COMPLETED")}}selected{{/if}}>Completed</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Additional Details</h3>
+                <div>
+                    <label for="links">Links (comma-separated URLs):</label>
+                    <input type="text" id="links" name="links" value="{{#if formData.links}}{{formData.links}}{{else}}{{editableStartup.links}}{{/if}}" placeholder="https://example.com, https://github.com/startup">
+                </div>
+                <div class="form-row">
+                    <div style="flex: 1; margin-right: 10px;">
+                        <label for="groupName">Group Name:</label>
+                        <input type="text" id="groupName" name="groupName" value="{{#if formData.groupName}}{{formData.groupName}}{{else}}{{editableStartup.groupName}}{{/if}}">
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="universityName">University Name:</label>
+                        <input type="text" id="universityName" name="universityName" value="{{#if formData.universityName}}{{formData.universityName}}{{else}}{{editableStartup.universityName}}{{/if}}">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h3>Agreements</h3>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="dataPrivacy" name="dataPrivacy" value="true" {{#if (defaultIfEmpty formData.dataPrivacy editableStartup.dataPrivacy)}}checked{{/if}}>
+                    <label for="dataPrivacy" class="checkbox-label">Data Privacy Agreement Accepted</label>
+                </div>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="eligibility" name="eligibility" value="true" {{#if (defaultIfEmpty formData.eligibility editableStartup.eligibility)}}checked{{/if}}>
+                    <label for="eligibility" class="checkbox-label">Eligibility Requirements Confirmed</label>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Update Startup</button>
+                <a href="/admin/startups" class="btn"><i class="fas fa-arrow-left"></i> Back to Startup List</a>
+            </div>
+        </form>
+    </main>
+    <footer>
+        <p>&copy; 2025 ChumCheck Admin Interface</p>
+    </footer>
+</body>
+</html>

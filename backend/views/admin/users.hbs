@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - ChumCheck Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>ChumCheck Admin</h1>
+        {{#if user}}
+            <p>Welcome, {{user.email}}!</p>
+        {{/if}}
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="/admin/users" class="active"><i class="fas fa-users"></i> Manage Users</a></li>
+            <li><a href="/admin/startups"><i class="fas fa-rocket"></i> Manage Startups</a></li>
+        </ul>
+    </nav>
+    <main>        <div class="page-header">
+            <h2><i class="fas fa-users"></i> Manage Users</h2>
+            <a href="/admin/users/create" class="btn create-btn"><i class="fas fa-plus"></i> Create New User</a>
+        </div>
+
+        {{#if success_msg}}
+            <div class="alert alert-success">
+                {{#each success_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">
+                {{#each error_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        {{#if users}}        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th class="id-column">ID</th>
+                        <th class="email-column">Email</th>
+                        <th class="role-column">Role</th>
+                        <th class="actions-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each users}}                    <tr>
+                        <td class="id-value">{{this.id}}</td>
+                        <td class="email-value">{{this.email}}</td>
+                        <td class="role-value"><span class="badge role-{{this.role}}">{{this.role}}</span></td>
+                        <td class="actions">
+                            <a href="/admin/users/edit/{{this.id}}" class="btn action-btn btn-edit"><i class="fas fa-edit fa-sm"></i><span>Edit</span></a>
+                            <form action="/admin/users/delete/{{this.id}}" method="POST" style="display:inline-block;vertical-align:top;line-height:normal;">
+                                <button type="submit" onclick="return confirm('Are you sure you want to delete this user?')" class="btn action-btn btn-delete"><i class="fas fa-trash-alt fa-sm"></i><span>Delete</span></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        {{else}}
+        <div class="empty-state">
+            <i class="fas fa-users fa-4x"></i>
+            <p>No users found.</p>
+            <a href="/admin/users/create" class="btn">Create First User</a>
+        </div>
+        {{/if}}
+    </main>
+    <footer>
+        <p>&copy; 2025 ChumCheck Admin Interface</p>
+    </footer>
+</body>
+</html>
