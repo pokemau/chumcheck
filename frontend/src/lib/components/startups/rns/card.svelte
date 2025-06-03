@@ -39,7 +39,7 @@
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
     <div class="text-sm break-words whitespace-pre-wrap">
-      {rns.description.substring(0, 100) +
+      {@html rns.description.substring(0, 100) +
         `${rns.description.length > 100 ? '...' : ''}`}
     </div>
     <div class="flex items-center justify-between">
@@ -74,20 +74,19 @@
   </Card.Content>
 </Card.Root>
 
-{#if !ai}
-  <RnsViewEditDeleteDialog
+<!-- {#if !ai} -->
+  <RnsViewEditDeleteAiDialog
     {open}
     {onOpenChange}
     {rns}
     {deleteRns}
-    {update}
-    {action}
     {members}
     {closeDialog}
     {index}
-    {role}
+    {addToRns}
+    isEdit={!ai}
   />
-{:else}
+<!-- {:else}
   <RnsViewEditDeleteAiDialog
     {open}
     {onOpenChange}
@@ -98,4 +97,4 @@
     {addToRns}
     {index}
   />
-{/if}
+{/if} -->
