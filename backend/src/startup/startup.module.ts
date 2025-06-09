@@ -14,6 +14,5 @@ import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
   ],
   providers: [StartupService],
   controllers: [StartupController],
-  exports: [StartupService], // Export StartupService
 })
 export class StartupModule {}
