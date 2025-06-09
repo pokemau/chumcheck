@@ -16,7 +16,16 @@ export class Initiative {
   id!: number;
 
   @Property()
+  priorityNumber!: number;
+
+  @Property()
   initiativeNumber!: number;
+
+  @Property()
+  clickedByMentor: boolean = false;
+
+  @Property()
+  clickedByStartup: boolean = false;
 
   @Enum(() => RnsStatus)
   status!: RnsStatus;

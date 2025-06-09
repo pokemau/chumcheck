@@ -1,8 +1,5 @@
 <script lang="ts">
   import {
-    AIColumn,
-    AITabs,
-    Can,
     Column,
     KanbanBoard,
     KanbanBoardNew,
@@ -34,12 +31,34 @@
     RnsCard,
     RnsCreateDialog
   } from '$lib/components/startups/rns/index.js';
-  import { Ellipsis, Kanban, TableIcon } from 'lucide-svelte';
+  import { Ellipsis, Kanban, TableIcon, Loader, ChevronDown } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
   import { log10 } from 'chart.js/helpers';
   import { goto } from '$app/navigation';
+
+  interface Member {
+    userId: number;
+    startupId: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    selected: boolean;
+  }
+
+  interface RNSItem {
+    id: number;
+    priorityNumber: number;
+    description: string;
+    isAiGenerated: boolean;
+    status: number;
+    assignee?: { id: number };
+    readinessType?: string;
+    targetLevel?: number;
+    targetLevelScore?: number;
+    term?: number;
+  }
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -60,16 +79,15 @@
     {
       queryKey: ['startupData'],
       queryFn: () => getData(`/startups/${startupId}`, access!)
-    }
+    },
+    {
+      queryKey: ['rnaData'],
+      queryFn: () => getData(`/rna/?startupId=${startupId}`, access!)
+    },
   ];
   const rnsQueries = useQueries(queryArray);
   const { isLoading, isError } = $derived(useQueriesState(queryArray));
   const isAccessible = $derived($rnsQueries[0].data);
-  let selectedTab = $state(getSelectedTab('rns'));
-
-  const updateRnsTab = (tab: string) => {
-    selectedTab = updateTab('rns', tab);
-  };
 
   const columns = $state(getColumns());
   const readiness = $state(getReadiness());
@@ -78,7 +96,7 @@
     $rnsQueries[3].isSuccess
       ? (() => {
           const data = $rnsQueries[3].data;
-          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
             userId: id,
             startupId: data.id,
             firstName,
@@ -88,7 +106,7 @@
           }));
 
           // Check if user is already in members
-          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -106,70 +124,65 @@
       : []
   );
 
-  const views = $derived(
-    selectedTab === 'rns'
-      ? [
-          {
-            name: 'Long Term',
-            value: 999,
-            items: [],
-            show: true
-          },
-          ...columns
-        ]
-      : readiness
-  );
+  const views = $derived(columns);
 
-  $effect(() => {
-    // console.log($rnsQueries[1].data);
-    const searchParam = $page.url.searchParams.get('tab');
-    selectedTab = getSavedTab('rns', searchParam);
-  });
-
-  let generatingRNS = false;
-  let generatingType = 'Technology';
+  let generatingRNS = $state(false);
   let open = $state(false);
-  const generateRNS = async (type: string) => {
+  const generateRNSForSelected = async () => {
+    if (selectedRNA.length === 0) {
+      toast.error('No RNS selected');
+      return;
+    }
+
     generatingRNS = true;
-    const payload = {
-      startup_id: data.startupId,
-      term: 1, //short term
-      readinessType: type,
-      no_of_tasks_to_create: 1
-    };
-    console.log(payload);
-    const test = await axios.all([
-      await axiosInstance.post(
-        `/rns/generate-tasks/`,
-          payload
-        ,
-        {
-          headers: {
-            Authorization: `Bearer ${data.access}`
-          }
+    try {
+      // First, get all current RNS items
+      const currentItems = await axiosInstance.get(`/rns/?startupId=${data.startupId}`, {
+        headers: {
+          Authorization: `Bearer ${data.access}`
         }
-      ),
+      });
+
+      // Increment priority numbers of all existing items
+      const updatePromises = currentItems.data.map((item: any) => 
+        axiosInstance.patch(
+          `/rns/${item.id}/`,
+          { priorityNumber: (item.priorityNumber || 0) + selectedRNA.length }, 
+          {
+            headers: {
+              Authorization: `Bearer ${data.access}`
+            }
+          }
+        )
+      );
+      
+      await Promise.all(updatePromises);
+
+      // Now generate new items with priority numbers starting from 1
       await axiosInstance.post(
-        `/rns/generate-tasks/`,
+        `/rns/generate-tasks/`, // Assuming this endpoint can handle rns_ids
         {
           startup_id: data.startupId,
-          term: 7, //long term
-          readinessType: type,
-          no_of_tasks_to_create: 1
+          rnaIds: selectedRNA, // Pass selected RNS IDs
+          no_of_tasks_to_create: 1,
+          startPriorityNumber: 1
         },
         {
           headers: {
             Authorization: `Bearer ${data.access}`
           }
         }
-      )
-    ]);
-    test.forEach((res, index) => {
-    console.log(`Response ${index}:`, res.data);
-    });
-    generatingRNS = false;
-    $rnsQueries[1].refetch();
-    toast.success(`Successfully generated ${generatingType} RNS`);
+      );
+
+      await $rnsQueries[1].refetch();
+      selectedRNA = []; // Clear selected RNS after generation
+
+      generatingRNS = false;
+      toast.success(`Successfully generated RNS`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to generate RNS');
+      generatingRNS = false;
+    }
   };
 
   const addToRNS = async (id: number, payload: any) => {
@@ -212,7 +225,7 @@
           });
         })
         .finally(async () => await updatePriorityNumber());
-      goto("rns?tab=rns")
+      goto("rns")
     } catch (error) {
       console.error('Error in addToRNS:', error);
       toast.error('Failed to add to RNS');
@@ -261,7 +274,7 @@
 
   const updatedEditRNS = async (
     id: number,
-    payload: { readinessType: string, description: string, targetLevelId: number, assigneeId: number, isAiGenerated: boolean }
+    payload: { readinessType: string, description: string, targetLevelId: number, assigneeId: number, isAiGenerated: boolean, clickedByMentor: boolean }
   ) => {
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
@@ -281,7 +294,7 @@
           .sort((a: any, b: any) => a.order - b.order);
       });
     });
-    goto("rns?tab=rns")
+    goto("rns")
   };
 
   const deleteRNS = async (id: number, index: number) => {
@@ -304,25 +317,27 @@
     }
   };
 
-  function handleDndConsider(e: CustomEvent<DndEvent<RNSItem>>, x: number) {
+  function handleDndConsider(e: CustomEvent<DndEvent<any>>, x: number) {
     columns[x].items = e.detail.items;
   }
 
-  async function handleDndFinalize(e: CustomEvent<DndEvent<RNSItem>>, x: number, status: number) {
+  async function handleDndFinalize(e: CustomEvent<DndEvent<any>>, x: number, status: number) {
     columns[x].items = e.detail.items;
     if (e.detail.info.trigger === 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
-      await axiosInstance.patch(
-        `/rns/${task.id}/`,
-        {
-          status
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${data.access}`
+      if (task) {
+        await axiosInstance.patch(
+          `/rns/${task.id}/`,
+          {
+            status
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${data.access}`
+            }
           }
-        }
-      );
+        );
+      }
 
       updatePriorityNumber();
       setTimeout(() => $rnsQueries[1].refetch(), 250);
@@ -358,8 +373,6 @@
     }
   };
 
-  let longTerms = $state([]);
-
   $effect(() => {
     if (!isLoading && $rnsQueries[1].isSuccess && Array.isArray($rnsQueries[1].data)) {
       columns.forEach((column) => {
@@ -373,6 +386,13 @@
           : [];
       });
     }
+
+
+    if ($rnsQueries[1].data && $rnsQueries[4].data)
+    selectedRNA = $rnsQueries[4].data.filter((rna: any) => 
+          !$rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType)
+        )
+        .map((rna: any) => rna.id);
   });
 
   const onOpenChange = () => {
@@ -417,6 +437,17 @@
   const updateTaskType = (newType: number) => {
     taskType = newType;
   };
+
+  let selectedRNA: number[] = $state([]);
+
+  const toggleRNSSelection = (id: number) => {
+    const index = selectedRNA.indexOf(id);
+    if (index !== -1) {
+      selectedRNA.splice(index, 1);
+    } else {
+      selectedRNA.push(id);
+    }
+  };
 </script>
 
 {#if isLoading}
@@ -445,6 +476,7 @@
   {members}
   {status}
 />
+
 {#snippet card(rns: any, ai = false, index: number)}
   <RnsCard
     {rns}
@@ -475,7 +507,7 @@
                 index !== 2 - 1 ? '-mr-1' : ''
               } `}
             >
-              ?
+              <span>?</span>
             </Skeleton>
           {/each}
         </div>
@@ -507,127 +539,155 @@
 {#snippet accessible()}
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
-      <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
-        <div class="bg-background flex h-fit justify-between rounded-lg">
-          <AITabs {selectedTab} name="rns" realName="RNS" updateTab={updateRnsTab} />
-        </div>
-      </Can>
-      {#if selectedTab === 'rns'}
-        <div class="bg-background flex h-fit justify-between rounded-lg">
-          <Tabs.Root value={selectedFormat}>
-            <Tabs.List class="bg-flutter-gray/20 border">
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="board"
-                onclick={() => (selectedFormat = 'board')}
-              >
-                <Kanban class="h-4 w-4" />
-                Board</Tabs.Trigger
-              >
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="table"
-                onclick={() => (selectedFormat = 'table')}
-              >
-                <TableIcon class="h-4 w-4" />
-                Table</Tabs.Trigger
-              >
-            </Tabs.List>
-          </Tabs.Root>
-        </div>
-        <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
-      {/if}
+      <div class="bg-background flex h-fit justify-between rounded-lg">
+        <Tabs.Root value={selectedFormat}>
+          <Tabs.List class="bg-flutter-gray/20 border">
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="board"
+              onclick={() => (selectedFormat = 'board')}
+            >
+              <Kanban class="h-4 w-4" />
+              Board</Tabs.Trigger
+            >
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="table"
+              onclick={() => (selectedFormat = 'table')}
+            >
+              <TableIcon class="h-4 w-4" />
+              Table</Tabs.Trigger
+            >
+          </Tabs.List>
+        </Tabs.Root>
+      </div>
+      <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
     </div>
     <div class="flex gap-4 items-center">
       {#if selectedFormat !== 'table'}
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
-        <button
-          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
-          onclick={showDialog}
-          type="button"
-        >
-          + Add
-        </button>
+        <div class="flex gap-1">
+          <button
+            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            type="button"
+            disabled={generatingRNS}
+            on:click={() => generateRNSForSelected()}
+          >
+            {#if generatingRNS}
+              <Loader class="h-4 w-4 animate-spin" />
+              Generating...
+            {:else}
+              + Add
+            {/if}
+          </button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <button
+                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                disabled={generatingRNS}
+              >
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content 
+              align="end" 
+              class="w-[300px] max-h-[300px] overflow-y-auto"
+            >
+              <DropdownMenu.Group class="space-y-1">
+                {#each $rnsQueries[4].data as rna}
+                  <div 
+                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType) ? 'opacity-50' : ''}"
+                    on:click|stopPropagation={() => toggleRNSSelection(rna.id)}
+                    on:keydown|stopPropagation
+                  >
+                    <div class="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedRNA.includes(rna.id)}
+                        class="h-4 w-4"
+                      />
+                      <div class="flex flex-col gap-0.5">
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium">{rna.readinessLevel.readinessType}</span>
+                          {#if $rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType)}
+                            <span class="text-xs text-muted-foreground">(Has RNS)</span>
+                          {/if}
+                        </div>
+                        <span class="text-xs text-muted-foreground line-clamp-2">
+                          {rna.rna.substring(0, 50) + '...'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                {/each}
+              </DropdownMenu.Group>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </div>
       {/if}
     </div>
   </div>
-  <!-- <div class="flex h-full gap-5 overflow-scroll"></div> -->
-  <!-- <div class="block w-full"> -->
-    {#if selectedTab === 'rns'}
-      <div class="block w-full">
-      {#if selectedFormat === 'board'}
-        <KanbanBoardNew
-          {columns}
-          {handleDndFinalize}
-          {handleDndConsider}
-          {card}
-          {showDialog}
-          role={data.role}
-          {updateStatus}
-          {selectedMembers}
-          {taskType}
-          {longTerms}
-        />
-      {:else}
-        <div class="h-fit w-full rounded-md border">
-          <Table.Root class="bg-background rounded-lg">
-            <Table.Header>
-              <Table.Row class="text-centery h-12">
-                <Table.Head class="pl-5">Type</Table.Head>
-                <Table.Head class="">Description</Table.Head>
-                <Table.Head class="">Target Level</Table.Head>
-                <Table.Head class="">Term</Table.Head>
-                <Table.Head class="">Assignee</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
-                {#if selectedMembers.includes(item.assignee.id) || selectedMembers.length === 0}
-                  <Table.Row class="h-14 cursor-pointer">
-                    <Table.Cell class="pl-5"
-                      >{item.readinessType}</Table.Cell
-                    >
-                    <Table.Cell class=""
-                      >{item.description.substring(0, 100)}</Table.Cell
-                    >
-                    <Table.Cell class="">{item.targetLevelScore}</Table.Cell>
-                    <Table.Cell class=""
-                      ><Badge
-                        class={`${item.status !== 7 ? 'bg-gray-700 hover:bg-gray-800' : 'bg-rose-700 hover:bg-rose-800'}`}
-                        >{item.status !== 7 ? 'Short' : 'Long'} Term</Badge
-                      ></Table.Cell
-                    >
-                    <Table.Cell class=""
-                      >{members.filter(
-                          (member: any) => member.userId === item.assignee.id
-                      )[0]?.firstName}
-                      {members.filter(
-                          (member: any) => member.userId === item.assignee.id
-                      )[0]?.lastName}</Table.Cell
-                    >
-                  </Table.Row>
-                {/if}
-              {/each}
-            </Table.Body>
-          </Table.Root>
-        </div>
-      {/if}
-      </div>
+  <div class="block w-full">
+    {#if selectedFormat === 'board'}
+      <KanbanBoardNew
+        {columns}
+        {handleDndFinalize}
+        {handleDndConsider}
+        {card}
+        {showDialog}
+        role={data.role}
+        {updateStatus}
+        {selectedMembers}
+        {taskType}
+      />
     {:else}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 h-full overflow-auto">
-      {#each readiness as readiness}
-        <AIColumn name={readiness.name} generate={generateRNS} role={data.role}>
-          {#each $rnsQueries[1].data.filter((data: any) => data.readinessType === readiness.name && data.isAiGenerated === true) as item, index}
-            <div>
-              {@render card(item, true, index)}
-            </div>
-          {/each}
-        </AIColumn>
-      {/each}
-    </div>
+      <div class="h-fit w-full rounded-md border">
+        <Table.Root class="bg-background rounded-lg">
+          <Table.Header>
+            <Table.Row class="text-centery h-12">
+              <Table.Head class="pl-5">Type</Table.Head>
+              <Table.Head class="">Description</Table.Head>
+              <Table.Head class="">Target Level</Table.Head>
+              <Table.Head class="">Term</Table.Head>
+              <Table.Head class="">Assignee</Table.Head>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
+              {#if selectedMembers.includes(item.assignee.id) || selectedMembers.length === 0}
+                <Table.Row class="h-14 cursor-pointer">
+                  <Table.Cell class="pl-5"
+                    >{item.readinessType}</Table.Cell
+                  >
+                  <Table.Cell class=""
+                    >{item.description.substring(0, 100)}</Table.Cell
+                  >
+                  <Table.Cell class="">{item.targetLevelScore}</Table.Cell>
+                  <Table.Cell class=""
+                    ><Badge
+                      class={`${item.status !== 7 ? 'bg-gray-700 hover:bg-gray-800' : 'bg-rose-700 hover:bg-rose-800'}`}
+                      >{item.status !== 7 ? 'Short' : 'Long'} Term</Badge
+                    ></Table.Cell
+                  >
+                  <Table.Cell class=""
+                    >{members.filter(
+                        (member: any) => member.userId === item.assignee.id
+                    )[0]?.firstName}
+                    {members.filter(
+                        (member: any) => member.userId === item.assignee.id
+                    )[0]?.lastName}</Table.Cell
+                  >
+                </Table.Row>
+              {/if}
+            {/each}
+          </Table.Body>
+        </Table.Root>
+      </div>
     {/if}
+  </div>
 {/snippet}
 
 {#snippet fallback()}

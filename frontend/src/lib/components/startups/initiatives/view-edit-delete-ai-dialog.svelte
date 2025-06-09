@@ -37,6 +37,13 @@
   let initiativeCopy = $state({ ...initiative });
   let isLoadingHistory = $state(false);
 
+  function handleDialogStateChange(newOpen: boolean) {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      closeDialog();
+    }
+  }
+
   async function loadChatHistory() {
     isLoadingHistory = true;
     try {
@@ -116,7 +123,7 @@
   }
 </script>
 
-<Dialog.Root bind:open={open} {onOpenChange}>
+<Dialog.Root bind:open={open} onOpenChange={handleDialogStateChange}>
   <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-scroll">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->

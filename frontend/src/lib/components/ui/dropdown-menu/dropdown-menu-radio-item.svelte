@@ -20,7 +20,7 @@
   {...restProps}
 >
   {#snippet children({ checked })}
-    <span class="absolute left-2 flex size-3.5 items-center justify-center">
+    <span class="absolute right-2 flex size-3.5 items-center justify-center">
       {#if checked}
         <Check class="size-4 fill-current" />
       {/if}

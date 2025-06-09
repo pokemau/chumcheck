@@ -61,7 +61,11 @@ export class AiService {
       const jsonStart = text.indexOf('[');
       const jsonEnd = text.lastIndexOf(']');
       const jsonString = text.substring(jsonStart, jsonEnd + 1);
-      return JSON.parse(jsonString);
+      const parsedData = JSON.parse(jsonString);
+      return parsedData.map((task: any) => ({
+        target_level: parseInt(task.target_level, 10) || 0,
+        description: task.description
+      }));
     } catch (err) {
       console.error('Failed to parse AI response:', text);
       throw new Error('AI returned an invalid response');

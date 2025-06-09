@@ -37,6 +37,13 @@
   const levels = $derived(getReadinessLevels(rnsCopy.readinessType));
   let isLoadingHistory = $state(false);
 
+  function handleDialogStateChange(newOpen: boolean) {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      closeDialog();
+    }
+  }
+
   async function loadChatHistory() {
     isLoadingHistory = true;
     try {
@@ -134,7 +141,7 @@
   }
 </script>
 
-<Dialog.Root bind:open={open} {onOpenChange}>
+<Dialog.Root bind:open={open} onOpenChange={handleDialogStateChange}>
   <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-auto">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->
@@ -326,7 +333,7 @@
             targetLevelId: rnsCopy.targetLevelId, 
             assigneeId: rnsCopy.assignee.id, 
             isAiGenerated: false});
-            open = false;
+            closeDialog();
           }}
           >{isEdit ? "Update" : "Add to RNS"}</Button>
         </div>

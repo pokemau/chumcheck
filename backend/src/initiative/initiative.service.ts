@@ -80,6 +80,14 @@ export class InitiativeService {
         initiative.remarks = dto.remarks;
     }
 
+    if (dto.clickedByMentor) {
+        initiative.clickedByMentor = dto.clickedByMentor;
+    }
+
+    if (dto.clickedByStartup) {
+        initiative.clickedByStartup = dto.clickedByStartup;
+    }
+
     await this.em.flush();
     return initiative;
     }
@@ -94,64 +102,149 @@ export class InitiativeService {
     }
 
     async generateInitiatives(dto: GenerateInitiativeDto) {
-    const task = await this.em.findOneOrFail(Rns, { id: dto.task_id },
-       { populate: ['startup', 'startup.capsuleProposal', 'readinessType', 'status', 'targetLevel'],}
-    );
-    
-    const basePrompt = await createBasePrompt(task.startup, this.em);
-    
-    if (!basePrompt) throw new BadRequestException('No capsule proposal found');
+        console.log("Number of initiatives to create: ", dto.no_of_initiatives_to_create)
+        if (dto.rnsIds && dto.rnsIds.length > 0) {
+            const initiatives: Initiative[] = [];
 
-    const taskPrompt = `
-    priorityNumber: ${task.priorityNumber}
-    readinessType: ${task.readinessType}
-    targetLevel: ${task.targetLevel.level}
-    description: ${task.description}
-    taskType: ${RnsStatus[task.status]}
-    `;
+            // Get current minimum priority number
+            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { priorityNumber: 'ASC' } });
+            let minPriorityNumber = existingInitiatives.length > 0 ? existingInitiatives[0].priorityNumber : 1;
+            if (minPriorityNumber > 1) minPriorityNumber = 1;
 
-    const prompt = `
-    ${basePrompt}
+            // Increment existing initiatives' priority numbers to make room for new ones
+            for (const initiative of existingInitiatives) {
+                initiative.priorityNumber += dto.rnsIds.length;
+                await this.em.persistAndFlush(initiative);
+            }
+            
+            for (let i = 0; i < dto.rnsIds.length; i++) {
+                const rnsId = dto.rnsIds[i];
+                const rns = await this.em.findOneOrFail(Rns, { id: rnsId },
+                    { populate: ['startup', 'startup.capsuleProposal', 'readinessType', 'status', 'targetLevel'] }
+                );
 
-    Based on this task:
-    ${taskPrompt}
+                // Get the current max initiativeNumber for this startup
+                const maxInitiativeNumber = await this.em.count(Initiative, { startup: rns.startup }) + 1;
 
-    Task: Create me ${dto.no_of_initiatives_to_create} initiatives for the startup's personalized task.
-    Requirement: The response should be in a JSON format.
-    It should consist of description, measures, targets, remarks
-    JSON format: [{"description": "", "measures": "", "targets": "", "remarks":""}]
-    Requirement note:
-    - description max 400
-    - measures, targets, and remarks max 150
-    `;
+                const basePrompt = await createBasePrompt(rns.startup, this.em);
+                if (!basePrompt) throw new BadRequestException('No capsule proposal found');
 
-    const resultText = await this.aiService.generateInitiativesFromPrompt(prompt);
+                const rnsPrompt = `
+            priorityNumber: ${rns.priorityNumber}
+            readinessType: ${rns.readinessType}
+            targetLevel: ${rns.targetLevel.level}
+            description: ${rns.description}
+            taskType: ${RnsStatus[rns.status]}
+            `;
 
+                const prompt = `
+            ${basePrompt}   
 
+            Based on this RNS:
+            ${rnsPrompt}
 
-    const initiatives:Initiative[] = [];
+            Task: Create me ${dto.no_of_initiatives_to_create} initiatives for the startup's personalized RNS.
+            Requirement: The response should be in a JSON format.
+            It should consist of description, measures, targets, remarks
+            JSON format: [{"description": "", "measures": "", "targets": "", "remarks":""}]
+            Requirement note:
+            - description max 400
+            - measures, targets, and remarks max 150
+            `;
 
-    for (const entry of resultText) {
-        const initiative = new Initiative();
-        initiative.description = entry.description;
-        initiative.measures = entry.measures;
-        initiative.targets = entry.targets;
-        initiative.remarks = entry.remarks;
-        initiative.rns = task;
-        initiative.isAiGenerated = true;
-        initiative.startup = task.startup;
-        initiative.assignee = task.startup.user;
-        initiative.status = 1;
-        initiative.initiativeNumber = 1; 
+                const resultText = await this.aiService.generateInitiativesFromPrompt(prompt);
 
-        await this.em.persistAndFlush(initiative);
-    }
+                console.log("Number of entries generated for RNS ID", rnsId, ":", resultText.length);
+                for (const entry of resultText) {
+                    const initiative = new Initiative();
+                    initiative.initiativeNumber = maxInitiativeNumber; // assign initiativeNumber
+                    initiative.description = entry.description;
+                    initiative.measures = entry.measures;
+                    initiative.targets = entry.targets;
+                    initiative.remarks = entry.remarks;
+                    initiative.rns = rns;
+                    initiative.isAiGenerated = false;
+                    initiative.startup = rns.startup;
+                    initiative.assignee = rns.startup.user;
+                    initiative.status = 1;
+                    initiative.priorityNumber = minPriorityNumber + i;
 
-    
-    if (dto.debug) {
-        return  prompt ;
-        }else{
+                    await this.em.persistAndFlush(initiative);
+                    initiatives.push(initiative);
+                }
+            }
+
             return initiatives;
+        } else if (dto.rnsId) {
+            // Similar logic for single RNS
+            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { priorityNumber: 'ASC' } });
+            let minPriorityNumber = existingInitiatives.length > 0 ? existingInitiatives[0].priorityNumber : 1;
+            if (minPriorityNumber > 1) minPriorityNumber = 1;
+
+            // Increment existing initiatives' priority numbers
+            for (const initiative of existingInitiatives) {
+                initiative.priorityNumber += 1;
+                await this.em.persistAndFlush(initiative);
+            }
+
+            const rns = await this.em.findOneOrFail(Rns, { id: dto.rnsId },
+                { populate: ['startup', 'startup.capsuleProposal', 'readinessType', 'status', 'targetLevel'] }
+            );
+
+            // Get the current max initiativeNumber for this startup
+            const maxInitiativeNumber = await this.em.count(Initiative, { startup: rns.startup }) + 1;
+
+            const basePrompt = await createBasePrompt(rns.startup, this.em);
+            if (!basePrompt) throw new BadRequestException('No capsule proposal found');
+
+            const rnsPrompt = `
+            priorityNumber: ${rns.priorityNumber}
+            readinessType: ${rns.readinessType}
+            targetLevel: ${rns.targetLevel.level}
+            description: ${rns.description}
+            taskType: ${RnsStatus[rns.status]}
+            `;
+
+            const prompt = `
+            ${basePrompt}
+
+            Based on this RNS:
+            ${rnsPrompt}
+
+            Task: Create me ${dto.no_of_initiatives_to_create} initiatives for the startup's personalized RNS.
+            Requirement: The response should be in a JSON format.
+            It should consist of description, measures, targets, remarks
+            JSON format: [{"description": "", "measures": "", "targets": "", "remarks":""}]
+            Requirement note:
+            - description max 400
+            - measures, targets, and remarks max 150
+            `;
+
+            const resultText = await this.aiService.generateInitiativesFromPrompt(prompt);
+
+            const initiatives: Initiative[] = [];
+
+            for (const entry of resultText) {
+                const initiative = new Initiative();
+                initiative.initiativeNumber = maxInitiativeNumber; // assign initiativeNumber
+                initiative.description = entry.description;
+                initiative.measures = entry.measures;
+                initiative.targets = entry.targets;
+                initiative.remarks = entry.remarks;
+                initiative.rns = rns;
+                initiative.isAiGenerated = false;
+                initiative.startup = rns.startup;
+                initiative.assignee = rns.startup.user;
+                initiative.status = 1;
+                initiative.priorityNumber = minPriorityNumber;
+
+                await this.em.persistAndFlush(initiative);
+                initiatives.push(initiative);
+        }
+
+            return initiatives;
+        } else {
+            throw new BadRequestException('Either rnsId or rnsIds must be provided');
         }
     }
 

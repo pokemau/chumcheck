@@ -5,14 +5,13 @@
   import * as Avatar from '$lib/components/ui/avatar';
   import { Delete, Edit, Ellipsis, Plus, Trash, User } from 'lucide-svelte';
   import { getProfileColor, zIndex } from '$lib/utils';
-  import { RoadblocksCreateDialog, RoadblocksViewEditDialog } from '.';
+  import { RoadblocksCreateDialog, RoadblocksViewEditDialog, RoadblocksViewEditAIDialog  } from '.';
   import type { Actions } from '$lib/types';
   let {
     roadblocks,
     members,
     update,
     ai,
-    addToRoadblocks,
     deleteRoadblocks,
     role,
     index
@@ -34,11 +33,23 @@
   let action: Actions = $state('View');
   const closeDialog = () => {
     open = false;
+
+    if (!roadblocks.clickedByMentor && role === 'Mentor') {
+      update(roadblocks.id, { ...roadblocks, clickedByMentor: true });
+    }
+    if (!roadblocks.clickedByStartup && role === 'Startup') {
+      update(roadblocks.id, { ...roadblocks, clickedByStartup: true });
+    }
   };
+
+  const isNewCard = () => {
+    return (role == 'Mentor' && !roadblocks.clickedByMentor) || (role == 'Startup' && !roadblocks.clickedByStartup);
+  }
 </script>
 
 <Card.Root
-  class="bg-gray-900 border border-gray-700 rounded-lg shadow-sm cursor-pointer"
+  class={`bg-gray-900 border rounded-lg shadow-sm cursor-pointer${
+    isNewCard() ? 'border-sky-600 border-2 animate-pulse' : 'border-gray-700'}`}
   onclick={() => {
     open = true;
     action = 'View';
@@ -49,12 +60,15 @@
       <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
       </Badge>
+      {#if isNewCard()}
+        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs">New</div>
+      {/if}
     </div>
     <div class="text-sm text-white mb-1 break-words whitespace-pre-wrap">
-      Description: {roadblocks?.description?.substring(0, 60) + (roadblocks?.description?.length > 60 ? '...' : '')}
+      Description: {@html roadblocks?.description?.substring(0, 60) + (roadblocks?.description?.length > 60 ? '...' : '')}
     </div>
     <div class="text-xs text-muted-foreground break-words whitespace-pre-wrap">
-      Fix: {roadblocks?.fix?.substring(0, 60) + (roadblocks?.fix?.length > 60 ? '...' : '')}
+      Fix: {@html roadblocks?.fix?.substring(0, 60) + (roadblocks?.fix?.length > 60 ? '...' : '')}
     </div>  
     <div class="flex items-center gap-2 mt-1 text-xs">
       <div class="flex items-center gap-1">
@@ -107,18 +121,13 @@
   </Card.Content>
 </Card.Root>
 
-<RoadblocksViewEditDialog
+<RoadblocksViewEditAIDialog
   {open}
   {onOpenChange}
-  rns={roadblocks}
-  {update}
-  {action}
-  deleteRns={deleteRoadblocks}
+  roadblock={roadblocks}
+  deleteroadblock={deleteRoadblocks}
   {members}
-  {assignedMember}
   {closeDialog}
-  {ai}
-  {addToRoadblocks}
+  {update}
   {index}
-  {role}
 />

@@ -57,6 +57,12 @@ export class RoadblockService {
     if (dto.fix !== undefined) {
         roadblock.fix = dto.fix;
     }
+    if (dto.clickedByMentor) {
+        roadblock.clickedByMentor = dto.clickedByMentor;
+    }
+    if (dto.clickedByStartup) {
+        roadblock.clickedByStartup = dto.clickedByStartup;
+    }
 
     await this.em.flush();
     return roadblock;
@@ -123,7 +129,7 @@ export class RoadblockService {
         Based on these initiatives:
         ${initiativesPrompt}
 
-        Task: If roadblock exists for the startup's personalized tasks and initiatives, create me at least ${dto.no_of_roadblocks_to_create} roadblocks. Approximate a risk number between 1 to 5, where 1 means least risk and 5 means highest risk. Else return an empty list.
+        Task: If roadblock exists for the startup's personalized tasks and initiatives, create me exactly ${dto.no_of_roadblocks_to_create} roadblocks. Approximate a risk number between 1 to 5, where 1 means least risk and 5 means highest risk. Else return an empty list.
         Requirement: The response should be in a JSON format.
         It should consist of description, fix, and riskNumber which should be an integer from 1 to 5.
         JSON format: [{"description": "", "fix": "", "riskNumber": (number)}]
@@ -147,7 +153,7 @@ export class RoadblockService {
             const roadblock = new Roadblock();
             roadblock.startup = startup;
             roadblock.assignee = startup.user
-            roadblock.isAiGenerated = true;
+            roadblock.isAiGenerated = false;
             roadblock.status = 1;
             roadblock.riskNumber = Number(data.riskNumber);
             roadblock.description = data.description;

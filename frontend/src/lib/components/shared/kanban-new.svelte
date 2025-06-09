@@ -12,7 +12,7 @@
     showDialog,
     role,
     updateStatus,
-    // selectedMembers
+    selectedMembers
   }: {
     handleDndConsider: any;
     handleDndFinalize: any;
@@ -21,7 +21,7 @@
     showDialog: any;
     role: any;
     updateStatus: any;
-    // selectedMembers: any;
+    selectedMembers: any;
   } = $props();
 
   const flipDurationMs = 300;
@@ -76,12 +76,9 @@
             {:else}
               {#each column.items as item (item.id)}
                 <div
-                  animate:flip={{ duration: flipDurationMs }}
-                >
-                <!-- <div
-                  animate:flip={{ duration: flipDurationMs }}
+                  animate:flip={{ duration: flipDurationMs }} 
                   class:hidden={!selectedMembers.includes(item.assigneeId ? item.assigneeId : 999) && selectedMembers.length !== 0}
-                > -->
+                >
                   {@render card(item, false, index)}
                 </div>
               {/each}
