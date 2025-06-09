@@ -2,33 +2,25 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChumCheck Admin Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
 </head>
 <body>
     <header>
-        <h1>ChumCheck Admin</h1>
+        <h1>Admin Dashboard</h1>
         {{#if user}}
             <p>Welcome, {{user.email}}!</p>
         {{/if}}
     </header>
     <nav>
         <ul>
-            <li><a href="/admin" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-            <li><a href="/admin/users"><i class="fas fa-users"></i> Manage Users</a></li>
-            <li><a href="/admin/startups"><i class="fas fa-rocket"></i> Manage Startups</a></li>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/users">Manage Users</a></li>
+            <li><a href="/admin/startups">Manage Startups</a></li> {{!-- Added this line --}}
         </ul>
     </nav>
-    <main>        <div class="page-header">
-            <h2><i class="fas fa-tachometer-alt"></i> {{message}}</h2>
-        </div>
-        
-        <div class="section-header">
-            <h3><i class="fas fa-chart-bar"></i> Key Statistics</h3>
-        </div>
-        
+    <main>
+        <h2>{{message}}</h2>
         {{#if success_msg}}
             <div class="alert alert-success">
                 {{#each success_msg}}
@@ -36,7 +28,6 @@
                 {{/each}}
             </div>
         {{/if}}
-        
         {{#if error_msg}}
             <div class="alert alert-danger">
                 {{#each error_msg}}
@@ -44,70 +35,18 @@
                 {{/each}}
             </div>
         {{/if}}
-        
-        <div class="stats-container">
-            <div class="stat-card">
-                <i class="fas fa-users fa-2x" style="color: #007bff;"></i>
-                <h3>Total Users</h3>
-                <div class="number">{{dashboard.stats.totalUsers}}</div>
-                <p>Registered accounts</p>
-            </div>
-            
-            <div class="stat-card">
-                <i class="fas fa-rocket fa-2x" style="color: #007bff;"></i>
-                <h3>Startups</h3>
-                <div class="number">{{dashboard.stats.totalStartups}}</div>
-                <p>Registered startups</p>
-            </div>
-            
-            <div class="stat-card">
-                <i class="fas fa-check-circle fa-2x" style="color: #28a745;"></i>
-                <h3>Qualified</h3>
-                <div class="number">{{dashboard.stats.qualifiedStartups}}</div>
-                <p>Qualified startups</p>
-            </div>
-            
-            <div class="stat-card">
-                <i class="fas fa-clock fa-2x" style="color: #ffc107;"></i>
-                <h3>Pending</h3>
-                <div class="number">{{dashboard.stats.pendingStartups}}</div>
-                <p>Pending evaluation</p>
-            </div>
-        </div>
-          <div class="section-header">
-            <h3><i class="fas fa-history"></i> Recent Activity</h3>
-        </div>
-        <div class="table-responsive">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Action</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each dashboard.recentActivity}}
-                    <tr>
-                        <td><span class="text-muted"><i class="far fa-calendar-alt"></i> {{this.date}}</span></td>
-                        <td>
-                            {{#if (eq this.action "System")}}
-                                <span class="badge role-Manager">{{this.action}}</span>
-                            {{else if (eq this.action "User")}}
-                                <span class="badge role-Startup">{{this.action}}</span>
-                            {{else}}
-                                <span class="badge role-Mentor">{{this.action}}</span>
-                            {{/if}}
-                        </td>
-                        <td>{{this.details}}</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-        </div>
+        {!-- Example: Displaying a list of users --}
+        {{#if users}}
+        <h3>Users</h3>
+        <ul>
+            {{#each users}}
+            <li>{{this.email}} - {{this.role}}</li> // Adjust properties as needed
+            {{/each}}
+        </ul>
+        {{/if}}
     </main>
     <footer>
-        <p>&copy; 2025 ChumCheck Admin Interface</p>
+        <p>&copy; 2025 Chumcheck Admin</p>
     </footer>
 </body>
 </html>

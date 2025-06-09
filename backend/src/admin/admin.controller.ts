@@ -13,35 +13,8 @@ export class AdminController {
 
   @Get()
   @Render('admin/dashboard')
-  async dashboard(@Req() req: Request) {
-    // Create static dashboard data instead of relying on API calls
-    const dashboardData = {
-      stats: {
-        totalUsers: 3,
-        totalStartups: 2,
-        qualifiedStartups: 1,
-        pendingStartups: 1
-      },
-      recentActivity: [
-        {
-          date: 'May 28, 2025',
-          action: 'System',
-          details: 'Admin interface updated'
-        },
-        {
-          date: 'May 28, 2025',
-          action: 'User',
-          details: 'New startup registered'
-        },
-        {
-          date: 'May 27, 2025',
-          action: 'Admin',
-          details: 'User account created'
-        }
-      ]
-    };
-    
-    return { user: req.user, message: 'Welcome to the Admin Dashboard!', dashboard: dashboardData };
+  async dashboard(@Req() req: Request) { // Add Request type
+    return { user: req.user, message: 'Welcome to the Admin Dashboard!' };
   }
 
   @Get('users')
