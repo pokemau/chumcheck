@@ -2,22 +2,29 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Edit User - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User - ChumCheck Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
 </head>
 <body>
     <header>
-        <h1>Admin Dashboard</h1>
+        <h1>ChumCheck Admin</h1>
+        {{#if user}}
+            <p>Welcome, {{user.email}}!</p>
+        {{/if}}
     </header>
     <nav>
         <ul>
-            <li><a href="/admin">Dashboard</a></li>
-            <li><a href="/admin/users">Manage Users</a></li>
-            <li><a href="/admin/startups">Manage Startups</a></li>
+            <li><a href="/admin"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="/admin/users" class="active"><i class="fas fa-users"></i> Manage Users</a></li>
+            <li><a href="/admin/startups"><i class="fas fa-rocket"></i> Manage Startups</a></li>
         </ul>
     </nav>
     <main>
-        <h2>Edit User: {{#if formData.email}}{{formData.email}}{{else}}{{editableUser.email}}{{/if}}</h2>
+        <div class="page-header">
+            <h2><i class="fas fa-user-edit"></i> Edit User: {{#if formData.email}}{{formData.email}}{{else}}{{editableUser.email}}{{/if}}</h2>
+        </div>
 
         {{#if error}}
             <div class="alert alert-danger">
@@ -29,20 +36,23 @@
 
         <form method="POST">
             <div>
-                <label for="email">Email:</label>
+                <label for="email">Email Address:</label>
                 <input type="email" id="email" name="email" value="{{#if formData.email}}{{formData.email}}{{else}}{{editableUser.email}}{{/if}}">
             </div>
-            <div>
-                <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" name="firstName" value="{{#if formData.firstName}}{{formData.firstName}}{{else}}{{editableUser.firstName}}{{/if}}">
-            </div>
-            <div>
-                <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" name="lastName" value="{{#if formData.lastName}}{{formData.lastName}}{{else}}{{editableUser.lastName}}{{/if}}">
+            <div class="form-row">
+                <div style="flex: 1; margin-right: 10px;">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName" name="firstName" value="{{#if formData.firstName}}{{formData.firstName}}{{else}}{{editableUser.firstName}}{{/if}}">
+                </div>
+                <div style="flex: 1;">
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" id="lastName" name="lastName" value="{{#if formData.lastName}}{{formData.lastName}}{{else}}{{editableUser.lastName}}{{/if}}">
+                </div>
             </div>
             <div>
                 <label for="password">New Password (leave blank to keep current):</label>
                 <input type="password" id="password" name="password">
+                <small>Minimum 8 characters recommended with a mix of letters, numbers, and symbols</small>
             </div>
             <div>
                 <label for="role">Role:</label>
@@ -52,13 +62,14 @@
                     <option value="Manager" {{#if (eq (defaultIfEmpty formData.role editableUser.role) "Manager")}}selected{{/if}}>Manager</option>
                 </select>
             </div>
-            <button type="submit">Update User</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Update User</button>
+                <a href="/admin/users" class="btn"><i class="fas fa-arrow-left"></i> Back to User List</a>
+            </div>
         </form>
-        <br>
-        <a href="/admin/users">Back to User List</a>
     </main>
     <footer>
-        <p>&copy; 2025 Chumcheck Admin</p>
+        <p>&copy; 2025 ChumCheck Admin Interface</p>
     </footer>
 </body>
 </html>
