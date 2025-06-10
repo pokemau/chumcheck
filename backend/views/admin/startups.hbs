@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Manage Startups - Admin</title>
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/users">Manage Users</a></li>
+            <li><a href="/admin/startups">Manage Startups</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>{{message}}</h2>
+
+        {{#if success_msg}}
+            <div class="alert alert-success">
+                {{#each success_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+        {{#if error_msg}}
+            <div class="alert alert-danger">
+                {{#each error_msg}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        {{#if startups}}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Owner (User ID)</th>
+                    <th>Qualification Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each startups}}
+                <tr>
+                    <td>{{this.id}}</td>
+                    <td>{{this.name}}</td>
+                    <td>{{this.user.id}} ({{this.user.email}})</td>
+                    <td>{{this.qualificationStatus}}</td>
+                    <td>
+                        <a href="/admin/startups/edit/{{this.id}}">Edit</a> |
+                        <form action="/admin/startups/delete/{{this.id}}" method="POST" style="display:inline;">
+                            <button type="submit" onclick="return confirm('Are you sure?')" class="link-button">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{/each}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No startups found.</p>
+        {{/if}}
+        <br>
+        <a href="/admin/startups/create">Create New Startup</a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Chumcheck Admin</p>
+    </footer>
+</body>
+</html>

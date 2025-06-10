@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Edit User - Admin</title>
+    <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
+</head>
+<body>
+    <header>
+        <h1>Admin Dashboard</h1>
+    </header>
+    <nav>
+        <ul>
+            <li><a href="/admin">Dashboard</a></li>
+            <li><a href="/admin/users">Manage Users</a></li>
+            <li><a href="/admin/startups">Manage Startups</a></li>
+        </ul>
+    </nav>
+    <main>
+        <h2>Edit User: {{#if formData.email}}{{formData.email}}{{else}}{{editableUser.email}}{{/if}}</h2>
+
+        {{#if error}}
+            <div class="alert alert-danger">
+                {{#each error}}
+                    <p>{{this}}</p>
+                {{/each}}
+            </div>
+        {{/if}}
+
+        <form method="POST">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="{{#if formData.email}}{{formData.email}}{{else}}{{editableUser.email}}{{/if}}">
+            </div>
+            <div>
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" value="{{#if formData.firstName}}{{formData.firstName}}{{else}}{{editableUser.firstName}}{{/if}}">
+            </div>
+            <div>
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" value="{{#if formData.lastName}}{{formData.lastName}}{{else}}{{editableUser.lastName}}{{/if}}">
+            </div>
+            <div>
+                <label for="password">New Password (leave blank to keep current):</label>
+                <input type="password" id="password" name="password">
+            </div>
+            <div>
+                <label for="role">Role:</label>
+                <select id="role" name="role">
+                    <option value="Startup" {{#if (eq (defaultIfEmpty formData.role editableUser.role) "Startup")}}selected{{/if}}>Startup</option>
+                    <option value="Mentor" {{#if (eq (defaultIfEmpty formData.role editableUser.role) "Mentor")}}selected{{/if}}>Mentor</option>
+                    <option value="Manager" {{#if (eq (defaultIfEmpty formData.role editableUser.role) "Manager")}}selected{{/if}}>Manager</option>
+                </select>
+            </div>
+            <button type="submit">Update User</button>
+        </form>
+        <br>
+        <a href="/admin/users">Back to User List</a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Chumcheck Admin</p>
+    </footer>
+</body>
+</html>
