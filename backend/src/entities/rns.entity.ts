@@ -14,6 +14,12 @@ export class Rns {
   @Property()
   priorityNumber!: number;
 
+  @Property()
+  clickedByMentor: boolean = false;
+
+  @Property()
+  clickedByStartup: boolean = false;
+
   @Property({ type: 'text' })
   description!: string;
 
@@ -21,7 +27,7 @@ export class Rns {
   targetLevel!: ReadinessLevel;
 
   @Property()
-  isAiGenerated!: boolean;
+  isAiGenerated: boolean = false;
 
   @Enum(() => RnsStatus)
   status: RnsStatus = RnsStatus.New;

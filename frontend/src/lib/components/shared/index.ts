@@ -11,3 +11,4 @@ export { default as RadarChart } from './RadarChart.svelte';
 export { default as RadarChartV2 } from './RadarChartv2.svelte';
 export { default as DeleteDialog } from './delete-dialog.svelte';
 export { default as TaskTypeFilter } from './task-type-filter.svelte';
+export { default as TextEditor } from './text-editor.svelte';

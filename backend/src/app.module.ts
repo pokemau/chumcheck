@@ -8,6 +8,7 @@ import { ReadinesslevelModule } from './readinesslevel/readinesslevel.module';
 import { AiModule } from './ai/ai.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ChatHistoryModule } from './chat_history/chat-history.module';
+import { AdminModule } from './admin/admin.module';
 
 import { User } from './entities/user.entity';
 import { Startup } from './entities/startup.entity';
@@ -45,6 +46,7 @@ import { ElevateModule } from './elevate/elevate.module';
     OverviewModule,
     ChatHistoryModule,
     ElevateModule,
+    AdminModule,
   ],
   providers: [AppService],
 })

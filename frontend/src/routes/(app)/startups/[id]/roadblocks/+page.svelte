@@ -1,7 +1,7 @@
 <script lang="ts">
   import {
-    AIColumn,
-    AITabs,
+    // AIColumn,
+    // AITabs,
     Can,
     Column,
     KanbanBoard,
@@ -15,7 +15,7 @@
     getSavedTab,
     getSelectedTab,
     updateTab,
-    getReadiness
+    // getReadiness
   } from '$lib/utils';
   import { useQueriesState } from '$lib/stores/useQueriesState.svelte.js';
   import { useQueries } from '@sveltestack/svelte-query';
@@ -26,11 +26,30 @@
   import { toast } from 'svelte-sonner';
   import { Badge } from '$lib/components/ui/badge/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
-  import { RoadblocksCard, RoadblocksCreateDialog } from '$lib/components/startups/roadblocks';
+  import { RoadblocksCard } from '$lib/components/startups/roadblocks';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-  import { Ellipsis, Kanban, Loader, Sparkles, TableIcon } from 'lucide-svelte';
+  import { Ellipsis, Kanban, Loader, Sparkles, TableIcon, ChevronDown, Check } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
+
+  interface Member {
+    userId: number;
+    startupId: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    selected: boolean;
+  }
+
+  interface Roadblock {
+    id: number;
+    description: string;
+    fix: string;
+    isAiGenerated: boolean;
+    status: number;
+    riskNumber: number;
+    assignee: number;
+  }
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -52,19 +71,13 @@
 
   const { isLoading, isError } = $derived(useQueriesState($roadblocksQueries));
   const isAccessible = $derived($roadblocksQueries[0].data);
-  let selectedTab = $state(getSelectedTab('roadblocks'));
-
-  const updateRoadblocksTab = (tab: string) => {
-    selectedTab = updateTab('roadblocks', tab);
-  };
 
   const columns = $state(getColumns());
-  const readiness = $state(getReadiness());
   const members = $derived(
     $roadblocksQueries[2].isSuccess
       ? (() => {
           const data = $roadblocksQueries[2].data;
-          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
             userId: id,
             startupId: data.id,
             firstName,
@@ -74,7 +87,7 @@
           }));
 
           // Check if user is already in members
-          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -92,77 +105,28 @@
       : []
   );
 
+  let numToGenerate = $state(3);
+
   $effect(() => {
-    const searchParam = $page.url.searchParams.get('tab');
-    selectedTab = getSavedTab('roadblocks', searchParam);
-
-    // console.log(members)
-
     if ($roadblocksQueries[1].isSuccess) {
-      // console.log($roadblocksQueries[1].data);
+      const roadblocksCount = ($roadblocksQueries[1].data as Roadblock[]).length;
+      if (roadblocksCount >= 3) {
+        numToGenerate = 1;
+      } else if (roadblocksCount >= 1) {
+        numToGenerate = 2;
+      } else {
+        numToGenerate = 3;
+      }
     }
 
     if (!isLoading) {
       columns.forEach((column) => {
-        column.items = $roadblocksQueries[1].data.filter(
-          (data) => data.isAiGenerated === false && data.status === column.value
+        column.items = ($roadblocksQueries[1].data as Roadblock[]).filter(
+          (data: Roadblock) => data.status === column.value
         );
       });
     }
-
-    // console.log($roadblocksQueries[1].data)
   });
-
-  const createRoadblocks = async (payload: any) => {
-    // console.log(payload);
-    await axiosInstance.post(
-      '/roadblocks/',
-      { ...payload, riskNumber: 1 },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    toast.success('Successfully created the Roadblocks');
-    open = false;
-    $roadblocksQueries[1]
-      .refetch()
-      .then((res) => {
-        columns.forEach((column) => {
-          column.items = res.data.filter(
-            (data) => data.isAiGenerated === false && data.status === column.value
-          );
-        });
-      })
-      .finally(async () => await updateRiskNumber());
-  };
-
-  const editRoadblock = async (
-    id: number,
-    riskNumber: number,
-    description: string,
-    fix: string,
-    assigneeId: number
-  ) => {
-    await axiosInstance.patch(
-      `/roadblocks/${id}/`,
-      {
-        riskNumber: riskNumber,
-        description,
-        fix,
-        assignee_id: assigneeId
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    toast.success('Successfuly updated the RNA');
-    // open = false;
-    $roadblocksQueries[1].refetch();
-  };
 
   const updatedEditRoadblock = async (id: number, payload: any) => {
     await axiosInstance.patch(`/roadblocks/${id}/`, payload, {
@@ -171,11 +135,10 @@
       }
     });
     toast.success('Successfuly updated the RNA');
-    // open = false;
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
-        column.items = res.data.filter(
-          (data) => data.isAiGenerated === false && data.status === column.value
+        column.items = (res.data as Roadblock[]).filter(
+          (data: Roadblock) => data.status === column.value
         );
       });
     });
@@ -192,8 +155,8 @@
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
-          column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+          column.items = (res.data as Roadblock[]).filter(
+            (data: Roadblock) => data.status === column.value
           );
         });
       })
@@ -207,7 +170,7 @@
   async function handleDndFinalize(e: any, x: number, status: number) {
     columns[x].items = e.detail.items;
     if (e.detail.info.trigger == 'droppedIntoZone') {
-      const task = e.detail.items.find((t) => t.id == e.detail.info.id);
+      const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
         `/roadblocks/${task.id}/`,
         {
@@ -322,7 +285,6 @@
     try {
       // Execute all update requests concurrently
       await Promise.all(updatePromises);
-      // $rnsQueries[1].refetch();
       console.log('All tasks updated successfully');
     } catch (error) {
       $roadblocksQueries[1].refetch();
@@ -332,59 +294,34 @@
   };
 
   let generatingRoadblocks: boolean = $state(false);
-  const generateRoadblocks = async () => {
+  const generateRoadblocks = async (count: number) => {
     generatingRoadblocks = true;
-    await axiosInstance.post(
-      `/roadblocks/generate-roadblocks/`,
-      {
-        startupId: data.startupId,
-        no_of_roadblocks_to_create: 3
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
+    console.log("Count: ", count);
+    try {
+      await axiosInstance.post(
+        `/roadblocks/generate-roadblocks/`,
+        {
+          startupId: data.startupId,
+          no_of_roadblocks_to_create: count
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
         }
-      }
-    );
-    generatingRoadblocks = false;
-    $roadblocksQueries[1].refetch();
-    toast.success('Successfully generated Roadblocks');
+      );
+
+      await $roadblocksQueries[1].refetch(); // Refetch all roadblocks including new AI-generated ones
+
+      toast.success(`Successfully generated ${count} Roadblocks`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to generate roadblocks');
+    } finally {
+      generatingRoadblocks = false;
+    }
   };
 
-  const addToRoadblocks = async (id: number) => {
-    await axiosInstance.patch(
-      `/roadblocks/${id}/`,
-      {
-        //status change
-        status: 4,
-        isAiGenerated: false
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
-      }
-    );
-    toast.success('Successfuly added to RNA');
-    $roadblocksQueries[1]
-      .refetch()
-      .then((res) => {
-        columns.forEach((column) => {
-          column.items = res.data.filter(
-            (data) => data.isAiGenerated === false && data.status === column.value
-          );
-        });
-      })
-      .finally(async () => await updateRiskNumber());
-  };
 
-  let open = $state(false);
-  const showDialog = () => {
-    open = true;
-  };
-  const onOpenChange = () => {
-    open = !open;
-  };
   let status = $state(4);
   const updateStatus = (newStatus: number) => {
     status = newStatus;
@@ -400,7 +337,7 @@
         selectedMembers.push(index);
       }
     } else {
-      const userId = members[index].user_id;
+      const userId = members[index].userId;
       const userIndex = selectedMembers.indexOf(userId);
 
       if (userIndex !== -1) {
@@ -430,22 +367,12 @@
   {@render fallback()}
 {/if}
 
-<RoadblocksCreateDialog
-  {open}
-  {onOpenChange}
-  {members}
-  {startupId}
-  create={createRoadblocks}
-  status={1}
-/>
-
 {#snippet card(roadblocks: any, index: number)}
   <RoadblocksCard
     {roadblocks}
     {members}
     ai={false}
     update={updatedEditRoadblock}
-    {addToRoadblocks}
     deleteRoadblocks={deleteRoadblock}
     role={data.role}
     {index}
@@ -467,10 +394,8 @@
             <Skeleton
               class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
                 index !== 2 - 1 ? '-mr-1' : ''
-              } `}
-            >
-              ?
-            </Skeleton>
+              }`}
+            />
           {/each}
         </div>
       </div>
@@ -503,79 +428,86 @@
 {#snippet accessible()}
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
-      <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
-        <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="roadblocks" realName="Roadblocks" updateTab={updateRoadblocksTab} />
-        </div>
-      </Can>
-      {#if selectedTab === 'roadblocks'}
-        <div class="flex h-fit justify-between rounded-lg bg-background">
-          <Tabs.Root value={selectedFormat}>
-            <Tabs.List class="border bg-flutter-gray/20">
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="board"
-                onclick={() => (selectedFormat = 'board')}
-              >
-                <Kanban class="h-4 w-4" />
-                Board</Tabs.Trigger
-              >
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="table"
-                onclick={() => (selectedFormat = 'table')}
-              >
-                <TableIcon class="h-4 w-4" />
-                Table</Tabs.Trigger
-              >
-            </Tabs.List>
-          </Tabs.Root>
-        </div>
-        <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
-      {/if}
+      <div class="flex h-fit justify-between rounded-lg bg-background">
+        <Tabs.Root value={selectedFormat}>
+          <Tabs.List class="border bg-flutter-gray/20">
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="board"
+              onclick={() => (selectedFormat = 'board')}
+            >
+              <Kanban class="h-4 w-4" />
+              Board</Tabs.Trigger
+            >
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="table"
+              onclick={() => (selectedFormat = 'table')}
+            >
+              <TableIcon class="h-4 w-4" />
+              Table</Tabs.Trigger
+            >
+          </Tabs.List>
+        </Tabs.Root>
+      </div>
+      <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
     </div>
     <div class="flex items-center gap-3">
-      {#if selectedTab === 'ai-roadblocks'}
-        <Button
-          class="ml-auto hidden rounded-lg lg:flex"
-          onclick={generateRoadblocks}
-          disabled={generatingRoadblocks}
-        >
-          {#if generatingRoadblocks}
-            <Loader class="mr-2 h-4 w-4 animate-spin" />
-          {:else}
-            <Sparkles class="mr-2 h-4 w-4" />
-          {/if}
-          Generate
-        </Button>
-      {:else}
-        <ShowHideColumns views={columns} />
-      {/if}
+      <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
-        <button
-          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
-          onclick={showDialog}
-          type="button"
-        >
-          + Add
-        </button>
+        <div class="flex gap-1">
+          <button
+            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            type="button"
+            disabled={generatingRoadblocks}
+            onclick={() => generateRoadblocks(numToGenerate)}
+          >
+            {#if generatingRoadblocks}
+              <Loader class="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            {:else}
+              + Add
+            {/if}
+          </button> 
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <button
+                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                disabled={generatingRoadblocks}
+              >
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content align="end" class="w-[100px] max-h-[150px] overflow-y-auto">
+              <DropdownMenu.RadioGroup value={numToGenerate.toString()} onValueChange={(val) => numToGenerate = Number(val)} class="space-y-1">
+                {#each [1, 2, 3, 4, 5] as count}
+                  <DropdownMenu.RadioItem
+                    value={count.toString()}
+                    class="flex items-center justify-between cursor-pointer px-2 py-1.5 hover:bg-accent"
+                  >
+                    <span>{count}</span>
+                    <!-- <Check class="h-4 w-4 ml-auto" /> -->
+                  </DropdownMenu.RadioItem>
+                {/each}
+              </DropdownMenu.RadioGroup>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
+        </div>
       {/if}
     </div>
   </div>
-  {#if selectedTab === 'roadblocks'}
+  <div class="block w-full">
     {#if selectedFormat === 'board'}
-      <div class="block w-full">
-        <KanbanBoardNew
-          {columns}
-          {handleDndFinalize}
-          {handleDndConsider}
-          {card}
-          {showDialog}
-          role={data.role}
-          {updateStatus}
-          {selectedMembers}
-        />
-      </div>
+      <KanbanBoardNew
+        {columns}
+        {handleDndFinalize}
+        {handleDndConsider}
+        card={card}
+        role={data.role}
+        {updateStatus}
+        {selectedMembers}
+      />
     {:else}
       <div class="h-fit w-full rounded-md border">
         <Table.Root class="rounded-lg bg-background">
@@ -587,15 +519,15 @@
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {#each $roadblocksQueries[1].data.filter((data) => data.isAiGenerated === false) as item}
+            {#each ($roadblocksQueries[1].data as Roadblock[]).filter((item: Roadblock) => item.isAiGenerated === false) as item}
               {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
                 <Table.Row class="h-14 cursor-pointer">
                   <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
                   <Table.Cell class="">{item.riskNumber}</Table.Cell>
                   <Table.Cell class=""
-                    >{members.filter((member: any) => member.userId === item.assignee)[0]
+                    >{members.filter((member: Member) => member.userId === item.assignee)[0]
                       ?.firstName}
-                    {members.filter((member: any) => member.userId === item.assignee)[0]
+                    {members.filter((member: Member) => member.userId === item.assignee)[0]
                       ?.lastName}</Table.Cell
                   >
                 </Table.Row>
@@ -605,22 +537,7 @@
         </Table.Root>
       </div>
     {/if}
-  {:else}
-    <div class="grid w-full grid-cols-4 gap-5 overflow-auto">
-      {#each $roadblocksQueries[1].data.filter((data: any) => data.isAiGenerated === true) as r, index}
-        <RoadblocksCard
-          roadblocks={r}
-          update={updatedEditRoadblock}
-          {addToRoadblocks}
-          deleteRoadblocks={deleteRoadblock}
-          ai={true}
-          {members}
-          role={data.role}
-          {index}
-        />
-      {/each}
-    </div>
-  {/if}
+  </div>
 {/snippet}
 
 {#snippet fallback()}

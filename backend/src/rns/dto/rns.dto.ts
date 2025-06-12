@@ -86,6 +86,16 @@ export class UpdateRnsDto {
   @IsBoolean()
   @Type(() => Boolean)
   isAiGenerated?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByMentor?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByStartup?: boolean;
 }
 
 export class GenerateTasksDto {
@@ -93,13 +103,20 @@ export class GenerateTasksDto {
   @IsInt()
   startup_id: number;
 
-  @IsString()
-  @IsEnum(ReadinessType)
-  readinessType: ReadinessType;
+  @IsOptional()
+  @Type(() => Array)
+  @IsInt({ each: true })
+  rnaIds?: number[];
 
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
-  term: number;
+  startPriorityNumber?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  term?: number;
 
   @Type(() => Number)
   @IsInt()

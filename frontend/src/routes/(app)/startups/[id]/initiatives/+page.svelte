@@ -26,11 +26,12 @@
   import { toast } from 'svelte-sonner';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { InitiativeCard, InitiativeCreateDialog } from '$lib/components/startups/initiatives';
-  import { Ellipsis, Kanban, TableIcon } from 'lucide-svelte';
+  import { Ellipsis, Kanban, TableIcon, Loader } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
   import HoveredRNSCard from '$lib/components/shared/hovered-rns-card.svelte';
+  import { ChevronDown } from 'lucide-svelte';
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -64,11 +65,31 @@
   const columns = $state(getColumns());
   const readiness = $state(getReadiness());
   const views = $derived(selectedTab === 'initiatives' ? columns : readiness);
+
+  interface Member {
+    userId: number;
+    startupId: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    selected: boolean;
+  }
+
+  interface RNSTask {
+    id: number;
+    priorityNumber: number;
+    description: string;
+    hasInitiatives: boolean;
+    readinessType: string;
+    isAiGenerated: boolean;
+    status: number;
+  }
+
   const members = $derived(
     $initiativesQueries[3].isSuccess
       ? (() => {
           const data = $initiativesQueries[3].data;
-          const baseMembers = data.members.map(({ id, email, firstName, lastName }) => ({
+          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
             userId: id,
             startupId: data.id,
             firstName,
@@ -77,8 +98,7 @@
             selected: false
           }));
 
-          // Check if user is already in members
-          const isUserInMembers = baseMembers.some(member => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -95,8 +115,9 @@
         })()
       : []
   );
+
   const tasks = $derived(
-    $initiativesQueries[1].isSuccess ? $initiativesQueries[1].data : []
+    $initiativesQueries[1].isSuccess ? ($initiativesQueries[1].data as RNSTask[]) : []
   );
 
   let status = $state(1);
@@ -104,19 +125,31 @@
   const selectedMembers: any = $state([]);
 
   $effect(() => {   
+    // Handle URL params and column data
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
-    if (!isLoading) {
+    if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
           (data: any) => data.isAiGenerated === false && data.status === column.value
         );
       });
     }
-    console.log($initiativesQueries[1].data)
-  });
 
+    // Handle RNS task selection
+    if ($initiativesQueries[1].isSuccess && $initiativesQueries[2].isSuccess) {
+      // Get all RNS IDs that already have initiatives
+      const rnsWithInitiatives = new Set($initiativesQueries[2].data.map((initiative: any) => initiative.rns));
+      
+      selectedRNS = tasks
+        .filter(task => 
+          !rnsWithInitiatives.has(task.id) && 
+          task.status !== 7
+        )
+        .map(task => task.id);
+    }
+  });
 
   const createInitiative = async (payload: any) => {
     await axiosInstance.post(
@@ -371,10 +404,11 @@
     }
   };
 
-  const addToInitiatives = async (id: number) => {
+  const addToInitiatives = async (id: number, payload: any) => {
     await axiosInstance.patch(
       `/initiatives/${id}/`,
       {
+        ...payload,
         status: 1,
         isAiGenerated: false
       },
@@ -399,46 +433,9 @@
     });
   };
 
-  let generatingInitiatives = false;
+  let generatingInitiatives = $state(false);
   let generatingType = 'Technology';
   let open = $state(false);
-  const generateInitiatives = async (type: string) => {
-    generatingInitiatives = true;
-    let ids = $initiativesQueries[1].data
-      .filter(
-        (data: any) =>
-          data.readinessType === type &&
-          data.isAiGenerated === false 
-      )
-      .map((d: any) => d.id);
-
-    if (ids.length > 0) {
-      const requests = ids.map(async (id: any) => {
-        return await axiosInstance.post(
-          `/initiatives/generate-initiatives/`,
-          {
-            task_id: id,
-            no_of_initiatives_to_create: 3
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          }
-        );
-      });
-
-      await axios.all(requests);
-      $initiativesQueries[2].refetch();
-      $initiativesQueries[1].refetch();
-      toast.success(`Successfully generated initiatives`);
-    } else {
-      toast.error('No initiatives to generate');
-    }
-
-    generatingInitiatives = false;
-  };
-
 
   const showDialog = () => {
     open = true;
@@ -469,6 +466,90 @@
       } else {
         selectedMembers.push(userId);
       }
+    }
+  };
+
+  let selectedRNS: number[] = $state([]);
+  
+  const toggleRNSSelection = (id: number) => {
+    const index = selectedRNS.indexOf(id);
+    if (index !== -1) {
+      selectedRNS.splice(index, 1);
+    } else {
+      selectedRNS.push(id);
+    }
+  };
+
+  const generateInitiativesForSelected = async () => {
+    if (selectedRNS.length === 0) {
+      toast.error('No RNS selected');
+      return;
+    }
+
+    generatingInitiatives = true;
+    try {
+      // First, get all current initiatives
+      const currentItems = await axiosInstance.get(`/initiatives/?startupId=${startupId}`, {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      });
+
+      // Increment priority numbers of all existing items so that new initiatives will be at the top of the column
+      const updatePromises = currentItems.data.map((item: any) => 
+        axiosInstance.patch(
+          `/initiatives/${item.id}/`,
+          { priorityNumber: (item.priorityNumber || 0) + selectedRNS.length }, // Increment by number of new items
+          {
+            headers: {
+              Authorization: `Bearer ${data.access}`
+            }
+          }
+        )
+      );
+      
+      await Promise.all(updatePromises);
+
+      // Generate new initiatives with priority numbers starting from 1
+      await axiosInstance.post(
+        `/initiatives/generate-initiatives/`,
+        {
+          rnsIds: selectedRNS,
+          no_of_initiatives_to_create: 1,
+          startPriorityNumber: 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
+        }
+      );
+
+      await Promise.all([
+        $initiativesQueries[1].refetch(),
+        $initiativesQueries[2].refetch()
+      ]);
+
+      // // Mark all new initiatives
+      // const newInitiatives = columns[0].items.filter(item => !item.isNew);
+      // for (const initiative of newInitiatives) {
+      //   await axiosInstance.patch(
+      //     `/initiatives/${initiative.id}/`,
+      //     { isNew: true },
+      //     {
+      //       headers: {
+      //         Authorization: `Bearer ${data.access}`
+      //       }
+      //     }
+      //   );
+      // }
+      
+      // selectedRNS = [];
+      toast.success('Successfully generated initiatives for selected RNS');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to generate initiatives');
+    } finally {
+      generatingInitiatives = false;
     }
   };
 </script>
@@ -565,129 +646,146 @@
 {#snippet accessible()}
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
-      <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
-        <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="initiatives" realName="Initiatives" updateTab={updateInitiativeTab} />
-        </div>
-      </Can>
-      {#if selectedTab === 'initiatives'}
-        <div class="flex h-fit justify-between rounded-lg bg-background">
-          <Tabs.Root value={selectedFormat}>
-            <Tabs.List class="border bg-flutter-gray/20">
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="board"
-                onclick={() => (selectedFormat = 'board')}
-              >
-                <Kanban class="h-4 w-4" />
-                Board</Tabs.Trigger
-              >
-              <Tabs.Trigger
-                class="flex items-center gap-1"
-                value="table"
-                onclick={() => (selectedFormat = 'table')}
-              >
-                <TableIcon class="h-4 w-4" />
-                Table</Tabs.Trigger
-              >
-            </Tabs.List>
-          </Tabs.Root>
-        </div>
-        <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
-      {/if}
+      <div class="flex h-fit justify-between rounded-lg bg-background">
+        <Tabs.Root value={selectedFormat}>
+          <Tabs.List class="border bg-flutter-gray/20">
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="board"
+              onclick={() => (selectedFormat = 'board')}
+            >
+              <Kanban class="h-4 w-4" />
+              Board</Tabs.Trigger
+            >
+            <Tabs.Trigger
+              class="flex items-center gap-1"
+              value="table"
+              onclick={() => (selectedFormat = 'table')}
+            >
+              <TableIcon class="h-4 w-4" />
+              Table</Tabs.Trigger
+            >
+          </Tabs.List>
+        </Tabs.Root>
+      </div>
+      <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
     </div>
     <div class="flex gap-4 items-center">
       {#if selectedFormat === 'board'}
-      <ShowHideColumns {views} />
-    {/if}
-      {#if data.role !== 'Startup'}
-        <button
-          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors"
-          onclick={showDialog}
-          type="button"
-        >
-          + Add
-        </button>
+        <ShowHideColumns {views} />
       {/if}
-    </div>
-  </div>
-    {#if selectedTab === 'initiatives'}
-    <div class="block w-full">
-      {#if selectedFormat === 'board'}
-        <KanbanBoardNew
-          {columns}
-          {handleDndFinalize}
-          {handleDndConsider}
-          {card}
-          {showDialog}
-          role={data.role}
-          {updateStatus}
-          {selectedMembers}
-        />
-      {:else}
-        <div class="h-fit w-full rounded-md border">
-          <Table.Root class="rounded-lg bg-background">
-            <Table.Header>
-              <Table.Row class="text-centery h-12">
-                <Table.Head class="pl-5">Description</Table.Head>
-                <Table.Head class="">Priority No.</Table.Head>
-                <Table.Head class="">Initiative No.</Table.Head>
-                <Table.Head class="">Assignee</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {#each $initiativesQueries[2].data.filter((data) => data.isAiGenerated === false) as item}
-                {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
-                  <Table.Row class="h-14 cursor-pointer">
-                    <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
-                    <Table.Cell class=""
-                      >{tasks.filter((task) => task.id === item.rns)[0]
-                        .priorityNumber}</Table.Cell
-                    >
-                    <Table.Cell class="">{item?.initiativeNumber}</Table.Cell>
-                    <Table.Cell class="">
-                      {members.filter((member: any) => member.userId === item.assignee)[0]
-                        ?.firstName}
-                      {members.filter((member: any) => member.userId === item.assignee)[0]
-                        ?.lastName}
-                    </Table.Cell>
-                  </Table.Row>
-                {/if}
-              {/each}
-            </Table.Body>
-          </Table.Root>
+      {#if data.role !== 'Startup'}
+        <div class="flex gap-1">
+          <button
+            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            type="button"
+            disabled={generatingInitiatives}
+            on:click={() => generateInitiativesForSelected()}
+          >
+            {#if generatingInitiatives}
+              <Loader class="h-4 w-4 animate-spin" />
+              Generating...
+            {:else}
+              + Add
+            {/if}
+          </button>
+          <DropdownMenu.Root>
+            <DropdownMenu.Trigger>
+              <button
+                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                type="button"
+                disabled={generatingInitiatives}
+              >
+                <ChevronDown class="h-4 w-4" />
+              </button>
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content 
+              align="end" 
+              class="w-[300px] max-h-[300px] overflow-y-auto"
+              closeOnItemClick={false}
+            >
+              <DropdownMenu.Group class="space-y-1">
+                {#each tasks
+                  .filter(task => task.status !== 7)
+                  .sort((a, b) => a.priorityNumber - b.priorityNumber) as task}
+                  <div 
+                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$initiativesQueries[2].data?.some((i: any) => i.rns === task.id) ? 'opacity-50' : ''}"
+                    on:click|stopPropagation={() => toggleRNSSelection(task.id)}
+                    on:keydown|stopPropagation
+                  >
+                    <div class="flex items-center gap-2">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedRNS.includes(task.id)}
+                        class="h-4 w-4"
+                      />
+                      <div class="flex flex-col gap-0.5">
+                        <div class="flex items-center gap-2">
+                          <span class="font-medium">RNS #{task.priorityNumber}</span>
+                          {#if $initiativesQueries[2].data?.some((i: any) => i.rns === task.id)}
+                            <span class="text-xs text-muted-foreground">(Has initiatives)</span>
+                          {/if}
+                        </div>
+                        <span class="text-xs text-muted-foreground line-clamp-2">
+                          {task.description}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                {/each}
+              </DropdownMenu.Group>
+            </DropdownMenu.Content>
+          </DropdownMenu.Root>
         </div>
       {/if}
     </div>
+  </div>
+  <div class="block w-full">
+    {#if selectedFormat === 'board'}
+      <KanbanBoardNew
+        {columns}
+        {handleDndFinalize}
+        {handleDndConsider}
+        {card}
+        {showDialog}
+        role={data.role}
+        {updateStatus}
+        {selectedMembers}
+      />
     {:else}
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 h-full overflow-auto">
-      {#each readiness as readiness}
-        {#if readiness.show}
-          <AIColumn name={readiness.name} generate={generateInitiatives} role={data.role}>
-            {#each $initiativesQueries[2].data.filter((data) => data.isAiGenerated === true) as item, index}
-              {@const ids = $initiativesQueries[1].data
-                .filter(
-                  (data) =>
-                    data.readinessType === readiness.name && data.isAiGenerated === false
-                )
-                .map((d) => d.id)}
-              {@const cur = $initiativesQueries[1].data.filter(
-                (data) =>
-                  data.readinessType === readiness.name &&
-                  data.isAiGenerated === false &&
-                  data.id === item.task_id
-              )[0]}
-              {#if ids.includes(item.rns)}
-                <div>
-                  {@render card(item, true, index)}
-                </div>
+      <div class="h-fit w-full rounded-md border">
+        <Table.Root class="rounded-lg bg-background">
+          <Table.Header>
+            <Table.Row class="text-centery h-12">
+              <Table.Head class="pl-5">Description</Table.Head>
+              <Table.Head class="">Priority No.</Table.Head>
+              <Table.Head class="">Initiative No.</Table.Head>
+              <Table.Head class="">Assignee</Table.Head>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {#each $initiativesQueries[2].data.filter((item: RNSTask) => item.isAiGenerated === false) as item}
+              {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
+                <Table.Row class="h-14 cursor-pointer">
+                  <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
+                  <Table.Cell class="">
+                    {tasks.filter((task: RNSTask) => task.id === item.rns)[0]?.priorityNumber}
+                  </Table.Cell>
+                  <Table.Cell class="">{item?.initiativeNumber}</Table.Cell>
+                  <Table.Cell class="">
+                    {members.filter((member: Member) => member.userId === item.assignee)[0]?.firstName}
+                    {members.filter((member: Member) => member.userId === item.assignee)[0]?.lastName}
+                  </Table.Cell>
+                </Table.Row>
               {/if}
             {/each}
-          </AIColumn>
-        {/if}
-      {/each}
-    </div>
+          </Table.Body>
+        </Table.Root>
+      </div>
     {/if}
+  </div>
 {/snippet}
 
-{#snippet fallback()}{/snippet}
+{#snippet fallback()}
+  <h1>Huh</h1>
+{/snippet}

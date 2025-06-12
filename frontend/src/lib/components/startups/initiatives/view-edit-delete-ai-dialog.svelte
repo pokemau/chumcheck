@@ -7,7 +7,9 @@
   import * as Select from '$lib/components/ui/select/index.js';
   import { Card } from '$lib/components/ui/card';
   import { Separator } from '$lib/components/ui/separator';
-  import { Check, Trash } from 'lucide-svelte';
+  import { Check, Trash, Copy } from 'lucide-svelte';
+  import { TextEditor } from '$lib/components/shared';
+  import { tick } from 'svelte';
 
   type ChatMessage = {
     id?: number;
@@ -29,11 +31,19 @@
     closeDialog,
     addToInitiative,
     index,
-    tasks
+    tasks,
+    isEdit = false
   } = $props();
 
   let initiativeCopy = $state({ ...initiative });
   let isLoadingHistory = $state(false);
+
+  function handleDialogStateChange(newOpen: boolean) {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      closeDialog();
+    }
+  }
 
   async function loadChatHistory() {
     isLoadingHistory = true;
@@ -42,6 +52,11 @@
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
       chatHistory = history;
+      tick().then(() => {
+        if (chatHistoryContainer) {
+          chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+      });
     } catch (error) {
       console.error('Error loading chat history:', error);
       chatHistory = [
@@ -64,10 +79,6 @@
     }
   });
 
-  let editDescription = $state(false);
-  let editMeasures = $state(false);
-  let editTargets = $state(false);
-  let editRemarks = $state(false);
   let deleteDialogOpen = $state(false);
 
   const deleteDialogOnOpenChange = () => {
@@ -77,6 +88,7 @@
   let chatHistory = $state<ChatMessage[]>([]);
   let userInput = $state('');
   let isLoading = $state(false);
+  let chatHistoryContainer: HTMLDivElement;
 
   async function handleSendMessage() {
     if (!userInput.trim()) return;
@@ -118,13 +130,13 @@
   }
 </script>
 
-<Dialog.Root bind:open={open} {onOpenChange}>
-  <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-scroll">
+<Dialog.Root bind:open={open} onOpenChange={handleDialogStateChange}>
+  <Dialog.Content class="h-[90vh] max-w-[1200px]">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->
       <div class="flex flex-col w-1/2 border-r border-border p-6">
         <h1 class="text-2xl font-semibold mb-4">Refine Initiative</h1>
-        <div class="flex-1 overflow-y-auto space-y-4 py-4">
+        <div bind:this={chatHistoryContainer} class="flex-1 overflow-y-auto space-y-4 py-4">
           {#if isLoadingHistory}
             <div class="flex justify-center items-center h-full">
               <div class="text-gray-400">Loading chat history...</div>
@@ -150,7 +162,7 @@
                           <strong>Description:</strong>
                           <div>{message.refinedDescription}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedDescription ?? '';
@@ -169,7 +181,7 @@
                           <strong>Measures:</strong>
                           <div>{message.refinedMeasures}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedMeasures ?? '';
@@ -188,7 +200,7 @@
                           <strong>Targets:</strong>
                           <div>{message.refinedTargets}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedTargets ?? '';
@@ -207,7 +219,7 @@
                           <strong>Remarks:</strong>
                           <div>{message.refinedRemarks}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedRemarks ?? '';
@@ -252,37 +264,61 @@
         <div class="flex flex-col gap-4 overflow-y-auto">
           <div class="mb-4">
             <Label>Description</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.description}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.description}
+              rows={4}
+              placeholder="Enter initiative description..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Measures</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.measures}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.measures}
+              rows={4}
+              placeholder="Enter measures..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Targets</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.targets}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.targets}
+              rows={4}
+              placeholder="Enter targets..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
           <div class="mb-4">
             <Label>Remarks</Label>
-            <Textarea
+            <!-- <Textarea
               rows={4}
               class="w-full rounded bg-background border border-border text-white p-3"
               bind:value={initiativeCopy.remarks}
+            /> -->
+            <TextEditor
+              bind:value={initiativeCopy.remarks}
+              rows={4}
+              placeholder="Enter remarks..."
+              classNames="w-full rounded bg-background border border-border text-white p-3"
             />
           </div>
 
@@ -327,9 +363,15 @@
           <div class="flex justify-end gap-2 mt-auto">
             <Button variant="outline" onclick={() => closeDialog()}>Cancel</Button>
             <Button onclick={() => {
-              addToInitiative(initiativeCopy.id);
+              addToInitiative(initiativeCopy.id, {
+                description: initiativeCopy.description,
+                measures: initiativeCopy.measures,
+                targets: initiativeCopy.targets,
+                remarks: initiativeCopy.remarks,
+                assignee: initiativeCopy.assignee,
+              });
               open = false;
-            }}>Add to Initiatives</Button>
+            }}>{isEdit ? "Update" : "Add to Initiatives"}</Button>
           </div>
         </div>
       </div>

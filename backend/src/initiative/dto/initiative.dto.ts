@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsPositive,
+  IsArray,
 } from 'class-validator';
 import { RnsStatus } from '../../entities/enums/rns.enum';
 import { Type } from 'class-transformer';
@@ -96,12 +97,29 @@ export class UpdateInitiativeDto {
   @IsString()
   @IsOptional()
   remarks: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByMentor?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByStartup?: boolean;
 }
 
 export class GenerateInitiativeDto {
   @Type(() => Number)
   @IsInt()
-  task_id: number;
+  @IsOptional()
+  rnsId?: number;
+
+  @Type(() => Number)
+  @IsArray()
+  @IsInt({ each: true })
+  @IsOptional()
+  rnsIds?: number[];
 
   @Type(() => Number)
   @IsInt()

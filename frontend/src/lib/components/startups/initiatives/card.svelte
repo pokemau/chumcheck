@@ -21,6 +21,12 @@
   let action: Actions = $state('View');
   const closeDialog = () => {
     open = false;
+    if (!initiative.clickedByMentor && role === 'Mentor') {
+      update(initiative.id, { ...initiative, clickedByMentor: true });
+    }
+    if (!initiative.clickedByStartup && role === 'Startup') {
+      update(initiative.id, { ...initiative, clickedByStartup: true });
+    }
   };
 
   function handleMouseEnter(event: MouseEvent) {
@@ -35,17 +41,25 @@
     hoveredRNSCard.set({ rns: null, coords: null, visible: false });
   }
 
+  const isNewCard = () => {
+    return (role == 'Mentor' && !initiative.clickedByMentor) || (role == 'Startup' && !initiative.clickedByStartup)
+  }
+
 </script>
 
 <Card.Root
-  class="bg-gray-900 border border-gray-700 rounded-lg shadow-sm cursor-pointer"
+  class={`bg-gray-900 border ${
+  isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
   onclick={() => {
     open = true;
     action = 'View';
   }}
 >
   <Card.Content class="flex flex-col gap-2 p-4">
-    <div class="flex items-center justify-between mb-1 relative">
+    <div class="flex relative items-center justify-between mb-1 relative">
+      {#if isNewCard()}
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs">New</div>
+      {/if}
       <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
       </Badge>
@@ -62,26 +76,26 @@
       </Badge>
     </div>
     <div class="text-sm text-white break-words whitespace-pre-wrap">
-      Task: {assignedRNS?.description?.substring(0, 60) + (assignedRNS?.description?.length > 60 ? '...' : '')}
-    </div>  
+      Task: {@html assignedRNS?.description?.substring(0, 40) + (assignedRNS?.description?.length > 40 ? '...' : '')}
+    </div>
     {#if initiative.description}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Description: {initiative.description.substring(0, 100) + (initiative.description.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Description: <span class="text-muted-foreground">{@html initiative.description.substring(0, 50) + (initiative.description.length > 50 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.measures}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Measures: {initiative.measures.substring(0, 100) + (initiative.measures.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Measures: <span class="text-muted-foreground">{@html initiative.measures.substring(0, 50) + (initiative.measures.length > 50 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.targets}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Targets: {initiative.targets.substring(0, 100) + (initiative.targets.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Targets: <span class="text-muted-foreground">{@html initiative.targets.substring(0, 50) + (initiative.targets.length > 50 ? '...' : '')}</span>
       </div>
     {/if}
     {#if initiative.remarks}
-      <div class="text-muted-foreground text-xs break-words whitespace-pre-wrap">
-        Remarks: {initiative.remarks.substring(0, 100) + (initiative.remarks.length > 100 ? '...' : '')}
+      <div class="text-xs break-words whitespace-pre-wrap">
+        Remarks: <span class="text-muted-foreground">{@html initiative.remarks.substring(0, 50) + (initiative.remarks.length > 50 ? '...' : '')}</span>
       </div>
     {/if}
     <div class="flex items-center gap-2 mt-1 text-xs">
@@ -108,20 +122,21 @@
   </Card.Content>
 </Card.Root>
 
-{#if ai}
-  <InitiativeViewEditDeleteAiDialog
-    {open}
-    {onOpenChange}
-    initiative={initiative}
-    {deleteInitiative}
-    {members}
-    {closeDialog}
-    {addToInitiative}
-    {index}
-    {tasks}
-  />
-{:else}
-  <InitiativeViewEditDeleteDialog
+<!-- {#if ai} -->
+<InitiativeViewEditDeleteAiDialog
+  {open}
+  {onOpenChange}
+  initiative={initiative}
+  {deleteInitiative}
+  {members}
+  {closeDialog}
+  {addToInitiative}
+  {index}
+  {tasks}
+  isEdit={!ai}
+/>
+<!-- {:else} -->
+  <!-- <InitiativeViewEditDeleteDialog
     {open}
     {onOpenChange}
     rns={initiative}
@@ -136,5 +151,5 @@
     {ai}
     {index}
     {role}
-  />
-{/if}
+  /> -->
+<!-- {/if} -->

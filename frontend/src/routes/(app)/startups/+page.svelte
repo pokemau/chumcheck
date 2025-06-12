@@ -207,7 +207,7 @@
   <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
     <div class="text-muted-foreground text-sm">Completion Rate</div>
     <div class="flex items-center gap-2">
-      <span class="text-2xl font-bold">{completedStartups.length / listOfStartups().length * 100}%</span>
+      <span class="text-2xl font-bold">{ completedStartups.length / listOfStartups().length * 100 || 0 }%</span>
     </div>
     <div class="text-muted-foreground text-sm">{completedStartups.length} of {listOfStartups().length} startups completed</div>
   </div>
@@ -309,7 +309,7 @@
 {/if}
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
-  <Dialog.Content class="h-4/5 max-w-[700px]">
+  <Dialog.Content class="h-4/5 max-w-[800px]">
     <Application access={data.access!} />
   </Dialog.Content>
 </Dialog.Root>
