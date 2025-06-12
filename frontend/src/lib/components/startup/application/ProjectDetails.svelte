@@ -55,7 +55,7 @@
   }
 </script>
 
-<div class="flex-1 overflow-scroll px-1" class:hidden={currentActive !== 2}>
+<div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 2}>
   <div class="flex h-0 flex-col gap-5">
     <div class="grid gap-2">
       <Label for="startup_name">Startup name</Label>

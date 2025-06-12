@@ -309,7 +309,7 @@
 {/if}
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
-  <Dialog.Content class="h-4/5 max-w-[700px]">
+  <Dialog.Content class="h-4/5 max-w-[800px]">
     <Application access={data.access!} />
   </Dialog.Content>
 </Dialog.Root>
