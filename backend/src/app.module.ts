@@ -20,6 +20,7 @@ import { RnsModule } from './rns/rns.module';
 import { InitiativeModule } from './initiative/initiative.module';
 import { ProgressModule } from './progress/progress.module';
 import { OverviewModule } from './overview/overview.module';
+import { ElevateModule } from './elevate/elevate.module';
 
 @Module({
   controllers: [AppController],
@@ -43,6 +44,7 @@ import { OverviewModule } from './overview/overview.module';
     ProgressModule,
     OverviewModule,
     ChatHistoryModule,
+    ElevateModule,
   ],
   providers: [AppService],
 })

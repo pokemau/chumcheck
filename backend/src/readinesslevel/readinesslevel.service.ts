@@ -55,7 +55,7 @@ export class ReadinesslevelService {
   async getReadinessLevelCriterion(){
     return await this.em.findAll(LevelCriterion);
   }
-  
+
   async getReadinessLevelCriterionAnswers(startupId: number) {
     return this.em.find(StartupCriterionAnswer, {
       startup: startupId, 
@@ -65,11 +65,12 @@ export class ReadinesslevelService {
   }
 
   async getStartupReadinessLevel(startupId: number) {
-    return this.em.find(StartupReadinessLevel, {
-      startup: startupId, 
+    const res = await this.em.find(StartupReadinessLevel, {
+      startup: startupId,
     }, {
       populate: ['readinessLevel'],
     });
+    return res;
   }
 
   async createUratQuestionAnswers(dto: UratQuestionAnswerDto) {

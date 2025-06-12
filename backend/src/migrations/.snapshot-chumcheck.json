@@ -1166,6 +1166,98 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "level": {
+          "name": "level",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "readiness_level_id": {
+          "name": "readiness_level_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        }
+      },
+      "name": "elevate_logs",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "elevate_logs_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "elevate_logs_startup_id_foreign": {
+          "constraintName": "elevate_logs_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.elevate_logs",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "updateRule": "cascade"
+        },
+        "elevate_logs_readiness_level_id_foreign": {
+          "constraintName": "elevate_logs_readiness_level_id_foreign",
+          "columnNames": [
+            "readiness_level_id"
+          ],
+          "localTableName": "public.elevate_logs",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.readiness_levels",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "title": {
           "name": "title",
           "type": "varchar(255)",

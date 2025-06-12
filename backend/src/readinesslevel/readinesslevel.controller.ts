@@ -40,7 +40,7 @@ export class ReadinesslevelController {
   @Get('/criterion')
   async getReadinessLevelCriterion(){
     return await this.readinessLevelService.getReadinessLevelCriterion();
-  }  
+  }
 
   @UseGuards(JwtGuard)
   @Post('/urat-question-answers/create')
@@ -62,5 +62,12 @@ export class ReadinesslevelController {
   @Get('urat-question-answers')
   async getUratQuestionAnswers(@Query('startupId') startupId: number) {
     return await this.readinessLevelService.getUratQuestionAnswers(startupId);
+  }
+
+
+  @UseGuards(JwtGuard)
+  @Get('readiness-level')
+  async getStartupReadinessLevels(@Query('startupId', ParseIntPipe) startupId: number) {
+    return await this.readinessLevelService.getStartupReadinessLevel(startupId);
   }
 }
