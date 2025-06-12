@@ -66,12 +66,12 @@
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
-  <Dialog.Content class="h-[90%] max-w-[800px]">
-    <div class="flex flex-col overflow-scroll">
+  <Dialog.Content class="h-[90%] max-w-[1000px]">
+    <div class="flex flex-col overflow-auto">
       <div class="flex h-0 flex-col gap-5">
         <!-- Project Details -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Project Details</h1>
+          <h1 class="text-2xl font-semibold">Project Details</h1>
           <div class="grid gap-2">
             <Label for="email">Startup Name</Label>
             <Input
@@ -114,7 +114,7 @@
         </div>
         <!-- Group Information -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Group Information</h1>
+          <h1 class="text-2xl font-semibold">Group Information</h1>
           <div class="grid gap-2">
             <Label for="email">Group Name</Label>
             <Input
@@ -204,7 +204,7 @@
         </div>
         <!-- Calculator -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">
+          <h1 class="text-2xl font-semibold">
             Technology and Commercialization Calculator
           </h1>
           <div class="p-10">
@@ -219,8 +219,8 @@
         </div>
         <!-- URAT Assessment -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">URAT Assessment</h1>
-          <div class="flex flex-col gap-3">
+          <h1 class="text-2xl font-semibold">URAT Assessment</h1>
+          <div class="flex flex-col gap-20">
             <Assessment
               questions={que.filter((d) => d.readinessType === 'Technology')}
               answers={ans.filter((d) => d.readinessType === 'Technology')}

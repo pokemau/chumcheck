@@ -13,9 +13,9 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <h2>{type}</h2>
+  <h2 class="text-lg italic">{type}</h2>
   {#each questions as question, index}
-    <div class="grid w-full gap-1.5">
+    <div class="grid w-full gap-2">
       <Label for="message">{question.question}</Label>
       <Textarea
         placeholder="Type your message here."

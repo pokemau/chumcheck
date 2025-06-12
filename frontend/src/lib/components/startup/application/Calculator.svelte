@@ -4,7 +4,7 @@
   import * as RadioGroup from '$lib/components/ui/radio-group';
 </script>
 
-<div class="flex-1 overflow-scroll px-1" class:hidden={currentActive !== 10}>
+<div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 10}>
   <div class="flex h-0 flex-col gap-5">
     {#each calculatorQuestions as category}
       <div class="form-control">

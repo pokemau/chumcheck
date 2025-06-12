@@ -76,12 +76,12 @@
 </script>
 
 <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
-  <Dialog.Content class="h-[90%] max-w-[800px]">
-    <div class="flex flex-col overflow-scroll">
+  <Dialog.Content class="h-[90%] max-w-[1000px]">
+    <div class="flex flex-col overflow-auto">
       <div class="flex h-0 flex-col gap-5">
         <!-- Project Details -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Project Details</h1>
+          <h1 class="text-2xl font-semibold">Project Details</h1>
           <div class="grid gap-2">
             <Label for="email">Startup Name</Label>
             <Input
@@ -124,7 +124,7 @@
         </div>
         <!-- Group Information -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Group Information</h1>
+          <h1 class="text-2xl font-semibold">Group Information</h1>
           <div class="grid gap-2">
             <Label for="email">Group Name</Label>
             <Input
@@ -214,11 +214,11 @@
         </div>
         <!-- Calculator -->
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">
+          <h1 class="text-2xl font-semibold">
             Technology and Commercialization Calculator
           </h1>
-          <div>Technology: {calc["Technology Level"]}</div>
-          <div>Commercialization: {calc["Commercialization Level"]}</div>
+          <div class="text-lg">Technology: {calc["Technology Level"]}</div>
+          <div class="text-lg">Commercialization: {calc["Commercialization Level"]}</div>
           <div class="p-10">
             <RadarChart
               id={inf.id}
@@ -243,10 +243,10 @@
           </div>
         </div>
         <div class="flex flex-col gap-3">
-          <h1 class="text-lg font-semibold">Assign Mentor</h1>
+          <h1 class="text-2xl font-semibold">Assign Mentor</h1>
 
           <Select.Root type="single" bind:value={selectedMentor}>
-            <Select.Trigger class="w-[180px]">
+            <Select.Trigger class="w-[180px] text-lg">
               {#if mentors && mentors.length > 0 && selectedMentor}
                 {mentors.find((mentor: any) => mentor.id === selectedMentor)?.firstName || 'Select Mentor'}
                 {mentors.find((mentor: any) => mentor.id === selectedMentor)?.lastName || ''}
@@ -256,7 +256,7 @@
             </Select.Trigger>
             <Select.Content>
               {#each mentors as mentor}
-                <Select.Item value={mentor.id}
+                <Select.Item value={mentor.id} class="text-lg"
                   >{`${mentor.firstName} ${mentor.lastName}`}</Select.Item
                 >
               {/each}
