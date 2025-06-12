@@ -9,6 +9,7 @@
   import { Separator } from '$lib/components/ui/separator';
   import { Check, Trash, Copy } from 'lucide-svelte';
   import { TextEditor } from '$lib/components/shared';
+  import { tick } from 'svelte';
 
   type ChatMessage = {
     id?: number;
@@ -17,6 +18,9 @@
     createdAt?: Date;
     refinedDescription?: string;
     refinedFix?: string;
+    refinedMeasures?: string;
+    refinedTargets?: string;
+    refinedRemarks?: string;
   };
 
   let {
@@ -48,6 +52,11 @@
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
       chatHistory = history;
+      tick().then(() => {
+        if (chatHistoryContainer) {
+          chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+      });
     } catch (error) {
       console.error('Error loading chat history:', error);
       chatHistory = [
@@ -79,6 +88,7 @@
   let chatHistory = $state<ChatMessage[]>([]);
   let userInput = $state('');
   let isLoading = $state(false);
+  let chatHistoryContainer: HTMLDivElement;
 
   async function handleSendMessage() {
     if (!userInput.trim()) return;
@@ -121,12 +131,12 @@
 </script>
 
 <Dialog.Root bind:open={open} onOpenChange={handleDialogStateChange}>
-  <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-scroll">
+  <Dialog.Content class="h-[90vh] max-w-[1200px]">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->
       <div class="flex flex-col w-1/2 border-r border-border p-6">
         <h1 class="text-2xl font-semibold mb-4">Refine Roadblock</h1>
-        <div class="flex-1 overflow-y-auto space-y-4 py-4">
+        <div bind:this={chatHistoryContainer} class="flex-1 overflow-y-auto space-y-4 py-4">
           {#if isLoadingHistory}
             <div class="flex justify-center items-center h-full">
               <div class="text-gray-400">Loading chat history...</div>
@@ -152,7 +162,7 @@
                           <strong>Description:</strong>
                           <div>{message.refinedDescription}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedDescription ?? '';
@@ -171,7 +181,7 @@
                           <strong>Fix:</strong>
                           <div>{message.refinedFix}</div>
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = message.refinedFix ?? '';

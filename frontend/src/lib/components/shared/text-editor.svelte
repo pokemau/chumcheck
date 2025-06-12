@@ -98,37 +98,37 @@
   <div class="toolbar mb-2 flex flex-wrap gap-2">
     <button
       onclick={toggleBold}
-      class="px-2 py-1 border rounded text-white text-sm
+      class="px-1.5 py-1 border rounded text-white text-xs
         {isBoldActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
       aria-pressed={isBoldActive}
     ><b>B</b></button>
     <button
       onclick={toggleItalic}
-      class="px-2 py-1 border rounded text-white text-sm
+      class="px-1.5 py-1 border rounded text-white text-xs
         {isItalicActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
       aria-pressed={isItalicActive}
     ><i>I</i></button>
     <button
       onclick={toggleUnderline}
-      class="px-2 py-1 border rounded text-white text-sm
+      class="px-1.5 py-1 border rounded text-white text-xs
         {isUnderlineActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
       aria-pressed={isUnderlineActive}
     ><u>U</u></button>
     <button
       onclick={addBulletPoint}
-      class="px-2 py-1 bg-gray-700 text-sm border border-gray-600 rounded text-white hover:bg-gray-600"
+      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
     >Bullet</button>
     <button
       onclick={() => setTextAlign('left')}
-      class="px-2 py-1 bg-gray-700 text-sm border border-gray-600 rounded text-white hover:bg-gray-600"
+      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
     >Align Left</button>
     <button
       onclick={() => setTextAlign('center')}
-      class="px-2 py-1 bg-gray-700 text-sm border border-gray-600 rounded text-white hover:bg-gray-600"
+      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
     >Align Center</button>
     <button
       onclick={() => setTextAlign('right')}
-      class="px-2 py-1 bg-gray-700 text-sm border border-gray-600 rounded text-white hover:bg-gray-600"
+      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
     >Align Right</button>
   </div>
   <div class="border border-[#333] rounded-lg">

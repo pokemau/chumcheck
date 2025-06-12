@@ -11,6 +11,7 @@
   import { Check, Trash, Copy } from 'lucide-svelte';
   import type { ReadinessType } from '$lib/utils';
   import { TextEditor } from '$lib/components/shared';
+  import { tick } from 'svelte';
 
 
   type ChatMessage = {
@@ -19,6 +20,9 @@
     content: string;
     createdAt?: Date;
     refinedDescription?: string;
+    refinedMeasures?: string;
+    refinedTargets?: string;
+    refinedRemarks?: string;
   };
 
   let {
@@ -51,6 +55,11 @@
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
       chatHistory = history;
+      tick().then(() => {
+        if (chatHistoryContainer) {
+          chatHistoryContainer.scrollTop = chatHistoryContainer.scrollHeight;
+        }
+      });
     } catch (error) {
       console.error('Error loading chat history:', error);
       chatHistory = [
@@ -99,6 +108,7 @@
   let chatHistory = $state<ChatMessage[]>([]);
   let userInput = $state('');
   let isLoading = $state(false);
+  let chatHistoryContainer: HTMLDivElement;
 
   async function handleSendMessage() {
     if (!userInput.trim()) return;
@@ -142,12 +152,12 @@
 </script>
 
 <Dialog.Root bind:open={open} onOpenChange={handleDialogStateChange}>
-  <Dialog.Content class="h-[90vh] max-w-[1200px] overflow-auto">
+  <Dialog.Content class="h-[90vh] max-w-[1200px]">
     <div class="flex gap-0 h-[80vh]">
       <!-- AI Chat Section (left) -->
       <div class="flex flex-col w-1/2 border-r border-border p-6">
         <h1 class="text-2xl font-semibold mb-4">Suggested RNS</h1>
-        <div class="flex-1 overflow-y-auto space-y-4 py-4">
+        <div bind:this={chatHistoryContainer} class="flex-1 overflow-y-auto space-y-4 py-4">
           {#if isLoadingHistory}
             <div class="flex justify-center items-center h-full">
               <div class="text-gray-400">Loading chat history...</div>
@@ -173,7 +183,7 @@
                         <div class="bg-[#0a1729] my-2 p-4 pb-8 rounded-lg relative group">
                           {@html message.refinedDescription}
                           <button 
-                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity" 
+                            class="absolute bottom-2 right-2 flex items-center gap-1 text-sm text-gray-400 hover:text-white opacity-50 hover:opacity-100 transition-opacity" 
                             onclick={(e) => {
                               const button = e.currentTarget as HTMLButtonElement;
                               const text = button.parentElement?.textContent?.replace('Copy', '').trim() || '';
