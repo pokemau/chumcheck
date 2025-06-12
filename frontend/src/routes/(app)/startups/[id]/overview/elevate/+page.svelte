@@ -28,17 +28,37 @@
       ).data,
     {
       cacheTime: 0,
-      staleTime: 0,
       refetchOnWindowFocus: false
     }
   );
+
+  const elevateData = useQuery(
+    'elevateData',
+    async () =>
+      (
+        await axiosInstance.get(`/elevate/${data.startupId}`, {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
+        })
+      ).data,
+    {
+      cacheTime: 0,
+      refetchOnWindowFocus: false
+    }
+  );
+
+  $: if ($elevateData.isSuccess) {
+    console.log('elevate data');
+    console.log($elevateData.data);
+  }
 
   const readinessData = useQuery(
     'readinessData',
     async () =>
       (
         await axiosInstance.get(
-          `/startup-readiness-levels/?startup_id=${data.startupId}`,
+          `/readinesslevel/readiness-level?startupId=${data.startupId}`,
           {
             headers: {
               Authorization: `Bearer ${data.access}`
@@ -48,7 +68,6 @@
       ).data,
     {
       cacheTime: 0,
-      staleTime: 0,
       refetchOnWindowFocus: false
     }
   );
@@ -69,18 +88,33 @@
       ).data,
     {
       cacheTime: 0,
-      staleTime: 0,
       refetchOnWindowFocus: false
     }
   );
 
-  // $: if ($readinessData.isSuccess) {
-  //   console.log($readinessData.data.results);
-  // }
+  $: if ($readinessData.isSuccess) {
+    console.log('readiness data');
+    console.log($readinessData.data);
+  }
 
-  // $: if ($rnaData.isSuccess) {
-  //   console.log($rnaData.data.results.filter((d) => d.is_ai_generated === false));
-  // }
+  function getCurrentLevel(
+    elevateLogs: any[],
+    readinessType: string,
+    levelsForType: any
+  ) {
+    // Try to find the log for this readinessType
+    const logs = elevateLogs.filter(
+      (log) => log.readinessLevel.readinessType === readinessType
+    );
+    if (logs.length === 0) {
+      return levelsForType.readinessLevel.level;
+    }
+    logs.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    return logs[0].level;
+  }
 
   let elevatedReadiness: any = [0, 0, 0, 0, 0, 0];
   let elevatedRemark: any = ['', '', '', '', '', ''];
@@ -94,42 +128,47 @@
       }))
       .filter((item: any) => item.readinessLevel !== 0);
 
-    if (readinessToUpdate.length > 0) {
-      const requests = readinessToUpdate.map((item: any) =>
-        axiosInstance.post(
-          `/startup-readiness-levels/`,
-          {
-            startup_id: data.startupId,
-            readiness_level_id: item.readinessLevel,
-            remark: item.remark ? item.remark : ' '
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          }
-        )
-      );
+    console.log('to update');
+    console.log(readinessToUpdate);
 
-      try {
-        await axios.all(requests);
-        console.log('All readiness levels updated successfully');
-        toast.success('Elevated successfully');
-        elevatedReadiness = [0, 0, 0, 0, 0, 0];
-        elevatedRemark = ['', '', '', '', '', ''];
-        $readinessData.refetch().then((res) => {
-          res.data.results
-            .slice(-6)
-            .sort((a, b) => a.readiness_type.localeCompare(b.readiness_type))
-            .map(
-              (x, index) => (elevatedReadiness[index] = x.readiness_level_id)
-            );
-        });
-      } catch (error) {
-        console.error('Error updating readiness levels:', error);
-      }
-    } else {
+    if (readinessToUpdate.length === 0) {
       console.log('No readiness levels to update');
+      return;
+    }
+
+    const requests = readinessToUpdate.map((item: any) =>
+      axiosInstance.post(
+        `/elevate`,
+        {
+          startupId: Number(data.startupId),
+          readinessLevelId: Number(item.readinessLevel),
+          remark: item.remark ?? ''
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
+        }
+      )
+    );
+
+    try {
+      await axios.all(requests);
+      console.log('All readiness levels updated successfully');
+      toast.success('Elevated successfully');
+      elevatedReadiness = [0, 0, 0, 0, 0, 0];
+      elevatedRemark = ['', '', '', '', '', ''];
+      $elevateData.refetch().then((res) => {
+        res.data
+          .sort((a, b) =>
+            a.readinessLevel.readinessType.localeCompare(
+              b.readinessLevel.readinessType
+            )
+          )
+          .map((x, index) => (elevatedReadiness[index] = x.readinessLevel.id));
+      });
+    } catch (error) {
+      console.error('Error updating readiness levels:', error);
     }
   }
 
@@ -143,15 +182,16 @@
 
   $: if ($readinessData.isSuccess && !t) {
     t = true;
-    $readinessData.data.results
-      .slice(-6)
-      .sort((a, b) => a.readiness_type.localeCompare(b.readiness_type))
+    $readinessData.data
+      .sort((a, b) =>
+        a.readinessLevel.readinessType.localeCompare(
+          b.readinessLevel.readinessType
+        )
+      )
       .map((x, index) => {
-        elevatedReadiness[index] = x.readiness_level_id;
+        elevatedReadiness[index] = x.readinessLevel.id;
         elevatedRemark[index] = x.remark;
       });
-
-    // console.log(elevatedReadiness);
   }
 </script>
 
@@ -165,7 +205,7 @@
       <Skeleton class="h-10" />
     {:else}
       <div class="w-3/4 rounded-md border">
-        <Table.Root class="bg-background rounded-lg">
+        <Table.Root class="rounded-lg bg-background">
           <Table.Header>
             <Table.Row class="text-centery h-12">
               <Table.Head class="pl-5">Type</Table.Head>
@@ -174,25 +214,33 @@
               {#if data.role !== 'Startup'}
                 <Table.Head class="">Next Level</Table.Head>
               {/if}
-              <Table.Head class="">Remarks</Table.Head>
+              <!-- <Table.Head class="">Remarks</Table.Head> -->
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {#if $queryResult.isLoading}
+            {#if $queryResult.isLoading && $elevateData.isLoading}
               <Skeleton class="h-40" />
             {:else}
-              {#each $readinessData.data.results
-                .slice(-6)
-                .sort( (a, b) => a.readiness_type.localeCompare(b.readiness_type) ) as r, index}
-                {@const initial = $readinessData.data.results
-                  .slice(0, 6)
-                  .sort((a, b) =>
-                    a.readiness_type.localeCompare(b.readiness_type)
-                  )[index]}
+              {#each $readinessData.data.sort( (a, b) => a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType) ) as r, index}
+                {@const initial = $readinessData.data[index]}
                 <Table.Row class="h-14 cursor-pointer">
-                  <Table.Cell class="pl-5">{r.readiness_type}</Table.Cell>
-                  <Table.Cell class="">{initial.readiness_level}</Table.Cell>
-                  <Table.Cell class="">{r.readiness_level}</Table.Cell>
+                  <Table.Cell class="pl-5"
+                    >{r.readinessLevel.readinessType}</Table.Cell
+                  >
+                  <Table.Cell class=""
+                    >{initial.readinessLevel.level}</Table.Cell
+                  >
+                  <Table.Cell class="">
+                    {#if $elevateData.data}
+                      {getCurrentLevel(
+                        $elevateData.data,
+                        r.readinessLevel.readinessType,
+                        r
+                      )}
+                    {:else}
+                      <Skeleton class="h-6" />
+                    {/if}
+                  </Table.Cell>
                   {#if data.role !== 'Startup'}
                     <Table.Cell class="">
                       <Select.Root
@@ -200,15 +248,17 @@
                         bind:value={elevatedReadiness[index]}
                       >
                         <Select.Trigger class="w-[100px]">
-                          {#if elevatedReadiness[index] !== r.readiness_level_id}
+                          {#if elevatedReadiness[index] !== r.readinessLevel.id}
                             {getLevel(
-                              getReadinessLevels(r.readiness_type),
+                              getReadinessLevels(
+                                r.readinessLevel.readinessType
+                              ),
                               elevatedReadiness[index]
                             )}
                           {/if}
                         </Select.Trigger>
                         <Select.Content>
-                          {#each getReadinessLevels(r.readiness_type) as item}
+                          {#each getReadinessLevels(r.readinessLevel.readinessType) as item}
                             <Select.Item value={`${item.id}`}
                               >{item.level}</Select.Item
                             >
@@ -217,22 +267,22 @@
                       </Select.Root>
                     </Table.Cell>
                   {/if}
-                  <Table.Cell>
-                    {#if data.role !== 'Startup'}
-                      {#if elevatedReadiness[index] === r.readiness_level_id}
-                        <Textarea rows={1} bind:value={r.remark} readonly />
-                      {:else}
-                        <Textarea rows={1} bind:value={elevatedRemark[index]} />
-                      {/if}
-                    {:else}
-                      <Textarea
-                        rows={1}
-                        class="border-none outline-none active:border-none active:outline-none"
-                        readonly
-                        value={r.remark}
-                      />
-                    {/if}
-                  </Table.Cell>
+                  <!-- <Table.Cell> -->
+                  <!--   {#if data.role !== 'Startup'} -->
+                  <!--     {#if elevatedReadiness[index] === r.readiness_level_id} -->
+                  <!--       <Textarea rows={1} bind:value={r.remark} readonly /> -->
+                  <!--     {:else} -->
+                  <!--       <Textarea rows={1} bind:value={elevatedRemark[index]} /> -->
+                  <!--     {/if} -->
+                  <!--   {:else} -->
+                  <!--     <Textarea -->
+                  <!--       rows={1} -->
+                  <!--       class="border-none outline-none active:border-none active:outline-none" -->
+                  <!--       readonly -->
+                  <!--       value={r.remark} -->
+                  <!--     /> -->
+                  <!--   {/if} -->
+                  <!-- </Table.Cell> -->
                 </Table.Row>
               {/each}
             {/if}
