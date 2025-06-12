@@ -1456,6 +1456,26 @@
           "nullable": false,
           "length": 6,
           "mappedType": "datetime"
+        },
+        "clicked_by_mentor": {
+          "name": "clicked_by_mentor",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "clicked_by_startup": {
+          "name": "clicked_by_startup",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
         }
       },
       "name": "roadblocks",
@@ -1620,6 +1640,26 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "clicked_by_mentor": {
+          "name": "clicked_by_mentor",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "clicked_by_startup": {
+          "name": "clicked_by_startup",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
         "description": {
           "name": "description",
           "type": "text",
@@ -1645,6 +1685,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "default": "false",
           "mappedType": "boolean"
         },
         "status": {
@@ -1849,6 +1890,15 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "priority_number": {
+          "name": "priority_number",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "initiative_number": {
           "name": "initiative_number",
           "type": "int",
@@ -1857,6 +1907,26 @@
           "primary": false,
           "nullable": false,
           "mappedType": "integer"
+        },
+        "clicked_by_mentor": {
+          "name": "clicked_by_mentor",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "clicked_by_startup": {
+          "name": "clicked_by_startup",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
         },
         "status": {
           "name": "status",

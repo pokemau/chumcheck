@@ -40,4 +40,10 @@ export class Roadblock {
 
   @Property({ fieldName: 'datetime_updated', onUpdate: () => new Date() })
   updatedAt: Date = new Date();
+
+  @Property()
+  clickedByMentor: boolean = false;
+
+  @Property()
+  clickedByStartup: boolean = false;
 }

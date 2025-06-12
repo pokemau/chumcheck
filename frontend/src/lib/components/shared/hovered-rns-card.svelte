@@ -61,7 +61,7 @@
                     </Badge>
                 </div>
                 <div class="text-[13px] font-semibold text-white mb-1">
-                    {  rns.description ?? rns.description?.substring(0, 60) + (rns.description?.length > 60 ? '...' : '')}
+                    {  rns.description?.substring(0, 60) + (rns.description?.length > 60 ? '...' : '')}
                 </div>
                 <div class="text-xs text-gray-400 mb-1">
                     Assigned: {#if rns.assignee}

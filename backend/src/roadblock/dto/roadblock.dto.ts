@@ -72,6 +72,16 @@ export class UpdateRoadblockDto {
   @IsString()
   @IsNotEmpty()
   fix?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByMentor?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  @Type(() => Boolean)
+  clickedByStartup?: boolean;
 }
 
 export class GenerateRoadblocksDto {
