@@ -261,11 +261,26 @@ async generateRoadblocksFromPrompt(
     if (!content) throw new Error('No content in response');
 
     const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
-    const refinements = JSON.parse(jsonStr);
+    const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+    
+    try {
+      const refinements = JSON.parse(cleanJsonStr);
 
-    return {
-      ...refinements,
-      aiCommentary: commentary || 'Changes applied successfully.'
-    };
+      const hasRefinements = refinements.refinedDescription || 
+                           refinements.refinedFix; 
+      
+      if (!hasRefinements) {
+        console.warn('AI response contained no refinements');
+      }
+
+      return {
+        ...refinements,
+        aiCommentary: commentary || 'Changes applied successfully.'
+      };
+    } catch (err) {
+      console.error('Failed to parse AI response:', content);
+      console.error('Parse error:', err);
+      throw new Error('AI returned an invalid JSON response');
+    }
   }
 }

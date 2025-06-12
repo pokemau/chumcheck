@@ -199,13 +199,40 @@ export class RoadblockService {
         User: ${latestPrompt}
 
         Please refine the roadblock details according to the user's instructions.
-        Format your response as JSON with these optional fields:
-        {
-            "description": "refined description if requested",
-            "fix": "refined fix if requested"
-        }
+        After the JSON, write '=========' on a new line, then provide a brief AI commentary (1-2 sentences) explaining your changes.
 
-        After the JSON, write '=========' on a new line, then provide a brief AI commentary (1-2 sentences) explaining your changes.`;
+        IMPORTANT INSTRUCTIONS:
+        1. Only refine the specific fields that the user explicitly asks to modify
+        2. Do not modify any other fields
+        3. Respond with a JSON object containing ONLY the requested refinements
+        4. If the user did not specify a field to refine, refine all fields.
+        4. Use the exact field names shown in the example
+
+        Example response format:
+        If user asks to update description only:
+        {
+            "refinedDescription": "your refined description here"
+        }
+        =========
+        Your commentary about the changes here.
+
+        If user asks to update description and fix:
+        {
+            "refinedDescription": "your refined description here",
+            "refinedFix": "your refined fix here"
+        }
+        =========
+        Your commentary about the changes here.
+
+        Available fields:
+        - refinedDescription (for description updates)
+        - refinedFix (for fix updates)
+
+        Remember:
+        - If the user specifies, only include fields that the user specifically asks to refine
+        - The JSON must be valid and properly formatted
+        - Always include the ========= separator followed by your commentary
+        `;
 
         const result = await this.aiService.refineRoadblock(prompt);
 

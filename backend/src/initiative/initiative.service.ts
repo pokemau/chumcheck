@@ -290,7 +290,8 @@ export class InitiativeService {
         1. Only refine the specific fields that the user explicitly asks to modify
         2. Do not modify any other fields
         3. Respond with a JSON object containing ONLY the requested refinements
-        4. Use the exact field names shown in the example
+        4. If the user did not specify a field to refine, refine all fields.
+        5. Use the exact field names shown in the example
 
         Example response format:
         If user asks to update measures only:
