@@ -33,7 +33,7 @@
             id={`score-${score}`}
             onclick={() => updateScore(answers[index].id, score)}
           />
-          <Label for={`score-${score}`} class="text-[12px]">{score}</Label>
+          <Label for={`score-${score}`} class="text-[16px]">{score}</Label>
         </div>
       {/each}
     </RadioGroup.Root>
