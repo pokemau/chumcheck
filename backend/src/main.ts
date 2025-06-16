@@ -63,11 +63,28 @@ async function bootstrap() {
     }),
   );
 
+  // app.enableCors({
+  //   origin: ['http://localhost:5173', 'https://chumcheck.vercel.app/'],
+  //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  //   credentials: true,
+  // });
+
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://chumcheck.vercel.app/'],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:5173',
+        'https://chumcheck.vercel.app',
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
