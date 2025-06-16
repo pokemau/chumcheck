@@ -17,14 +17,14 @@ async function bootstrap() {
   hbs.registerHelper('defaultIfEmpty', function (value, defaultValue) {
     return value ? value : defaultValue;
   });
-  
+
   // Add additional helper for date formatting if needed
   hbs.registerHelper('formatDate', function (date) {
     if (!date) return '';
-    return new Date(date).toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
   });
 
@@ -64,7 +64,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://chumcheck.vercel.app/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
   await app.listen(process.env.PORT ?? 3000);
