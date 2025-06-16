@@ -14,4 +14,9 @@ export default defineConfig({
   entitiesTs: ['./src/**/*.entity.ts'],
   debug: true,
   driver: PostgreSqlDriver,
+  driverOptions: {
+    connection: {
+      ssl: { rejectUnauthorized: false }
+    }
+  }
 });
