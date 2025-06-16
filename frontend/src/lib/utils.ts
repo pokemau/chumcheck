@@ -228,8 +228,9 @@ export const getSavedTab = (name: string, searchParam: any) => {
 };
 
 export const getData = async (url: string, access: string) => {
-  const localhostURL = `http://localhost:3000${url}`;
-  const response = await axiosInstance.get(localhostURL, {
+  // const localhostURL = `http://localhost:3000${url}`;
+  const URL = `https://chumcheck.onrender.com${url}`;
+  const response = await axiosInstance.get(URL, {
     headers: {
       Authorization: `Bearer ${access}`
     }
