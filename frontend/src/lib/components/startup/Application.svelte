@@ -72,6 +72,7 @@
   let data: any;
   let doneFetching = false;
   export let access: string;
+  export let startup: any = null;
 
   const steps = [
     'data-privacy',
@@ -102,9 +103,10 @@
 
   let currentActive = 0;
   let formData = {
-    dataPrivacy: false,
-    eligibility: false
+    dataPrivacy: startup?.dataPrivacy ?? false,
+    eligibility: startup?.eligibility ?? false
   };
+  console.log("Startup: ", startup);  
 
   const toggleDataPrivacy = (value: boolean) => {
     formData.dataPrivacy = value;
@@ -139,24 +141,27 @@
     dataPrivacy={formData.dataPrivacy}
     {toggleDataPrivacy}
     {currentActive}
+    {startup}
   />
   <EligibilityAgreement
     {currentActive}
     {toggleEligibility}
     eligibility={formData.eligibility}
+    {startup}
   />
-  <ProjectDetails {currentActive} {access} />
-  <GroupInformation {currentActive} {access} />
+  <ProjectDetails {currentActive} {access} {startup} />
+  <GroupInformation {currentActive} {access} {startup} />
   {#if doneFetching && data}
-    <Technology {currentActive} question={data.technologyQuestions} />
-    <Market {currentActive} question={data.marketQuestions} />
-    <Regulatory {currentActive} question={data.regulatoryQuestions} />
-    <Acceptance {currentActive} question={data.acceptanceQuestions} />
-    <Organizational {currentActive} question={data.organizationalQuestions} />
-    <Investment {currentActive} question={data.investmentQuestions} />
+    <Technology {currentActive} question={data.technologyQuestions} {startup} />
+    <Market {currentActive} question={data.marketQuestions} {startup} />
+    <Regulatory {currentActive} question={data.regulatoryQuestions} {startup} />
+    <Acceptance {currentActive} question={data.acceptanceQuestions} {startup} />
+    <Organizational {currentActive} question={data.organizationalQuestions} {startup} />
+    <Investment {currentActive} question={data.investmentQuestions} {startup} />
     <TechnologyCalculator
       {currentActive}
       calculatorQuestions={data.calculator}
+      {startup}
     />
   {/if}
   <div class="flex justify-end gap-3">

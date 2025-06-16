@@ -7,6 +7,7 @@
 
   let files: any;
   export let access: string;
+  export let startup: any = null;
   let processing = false;
   let information: {
     title: string;
@@ -18,6 +19,13 @@
     scope: string;
     methodology: string;
   };
+
+  let formData = {
+    name: startup?.name ?? '',
+    // capsule proposal
+    links: startup?.links ?? ''
+  };
+
   async function getInformation() {
     processing = true;
     if (!files || !files[0]) {
@@ -65,6 +73,7 @@
         type="text"
         placeholder="startup name"
         required
+        bind:value={formData.name}
       />
     </div>
     <div class="grid gap-2">
@@ -82,6 +91,10 @@
           {:else}
             <div>{files[0].name}</div>
           {/if}
+        {:else if startup?.capsuleProposal?.fileName}
+          <div class="flex flex-col items-center justify-center gap-2">
+            <div>{startup.capsuleProposal.fileName}</div>
+          </div>
         {:else}
           Upload or drag your capsule proposal here.
         {/if}
@@ -125,7 +138,7 @@
       <Label for="links"
         >Links to any supporting materials (e.g., website, explainer video)</Label
       >
-      <Input name="links" id="links" type="text" placeholder="links" required />
+      <Input name="links" id="links" type="text" placeholder="links" required bind:value={formData.links}/>
     </div>
   </div>
 </div>

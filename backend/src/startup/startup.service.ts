@@ -34,9 +34,21 @@ export class StartupService {
 
     switch (user.role) {
       case Role.Startup:
-        return await this.em.find(Startup, {
-          user: userId,
-        });
+        return await this.em.find(
+          Startup,
+          { user: userId },
+          {
+            populate: [
+              'user',
+              'members',
+              'capsuleProposal',
+              'mentors',
+              'readinessLevels.readinessLevel',
+              'uratQuestionAnswers.uratQuestion',
+              'calculatorQuestionAnswers.question'
+            ]
+          }
+        );
       case Role.Mentor:
         return await this.em.find(
           Startup,
@@ -767,6 +779,7 @@ export class StartupService {
     proposal.objectives = dto.objectives;
     proposal.scope = dto.scope;
     proposal.methodology = dto.methodology;
+    proposal.fileName = dto.fileName;
     proposal.startup = startup;
     await this.em.persistAndFlush(proposal);
     return proposal;

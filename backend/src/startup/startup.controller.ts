@@ -89,6 +89,7 @@ export class StartupController {
             scope: parsed.scope,
             methodology: parsed.methodology,
             startupId: -1,  //placeholder
+            fileName: file.originalname
           };
           const startup = await this.startupService.createStartup(dto);
           capsuleProposalDto.startupId = startup.id;

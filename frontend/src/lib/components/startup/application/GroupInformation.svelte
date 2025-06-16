@@ -6,9 +6,17 @@
   import Add from 'lucide-svelte/icons/plus';
 
   export let access: string;
+  export let startup: any = null;
+
   let members: any = [];
   let search: string;
   let searchedUsers: any[] = [];
+  let formData = {
+    groupName: startup?.groupName ?? '',
+    universityName: startup?.universityName ?? '',
+    // Add other fields as needed
+  };
+
   async function searchUsers() {
     const response = await fetch(`${PUBLIC_API_URL}/users/?search=${search}`, {
       method: 'GET',
@@ -40,7 +48,7 @@
   <div class="flex h-0 flex-col gap-5">
     <div class="grid gap-2">
       <Label for="group_name">Group name</Label>
-      <Input name="group_name" id="group_name" type="text" placeholder="group name" required />
+      <Input name="group_name" id="group_name" type="text" placeholder="group name" required bind:value={formData.groupName} />
     </div>
 
     <div class="grid gap-2">
@@ -51,6 +59,7 @@
         type="text"
         placeholder="university name"
         required
+        bind:value={formData.universityName}
       />
     </div>
     <div class="grid gap-2">

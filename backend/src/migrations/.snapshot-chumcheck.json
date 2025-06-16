@@ -1331,6 +1331,16 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "file_name": {
+          "name": "file_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "startup_id": {
           "name": "startup_id",
           "type": "int",
