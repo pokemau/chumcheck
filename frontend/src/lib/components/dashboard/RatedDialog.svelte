@@ -47,17 +47,17 @@
   ];
 
   const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
-  const apiKeyMapping: Record<string, string> = {
-    [CalculatorCategory.Technology]: "Technology",
-    [CalculatorCategory.Product_Development]: "Product Development",
-    [CalculatorCategory.Product_Definition]: "Product Definition/Design",
-    [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
-    [CalculatorCategory.Team]: "Team",
-    [CalculatorCategory.Go_To_Market]: "Go-To-Market",
-    [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
-  };
+    const apiKeyMapping: Record<string, string> = {
+      [CalculatorCategory.Technology]: 'Technology',
+      [CalculatorCategory.Product_Development]: 'Product Development',
+      [CalculatorCategory.Product_Definition]: 'Product Definition/Design',
+      [CalculatorCategory.Competitive_Landscape]: 'Competitive Landscape',
+      [CalculatorCategory.Team]: 'Team',
+      [CalculatorCategory.Go_To_Market]: 'Go-To-Market',
+      [CalculatorCategory.Supply_Chain]: 'Manufacturing/Supply Chain'
+    };
 
-  const apiKey = apiKeyMapping[label];
+    const apiKey = apiKeyMapping[label];
     return calc[apiKey] || 0;
   });
 
@@ -67,10 +67,12 @@
     ReadinessType.Market,
     ReadinessType.Regulatory,
     ReadinessType.Acceptance,
-    ReadinessType.Investment,
+    ReadinessType.Investment
   ];
 
-  const uratScoresByType = uratLabels.map((type) => uratReadinessScores[type] || 0);
+  const uratScoresByType = uratLabels.map(
+    (type) => uratReadinessScores[type] || 0
+  );
 
   let selectedMentor = mentors?.[0]?.id || null;
 </script>
@@ -217,8 +219,10 @@
           <h1 class="text-2xl font-semibold">
             Technology and Commercialization Calculator
           </h1>
-          <div class="text-lg">Technology: {calc["Technology Level"]}</div>
-          <div class="text-lg">Commercialization: {calc["Commercialization Level"]}</div>
+          <div class="text-lg">Technology: {calc['Technology Level']}</div>
+          <div class="text-lg">
+            Commercialization: {calc['Commercialization Level']}
+          </div>
           <div class="p-10">
             <RadarChart
               id={inf.id}
@@ -243,20 +247,22 @@
           </div>
         </div>
         <div class="flex flex-col gap-3">
-          <h1 class="text-2xl font-semibold">Assign Mentor</h1>
+          <h1 class="text-lg font-semibold">Assign Mentor</h1>
 
           <Select.Root type="single" bind:value={selectedMentor}>
-            <Select.Trigger class="w-[180px] text-lg">
+            <Select.Trigger class="w-[180px]">
               {#if mentors && mentors.length > 0 && selectedMentor}
-                {mentors.find((mentor: any) => mentor.id === selectedMentor)?.firstName || 'Select Mentor'}
-                {mentors.find((mentor: any) => mentor.id === selectedMentor)?.lastName || ''}
+                {mentors.find((mentor: any) => mentor.id === selectedMentor)
+                  ?.firstName || 'Select Mentor'}
+                {mentors.find((mentor: any) => mentor.id === selectedMentor)
+                  ?.lastName || ''}
               {:else}
                 Select Mentor
               {/if}
             </Select.Trigger>
             <Select.Content>
               {#each mentors as mentor}
-                <Select.Item value={mentor.id} class="text-lg"
+                <Select.Item value={mentor.id}
                   >{`${mentor.firstName} ${mentor.lastName}`}</Select.Item
                 >
               {/each}
