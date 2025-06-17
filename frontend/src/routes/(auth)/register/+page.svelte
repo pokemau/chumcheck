@@ -7,7 +7,8 @@
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
 
-  export let data: PageData;
+  // export let data: PageData;
+  let { data }: { data: PageData } = $props();
   let isLoading = false;
 
   // async function onSubmit() {
@@ -21,24 +22,24 @@
   const { form, errors, enhance, message, submitting } = superForm(data.form);
 
 
-  // $effect(() => {
-  //   if ($submitting) {
-  //     toast.dismiss();
-  //     toast.info('Logging in...');
-  //   }
+  $effect(() => {
+    if ($submitting) {
+      toast.dismiss();
+      toast.info('Creating account...');
+    }
 
-  //   if ($message && !$submitting) {
-  //     toast.dismiss();
-  //     toast.success('Login successful');
-  //     goto('/startups');
-  //   }
-  //   if ($errors.repeatPassword && !$submitting) {
-  //     toast.dismiss();
-  //     toast.error('Signup failed', {
-  //       description: $errors.repeatPassword.toString()
-  //     });
-  //   }
-  // });
+    if ($message && !$submitting) {
+      toast.dismiss();
+      toast.success('Account created successfully');
+      goto('/login');
+    }
+    if ($errors.repeatPassword && !$submitting) {
+      toast.dismiss();
+      toast.error('Signup failed', {
+        description: $errors.repeatPassword.toString()
+      });
+    }
+  });
 </script>
 
 <svelte:head>
