@@ -24,7 +24,6 @@
     const success = $page.url.searchParams.get('success');
 
     if (success === 'true') {
-      console.log('Success is true');
       toast.success('You are now in mentor view.');
       // Remove the 'success' parameter from the URL
       const url = new URL($page.url.href);

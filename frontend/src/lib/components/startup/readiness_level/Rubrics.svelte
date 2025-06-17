@@ -7,7 +7,6 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE3MTU1ODEyLCJpYXQiOjE3MTY4OTY2MTIsImp0aSI6IjE3NDRiZGUyYTMwYjRiNTRhN2ZmNTYxNDNiMmE3OTliIiwidXNlcl9pZCI6MywidXNlcl90eXBlIjoiTSJ9.01eNx7NdkvPkXEFg2wCate01ct4zIRQ5dr1XQJjH8TQ';
 
   export let questions: any, type: string;
-  console.log(type);
 </script>
 
 <Tabs.Content value={`${type}`}>

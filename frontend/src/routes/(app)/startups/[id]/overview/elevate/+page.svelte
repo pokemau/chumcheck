@@ -48,10 +48,6 @@
     }
   );
 
-  $: if ($elevateData.isSuccess) {
-    console.log('elevate data');
-    console.log($elevateData.data);
-  }
 
   const readinessData = useQuery(
     'readinessData',
@@ -92,11 +88,6 @@
     }
   );
 
-  $: if ($readinessData.isSuccess) {
-    console.log('readiness data');
-    console.log($readinessData.data);
-  }
-
   function getCurrentLevel(
     elevateLogs: any[],
     readinessType: string,
@@ -120,16 +111,12 @@
   let elevatedRemark: any = ['', '', '', '', '', ''];
 
   async function elevate() {
-    // console.log(elevatedReadiness);
     const readinessToUpdate = elevatedReadiness
       .map((r: any, index: number) => ({
         readinessLevel: r,
         remark: elevatedRemark[index]
       }))
       .filter((item: any) => item.readinessLevel !== 0);
-
-    console.log('to update');
-    console.log(readinessToUpdate);
 
     if (readinessToUpdate.length === 0) {
       console.log('No readiness levels to update');

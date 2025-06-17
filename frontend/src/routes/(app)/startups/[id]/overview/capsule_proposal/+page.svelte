@@ -25,9 +25,6 @@
     }
   );
 
-  $: if ($queryResult.isSuccess) {
-    console.log($queryResult.data.capsuleProposal);
-  }
 </script>
 
 <svelte:head>

@@ -20,16 +20,6 @@
     getData(`/progress/${data.startupId}/progress-report`, data.access!)
   );
 
-  $effect(() => {
-    if ($queryResult.isSuccess) {
-      // console.log('--------');
-      // console.log('--------');
-      // console.log($queryResult.data);
-      // console.log('--------');
-      // console.log('--------');
-    }
-  });
-
   const downloadMultiPagePDF = async () => {
     try {
       // Select all the pages to capture
@@ -102,12 +92,6 @@
   };
 
   let divRef: HTMLDivElement;
-
-  // $effect(() => {
-  //   if ($queryResult.isSuccess) {
-  //     console.log($queryResult.data);
-  //   }
-  // });
 
   let titleState = $state(false);
 

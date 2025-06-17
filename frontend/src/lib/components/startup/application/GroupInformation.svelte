@@ -16,7 +16,6 @@
         Authorization: `Bearer ${access}`
       }
     });
-    console.log(response);
     const d = await response.json();
 
     if (response.ok) {

@@ -296,7 +296,6 @@
   let generatingRoadblocks: boolean = $state(false);
   const generateRoadblocks = async (count: number) => {
     generatingRoadblocks = true;
-    console.log("Count: ", count);
     try {
       await axiosInstance.post(
         `/roadblocks/generate-roadblocks/`,

@@ -19,8 +19,6 @@
 
   let assignee = $derived(roadblocks.assignee);
 
-  // console.log($state.snapshot(roadblocks));
-
   const assignedMember = $derived(
     members.filter((member: any) => member.userId === assignee)[0]
   );

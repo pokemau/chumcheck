@@ -6,8 +6,6 @@
   let scrollContainer: HTMLDivElement;
 
   function handleScroll() {
-    console.log('Scroll position:', scrollContainer.scrollTop);
-    // You can add your blur logic here if needed
   }
 
   onMount(() => {

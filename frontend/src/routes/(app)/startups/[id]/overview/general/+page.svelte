@@ -26,9 +26,6 @@
     }
   );
 
-  // $: if ($queryResult.isSuccess) {
-  //   console.log($queryResult.data);
-  // }
 </script>
 
 <svelte:head>

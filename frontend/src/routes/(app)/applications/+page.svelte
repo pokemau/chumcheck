@@ -166,7 +166,6 @@
       );
 
       const answers_data = await urat_answers.json();
-      console.log('answers_data:', answers_data);
 
       const calculator = await fetch(
         `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
@@ -302,10 +301,6 @@
       if (level.ok) {
         inf = data;
         lev = levels;
-        console.log('LEVELS');
-        console.log('LEVELS');
-        console.log('LEVELS');
-        console.log(levels);
         // return {
         // 	info: data,
         // 	lev: levels.results,
@@ -456,7 +451,6 @@
                   dialogLoading = false;
                 }}
               >
-                {console.log('applicant:', applicant)}
                 <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
                 <Table.Cell>{applicant.groupName}</Table.Cell>
                 <Table.Cell class=""

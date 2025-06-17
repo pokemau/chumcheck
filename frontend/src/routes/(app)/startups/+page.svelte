@@ -14,7 +14,6 @@
   import axiosInstance from '$lib/axios';
 
   let { data, form } = $props();
-  console.log("Form: ", form);
 
   const queryResult = useQuery('startupData', () =>
     getData(`/startups/startups`, data.access!)
@@ -106,7 +105,6 @@
     const success = $page.url.searchParams.get('success');
 
     if (form?.error) {
-      console.log('Error in form');
       let formError = form.error.length > 60
       ? form.error.substring(0, 60) + '...'
       : form.error;
@@ -114,7 +112,6 @@
     }
 
     if (success === 'true') {
-      //console.log('Success is true');
       toast.success('Application successfull.');
       // Remove the 'success' parameter from the URL
       const url = new URL($page.url.href);
@@ -127,7 +124,6 @@
     async function fetchInitiatives() {
       if ($queryResult.isSuccess && listOfStartups().length > 0) {
         const allInitiativesFetched = await getAllInitiativesForStartups(listOfStartups(), data.access!);
-        console.log('All initiatives:', allInitiativesFetched);
         allInitiatives = allInitiativesFetched;
         completedInitiativesPercentage = (allInitiatives.filter(initiative => initiative.status === 4).length / allInitiatives.length * 100);
       }

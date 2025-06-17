@@ -106,7 +106,6 @@
       };
     }
 
-    console.log("LATEST: ", latest);
     const getLevel = (type: string) => {
     const match = latest.find(
         (r: any) => r.readinessLevel.readinessType === type

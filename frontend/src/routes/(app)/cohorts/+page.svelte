@@ -59,11 +59,6 @@
   const isLoading = $derived($analyticsQueries[0].isLoading || $analyticsQueries[1].isLoading);
   const isError = $derived($analyticsQueries[0].isError || $analyticsQueries[1].isError);
 
-  $effect(() => {
-    if ($analyticsQueries[2].isSuccess) {
-      console.log($analyticsQueries[2].data.results);
-    }
-  });
 </script>
 
 <div class="flex h-full flex-col gap-3">

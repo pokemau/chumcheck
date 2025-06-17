@@ -396,7 +396,6 @@
       // Execute all update requests concurrently
       await Promise.all(updatePromises);
       // $rnsQueries[1].refetch();
-      console.log('All tasks updated successfully');
     } catch (error) {
       $initiativesQueries[1].refetch();
       toast.error('Error updating');

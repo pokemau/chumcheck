@@ -48,10 +48,6 @@
 
   let rnaDialog = $state(false);
 
-  $effect(() => {
-    // console.log($state.snapshot(readinessData));
-    // console.log($state.snapshot(rnaCopy));
-  });
 </script>
 
 <ViewEditDeleteDialog {open} {onOpenChange}>

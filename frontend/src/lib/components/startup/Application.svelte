@@ -6,9 +6,6 @@
 
     const data = await uratQuestions.json();
     if (uratQuestions.ok) {
-      //const calculatorQuestions = await fetch(
-      //  `${PUBLIC_API_URL}/readinesslevel/calculator-categories/`
-      //);
 
       const calculatorQuestions = await fetch(
         `${PUBLIC_API_URL}/readinesslevel/calculator-questions/`
@@ -16,13 +13,6 @@
 
       const data2 = await calculatorQuestions.json();
 
-      //console.log('URAT QUESTIONS');
-      //console.log(data);
-      //
-      //console.log('CALC CATEGORIES');
-      //console.log(data2);
-      //
-      //console.log(data.results);
 
       if (calculatorQuestions.ok) {
         return {

@@ -20,13 +20,6 @@
 
   const { form, errors, enhance, message, submitting } = superForm(data.form);
 
-  $: {
-    //console.log($message.access_token);
-    //if ($message.sucess) {
-    //  console.log('here');
-    //localStorage.setItem('token', $message.token);
-    //}
-  }
 
   // $effect(() => {
   //   if ($submitting) {

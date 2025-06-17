@@ -31,7 +31,13 @@
     RnsCard,
     RnsCreateDialog
   } from '$lib/components/startups/rns/index.js';
-  import { Ellipsis, Kanban, TableIcon, Loader, ChevronDown } from 'lucide-svelte';
+  import {
+    Ellipsis,
+    Kanban,
+    TableIcon,
+    Loader,
+    ChevronDown
+  } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
@@ -83,7 +89,7 @@
     {
       queryKey: ['rnaData'],
       queryFn: () => getData(`/rna/?startupId=${startupId}`, access!)
-    },
+    }
   ];
   const rnsQueries = useQueries(queryArray);
   const { isLoading, isError } = $derived(useQueriesState(queryArray));
@@ -96,17 +102,31 @@
     $rnsQueries[3].isSuccess
       ? (() => {
           const data = $rnsQueries[3].data;
-          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
-            userId: id,
-            startupId: data.id,
-            firstName,
-            lastName,
-            email,
-            selected: false
-          }));
+          const baseMembers: Member[] = data.members.map(
+            ({
+              id,
+              email,
+              firstName,
+              lastName
+            }: {
+              id: number;
+              email: string;
+              firstName: string;
+              lastName: string;
+            }) => ({
+              userId: id,
+              startupId: data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          );
 
           // Check if user is already in members
-          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some(
+            (member: Member) => member.userId === data.user.id
+          );
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -137,17 +157,20 @@
     generatingRNS = true;
     try {
       // First, get all current RNS items
-      const currentItems = await axiosInstance.get(`/rns/?startupId=${data.startupId}`, {
-        headers: {
-          Authorization: `Bearer ${data.access}`
+      const currentItems = await axiosInstance.get(
+        `/rns/?startupId=${data.startupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
         }
-      });
+      );
 
       // Increment priority numbers of all existing items
-      const updatePromises = currentItems.data.map((item: any) => 
+      const updatePromises = currentItems.data.map((item: any) =>
         axiosInstance.patch(
           `/rns/${item.id}/`,
-          { priorityNumber: (item.priorityNumber || 0) + selectedRNA.length }, 
+          { priorityNumber: (item.priorityNumber || 0) + selectedRNA.length },
           {
             headers: {
               Authorization: `Bearer ${data.access}`
@@ -155,7 +178,7 @@
           }
         )
       );
-      
+
       await Promise.all(updatePromises);
 
       // Now generate new items with priority numbers starting from 1
@@ -187,7 +210,6 @@
 
   const addToRNS = async (id: number, payload: any) => {
     const length = columns[0].items.length;
-    console.log("Length:", length);
     try {
       const response = await axiosInstance.patch(
         `/rns/${id}/`,
@@ -197,7 +219,7 @@
           isAiGenerated: false,
           assigneeId: payload.assigneeId,
           readinessType: payload.readinessType,
-          targetLevel: payload.targetLevelId,
+          targetLevel: payload.targetLevelId
         },
         {
           headers: {
@@ -205,27 +227,23 @@
           }
         }
       );
-      console.log('Patch response:', response.data);
       toast.success('Successfully added to RNS');
-      
+
       $rnsQueries[1]
         .refetch()
         .then((res) => {
-          console.log('Refetch response:', res.data);
           columns.forEach((column) => {
             const filteredItems = res.data
               .filter(
                 (data: any) =>
-                  data.isAiGenerated === false &&
-                  data.status === column.value
+                  data.isAiGenerated === false && data.status === column.value
               )
               .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
-            console.log(`Column ${column.value} items:`, filteredItems);
             column.items = filteredItems;
           });
         })
         .finally(async () => await updatePriorityNumber());
-      goto("rns")
+      goto('rns');
     } catch (error) {
       console.error('Error in addToRNS:', error);
       toast.error('Failed to add to RNS');
@@ -274,7 +292,14 @@
 
   const updatedEditRNS = async (
     id: number,
-    payload: { readinessType: string, description: string, targetLevelId: number, assigneeId: number, isAiGenerated: boolean, clickedByMentor: boolean }
+    payload: {
+      readinessType: string;
+      description: string;
+      targetLevelId: number;
+      assigneeId: number;
+      isAiGenerated: boolean;
+      clickedByMentor: boolean;
+    }
   ) => {
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
@@ -294,7 +319,7 @@
           .sort((a: any, b: any) => a.order - b.order);
       });
     });
-    goto("rns")
+    goto('rns');
   };
 
   const deleteRNS = async (id: number, index: number) => {
@@ -321,7 +346,11 @@
     columns[x].items = e.detail.items;
   }
 
-  async function handleDndFinalize(e: CustomEvent<DndEvent<any>>, x: number, status: number) {
+  async function handleDndFinalize(
+    e: CustomEvent<DndEvent<any>>,
+    x: number,
+    status: number
+  ) {
     columns[x].items = e.detail.items;
     if (e.detail.info.trigger === 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
@@ -374,7 +403,11 @@
   };
 
   $effect(() => {
-    if (!isLoading && $rnsQueries[1].isSuccess && Array.isArray($rnsQueries[1].data)) {
+    if (
+      !isLoading &&
+      $rnsQueries[1].isSuccess &&
+      Array.isArray($rnsQueries[1].data)
+    ) {
       columns.forEach((column) => {
         column.items = $rnsQueries[1].data
           ? $rnsQueries[1].data
@@ -387,10 +420,14 @@
       });
     }
 
-
     if ($rnsQueries[1].data && $rnsQueries[4].data)
-    selectedRNA = $rnsQueries[4].data.filter((rna: any) => 
-          !$rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType)
+      selectedRNA = $rnsQueries[4].data
+        .filter(
+          (rna: any) =>
+            !$rnsQueries[1].data.some(
+              (rns: any) =>
+                rns.readinessType === rna.readinessLevel.readinessType
+            )
         )
         .map((rna: any) => rna.id);
   });
@@ -503,7 +540,7 @@
         <div class="flex">
           {#each [1, 2] as item, index}
             <Skeleton
-              class={`border-background flex h-9 w-9 items-center justify-center rounded-full border-2 ${
+              class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
                 index !== 2 - 1 ? '-mr-1' : ''
               } `}
             >
@@ -512,22 +549,22 @@
           {/each}
         </div>
       </div>
-      <div class="bg-background ml-auto">
+      <div class="ml-auto bg-background">
         <Skeleton class="h-9 w-[90px]" />
       </div>
     </div>
 
     <div class="grid h-full grid-cols-4 gap-5">
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
     </div>
@@ -539,9 +576,9 @@
 {#snippet accessible()}
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
-      <div class="bg-background flex h-fit justify-between rounded-lg">
+      <div class="flex h-fit justify-between rounded-lg bg-background">
         <Tabs.Root value={selectedFormat}>
-          <Tabs.List class="bg-flutter-gray/20 border">
+          <Tabs.List class="border bg-flutter-gray/20">
             <Tabs.Trigger
               class="flex items-center gap-1"
               value="board"
@@ -563,14 +600,14 @@
       </div>
       <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
     </div>
-    <div class="flex gap-4 items-center">
+    <div class="flex items-center gap-4">
       {#if selectedFormat !== 'table'}
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
         <div class="flex gap-1">
           <button
-            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            class="flex items-center gap-2 rounded-l-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingRNS}
             on:click={() => generateRNSForSelected()}
@@ -585,38 +622,49 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <button
-                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRNS}
               >
                 <ChevronDown class="h-4 w-4" />
               </button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content 
-              align="end" 
-              class="w-[300px] max-h-[300px] overflow-y-auto"
+            <DropdownMenu.Content
+              align="end"
+              class="max-h-[300px] w-[300px] overflow-y-auto"
             >
               <DropdownMenu.Group class="space-y-1">
                 {#each $rnsQueries[4].data as rna}
-                  <div 
-                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType) ? 'opacity-50' : ''}"
+                  <div
+                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$rnsQueries[1].data.some(
+                      (rns: any) =>
+                        rns.readinessType === rna.readinessLevel.readinessType
+                    )
+                      ? 'opacity-50'
+                      : ''}"
                     on:click|stopPropagation={() => toggleRNSSelection(rna.id)}
                     on:keydown|stopPropagation
                   >
                     <div class="flex items-center gap-2">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selectedRNA.includes(rna.id)}
                         class="h-4 w-4"
                       />
                       <div class="flex flex-col gap-0.5">
                         <div class="flex items-center gap-2">
-                          <span class="font-medium">{rna.readinessLevel.readinessType}</span>
+                          <span class="font-medium"
+                            >{rna.readinessLevel.readinessType}</span
+                          >
                           {#if $rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType)}
-                            <span class="text-xs text-muted-foreground">(Has RNS)</span>
+                            <span class="text-xs text-muted-foreground"
+                              >(Has RNS)</span
+                            >
                           {/if}
                         </div>
-                        <span class="text-xs text-muted-foreground line-clamp-2">
+                        <span
+                          class="line-clamp-2 text-xs text-muted-foreground"
+                        >
                           {rna.rna.substring(0, 50) + '...'}
                         </span>
                       </div>
@@ -645,7 +693,7 @@
       />
     {:else}
       <div class="h-fit w-full rounded-md border">
-        <Table.Root class="bg-background rounded-lg">
+        <Table.Root class="rounded-lg bg-background">
           <Table.Header>
             <Table.Row class="text-centery h-12">
               <Table.Head class="pl-5">Type</Table.Head>
@@ -659,9 +707,7 @@
             {#each $rnsQueries[1].data.filter((data: any) => data.isAiGenerated === false) as item}
               {#if selectedMembers.includes(item.assignee.id) || selectedMembers.length === 0}
                 <Table.Row class="h-14 cursor-pointer">
-                  <Table.Cell class="pl-5"
-                    >{item.readinessType}</Table.Cell
-                  >
+                  <Table.Cell class="pl-5">{item.readinessType}</Table.Cell>
                   <Table.Cell class=""
                     >{item.description.substring(0, 100)}</Table.Cell
                   >
@@ -674,10 +720,10 @@
                   >
                   <Table.Cell class=""
                     >{members.filter(
-                        (member: any) => member.userId === item.assignee.id
+                      (member: any) => member.userId === item.assignee.id
                     )[0]?.firstName}
                     {members.filter(
-                        (member: any) => member.userId === item.assignee.id
+                      (member: any) => member.userId === item.assignee.id
                     )[0]?.lastName}</Table.Cell
                   >
                 </Table.Row>
