@@ -691,7 +691,7 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <button
-                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 type="button"
                 disabled={generatingInitiatives}
               >

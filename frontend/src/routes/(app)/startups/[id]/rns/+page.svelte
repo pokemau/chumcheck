@@ -622,7 +622,7 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <button
-                class="rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRNS}
               >
