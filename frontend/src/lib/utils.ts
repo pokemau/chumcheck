@@ -4,6 +4,7 @@ import { browser } from '$app/environment';
 import type { RNSItem } from './types';
 // import type { Role } from './types';
 import axiosInstance from './axios';
+import { PUBLIC_API_URL } from '$env/static/public';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -228,8 +229,7 @@ export const getSavedTab = (name: string, searchParam: any) => {
 };
 
 export const getData = async (url: string, access: string) => {
-  // const localhostURL = `http://localhost:3000${url}`;
-  const URL = `https://chumcheck.onrender.com${url}`;
+  const URL = `${PUBLIC_API_URL}${url}`;
   const response = await axiosInstance.get(URL, {
     headers: {
       Authorization: `Bearer ${access}`
