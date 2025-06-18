@@ -119,6 +119,23 @@
   </Card.Content>
 </Card.Root>
 
+{#if  role === 'Startup'}
+<RoadblocksViewEditDialog
+  {open}
+  {onOpenChange}
+  rns={roadblocks}
+  {update}
+  {action}
+  deleteRns={deleteRoadblocks}
+  {members}
+  {assignedMember}
+  {closeDialog}
+  {ai}
+  addToRoadblocks={update}
+  {index}
+  {role}
+/>
+{:else}
 <RoadblocksViewEditAIDialog
   {open}
   {onOpenChange}
@@ -129,3 +146,4 @@
   {update}
   {index}
 />
+{/if} 
