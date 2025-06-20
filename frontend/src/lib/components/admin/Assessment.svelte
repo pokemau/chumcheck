@@ -13,7 +13,7 @@
 </script>
 
 <div class="flex flex-col gap-3">
-  <h2 class="text-lg italic">{type}</h2>
+  <h2 class="font-bold italic">{type}</h2>
   {#each questions as question, index}
     <div class="grid w-full gap-2">
       <Label for="message">{question.question}</Label>

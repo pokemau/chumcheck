@@ -52,7 +52,6 @@
     if (response.ok) {
       information = data;
       console.log("Capsule proposal parsed data: (Title used would be from the form, not from the file, so if the title here is null, disregard");
-      console.log(data);
     }
 
     processing = false;

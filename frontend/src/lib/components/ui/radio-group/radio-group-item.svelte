@@ -23,7 +23,7 @@
   {#snippet children({ checked })}
     <div class="flex items-center justify-center">
       {#if checked}
-        <Check class="size-3.5 fill-primary" />
+        <Check class="size-5 fill-primary" />
       {/if}
     </div>
   {/snippet}

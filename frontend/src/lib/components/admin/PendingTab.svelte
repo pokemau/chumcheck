@@ -22,7 +22,6 @@
 
   export let data;
   let applicants = data.filter((d) => d.qualification_status === 1);
-  console.log('lol' + applicants);
   let showCapsule = false;
 
   let showPendingDialog = false;
@@ -37,7 +36,6 @@
   let inf: any, que: any, ans: any, calc: any;
 
   async function getStartupInformation(startupId: number) {
-    console.log('here');
     const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
       method: 'get',
       headers: {
@@ -86,8 +84,6 @@
         que = questions_data.results;
         ans = answers_data.results;
         calc = calculator_data;
-        console.log(que);
-        console.log(ans);
         // return {
         // 	info: data,
         // 	questions: questions_data.results,

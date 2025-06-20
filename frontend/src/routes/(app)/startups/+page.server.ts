@@ -101,10 +101,7 @@ export const actions: Actions = {
       }
     });
 
-    //console.log(formData);
-
     categories.forEach((category) => {
-      //console.log('CATEGORY', parseInt(formData.get(`${category}`) as string));
       calculatorAnswers.push({
         startupId: startupId,
         calculatorQuestionId: parseInt(formData.get(`${category}`) as string)
@@ -114,11 +111,6 @@ export const actions: Actions = {
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////
-
-    console.log('ANSWERS');
-    console.log('ANSWERS');
-    console.log('ANSWERS');
-    console.log(answers);
 
     const urat_answers = await fetch(
       `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/create`,
@@ -133,12 +125,6 @@ export const actions: Actions = {
     );
 
     const urat_res = await urat_answers.json();
-    console.log(urat_res);
-
-    //console.log('CALC ANSWERS');
-    //console.log('CALC ANSWERS');
-    //console.log('CALC ANSWERS');
-    //console.log(JSON.stringify({ calculatorAnswers }));
 
     const calculator_answers = await fetch(
       `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/create`,
@@ -155,8 +141,6 @@ export const actions: Actions = {
     );
 
     const res = await calculator_answers.json();
-
-    console.log(res);
 
     //
     //    if (urat_answers.ok && calculator_answers.ok) {

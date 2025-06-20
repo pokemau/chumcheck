@@ -25,10 +25,6 @@
     // status: 4
   });
 
-  $effect(() => {
-      // console.log($state.snapshot(data))
-  });
-
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
@@ -44,16 +40,12 @@
       <div class="flex flex-col gap-4">
         <Label for="username">Fix</Label>
         <Textarea rows={4} bind:value={data.fix} />
-        {console.log(members)}
       </div>
     </div>
     <div class="flex flex-col gap-4">
       <Label for="name">Assignee</Label>
       <Select.Root type="single" bind:value={data.assigneeId}>
         <Select.Trigger class="w-[180px]">
-          {console.log(
-            members.filter((member: any) => member.userId === data.assigneeId)
-          )}
           {data.assigneeId
             ? `${members.filter((member: any) => member.userId === data.assigneeId)[0].firstName} ${members.filter((member: any) => member.userId === data.assigneeId)[0].lastName}`
             : ''}</Select.Trigger

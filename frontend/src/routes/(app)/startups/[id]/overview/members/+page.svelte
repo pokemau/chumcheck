@@ -32,10 +32,6 @@
     }
   );
 
-  $: if ($queryResult.isSuccess) {
-    // console.log($queryResult.data);
-  }
-
   let members: any = [];
   let search: string;
   let searchedUsers: any[] = [];

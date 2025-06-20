@@ -47,9 +47,6 @@
   let editTarget = $state(false);
   let editRemarks = $state(false);
 
-    
-    // console.log(tasks)
-
   let deleteDialogOpen = $state(false);
   const deleteDialogOnOpenChange = () => {
     deleteDialogOpen = !deleteDialogOnOpenChange;
@@ -60,57 +57,61 @@
   <svelte:fragment slot="editableSection">
     <SectionTitle>Initiative #{rnsCopy.initiativeNumber}</SectionTitle>
     <EditableSection
-    label="Tasks"
-    editMode={editDescription}
-    role={role}
-    data={rnsCopy.description}
-    dataId={rnsCopy.id}
-    update={update}
-    isTask={true}
-    taskDescription={tasks.filter((task: any) => task.id === rnsCopy.rns)[0].description}
+      label="Tasks"
+      editMode={editDescription}
+      {role}
+      data={rnsCopy.description}
+      dataId={rnsCopy.id}
+      {update}
+      isTask={true}
+      taskDescription={tasks.filter((task: any) => task.id === rnsCopy.rns)[0]
+        .description}
     />
     <EditableSection
-    label="Description"
-    editMode={editDescription}
-    role={role}
-    data={rnsCopy.description}
-    dataId={rnsCopy.id}
-    dataColumn="description"
-    update={update}
+      label="Description"
+      editMode={editDescription}
+      {role}
+      data={rnsCopy.description}
+      dataId={rnsCopy.id}
+      dataColumn="description"
+      {update}
     />
     <EditableSection
-    label="Measures"
-    editMode={editMeasures}
-    role={role}
-    data={rnsCopy.measures}
-    dataId={rnsCopy.id}
-    dataColumn="measures"
-    update={update}
+      label="Measures"
+      editMode={editMeasures}
+      {role}
+      data={rnsCopy.measures}
+      dataId={rnsCopy.id}
+      dataColumn="measures"
+      {update}
     />
     <EditableSection
-    label="Target"
-    editMode={editTarget}
-    role={role}
-    data={rnsCopy.targets}
-    dataId={rnsCopy.id}
-    dataColumn="targets"
-    update={update}
+      label="Target"
+      editMode={editTarget}
+      {role}
+      data={rnsCopy.targets}
+      dataId={rnsCopy.id}
+      dataColumn="targets"
+      {update}
     />
     <EditableSection
-    label="Remarks"
-    editMode={editRemarks}
-    role={role}
-    data={rnsCopy.remarks}
-    dataId={rnsCopy.id}
-    dataColumn="remarks"
-    update={update}
+      label="Remarks"
+      editMode={editRemarks}
+      {role}
+      data={rnsCopy.remarks}
+      dataId={rnsCopy.id}
+      dataColumn="remarks"
+      {update}
     />
   </svelte:fragment>
 
   <svelte:fragment slot="detailsSection">
     <div class="flex gap-3">
       {#if role !== 'Startup'}
-        <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
+        <Button
+          size="sm"
+          variant="destructive"
+          onclick={() => (deleteDialogOpen = true)}
           ><Trash class="h-4 w-4" /> Delete</Button
         >
       {/if}
@@ -125,34 +126,37 @@
       {/if}
     </div>
     <DetailsSectionContainer>
-        <DetailsSection
-            label="Assignee"
-            value={rnsCopy.assignee}
-            editable={true}
-            editableCondition={role !== 'Startup'}
-            options={members}
-            valueKey="userId"
-            displayFn={(member) => `${member.firstName} ${member.lastName}`}
-            onChange={(val) => update(rnsCopy.id, { assigneeId: val })}
-        />
-        <DetailsSection
-            label="RNS Priority No."
-            value={
-              typeof rnsCopy.rns === 'object'
-                ? rnsCopy.rns.priorityNumber
-                : tasks.find((t:any) => t.id === rnsCopy.rns)?.priorityNumber ?? '—'
-            }
-        />
+      <DetailsSection
+        label="Assignee"
+        value={rnsCopy.assignee}
+        editable={true}
+        editableCondition={role !== 'Startup'}
+        options={members}
+        valueKey="userId"
+        displayFn={(member) => `${member.firstName} ${member.lastName}`}
+        onChange={(val) => update(rnsCopy.id, { assigneeId: val })}
+      />
+      <DetailsSection
+        label="RNS Priority No."
+        value={typeof rnsCopy.rns === 'object'
+          ? rnsCopy.rns.priorityNumber
+          : (tasks.find((t: any) => t.id === rnsCopy.rns)?.priorityNumber ??
+            '—')}
+      />
     </DetailsSectionContainer>
   </svelte:fragment>
 </ViewEditDeleteDialog>
 
-<AlertDialog.Root bind:open={deleteDialogOpen} onOpenChange={deleteDialogOnOpenChange}>
+<AlertDialog.Root
+  bind:open={deleteDialogOpen}
+  onOpenChange={deleteDialogOnOpenChange}
+>
   <AlertDialog.Content>
     <AlertDialog.Header>
       <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
       <AlertDialog.Description>
-        This action cannot be undone. This will permanently delete this Initiative.
+        This action cannot be undone. This will permanently delete this
+        Initiative.
       </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer>
