@@ -133,7 +133,7 @@
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
           (data: any) => data.isAiGenerated === false && data.status === column.value
-        );
+        ).sort((a: any, b: any) => a.initiativeNumber - b.initiativeNumber);
       });
     }
 
@@ -152,10 +152,24 @@
   });
 
   const createInitiative = async (payload: any) => {
+    // Increment existing priority numbers
+    const currentItems = await axiosInstance.get(`/initiatives/?startupId=${startupId}`, {
+      headers: { Authorization: `Bearer ${access}` }
+    });
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(`/initiatives/${item.id}/`, {
+        priorityNumber: (item.priorityNumber || 0) + 1
+      }, {
+        headers: { Authorization: `Bearer ${access}` }
+      })
+    );
+    await Promise.all(updatePromises);
+
     await axiosInstance.post(
       '/initiatives/',
       {
-        ...payload
+        ...payload,
+        priorityNumber: 1
       },
       {
         headers: {
@@ -199,13 +213,13 @@
       .finally(async () => await updateInitiativeNumber());
   };
 
-  const updatedEditInitiative = async (id: number, payload: any) => {
+  const updatedEditInitiative = async (id: number, payload: any, showToast: boolean = true) => {
     await axiosInstance.patch(`/initiatives/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated Initiatives');
+    if (showToast) toast.success('Successfuly updated Initiatives');
     $initiativesQueries[1].refetch();
     $initiativesQueries[2].refetch();
 
@@ -674,6 +688,13 @@
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          on:click={() => showDialog()}
+        >
+          Add
+        </button>
         <div class="flex gap-1">
           <button
             class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -685,7 +706,7 @@
               <Loader class="h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
           </button>
           <DropdownMenu.Root>

@@ -27,6 +27,7 @@
   import { Badge } from '$lib/components/ui/badge/index.js';
   import { Button } from '$lib/components/ui/button/index.js';
   import { RoadblocksCard } from '$lib/components/startups/roadblocks';
+  import { RoadblocksCreateDialog } from '$lib/components/startups/roadblocks';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import { Ellipsis, Kanban, Loader, Sparkles, TableIcon, ChevronDown, Check } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -128,13 +129,13 @@
     }
   });
 
-  const updatedEditRoadblock = async (id: number, payload: any) => {
+  const updatedEditRoadblock = async (id: number, payload: any, showToast: boolean = true) => {
     await axiosInstance.patch(`/roadblocks/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated the RNA');
+    if (showToast) toast.success('Successfuly updated the RNA');
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
         column.items = (res.data as Roadblock[]).filter(
@@ -294,9 +295,77 @@
   };
 
   let generatingRoadblocks: boolean = $state(false);
+  let open = $state(false);
+  
+  const showDialog = () => {
+    open = true;
+  };
+
+  const onOpenChange = () => {
+    open = !open;
+  };
+
+  const createRoadblock = async (payload: any) => {
+    // Increment existing risk numbers
+    const currentItems = await axiosInstance.get(`/roadblocks/?startupId=${startupId}`, {
+      headers: { Authorization: `Bearer ${access}` }
+    });
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(`/roadblocks/${item.id}/`, {
+        riskNumber: (item.riskNumber || 0) + 1
+      }, {
+        headers: { Authorization: `Bearer ${access}` }
+      })
+    );
+    await Promise.all(updatePromises);
+
+    await axiosInstance.post(
+      '/roadblocks/',
+      {
+        ...payload,
+        riskNumber: 1,
+        status: 1
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    toast.success('Successfully created the Roadblock');
+    open = false;
+    $roadblocksQueries[1]
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = (res.data as Roadblock[])
+            .filter(
+              (data: Roadblock) => data.status === column.value
+            )
+            .sort((a: any, b: any) => b.riskNumber - a.riskNumber);
+        });
+      })
+      .finally(async () => {
+        await updateRiskNumber();
+      });
+  };
+
   const generateRoadblocks = async (count: number) => {
     generatingRoadblocks = true;
     try {
+      // Increment existing risk numbers
+      const currentItems = await axiosInstance.get(`/roadblocks/?startupId=${startupId}`, {
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      const updatePromises = currentItems.data.map((item: any) =>
+        axiosInstance.patch(`/roadblocks/${item.id}/`, {
+          riskNumber: (item.riskNumber || 0) + count
+        }, {
+          headers: { Authorization: `Bearer ${access}` }
+        })
+      );
+      await Promise.all(updatePromises);
+      
       await axiosInstance.post(
         `/roadblocks/generate-roadblocks/`,
         {
@@ -311,6 +380,7 @@
       );
 
       await $roadblocksQueries[1].refetch(); // Refetch all roadblocks including new AI-generated ones
+      await updateRiskNumber();
 
       toast.success(`Successfully generated ${count} Roadblocks`);
     } catch (error: any) {
@@ -319,7 +389,6 @@
       generatingRoadblocks = false;
     }
   };
-
 
   let status = $state(4);
   const updateStatus = (newStatus: number) => {
@@ -365,6 +434,15 @@
 {:else}
   {@render fallback()}
 {/if}
+
+<RoadblocksCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRoadblock}
+  {startupId}
+  {members}
+  {status}
+/>
 
 {#snippet card(roadblocks: any, index: number)}
   <RoadblocksCard
@@ -454,6 +532,13 @@
     <div class="flex items-center gap-3">
       <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          onclick={() => showDialog()}
+        >
+          Add
+        </button>
         <div class="flex gap-1">
           <button
             class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
@@ -465,7 +550,7 @@
               <Loader class="mr-2 h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
           </button> 
           <DropdownMenu.Root>
@@ -506,6 +591,7 @@
         role={data.role}
         {updateStatus}
         {selectedMembers}
+        {showDialog}
       />
     {:else}
       <div class="h-fit w-full rounded-md border">

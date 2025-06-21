@@ -22,10 +22,10 @@
   const closeDialog = () => {
     open = false;
     if (!initiative.clickedByMentor && role === 'Mentor') {
-      update(initiative.id, { ...initiative, clickedByMentor: true });
+      update(initiative.id, { ...initiative, clickedByMentor: true }, false);
     }
     if (!initiative.clickedByStartup && role === 'Startup') {
-      update(initiative.id, { ...initiative, clickedByStartup: true });
+      update(initiative.id, { ...initiative, clickedByStartup: true }, false);
     }
   };
 

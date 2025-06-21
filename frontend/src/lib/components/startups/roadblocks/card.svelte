@@ -33,10 +33,10 @@
     open = false;
 
     if (!roadblocks.clickedByMentor && role === 'Mentor') {
-      update(roadblocks.id, { ...roadblocks, clickedByMentor: true });
+      update(roadblocks.id, { ...roadblocks, clickedByMentor: true }, false);
     }
     if (!roadblocks.clickedByStartup && role === 'Startup') {
-      update(roadblocks.id, { ...roadblocks, clickedByStartup: true });
+      update(roadblocks.id, { ...roadblocks, clickedByStartup: true }, false);
     }
   };
 

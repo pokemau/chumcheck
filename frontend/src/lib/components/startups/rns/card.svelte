@@ -24,10 +24,10 @@
     open = false;
 
     if (!rns.clickedByMentor && role === 'Mentor') {
-      update(rns.id, { ...rns, clickedByMentor: true });
+      update(rns.id, { ...rns, clickedByMentor: true }, false);
     }
     if (!rns.clickedByStartup && role === 'Startup') {
-      update(rns.id, { ...rns, clickedByStartup: true });
+      update(rns.id, { ...rns, clickedByStartup: true }, false);
     }
   };
 

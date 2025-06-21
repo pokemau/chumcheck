@@ -251,14 +251,6 @@
   };
 
   const createRns = async (payload: any) => {
-    const statuses = [
-      'Discontinued',
-      'Scheduled',
-      'Track',
-      'Delayed',
-      'Completed'
-    ];
-
     await axiosInstance.post(
       '/rns',
       {
@@ -269,7 +261,7 @@
         headers: {
           Authorization: `Bearer ${data.access}`
         }
-      }
+      } 
     );
     toast.success('Successfully created the RNS');
     open = false;
@@ -299,7 +291,8 @@
       assigneeId: number;
       isAiGenerated: boolean;
       clickedByMentor: boolean;
-    }
+    },
+    showToast: boolean = true
   ) => {
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
@@ -307,7 +300,7 @@
       }
     });
 
-    toast.success('Successfully updated the RNS');
+    if (showToast) toast.success('Successfully updated the RNS');
     open = false;
     $rnsQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
@@ -316,10 +309,10 @@
             (data: any) =>
               data.isAiGenerated === false && data.status === column.value
           )
-          .sort((a: any, b: any) => a.order - b.order);
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
     });
-    goto('rns');
+    // goto('rns');
   };
 
   const deleteRNS = async (id: number, index: number) => {
@@ -605,6 +598,13 @@
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
+        <button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          on:click={() => showDialog()}
+        >
+          Add
+        </button>
         <div class="flex gap-1">
           <button
             class="flex items-center gap-2 rounded-l-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
@@ -616,7 +616,7 @@
               <Loader class="h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
           </button>
           <DropdownMenu.Root>
