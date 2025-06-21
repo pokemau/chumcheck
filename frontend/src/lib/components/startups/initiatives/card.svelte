@@ -45,11 +45,17 @@
     return (role == 'Mentor' && !initiative.clickedByMentor) || (role == 'Startup' && !initiative.clickedByStartup)
   }
 
+  let initiativesCopy = $state({ ...initiative });
+
+  $effect(() => {
+    initiativesCopy = { ...initiative };
+  });
+
 </script>
 
 <Card.Root
-  class={`bg-gray-900 border ${
-  isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
+  class={`${initiativesCopy.approvalStatus === 'Unchanged' ? 'bg-gray-900' : 'bg-violet-950'} border 
+  ${ isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
   onclick={() => {
     open = true;
     action = 'View';

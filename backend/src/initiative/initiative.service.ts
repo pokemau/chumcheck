@@ -23,6 +23,7 @@ export class InitiativeService {
         const initiative = new Initiative();
         initiative.initiativeNumber = dto.initiativeNumber;
         initiative.status = dto.status;
+        initiative.requestedStatus = dto.status;
         initiative.rns = this.em.getReference(Rns, dto.rnsId);
         initiative.isAiGenerated = dto.isAiGenerated;
         initiative.assignee = this.em.getReference(User, dto.assigneeId);

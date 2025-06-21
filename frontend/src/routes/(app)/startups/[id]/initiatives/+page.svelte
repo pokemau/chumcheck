@@ -129,10 +129,12 @@
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
+    // console.log($initiativesQueries[2].data)
+
     if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
-          (data: any) => data.isAiGenerated === false && data.status === column.value
+          (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
         );
       });
     }
@@ -171,7 +173,7 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
           );
         });
       })
@@ -192,7 +194,7 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
           );
         });
       })
@@ -234,6 +236,8 @@
     }
 
     updateInitiativeNumber();
+    $initiativesQueries[1].refetch();
+    $initiativesQueries[2].refetch();
   }
 
   const updateInitiativeNumber = async () => {
@@ -424,7 +428,7 @@
         .then((res) => {
           columns.forEach((column) => {
             column.items = res.data.filter(
-              (data: any) => data.isAiGenerated === false && data.status === column.value
+              (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
             );
           });
         })
