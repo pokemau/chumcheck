@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Initiative } from 'src/entities/initiative.entity';
 import { CreateInitiativeDto, GenerateInitiativeDto, UpdateInitiativeDto } from './dto/initiative.dto';
 import { Rns } from 'src/entities/rns.entity';
@@ -90,6 +90,27 @@ export class InitiativeService {
 
     await this.em.flush();
     return initiative;
+    }
+
+    async statusChange(id: number, role: string, dto:UpdateInitiativeDto){
+        const initiative = await this.em.findOne(Initiative, { id });
+        if (!initiative) throw new NotFoundException('Initiative not found');
+
+        if (role === "Startup") {
+            if(initiative.status === dto.status){
+                initiative.approvalStatus = 'Unchanged';
+            }else{
+                initiative.approvalStatus = 'Pending';
+            }
+            initiative.requestedStatus = dto.status;
+        } else {
+            initiative.status = dto.status;
+            initiative.approvalStatus = 'Unchanged';
+            initiative.requestedStatus = dto.status;
+        }
+
+        await this.em.flush();
+        return initiative;
     }
 
 

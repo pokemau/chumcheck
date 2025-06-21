@@ -221,7 +221,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/initiatives/${task.id}/`,
+        `/initiatives/${task.id}/roleDependent?role=${data.role}`,
         {
           status
         },
