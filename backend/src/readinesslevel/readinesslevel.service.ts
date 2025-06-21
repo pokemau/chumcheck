@@ -158,4 +158,22 @@ export class ReadinesslevelService {
       readinessType: answer.uratQuestion.readinessType,
     }));
   }
+
+  async updateUratQuestionAnswer(id: number, dto: { response?: string; score?: number }) {
+    const answer = await this.em.findOneOrFail(UratQuestionAnswer, { id });
+    if (dto.response !== undefined) answer.response = dto.response;
+    answer.score = 1;
+    await this.em.flush();
+    return answer;
+  }
+
+  async updateCalculatorQuestionAnswer(id: number, dto: { calculatorQuestionId?: number }) {
+    const answer = await this.em.findOneOrFail(CalculatorQuestionAnswer, { id });
+    if (dto.calculatorQuestionId !== undefined) {
+      const newQuestion = await this.em.findOneOrFail(CalculatorQuestion, { id: dto.calculatorQuestionId });
+      answer.question = newQuestion;
+    }
+    await this.em.flush();
+    return answer;
+  }
 }

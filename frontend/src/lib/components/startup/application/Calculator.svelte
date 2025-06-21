@@ -14,6 +14,12 @@
     acc[answer.question.category] = answer.question.id;
     return acc;
   }, {});
+
+  // Create a map of category to answer ID
+  $: answerIds = calculatorAnswers.reduce((acc: Record<string, number>, answer: any) => {
+    acc[answer.question.category] = answer.id;
+    return acc;
+  }, {});
 </script>
 
 <div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 10}>
@@ -39,6 +45,9 @@
           {/each}
           <!-- <RadioGroup.Input name={category.category} /> -->
         </RadioGroup.Root>
+        {#if answerIds[category.category]}
+          <input type="hidden" name={`${category.category}AnswerId`} value={`${answerIds[category.category]}`} />
+        {/if}
       </div>
     {/each}
   </div>

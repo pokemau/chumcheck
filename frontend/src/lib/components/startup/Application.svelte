@@ -126,6 +126,9 @@
   class="flex flex-col gap-5 p-3"
   enctype="multipart/form-data"
 >
+  {#if startup?.id}
+    <input type="hidden" name="startupId" value={startup.id} />
+  {/if}
   <h1 class="px-1 text-2xl font-semibold">{labels[currentActive]}</h1>
   <DataPrivacy
     dataPrivacy={formData.dataPrivacy}

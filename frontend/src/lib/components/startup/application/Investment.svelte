@@ -23,6 +23,9 @@
           value={investmentAnswers[i]?.response ?? ''} 
         />
         <input type="hidden" name={`investment${i}id`} value={`${q.id}`} />
+        {#if investmentAnswers[i]?.id}
+          <input type="hidden" name={`investment${i}answerId`} value={`${investmentAnswers[i].id}`} />
+        {/if}
       </div>
     {/each}
   </div>

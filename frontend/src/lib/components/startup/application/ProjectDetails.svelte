@@ -26,6 +26,20 @@
     links: startup?.links ?? ''
   };
 
+  // Initialize information with existing capsule proposal data if available
+  $: if (startup?.capsuleProposal && !files) {
+    information = {
+      title: startup.capsuleProposal.title || '',
+      startup_description: startup.capsuleProposal.description || '',
+      problem_statement: startup.capsuleProposal.problemStatement || '',
+      target_market: startup.capsuleProposal.targetMarket || '',
+      solution_description: startup.capsuleProposal.solutionDescription || '',
+      objectives: startup.capsuleProposal.objectives || '',
+      scope: startup.capsuleProposal.scope || '',
+      methodology: startup.capsuleProposal.methodology || ''
+    };
+  }
+
   async function getInformation() {
     processing = true;
     if (!files || !files[0]) {
@@ -107,7 +121,7 @@
         bind:files
       />
     </div>
-    {#if files && !processing}
+    {#if information}
       <input type="hidden" name="title" value={information.title} />
       <input
         type="hidden"
