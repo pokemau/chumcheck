@@ -59,7 +59,7 @@
         Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
       </Badge>
       {#if isNewCard()}
-        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs">New</div>
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
     </div>
     <div class="text-sm text-white mb-1 break-words whitespace-pre-wrap">

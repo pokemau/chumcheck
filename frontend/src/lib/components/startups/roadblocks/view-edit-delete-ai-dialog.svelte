@@ -10,6 +10,7 @@
   import { Check, Trash, Copy } from 'lucide-svelte';
   import { TextEditor } from '$lib/components/shared';
   import { tick } from 'svelte';
+  import { Input } from '$lib/components/ui/input';
 
   type ChatMessage = {
     id?: number;
@@ -204,14 +205,12 @@
           {/if}
         </div>
         <div class="mt-auto flex gap-2">
-          <input
-            class="flex-1 rounded bg-background border border-border px-3 py-2 text-white"
-            placeholder="Ask how you would like to refine the roadblock..."
+          <Input type="text" placeholder="Ask how you would like to refine the roadblock..." required
             bind:value={userInput}
             onkeydown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
             disabled={isLoadingHistory}
           />
-          <Button 
+          <Button
             disabled={isLoading || !userInput.trim() || isLoadingHistory} 
             onclick={handleSendMessage}
           >
