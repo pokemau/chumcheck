@@ -130,6 +130,8 @@
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
+    // console.log($initiativesQueries[2].data)
+
     if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
@@ -186,7 +188,7 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
           );
         });
       })
@@ -207,7 +209,7 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
           );
         });
       })
@@ -236,7 +238,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/initiatives/${task.id}/`,
+        `/initiatives/${task.id}/roleDependent?role=${data.role}`,
         {
           status
         },
@@ -249,6 +251,8 @@
     }
 
     updateInitiativeNumber();
+    $initiativesQueries[1].refetch();
+    $initiativesQueries[2].refetch();
   }
 
   const updateInitiativeNumber = async () => {
@@ -439,7 +443,7 @@
         .then((res) => {
           columns.forEach((column) => {
             column.items = res.data.filter(
-              (data: any) => data.isAiGenerated === false && data.status === column.value
+              (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
             );
           });
         })

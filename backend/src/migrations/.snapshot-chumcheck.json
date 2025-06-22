@@ -2039,6 +2039,26 @@
           "nullable": false,
           "mappedType": "enum"
         },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
+        },
         "rns_id": {
           "name": "rns_id",
           "type": "int",

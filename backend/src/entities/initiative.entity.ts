@@ -30,6 +30,12 @@ export class Initiative {
   @Enum(() => RnsStatus)
   status!: RnsStatus;
 
+  @Enum(() => RnsStatus)
+  requestedStatus?: RnsStatus;
+
+  @Property({ default: 'Unchanged' })
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
+
   @ManyToOne(() => Rns)
   rns!: Rns;
 

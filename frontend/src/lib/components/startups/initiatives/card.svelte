@@ -45,11 +45,17 @@
     return (role == 'Mentor' && !initiative.clickedByMentor) || (role == 'Startup' && !initiative.clickedByStartup)
   }
 
+  let initiativesCopy = $state({ ...initiative });
+
+  $effect(() => {
+    initiativesCopy = { ...initiative };
+  });
+
 </script>
 
 <Card.Root
-  class={`bg-gray-900 border ${
-  isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
+  class={`${initiativesCopy.approvalStatus === 'Unchanged' ? 'bg-gray-900' : 'bg-violet-950'} border 
+  ${ isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
   onclick={() => {
     open = true;
     action = 'View';
@@ -122,8 +128,25 @@
   </Card.Content>
 </Card.Root>
 
-<!-- {#if ai} -->
-<InitiativeViewEditDeleteAiDialog
+{#if role === 'Startup'}
+ <InitiativeViewEditDeleteDialog
+  {open}
+  {onOpenChange}
+  rns={initiative}
+  {update}
+  {action}
+  deleteRns={deleteInitiative}
+  {members}
+  {assignedMember}
+  {closeDialog}
+  {tasks}
+  {addToInitiative}
+  {ai}
+  {index}
+  {role}
+/>
+{:else}
+  <InitiativeViewEditDeleteAiDialog
   {open}
   {onOpenChange}
   initiative={initiative}
@@ -134,22 +157,5 @@
   {index}
   {tasks}
   isEdit={!ai}
-/>
-<!-- {:else} -->
-  <!-- <InitiativeViewEditDeleteDialog
-    {open}
-    {onOpenChange}
-    rns={initiative}
-    update={update}
-    {action}
-    deleteRns={deleteInitiative}
-    {members}
-    {assignedMember}
-    {closeDialog}
-    {tasks}
-    {addToInitiative}
-    {ai}
-    {index}
-    {role}
-  /> -->
-<!-- {/if} -->
+  />
+{/if}

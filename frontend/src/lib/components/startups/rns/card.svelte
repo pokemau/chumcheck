@@ -89,7 +89,20 @@
   </Card.Content>
 </Card.Root>
 
-<!-- {#if !ai} -->
+{#if  role === 'Startup'}
+  <RnsViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    {rns}
+    {deleteRns}
+    {update}
+    {action}
+    {members}
+    {closeDialog}
+    {index}
+    {role}
+  />
+{:else}
   <RnsViewEditDeleteAiDialog
     {open}
     {onOpenChange}
@@ -101,15 +114,4 @@
     {addToRns}
     isEdit={!ai}
   />
-<!-- {:else}
-  <RnsViewEditDeleteAiDialog
-    {open}
-    {onOpenChange}
-    {rns}
-    {deleteRns}
-    {members}
-    {closeDialog}
-    {addToRns}
-    {index}
-  />
-{/if} -->
+{/if} 
