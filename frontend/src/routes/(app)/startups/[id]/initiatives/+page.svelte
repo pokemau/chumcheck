@@ -689,13 +689,13 @@
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
-        <button
+        <Button
           class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           type="button"
           on:click={() => showDialog()}
         >
           Add
-        </button>
+        </Button>
         <div class="flex gap-1">
           <Button
             class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
