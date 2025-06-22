@@ -25,12 +25,12 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { toast } from 'svelte-sonner';
   import { Badge } from '$lib/components/ui/badge/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
   import { RoadblocksCard } from '$lib/components/startups/roadblocks';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import { Ellipsis, Kanban, Loader, Sparkles, TableIcon, ChevronDown, Check } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
+  import { Button } from '$lib/components/ui/button';
 
   interface Member {
     userId: number;
@@ -455,8 +455,8 @@
       <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
         <div class="flex gap-1">
-          <button
-            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          <Button
+            class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
             type="button"
             disabled={generatingRoadblocks}
             onclick={() => generateRoadblocks(numToGenerate)}
@@ -467,16 +467,16 @@
             {:else}
               + Add
             {/if}
-          </button> 
+          </Button> 
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <button
-                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <Button
+                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
                 type="button"
                 disabled={generatingRoadblocks}
               >
                 <ChevronDown class="h-4 w-4" />
-              </button>
+              </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end" class="w-[100px] max-h-[150px] overflow-y-auto">
               <DropdownMenu.RadioGroup value={numToGenerate.toString()} onValueChange={(val) => numToGenerate = Number(val)} class="space-y-1">
