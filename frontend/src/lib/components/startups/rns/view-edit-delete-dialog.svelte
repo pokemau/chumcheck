@@ -81,9 +81,17 @@
 
     return matchingLevels.length > 0 ? matchingLevels[0].id : '';
 };
+
+  function handleDialogStateChange(newOpen: boolean) {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      closeDialog();
+    }
+  }
+
 </script>
 
-<ViewEditDeleteDialog {open} {onOpenChange}>
+<ViewEditDeleteDialog {open} onOpenChange={handleDialogStateChange}>
   <svelte:fragment slot="editableSection">
     <SectionTitle>Priority #{rnsCopy.priorityNumber}</SectionTitle>
     <EditableSection

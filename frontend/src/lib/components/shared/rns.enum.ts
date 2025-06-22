@@ -1,9 +1,9 @@
 export enum RnsStatus {
-  New = 1,
-  Scheduled,
-  OnTrack,
-  Completed,
-  Delayed,
-  Discontinued,
-  LongTerm
+  'New' = 1,
+  'Scheduled',
+  'On Track',
+  'Completed',
+  'Delayed',
+  'Discontinued',
+  'Long Term'
 }

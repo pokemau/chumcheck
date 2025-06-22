@@ -49,4 +49,13 @@ export class RoadblockController {
             dto.latestPrompt
         );
     }
+
+    @Patch(':id/roleDependent')
+    async roleStatusUpdate(
+        @Param('id', ParseIntPipe) id: number,
+        @Query('role') role: string,
+        @Body() dto: UpdateRoadblockDto
+    ) {
+        return this.roadblockService.statusChange(id, role, dto);
+    }
 }

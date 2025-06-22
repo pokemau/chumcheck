@@ -32,6 +32,12 @@ export class Rns {
   @Enum(() => RnsStatus)
   status: RnsStatus = RnsStatus.New;
 
+  @Enum(() => RnsStatus)
+  requestedStatus?: RnsStatus;
+
+  @Property({ default: 'Unchanged' })
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
+
   @Enum(() => ReadinessType)
   readinessType!: ReadinessType;
 

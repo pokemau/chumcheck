@@ -24,6 +24,7 @@ export class InitiativeService {
         initiative.initiativeNumber = dto.initiativeNumber;
         initiative.status = dto.status;
         initiative.requestedStatus = dto.status;
+        initiative.approvalStatus = 'Unchanged';
         initiative.rns = this.em.getReference(Rns, dto.rnsId);
         initiative.isAiGenerated = dto.isAiGenerated;
         initiative.assignee = this.em.getReference(User, dto.assigneeId);
@@ -105,6 +106,10 @@ export class InitiativeService {
         const initiative = await this.em.findOne(Initiative, { id });
         if (!initiative) throw new NotFoundException('Initiative not found');
 
+        if(initiative.requestedStatus === dto.status){
+            return initiative;
+        }
+        
         if (role === "Startup") {
             if(initiative.status === dto.status){
                 initiative.approvalStatus = 'Unchanged';

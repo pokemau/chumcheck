@@ -25,6 +25,8 @@ export class RoadblockService {
         roadblock.startup = this.em.getReference(Startup, dto.startupId);
         roadblock.isAiGenerated = dto.isAiGenerated;
         roadblock.status = dto.status;
+        roadblock.requestedStatus = dto.status;
+        roadblock.approvalStatus = 'Unchanged';
         roadblock.riskNumber = dto.riskNumber;
         roadblock.description = dto.description;
         roadblock.fix = dto.fix;
@@ -48,6 +50,15 @@ export class RoadblockService {
     if (dto.status !== undefined) {
         roadblock.status = dto.status;
     }
+
+    if (dto.requestedStatus !== undefined) {
+        roadblock.requestedStatus = dto.requestedStatus;
+    }
+
+    if (dto.approvalStatus !== undefined) {
+        roadblock.approvalStatus = dto.approvalStatus;
+    }
+
     if (dto.riskNumber !== undefined) {
         roadblock.riskNumber = dto.riskNumber;
     }
@@ -66,6 +77,31 @@ export class RoadblockService {
 
     await this.em.flush();
     return roadblock;
+    }
+
+    async statusChange(id: number, role: string, dto:UpdateRoadblockDto){
+        const roadblock = await this.em.findOne(Roadblock, { id });
+        if (!roadblock) throw new NotFoundException('Roadblock not found');
+
+        if(roadblock.requestedStatus === dto.status){
+            return roadblock;
+        }
+        
+        if (role === "Startup") {
+            if(roadblock.status === dto.status){
+                roadblock.approvalStatus = 'Unchanged';
+            }else{
+                roadblock.approvalStatus = 'Pending';
+            }
+            roadblock.requestedStatus = dto.status;
+        } else {
+            roadblock.status = dto.status;
+            roadblock.approvalStatus = 'Unchanged';
+            roadblock.requestedStatus = dto.status;
+        }
+
+        await this.em.flush();
+        return roadblock;
     }
 
     async delete(id: number) {

@@ -10,6 +10,7 @@
   import { Check, Trash, Copy } from 'lucide-svelte';
   import { TextEditor } from '$lib/components/shared';
   import { tick } from 'svelte';
+  import { RnsStatus } from '$lib/components/shared/rns.enum';
 
   type ChatMessage = {
     id?: number;
@@ -33,6 +34,9 @@
     update,
     index,
     isEdit = false,
+    approveDialog,
+    denyDialog,
+    
   } = $props();
 
   let roadblockCopy = $state({ ...roadblock });
@@ -224,6 +228,15 @@
       <div class="flex flex-col w-1/2 p-6">
         <h2 class="text-2xl font-semibold mb-4">Roadblock Details</h2>
         <div class="flex flex-col gap-4 overflow-y-auto">
+          {#if roadblock.approvalStatus === 'Pending'}
+            <div class="mb-4">
+              <Label>This initiative was moved from <strong>{RnsStatus[roadblock.status]}</strong> by a startup user. Approve or Deny status change.</Label>
+              <div class="mt-2">
+                <Button variant="default" onclick={() => approveDialog()}>Approve</Button>
+                <Button variant="destructive" onclick={() => denyDialog()}>Deny</Button>
+              </div>
+            </div>
+          {/if}
           <div class="mb-4">
             <Label>Description</Label>
             <TextEditor
