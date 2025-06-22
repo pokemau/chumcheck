@@ -29,6 +29,16 @@
     }
   };
 
+  const approveDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', status: initiative.requestedStatus});
+  }
+
+  const denyDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', requestedStatus: initiative.status});
+  }
+
   function handleMouseEnter(event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
     hoveredRNSCard.set({
@@ -157,5 +167,7 @@
   {index}
   {tasks}
   isEdit={!ai}
+  {approveDialog}
+  {denyDialog}
   />
 {/if}

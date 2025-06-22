@@ -51,9 +51,16 @@
   const deleteDialogOnOpenChange = () => {
     deleteDialogOpen = !deleteDialogOnOpenChange;
   };
+
+  function handleDialogStateChange(newOpen: boolean) {
+    onOpenChange(newOpen);
+    if (!newOpen) {
+      closeDialog();
+    }
+  }
 </script>
 
-<ViewEditDeleteDialog {open} {onOpenChange}>
+<ViewEditDeleteDialog {open} onOpenChange={handleDialogStateChange}>
   <svelte:fragment slot="editableSection">
     <SectionTitle>Initiative #{rnsCopy.initiativeNumber}</SectionTitle>
     <EditableSection

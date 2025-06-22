@@ -49,6 +49,14 @@ export class InitiativeService {
         initiative.status = dto.status;
     }
 
+    if (dto.requestedStatus !== undefined) {
+        initiative.requestedStatus = dto.requestedStatus;
+    }
+
+    if (dto.approvalStatus !== undefined) {
+        initiative.approvalStatus = dto.approvalStatus;
+    }
+
     if (dto.isAiGenerated !== undefined) {
         initiative.isAiGenerated = dto.isAiGenerated;
     }
