@@ -8,4 +8,5 @@ export class CreateCapsuleProposalDto {
   scope: string;
   methodology: string;
   startupId: number;
+  fileName?: string;
 }

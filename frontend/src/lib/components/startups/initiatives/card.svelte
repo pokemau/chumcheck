@@ -23,10 +23,10 @@
   const closeDialog = () => {
     open = false;
     if (!initiative.clickedByMentor && role === 'Mentor') {
-      update(initiative.id, { ...initiative, clickedByMentor: true });
+      update(initiative.id, { ...initiative, clickedByMentor: true }, false);
     }
     if (!initiative.clickedByStartup && role === 'Startup') {
-      update(initiative.id, { ...initiative, clickedByStartup: true });
+      update(initiative.id, { ...initiative, clickedByStartup: true }, false);
     }
   };
 
@@ -75,7 +75,7 @@
   <Card.Content class="flex flex-col gap-2 p-4">
     <div class="flex relative items-center justify-between mb-1 relative">
       {#if isNewCard()}
-        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs">New</div>
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
       {#if initiativesCopy.approvalStatus !== 'Unchanged'}
         <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>

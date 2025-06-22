@@ -7,6 +7,7 @@
 
   let files: any;
   export let access: string;
+  export let startup: any = null;
   let processing = false;
   let information: {
     title: string;
@@ -18,6 +19,27 @@
     scope: string;
     methodology: string;
   };
+
+  let formData = {
+    name: startup?.name ?? '',
+    // capsule proposal
+    links: startup?.links ?? ''
+  };
+
+  // Initialize information with existing capsule proposal data if available
+  $: if (startup?.capsuleProposal && !files) {
+    information = {
+      title: startup.capsuleProposal.title || '',
+      startup_description: startup.capsuleProposal.description || '',
+      problem_statement: startup.capsuleProposal.problemStatement || '',
+      target_market: startup.capsuleProposal.targetMarket || '',
+      solution_description: startup.capsuleProposal.solutionDescription || '',
+      objectives: startup.capsuleProposal.objectives || '',
+      scope: startup.capsuleProposal.scope || '',
+      methodology: startup.capsuleProposal.methodology || ''
+    };
+  }
+
   async function getInformation() {
     processing = true;
     if (!files || !files[0]) {
@@ -64,6 +86,7 @@
         type="text"
         placeholder="startup name"
         required
+        bind:value={formData.name}
       />
     </div>
     <div class="grid gap-2">
@@ -81,6 +104,10 @@
           {:else}
             <div>{files[0].name}</div>
           {/if}
+        {:else if startup?.capsuleProposal?.fileName}
+          <div class="flex flex-col items-center justify-center gap-2">
+            <div>{startup.capsuleProposal.fileName}</div>
+          </div>
         {:else}
           Upload or drag your capsule proposal here.
         {/if}
@@ -94,7 +121,7 @@
         bind:files
       />
     </div>
-    {#if files && !processing}
+    {#if information}
       <input type="hidden" name="title" value={information.title} />
       <input
         type="hidden"
@@ -124,7 +151,7 @@
       <Label for="links"
         >Links to any supporting materials (e.g., website, explainer video)</Label
       >
-      <Input name="links" id="links" type="text" placeholder="links" required />
+      <Input name="links" id="links" type="text" placeholder="links" required bind:value={formData.links}/>
     </div>
   </div>
 </div>

@@ -16,6 +16,8 @@ import { QualificationStatus } from './enums/qualification-status.enum';
 import { Roadblock } from './roadblock.entity';
 import { Rns } from './rns.entity';
 import { StartupReadinessLevel } from './startup-readiness-level.entity';
+import { UratQuestionAnswer } from './urat-question-answer.entity';
+import { CalculatorQuestionAnswer } from './calculator-question-answer.entity';
 
 @Entity({ tableName: 'startups' })
 export class Startup {
@@ -68,4 +70,10 @@ export class Startup {
 
   @OneToMany(() => StartupReadinessLevel, (s) => s.startup)
   readinessLevels = new Collection<StartupReadinessLevel>(this);
+
+  @OneToMany(() => UratQuestionAnswer, (answer) => answer.startup)
+  uratQuestionAnswers = new Collection<UratQuestionAnswer>(this);
+
+  @OneToMany(() => CalculatorQuestionAnswer, (answer) => answer.startup)
+  calculatorQuestionAnswers = new Collection<CalculatorQuestionAnswer>(this);
 }

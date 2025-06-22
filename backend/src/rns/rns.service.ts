@@ -76,23 +76,23 @@ export class RnsService {
       throw new NotFoundException(`RNS with ID ${rnsId} does not exist.`);
     }
 
-    if (dto.readinessType) {
+    if (dto.readinessType !== undefined) {
       rns.readinessType = dto.readinessType;
     }
 
-    if (dto.assigneeId) {
+    if (dto.assigneeId !== undefined) {
       rns.assignee = this.em.getReference(User, dto.assigneeId);
     }
 
-    if (dto.targetLevel) {
+    if (dto.targetLevel !== undefined) {
       rns.targetLevel = this.em.getReference(ReadinessLevel, dto.targetLevel);
     }
 
-    if (dto.description) {
+    if (dto.description !== undefined) {
       rns.description = dto.description;
     }
 
-    if (dto.status) {
+    if (dto.status !== undefined) {
       rns.status = dto.status;
     }
 
@@ -104,15 +104,15 @@ export class RnsService {
         rns.approvalStatus = dto.approvalStatus;
     }
 
-    if (dto.priorityNumber) {
+    if (dto.priorityNumber !== undefined) {
       rns.priorityNumber = dto.priorityNumber;
     }
 
-    if (dto.clickedByMentor) {
+    if (dto.clickedByMentor !== undefined) {
       rns.clickedByMentor = dto.clickedByMentor;
     }
 
-    if (dto.clickedByStartup) {
+    if (dto.clickedByStartup !== undefined) {
       rns.clickedByStartup = dto.clickedByStartup;
     }
 

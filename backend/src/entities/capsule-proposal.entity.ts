@@ -30,6 +30,9 @@ export class CapsuleProposal {
   @Property({ type: 'text' })
   methodology!: string;
 
+  @Property({ nullable: true })
+  fileName?: string;
+
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
     owner: true,
   })

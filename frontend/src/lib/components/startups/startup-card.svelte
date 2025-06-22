@@ -16,6 +16,13 @@
 <a
   href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
   class="block"
+  on:click={(e) => {
+    if (startup?.qualificationStatus === 4) {
+      e.preventDefault();
+      const event = new CustomEvent('openApplication', { detail: { startup } });
+      window.dispatchEvent(event);
+    }
+  }}
 >
   <Card.Root class="h-44 cursor-pointer bg-background border border-gray-700 hover:bg-accent rounded-xl p-0 transition-colors duration-150">
     <Card.Content class="h-full">

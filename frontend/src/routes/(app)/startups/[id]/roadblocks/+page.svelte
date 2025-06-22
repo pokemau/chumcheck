@@ -25,12 +25,13 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { toast } from 'svelte-sonner';
   import { Badge } from '$lib/components/ui/badge/index.js';
-  import { Button } from '$lib/components/ui/button/index.js';
   import { RoadblocksCard } from '$lib/components/startups/roadblocks';
+  import { RoadblocksCreateDialog } from '$lib/components/startups/roadblocks';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import { Ellipsis, Kanban, Loader, Sparkles, TableIcon, ChevronDown, Check } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
+  import { Button } from '$lib/components/ui/button';
 
   interface Member {
     userId: number;
@@ -129,15 +130,15 @@
     }
   });
 
-  const updatedEditRoadblock = async (id: number, payload: any) => {
+  const updatedEditRoadblock = async (id: number, payload: any, showToast: boolean = true) => {
     await axiosInstance.patch(`/roadblocks/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated the RNA');
-    $roadblocksQueries[1].refetch()
-    .then((res) => {
+  
+    if (showToast) toast.success('Successfuly updated the RNA');
+    $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
         column.items = (res.data as Roadblock[]).filter(
           (data: Roadblock) => data.requestedStatus === column.value
@@ -301,9 +302,77 @@
   };
 
   let generatingRoadblocks: boolean = $state(false);
+  let open = $state(false);
+  
+  const showDialog = () => {
+    open = true;
+  };
+
+  const onOpenChange = () => {
+    open = !open;
+  };
+
+  const createRoadblock = async (payload: any) => {
+    // Increment existing risk numbers
+    const currentItems = await axiosInstance.get(`/roadblocks/?startupId=${startupId}`, {
+      headers: { Authorization: `Bearer ${access}` }
+    });
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(`/roadblocks/${item.id}/`, {
+        riskNumber: (item.riskNumber || 0) + 1
+      }, {
+        headers: { Authorization: `Bearer ${access}` }
+      })
+    );
+    await Promise.all(updatePromises);
+
+    await axiosInstance.post(
+      '/roadblocks/',
+      {
+        ...payload,
+        riskNumber: 1,
+        status: 1
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    toast.success('Successfully created the Roadblock');
+    open = false;
+    $roadblocksQueries[1]
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = (res.data as Roadblock[])
+            .filter(
+              (data: Roadblock) => data.status === column.value
+            )
+            .sort((a: any, b: any) => b.riskNumber - a.riskNumber);
+        });
+      })
+      .finally(async () => {
+        await updateRiskNumber();
+      });
+  };
+
   const generateRoadblocks = async (count: number) => {
     generatingRoadblocks = true;
     try {
+      // Increment existing risk numbers
+      const currentItems = await axiosInstance.get(`/roadblocks/?startupId=${startupId}`, {
+        headers: { Authorization: `Bearer ${access}` }
+      });
+      const updatePromises = currentItems.data.map((item: any) =>
+        axiosInstance.patch(`/roadblocks/${item.id}/`, {
+          riskNumber: (item.riskNumber || 0) + count
+        }, {
+          headers: { Authorization: `Bearer ${access}` }
+        })
+      );
+      await Promise.all(updatePromises);
+      
       await axiosInstance.post(
         `/roadblocks/generate-roadblocks/`,
         {
@@ -318,6 +387,7 @@
       );
 
       await $roadblocksQueries[1].refetch(); // Refetch all roadblocks including new AI-generated ones
+      await updateRiskNumber();
 
       toast.success(`Successfully generated ${count} Roadblocks`);
     } catch (error: any) {
@@ -326,7 +396,6 @@
       generatingRoadblocks = false;
     }
   };
-
 
   let status = $state(4);
   const updateStatus = (newStatus: number) => {
@@ -372,6 +441,15 @@
 {:else}
   {@render fallback()}
 {/if}
+
+<RoadblocksCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRoadblock}
+  {startupId}
+  {members}
+  {status}
+/>
 
 {#snippet card(roadblocks: any, index: number)}
   <RoadblocksCard
@@ -461,9 +539,16 @@
     <div class="flex items-center gap-3">
       <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
+        <Button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          onclick={() => showDialog()}
+        >
+          Add
+        </Button>
         <div class="flex gap-1">
-          <button
-            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          <Button
+            class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
             type="button"
             disabled={generatingRoadblocks}
             onclick={() => generateRoadblocks(numToGenerate)}
@@ -472,18 +557,18 @@
               <Loader class="mr-2 h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
-          </button> 
+          </Button> 
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <button
-                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <Button
+                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
                 type="button"
                 disabled={generatingRoadblocks}
               >
                 <ChevronDown class="h-4 w-4" />
-              </button>
+              </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content align="end" class="w-[100px] max-h-[150px] overflow-y-auto">
               <DropdownMenu.RadioGroup value={numToGenerate.toString()} onValueChange={(val) => numToGenerate = Number(val)} class="space-y-1">
@@ -513,6 +598,7 @@
         role={data.role}
         {updateStatus}
         {selectedMembers}
+        {showDialog}
       />
     {:else}
       <div class="h-fit w-full rounded-md border">

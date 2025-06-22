@@ -16,7 +16,7 @@ import { Type } from 'class-transformer';
 export class CreateInitiativeDto {
   @IsInt()
   initiativeNumber: number;
-
+  
   @IsEnum(RnsStatus)
   status: RnsStatus;
 

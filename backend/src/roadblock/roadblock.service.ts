@@ -68,10 +68,10 @@ export class RoadblockService {
     if (dto.fix !== undefined) {
         roadblock.fix = dto.fix;
     }
-    if (dto.clickedByMentor) {
+    if (dto.clickedByMentor !== undefined) {
         roadblock.clickedByMentor = dto.clickedByMentor;
     }
-    if (dto.clickedByStartup) {
+    if (dto.clickedByStartup !== undefined) {
         roadblock.clickedByStartup = dto.clickedByStartup;
     }
 

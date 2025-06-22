@@ -32,6 +32,7 @@
   import * as Table from '$lib/components/ui/table';
   import HoveredRNSCard from '$lib/components/shared/hovered-rns-card.svelte';
   import { ChevronDown } from 'lucide-svelte';
+  import { Button } from '$lib/components/ui/button';
 
   const { data } = $props();
   const { access, startupId } = data;
@@ -134,8 +135,8 @@
     if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data.filter(
-          (data: any) => data.isAiGenerated === false && data.requestedStatus === column.value
-        );
+          (data: any) => data.isAiGenerated === false && data.status === column.value
+        ).sort((a: any, b: any) => a.initiativeNumber - b.initiativeNumber);
       });
     }
 
@@ -154,10 +155,24 @@
   });
 
   const createInitiative = async (payload: any) => {
+    // Increment existing priority numbers
+    const currentItems = await axiosInstance.get(`/initiatives/?startupId=${startupId}`, {
+      headers: { Authorization: `Bearer ${access}` }
+    });
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(`/initiatives/${item.id}/`, {
+        priorityNumber: (item.priorityNumber || 0) + 1
+      }, {
+        headers: { Authorization: `Bearer ${access}` }
+      })
+    );
+    await Promise.all(updatePromises);
+
     await axiosInstance.post(
       '/initiatives/',
       {
-        ...payload
+        ...payload,
+        priorityNumber: 1
       },
       {
         headers: {
@@ -201,13 +216,13 @@
       .finally(async () => await updateInitiativeNumber());
   };
 
-  const updatedEditInitiative = async (id: number, payload: any) => {
+  const updatedEditInitiative = async (id: number, payload: any, showToast: boolean = true) => {
     await axiosInstance.patch(`/initiatives/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated Initiatives');
+    if (showToast) toast.success('Successfuly updated Initiatives');
     $initiativesQueries[1].refetch();
     $initiativesQueries[2].refetch();
 
@@ -678,29 +693,36 @@
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
+        <Button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          on:click={() => showDialog()}
+        >
+          Add
+        </Button>
         <div class="flex gap-1">
-          <button
-            class="rounded-l-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          <Button
+            class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
             type="button"
             disabled={generatingInitiatives}
-            on:click={() => generateInitiativesForSelected()}
+            onclick={() => generateInitiativesForSelected()}
           >
             {#if generatingInitiatives}
               <Loader class="h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
-          </button>
+          </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <button
-                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              <Button
+                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
                 type="button"
                 disabled={generatingInitiatives}
               >
                 <ChevronDown class="h-4 w-4" />
-              </button>
+              </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content 
               align="end" 

@@ -1,8 +1,14 @@
 <script lang="ts">
   export let currentActive: number;
   export let question: any;
+  export let startup: any = null;
   import { Label } from '$lib/components/ui/label/index.js';
   import { Textarea } from '$lib/components/ui/textarea';
+
+  // Filter and sort acceptance answers
+  $: acceptanceAnswers = startup?.uratQuestionAnswers
+    ?.filter((answer: any) => answer.uratQuestion.readinessType === 'Acceptance')
+    ?.sort((a: any, b: any) => a.uratQuestion.id - b.uratQuestion.id) ?? [];
 </script>
 
 <div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 7}>
@@ -10,8 +16,16 @@
     {#each question as q, i}
       <div class="grid w-full gap-1.5">
         <Label for="message">{q.question}</Label>
-        <Textarea placeholder="Type your message here." id="message" name={`acceptance${i}`} />
+        <Textarea 
+          placeholder="Type your message here." 
+          id="message" 
+          name={`acceptance${i}`}
+          value={acceptanceAnswers[i]?.response ?? ''} 
+        />
         <input type="hidden" name={`acceptance${i}id`} value={`${q.id}`} />
+        {#if acceptanceAnswers[i]?.id}
+          <input type="hidden" name={`acceptance${i}answerId`} value={`${acceptanceAnswers[i].id}`} />
+        {/if}
       </div>
     {/each}
   </div>
