@@ -15,47 +15,98 @@ export const load: PageServerLoad = ({ cookies, locals }) => {
 export const actions: Actions = {
   default: async ({ request, fetch, locals, cookies }) => {
     const formData = await request.formData();
-    const newFormData = new FormData();
+    const startupIdRaw = formData.get('startupId');
+    const startupId = startupIdRaw ? Number(startupIdRaw) : null;
+    let response, data;
 
-    newFormData.append('dataPrivacy', formData.get('data_privacy') as string);
-    newFormData.append('eligibility', formData.get('eligibility') as string);
-    newFormData.append('name', formData.get('startup_name') as string);
-    newFormData.append('userId', locals.user.id.toString());
+    console.log('Form submission - startupId:', startupId);
+    console.log('All form data keys:', Array.from(formData.keys()));
 
-    const capsuleProposalFile = formData.get('capsuleProposal');
-    if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
-      newFormData.append('capsuleProposal', capsuleProposalFile);
-    }
-
-    newFormData.append('links', formData.get('links') as string);
-    newFormData.append('groupName', formData.get('group_name') as string);
-    newFormData.append('universityName', formData.get('university_name') as string);
-
-    for (let i = 2; i < 5; i++) {
-      if (formData.get(`member_${i}`) !== null) {
-        newFormData.append(
-          'set_members',
-          formData.get(`member_${i}`) as string
-        );
+    // Update existing startup
+    if (startupId) {
+      console.log('Processing existing startup update for ID:', startupId);
+      
+      // Check if a new capsule proposal file was uploaded
+      const capsuleProposalFile = formData.get('capsuleProposal');
+      if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
+        console.log('Capsule proposal file found, using file upload endpoint');
+        // Use the new endpoint that handles file uploads
+        const newFormData = new FormData();
+        newFormData.append('name', formData.get('startup_name') as string);
+        newFormData.append('userId', locals.user.id.toString());
+        newFormData.append('links', formData.get('links') as string);
+        newFormData.append('groupName', formData.get('group_name') as string);
+        newFormData.append('universityName', formData.get('university_name') as string);
+        newFormData.append('qualificationStatus', '1'); // Set to PENDING when updating
+        newFormData.append('dataPrivacy', formData.get('data_privacy') as string);
+        newFormData.append('eligibility', formData.get('eligibility') as string);
+        newFormData.append('capsuleProposal', capsuleProposalFile);
+        
+        response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/with-capsule-proposal`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${cookies.get('Access')}`
+          },
+          body: newFormData
+        });
+      } else {
+        console.log('No capsule proposal file, using regular update endpoint');
+        // Use the regular update endpoint (no file upload)
+        const updatePayload = {
+          dataPrivacy: formData.get('data_privacy'),
+          eligibility: formData.get('eligibility'),
+          name: formData.get('startup_name'),
+          userId: locals.user.id,
+          links: formData.get('links'),
+          groupName: formData.get('group_name'),
+          universityName: formData.get('university_name'),
+          qualificationStatus: 1, // Set to PENDING when updating
+        };
+        response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-type': 'application/json',
+            Authorization: `Bearer ${cookies.get('Access')}`
+          },
+          body: JSON.stringify(updatePayload)
+        });
       }
+      data = await response.json();
+      console.log('Startup update response status:', response.status);
+      console.log('Startup update response data:', data);
+    } else {
+      // Create new startup (file required)
+      const newFormData = new FormData();
+      newFormData.append('dataPrivacy', formData.get('data_privacy') as string);
+      newFormData.append('eligibility', formData.get('eligibility') as string);
+      newFormData.append('name', formData.get('startup_name') as string);
+      newFormData.append('userId', locals.user.id.toString());
+      const capsuleProposalFile = formData.get('capsuleProposal');
+      if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
+        newFormData.append('capsuleProposal', capsuleProposalFile);
+      }
+      newFormData.append('links', formData.get('links') as string);
+      newFormData.append('groupName', formData.get('group_name') as string);
+      newFormData.append('universityName', formData.get('university_name') as string);
+      for (let i = 2; i < 5; i++) {
+        if (formData.get(`member_${i}`) !== null) {
+          newFormData.append('set_members', formData.get(`member_${i}`) as string);
+        }
+      }
+      response = await fetch(`${PUBLIC_API_URL}/startups/create-startup`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${cookies.get('Access')}`
+        },
+        body: newFormData
+      });
+      data = await response.json();
     }
-
-    const response = await fetch(`${PUBLIC_API_URL}/startups/create-startup`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${cookies.get('Access')}`
-      },
-      body: newFormData
-    });
-
-    const data = await response.json();
 
     if (!response.ok) {
-      let errorMessage = data?.message || 'Failed to create startup.';
+      let errorMessage = data?.message || 'Failed to create or update startup.';
       return fail(400, { error: errorMessage });
     }
-
-    const startupId = data.id;
 
     const types = [
       'technology',
@@ -76,100 +127,151 @@ export const actions: Actions = {
       'Manufacturing/Supply Chain'
     ];
 
-    const answers: {
-      startupId: number;
-      uratQuestionId: number;
-      response: string;
-      //score: number;
-    }[] = [];
+    if (startupId) {
+      console.log('Starting URAT and calculator answer updates...');
+      
+      // Update existing URAT question answers
+      const answers: {
+        id: number;
+        response: string;
+      }[] = [];
 
-    const calculatorAnswers: {
-      startupId: number;
-      calculatorQuestionId: number;
-    }[] = [];
-
-    types.forEach((type) => {
-      for (let i = 0; i < 3; i++) {
-        answers.push({
-          startupId: startupId,
-          uratQuestionId: Number.parseInt(
-            formData.get(`${type}${i}id`) as string
-          ),
-          response: formData.get(`${type}${i}`) as string
-          //score: 1
-        });
-      }
-    });
-
-    categories.forEach((category) => {
-      calculatorAnswers.push({
-        startupId: startupId,
-        calculatorQuestionId: parseInt(formData.get(`${category}`) as string)
+      types.forEach((type) => {
+        for (let i = 0; i < 3; i++) {
+          const answerId = formData.get(`${type}${i}answerId`);
+          console.log(`Looking for ${type}${i}answerId:`, answerId);
+          if (answerId) {
+            answers.push({
+              id: Number.parseInt(answerId as string),
+              response: formData.get(`${type}${i}`) as string
+            });
+          }
+        }
       });
-    });
 
-    ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////
+      // Update existing calculator question answers
+      const calculatorAnswers: {
+        id: number;
+        calculatorQuestionId: number;
+      }[] = [];
 
-    const urat_answers = await fetch(
-      `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/create`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${cookies.get('Access')}`
-        },
-        body: JSON.stringify({ answers })
+      categories.forEach((category) => {
+        const answerId = formData.get(`${category}AnswerId`);
+        const questionId = formData.get(`${category}`);
+        console.log(`Looking for ${category}AnswerId:`, answerId, `and ${category}:`, questionId);
+        if (answerId && questionId) {
+          calculatorAnswers.push({
+            id: parseInt(answerId as string),
+            calculatorQuestionId: parseInt(questionId as string)
+          });
+        }
+      });
+
+      console.log('URAT answers to update:', answers);
+      console.log('Calculator answers to update:', calculatorAnswers);
+
+      // Update URAT question answers
+      for (const answer of answers) {
+        console.log(`Updating URAT answer ${answer.id} with response:`, answer.response);
+        const response = await fetch(
+          `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/${answer.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-type': 'application/json',
+              Authorization: `Bearer ${cookies.get('Access')}`
+            },
+            body: JSON.stringify({ response: answer.response })
+          }
+        );
+        console.log('URAT update response:', response.status);
       }
-    );
 
-    const urat_res = await urat_answers.json();
-
-    const calculator_answers = await fetch(
-      `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/create`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${cookies.get('Access')}`
-        },
-        body: JSON.stringify({
-          calculatorAnswers
-        })
+      // Update calculator question answers
+      for (const answer of calculatorAnswers) {
+        console.log(`Updating calculator answer ${answer.id} with question ID:`, answer.calculatorQuestionId);
+        const response = await fetch(
+          `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/${answer.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-type': 'application/json',
+              Authorization: `Bearer ${cookies.get('Access')}`
+            },
+            body: JSON.stringify({ calculatorQuestionId: answer.calculatorQuestionId })
+          }
+        );
+        console.log('Calculator update response:', response.status);
       }
-    );
+      
+      console.log('Finished URAT and calculator answer updates');
+    } else {
+      // Create new URAT question answers
+      const answers: {
+        startupId: number;
+        uratQuestionId: number;
+        response: string;
+        //score: number;
+      }[] = [];
 
-    const res = await calculator_answers.json();
+      const calculatorAnswers: {
+        startupId: number;
+        calculatorQuestionId: number;
+      }[] = [];
 
-    //
-    //    if (urat_answers.ok && calculator_answers.ok) {
-    //      const capsule_info = await fetch(
-    //        `${PUBLIC_API_URL}/capsule-proposal-infos/`,
-    //        {
-    //          method: 'POST', // slamm pisot
-    //          headers: {
-    //            'Content-type': 'application/json',
-    //            Authorization: `Bearer ${cookies.get('Access')}`
-    //          },
-    //          body: JSON.stringify({
-    //            title: formData.get('title'),
-    //            startup_description: formData.get('startupDescription'),
-    //            problem_statement: formData.get('problemStatement'),
-    //            target_market: formData.get('targetMarket'),
-    //            solution_description: formData.get('solutionDescription'),
-    //            objectives: formData.get('objectives'),
-    //            scope: formData.get('scope'),
-    //            methodology: formData.get('methodology'),
-    //            startup_id: startupId
-    //          })
-    //        }
-    //      );
-    //
-    //      if (capsule_info.ok) {
-    //        redirect(302, '/startups?success=true');
-    //      }
-    //    }
-    //  }
+      types.forEach((type) => {
+        for (let i = 0; i < 3; i++) {
+          answers.push({
+            startupId: data.id,
+            uratQuestionId: Number.parseInt(
+              formData.get(`${type}${i}id`) as string
+            ),
+            response: formData.get(`${type}${i}`) as string
+            //score: 1
+          });
+        }
+      });
+
+      categories.forEach((category) => {
+        calculatorAnswers.push({
+          startupId: data.id,
+          calculatorQuestionId: parseInt(formData.get(`${category}`) as string)
+        });
+      });
+
+      ////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////
+
+      const urat_answers = await fetch(
+        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/create`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+            Authorization: `Bearer ${cookies.get('Access')}`
+          },
+          body: JSON.stringify({ answers })
+        }
+      );
+
+      const urat_res = await urat_answers.json();
+
+      const calculator_answers = await fetch(
+        `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/create`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+            Authorization: `Bearer ${cookies.get('Access')}`
+          },
+          body: JSON.stringify({
+            calculatorAnswers
+          })
+        }
+      );
+
+      const res = await calculator_answers.json();
+    }
   }
 };

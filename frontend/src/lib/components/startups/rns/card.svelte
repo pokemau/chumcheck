@@ -24,10 +24,10 @@
     open = false;
 
     if (!rns.clickedByMentor && role === 'Mentor') {
-      update(rns.id, { ...rns, clickedByMentor: true });
+      update(rns.id, { ...rns, clickedByMentor: true }, false);
     }
     if (!rns.clickedByStartup && role === 'Startup') {
-      update(rns.id, { ...rns, clickedByStartup: true });
+      update(rns.id, { ...rns, clickedByStartup: true }, false);
     }
   };
 
@@ -49,7 +49,7 @@
     <div class="flex items-center justify-between mb-1">
       <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</Badge>
       {#if isNewCard()}
-        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs">New</div>
+        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>

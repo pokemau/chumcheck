@@ -22,10 +22,10 @@
   const closeDialog = () => {
     open = false;
     if (!initiative.clickedByMentor && role === 'Mentor') {
-      update(initiative.id, { ...initiative, clickedByMentor: true });
+      update(initiative.id, { ...initiative, clickedByMentor: true }, false);
     }
     if (!initiative.clickedByStartup && role === 'Startup') {
-      update(initiative.id, { ...initiative, clickedByStartup: true });
+      update(initiative.id, { ...initiative, clickedByStartup: true }, false);
     }
   };
 
@@ -64,7 +64,7 @@
   <Card.Content class="flex flex-col gap-2 p-4">
     <div class="flex relative items-center justify-between mb-1 relative">
       {#if isNewCard()}
-        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs">New</div>
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
       <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}

@@ -43,6 +43,7 @@
   import * as Table from '$lib/components/ui/table';
   import { log10 } from 'chart.js/helpers';
   import { goto } from '$app/navigation';
+  import { Button } from '$lib/components/ui/button';
 
   interface Member {
     userId: number;
@@ -251,14 +252,6 @@
   };
 
   const createRns = async (payload: any) => {
-    const statuses = [
-      'Discontinued',
-      'Scheduled',
-      'Track',
-      'Delayed',
-      'Completed'
-    ];
-
     await axiosInstance.post(
       '/rns',
       {
@@ -269,7 +262,7 @@
         headers: {
           Authorization: `Bearer ${data.access}`
         }
-      }
+      } 
     );
     toast.success('Successfully created the RNS');
     open = false;
@@ -299,7 +292,8 @@
       assigneeId: number;
       isAiGenerated: boolean;
       clickedByMentor: boolean;
-    }
+    },
+    showToast: boolean = true
   ) => {
     await axiosInstance.patch(`/rns/${id}/`, payload, {
       headers: {
@@ -307,7 +301,7 @@
       }
     });
 
-    toast.success('Successfully updated the RNS');
+    if (showToast) toast.success('Successfully updated the RNS');
     open = false;
     $rnsQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
@@ -316,10 +310,10 @@
             (data: any) =>
               data.isAiGenerated === false && data.status === column.value
           )
-          .sort((a: any, b: any) => a.order - b.order);
+          .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
     });
-    goto('rns');
+    // goto('rns');
   };
 
   const deleteRNS = async (id: number, index: number) => {
@@ -605,29 +599,36 @@
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
+        <Button
+          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          type="button"
+          onclick={() => showDialog()}
+        >
+          Add
+        </Button>
         <div class="flex gap-1">
-          <button
-            class="flex items-center gap-2 rounded-l-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          <Button
+            class="flex items-center gap-2 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
             type="button"
             disabled={generatingRNS}
-            on:click={() => generateRNSForSelected()}
+            onclick={() => generateRNSForSelected()}
           >
             {#if generatingRNS}
               <Loader class="h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              Generate
             {/if}
-          </button>
+          </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <button
-                class="h-[40px] rounded-r-md border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              <Button
+                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
                 type="button"
                 disabled={generatingRNS}
               >
                 <ChevronDown class="h-4 w-4" />
-              </button>
+              </Button>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content
               align="end"

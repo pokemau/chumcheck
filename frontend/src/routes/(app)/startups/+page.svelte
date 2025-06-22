@@ -97,9 +97,25 @@
   }
 
   let showApplicationForm = $state(false);
+  let selectedStartup = $state(null);
   const toggleApplicationForm = () => {
     showApplicationForm = !showApplicationForm;
+    if (!showApplicationForm) {
+      selectedStartup = null;
+    }
   };
+
+  $effect(() => {
+    const handleOpenApplication = (event: CustomEvent) => {
+      selectedStartup = event.detail.startup;
+      showApplicationForm = true;
+    };
+
+    window.addEventListener('openApplication', handleOpenApplication as EventListener);
+    return () => {
+      window.removeEventListener('openApplication', handleOpenApplication as EventListener);
+    };
+  });
 
   $effect(() => {
     const success = $page.url.searchParams.get('success');
@@ -306,6 +322,6 @@
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
   <Dialog.Content class="h-4/5 max-w-[800px]">
-    <Application access={data.access!} />
+    <Application access={data.access!} startup={selectedStartup} />
   </Dialog.Content>
 </Dialog.Root>

@@ -33,10 +33,10 @@
     open = false;
 
     if (!roadblocks.clickedByMentor && role === 'Mentor') {
-      update(roadblocks.id, { ...roadblocks, clickedByMentor: true });
+      update(roadblocks.id, { ...roadblocks, clickedByMentor: true }, false);
     }
     if (!roadblocks.clickedByStartup && role === 'Startup') {
-      update(roadblocks.id, { ...roadblocks, clickedByStartup: true });
+      update(roadblocks.id, { ...roadblocks, clickedByStartup: true }, false);
     }
   };
 
@@ -59,7 +59,7 @@
         Risk #{roadblocks.riskNumber ? roadblocks.riskNumber : ''}
       </Badge>
       {#if isNewCard()}
-        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs">New</div>
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
     </div>
     <div class="text-sm text-white mb-1 break-words whitespace-pre-wrap">

@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import {
   CalculatorQuestionAnswerDto,
@@ -69,5 +70,23 @@ export class ReadinesslevelController {
   @Get('readiness-level')
   async getStartupReadinessLevels(@Query('startupId', ParseIntPipe) startupId: number) {
     return await this.readinessLevelService.getStartupReadinessLevel(startupId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch('/urat-question-answers/:id')
+  async updateUratQuestionAnswer(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { response?: string; score?: number }
+  ) {
+    return await this.readinessLevelService.updateUratQuestionAnswer(id, dto);
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch('/calculator-question-answers/:id')
+  async updateCalculatorQuestionAnswer(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: { calculatorQuestionId?: number }
+  ) {
+    return await this.readinessLevelService.updateCalculatorQuestionAnswer(id, dto);
   }
 }
