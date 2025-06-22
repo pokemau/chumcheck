@@ -14,9 +14,9 @@
 </script>
 
 <a
-  href={startup?.qualificationStatus === 4 ? '#' : `/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
+  href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
   class="block"
-  on:click|preventDefault={(e) => {
+  on:click={(e) => {
     if (startup?.qualificationStatus === 4) {
       e.preventDefault();
       const event = new CustomEvent('openApplication', { detail: { startup } });
