@@ -265,7 +265,7 @@
         <h2 class="text-2xl font-semibold mb-4">Initiative Details</h2>
         <div class="flex flex-col gap-4 overflow-y-auto">
           {#if initiative.approvalStatus === 'Pending'}
-            <div class="mb-4">
+            <div class="mb-4 border p-2 rounded">
               <Label>This initiative was moved from <strong>{RnsStatus[initiative.status]}</strong> by a startup user. Approve or Deny status change.</Label>
               <div class="mt-2">
                 <Button variant="default" onclick={() => approveDialog()}>Approve</Button>

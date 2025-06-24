@@ -70,7 +70,7 @@
         <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
       {/if}
       {#if rnsCopy.approvalStatus !== 'Unchanged'}
-        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
+        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
       {/if}
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
