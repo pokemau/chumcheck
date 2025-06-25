@@ -19,7 +19,7 @@
   const data = $state({
     description: '',
     fix: '',
-    assigneeId: '',
+    assigneeId: ''
     // startupId: startupId,
     // isAiGenerated: false,
     // status: 4
@@ -30,7 +30,7 @@
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/5  max-w-[600px] overflow-auto">
     <Dialog.Header>
-      <Dialog.Title>Create {getStatusName(status)} Roadblock</Dialog.Title>
+      <Dialog.Title>Create New Roadblock</Dialog.Title>
     </Dialog.Header>
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
@@ -62,18 +62,18 @@
     <Dialog.Footer>
       <Button
         onclick={() => {
-         create({
-                ...data,
-                assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
-                startupId: Number(startupId),
-                status: status,
-                isAiGenerated: false,
-          })
-          
+          create({
+            ...data,
+            assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
+            startupId: Number(startupId),
+            status: status,
+            isAiGenerated: false
+          });
+
           data.description = '';
           data.fix = '';
           data.assigneeId = '';
-          }}
+        }}
         disabled={data.description === '' || data.fix === ''}>Create</Button
       >
     </Dialog.Footer>

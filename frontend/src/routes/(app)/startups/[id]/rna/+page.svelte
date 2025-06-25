@@ -1,24 +1,17 @@
 <script lang="ts">
   import { useQueriesState } from '$lib/stores/useQueriesState.svelte.js';
   import {
-    AIColumn,
-    AITabs,
-    Can,
-    Column,
-    MembersFilter,
-    ShowHideColumns
-  } from '$lib/components/shared';
-  import { getData, getReadiness, getSavedTab, getSelectedTab, updateTab } from '$lib/utils';
+    getData,
+  } from '$lib/utils';
   import { useQueries } from '@sveltestack/svelte-query';
-  import { page } from '$app/stores';
-  import { RnaCard, RnaCreateDialog, RnaDialog } from '$lib/components/startups/rna';
-  import type { Actions } from '$lib/types';
+  import {
+    RnaCard,
+    RnaCreateDialog,
+  } from '$lib/components/startups/rna';
   import { Button } from '$lib/components/ui/button';
-  import { Ellipsis, Loader, Plus, Sparkles } from 'lucide-svelte';
+  import { Loader, Plus, Sparkles } from 'lucide-svelte';
   import axiosInstance from '$lib/axios';
   import { toast } from 'svelte-sonner';
-  import * as Card from '$lib/components/ui/card';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { Skeleton } from '$lib/components/ui/skeleton';
 
   const { data } = $props();
@@ -35,7 +28,11 @@
     },
     {
       queryKey: ['readinessData'],
-      queryFn: () => getData(`/startups/startup-readiness-level?startupId=${startupId}`, access!)
+      queryFn: () =>
+        getData(
+          `/startups/startup-readiness-level?startupId=${startupId}`,
+          access!
+        )
     },
     {
       queryKey: ['startupData'],
@@ -46,31 +43,16 @@
   const { isLoading, isError } = $derived(useQueriesState($rnaQueries));
   const isAccessible = $derived($rnaQueries[0].data);
 
-  let selectedTab = $state(getSelectedTab('rna'));
-  const readiness = $state(getReadiness());
-  const aiReadiness = $state(getReadiness());
-
-  const updateRnaTab = (tab: string) => {
-    selectedTab = updateTab('rna', tab);
-  };
-
-  const views = $derived(selectedTab === 'rna' ? readiness : aiReadiness);
-
   let open = $state(false);
-  let action: Actions = $state('View');
   const onOpenChange = () => {
     open = !open;
-  };
-
-  const openDialog = () => {
-    open = true;
   };
 
   let generatingRNA = $state(false);
 
   const generateRNA = async () => {
     generatingRNA = true;
-    await axiosInstance.get(`/startups/${data.startupId}/generate-rna/`, {
+    await axiosInstance.get(`/rna/${data.startupId}/generate-rna/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
@@ -80,25 +62,13 @@
     $rnaQueries[1].refetch();
   };
 
-  const checkIfExist = (id: number) => {
-    const toBeAdded = $rnaQueries[1].data.find((item: any) => item.id === id);
-    const existingItem = $rnaQueries[1].data.find(
-      (d: any) =>
-        d.isAiGenerated === false && d.readinessLevel.readinessType === toBeAdded.readinessLevel.readinessType
-    );
-
-    if (existingItem) {
-      return true;
-    }
-
-    return false;
-  };
-
   const addToRNA = async (id: number) => {
     const toBeAdded = $rnaQueries[1].data.find((item: any) => item.id === id);
     const existingItem = $rnaQueries[1].data.find(
       (d: any) =>
-        d.isAiGenerated  === false && d.readinessLevel.readinessType === toBeAdded.readinessLevel.readinessType
+        d.isAiGenerated === false &&
+        d.readinessLevel.readinessType ===
+          toBeAdded.readinessLevel.readinessType
     );
 
     if (existingItem) {
@@ -110,11 +80,10 @@
       toast.info('Existing RNA data with the same readiness type deleted');
     }
 
-
     await axiosInstance.patch(
       `/rna/${id}/`,
       {
-        isAiGenerated : false
+        isAiGenerated: false
       },
       {
         headers: {
@@ -127,12 +96,10 @@
   };
 
   const createRNA = async (payload: any) => {
-
-
     const cleanPayload = {
       ...payload,
       readiness_level_id: Number(payload.readiness_level_id),
-      startup_id: Number(payload.startup_id),
+      startup_id: Number(payload.startup_id)
     };
 
     await axiosInstance.post(
@@ -150,16 +117,11 @@
   };
 
   const editRNA = async (id: number, payload: any) => {
-
-    await axiosInstance.patch(
-      `/rna/${id}/`,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${data.access}`
-        }
+    await axiosInstance.patch(`/rna/${id}/`, payload, {
+      headers: {
+        Authorization: `Bearer ${data.access}`
       }
-    );
+    });
     toast.success('Successfuly updated the RNA');
     open = false;
     $rnaQueries[1].refetch();
@@ -175,17 +137,15 @@
     $rnaQueries[1].refetch();
   };
 
-  const currentCondition = $derived(selectedTab === 'rna' ? false : true);
-  // isAiGenerated , readiness_level_id, startup_id, rna, readinessLevel.readinessType
-
   const readinessData = $derived(
     $rnaQueries[2].isSuccess
       ? $rnaQueries[2].data
           .slice(-6)
-          .sort(
-          (a: any, b: any) =>
-            a.readinessLevel.readinessType.localeCompare(b.readinessLevel.readinessType)
-        )
+          .sort((a: any, b: any) =>
+            a.readinessLevel.readinessType.localeCompare(
+              b.readinessLevel.readinessType
+            )
+          )
       : []
   );
 </script>
@@ -208,7 +168,13 @@
   {@render fallback()}
 {/if}
 
-<RnaCreateDialog {open} {onOpenChange} create={createRNA} {startupId} {readinessData} />
+<RnaCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRNA}
+  {startupId}
+  {readinessData}
+/>
 
 {#snippet loading()}
   <div class="flex h-full flex-col gap-3">
@@ -241,15 +207,12 @@
 
 {#snippet accessible()}
   <div class="flex items-center justify-between">
-    <Can role={['Mentor', 'Manager as Mentor']} userRole={data.role}>
-      <div class="flex gap-3">
-        <div class="flex h-fit justify-between rounded-lg bg-background">
-          <AITabs {selectedTab} name="rna" realName="RNA" updateTab={updateRnaTab} />
-        </div>
-      </div>
-    </Can>
     <div class="ml-auto flex items-center gap-3">
-      {#if selectedTab === 'ai-rna'}
+      {#if data.role !== 'Startup'}
+        <Button onclick={() => (open = true)}
+          ><Plus class="h-4 w-4" />Add</Button
+        >
+
         <Button onclick={generateRNA} disabled={generatingRNA}>
           {#if generatingRNA}
             <Loader class="mr-2 h-4 w-4 animate-spin" />
@@ -258,35 +221,29 @@
           {/if}
           Generate</Button
         >
-      {:else if data.role !== 'Startup'}
-        <Button onclick={() => (open = true)}><Plus class="h-4 w-4" />Add</Button>
       {/if}
     </div>
   </div>
 
-  <div class="grid w-full grid-cols-4 gap-5">
-    {#each $rnaQueries[1].data.filter((d: any) => d.isAiGenerated === currentCondition) 
-        // .sort((a: any, b: any) => {
-        // if (a.readinessLevel.readinessType < b.readinessLevel.readinessType) return -1;
-        // if (a.readinessLevel.readinessType > b.readinessLevel.readinessType) return 1;
-        // return b.readinessLevel.level - a.readinessLevel.level;}) 
-      as rna, index}
+  <div
+    class="mt-5 grid max-h-[40rem] w-full grid-cols-4 gap-5 overflow-auto rounded-xl border-2 p-10"
+  >
+    {#if $rnaQueries[1].data.length === 0}
+      <h1 class="text-gray-600">There are currently no RNAs created...</h1>
+    {/if}
+    {#each $rnaQueries[1].data as rna}
       <RnaCard
         {rna}
-        ai={selectedTab === 'rna' ? false : true} 
-        update={editRNA}
-        deleteRna={deleteRNA}
-        addToRna={addToRNA}
-        role={data.role}
         {readinessData}
-        {checkIfExist}
-      />
+        update={editRNA}
+        addToRna={addToRNA}
+        deleteRna={deleteRNA}
+        role={data.role}
+      ></RnaCard>
     {/each}
   </div>
 {/snippet}
 
 {#snippet fallback()}
-  <div>test</div>
+  <div>Something went wrong...</div>
 {/snippet}
-
-<!-- <RnaDialog {action} {open} {onOpenChange} /> -->

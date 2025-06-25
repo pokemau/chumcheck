@@ -36,7 +36,11 @@
     Kanban,
     TableIcon,
     Loader,
-    ChevronDown
+    ChevronDown,
+    Sparkles,
+
+    Plus
+
   } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -94,6 +98,7 @@
       queryFn: () => getData(`/rna/?startupId=${startupId}`, access!)
     }
   ];
+
   const rnsQueries = useQueries(queryArray);
   const { isLoading, isError } = $derived(useQueriesState(queryArray));
   const isAccessible = $derived($rnsQueries[0].data);
@@ -264,7 +269,7 @@
         headers: {
           Authorization: `Bearer ${data.access}`
         }
-      } 
+      }
     );
     toast.success('Successfully created the RNS');
     open = false;
@@ -493,7 +498,8 @@
 {:else if isAccessible}
   {@render accessible()}
 {:else}
-  {@render fallback()}
+  {@render loading()}
+  <!-- {@render fallback()} -->
 {/if}
 
 <svelte:head>
@@ -605,30 +611,32 @@
       {/if}
       {#if data.role !== 'Startup'}
         <Button
-          class="rounded-md bg-primary px-4 py-2 text-white hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onclick={() => showDialog()}
         >
+          <Plus class="h-4 w-4" />
+
           Add
         </Button>
         <div class="flex gap-1">
           <Button
-            class="flex items-center gap-2 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
+            class="flex items-center gap-2 rounded-br-none rounded-tr-none bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingRNS}
             onclick={() => generateRNSForSelected()}
           >
             {#if generatingRNS}
-              <Loader class="h-4 w-4 animate-spin" />
+              <Loader class="mr-2 h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              Generate
+              <Sparkles class="h-4 w-4" />Generate
             {/if}
           </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button
-                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
+                class="rounded-bl-none rounded-tl-none border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRNS}
               >
@@ -743,5 +751,47 @@
 {/snippet}
 
 {#snippet fallback()}
-  <h1>Huh</h1>
+  <!-- TODO: TEMP FIX RANI -->
+
+  <div class="flex h-full flex-col gap-3">
+    <div class="flex justify-between">
+      <div class="flex gap-3">
+        <div class="bg-background" class:hidden={data.role === 'Startup'}>
+          <Skeleton class="h-9 w-[126px]" />
+        </div>
+        <div class="bg-background">
+          <Skeleton class="h-9 w-[170px]" />
+        </div>
+        <div class="flex">
+          {#each [1, 2] as item, index}
+            <Skeleton
+              class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
+                index !== 2 - 1 ? '-mr-1' : ''
+              } `}
+            >
+              <span>?</span>
+            </Skeleton>
+          {/each}
+        </div>
+      </div>
+      <div class="ml-auto bg-background">
+        <Skeleton class="h-9 w-[90px]" />
+      </div>
+    </div>
+
+    <div class="grid h-full grid-cols-4 gap-5">
+      <div class="h-full w-full bg-background">
+        <Skeleton class="h-full" />
+      </div>
+      <div class="h-full w-full bg-background">
+        <Skeleton class="h-full" />
+      </div>
+      <div class="h-full w-full bg-background">
+        <Skeleton class="h-full" />
+      </div>
+      <div class="h-full w-full bg-background">
+        <Skeleton class="h-full" />
+      </div>
+    </div>
+  </div>
 {/snippet}

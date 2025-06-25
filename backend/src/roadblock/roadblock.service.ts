@@ -1,7 +1,15 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Roadblock } from 'src/entities/roadblock.entity';
-import { CreateRoadblockDto, GenerateRoadblocksDto, UpdateRoadblockDto } from './dto/roadblock.dto';
+import {
+  CreateRoadblockDto,
+  GenerateRoadblocksDto,
+  UpdateRoadblockDto,
+} from './dto/roadblock.dto';
 import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { AiService } from 'src/ai/ai.service';
@@ -13,42 +21,47 @@ import { RoadblockChatHistory } from 'src/entities/roadblock-chat-history.entity
 
 @Injectable()
 export class RoadblockService {
-    constructor(private readonly em: EntityManager, private readonly aiService: AiService) {}
+  constructor(
+    private readonly em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
-    async getByStartupId(startupId: number): Promise<Roadblock[]> {
-        return this.em.find(Roadblock, { startup: startupId }, { orderBy: { id: 'ASC' } });
-    }
+  async getByStartupId(startupId: number): Promise<Roadblock[]> {
+    return this.em.find(
+      Roadblock,
+      { startup: startupId },
+      { orderBy: { id: 'ASC' } },
+    );
+  }
 
-    async createRoadblock(dto: CreateRoadblockDto): Promise<Roadblock> {
-        const roadblock = new Roadblock();
-        roadblock.assignee = this.em.getReference(User, dto.assigneeId);
-        roadblock.startup = this.em.getReference(Startup, dto.startupId);
-        roadblock.isAiGenerated = dto.isAiGenerated;
-        roadblock.status = dto.status;
-        roadblock.requestedStatus = dto.status;
-        roadblock.approvalStatus = 'Unchanged';
-        roadblock.riskNumber = dto.riskNumber;
-        roadblock.description = dto.description;
-        roadblock.fix = dto.fix;
+  async createRoadblock(dto: CreateRoadblockDto): Promise<Roadblock> {
+    const roadblock = new Roadblock();
+    roadblock.assignee = this.em.getReference(User, dto.assigneeId);
+    roadblock.startup = this.em.getReference(Startup, dto.startupId);
+    roadblock.isAiGenerated = dto.isAiGenerated;
+    roadblock.status = dto.status;
+    roadblock.riskNumber = dto.riskNumber;
+    roadblock.description = dto.description;
+    roadblock.fix = dto.fix;
 
-        await this.em.persistAndFlush(roadblock);
-        return roadblock;
-    }
+    await this.em.persistAndFlush(roadblock);
+    return roadblock;
+  }
 
-    async update(id: number, dto: UpdateRoadblockDto): Promise<Roadblock> {
+  async update(id: number, dto: UpdateRoadblockDto): Promise<Roadblock> {
     const roadblock = await this.em.findOneOrFail(Roadblock, id);
 
     if (dto.assigneeId !== undefined) {
-        roadblock.assignee = this.em.getReference(User, dto.assigneeId);
+      roadblock.assignee = this.em.getReference(User, dto.assigneeId);
     }
     if (dto.startupId !== undefined) {
-        roadblock.startup = this.em.getReference(Startup, dto.startupId);
+      roadblock.startup = this.em.getReference(Startup, dto.startupId);
     }
     if (dto.isAiGenerated !== undefined) {
-        roadblock.isAiGenerated = dto.isAiGenerated;
+      roadblock.isAiGenerated = dto.isAiGenerated;
     }
     if (dto.status !== undefined) {
-        roadblock.status = dto.status;
+      roadblock.status = dto.status;
     }
 
     if (dto.requestedStatus !== undefined) {
@@ -60,25 +73,26 @@ export class RoadblockService {
     }
 
     if (dto.riskNumber !== undefined) {
-        roadblock.riskNumber = dto.riskNumber;
+      roadblock.riskNumber = dto.riskNumber;
     }
     if (dto.description !== undefined) {
-        roadblock.description = dto.description;
+      roadblock.description = dto.description;
     }
     if (dto.fix !== undefined) {
-        roadblock.fix = dto.fix;
+      roadblock.fix = dto.fix;
     }
     if (dto.clickedByMentor !== undefined) {
-        roadblock.clickedByMentor = dto.clickedByMentor;
+      roadblock.clickedByMentor = dto.clickedByMentor;
     }
     if (dto.clickedByStartup !== undefined) {
-        roadblock.clickedByStartup = dto.clickedByStartup;
+      roadblock.clickedByStartup = dto.clickedByStartup;
     }
 
     await this.em.flush();
     return roadblock;
-    }
+  }
 
+<<<<<<< HEAD
     async statusChange(id: number, role: string, dto:UpdateRoadblockDto){
         const roadblock = await this.em.findOne(Roadblock, { id });
         if (!roadblock) throw new NotFoundException('Roadblock not found');
@@ -105,58 +119,76 @@ export class RoadblockService {
     }
 
     async delete(id: number) {
+=======
+  async deleteRoadblock(id: number): Promise<{ message: string }> {
+>>>>>>> dev
     const roadblock = await this.em.findOne(Roadblock, { id });
     if (!roadblock) throw new NotFoundException('Roadblock not found');
 
     await this.em.removeAndFlush(roadblock);
     return { message: 'Roadblock deleted successfully' };
+  }
+
+  async generateRoadblocks(dto: GenerateRoadblocksDto) {
+    const startup = await this.em.findOneOrFail(
+      Startup,
+      { id: dto.startupId },
+      {
+        populate: ['capsuleProposal', 'user'],
+      },
+    );
+
+    if (!startup.capsuleProposal) {
+      throw new BadRequestException('No capsule proposal found.');
     }
 
-    async generateRoadblocks(dto: GenerateRoadblocksDto) {
-        const startup = await this.em.findOneOrFail(Startup, { id: dto.startupId }, {
-            populate: ['capsuleProposal', 'user'],
-        });
+    const basePrompt = await this.aiService.createBasePrompt(startup, this.em); // You'll implement this helper
 
-        if (!startup.capsuleProposal) {
-            throw new BadRequestException('No capsule proposal found.');
-        }
+    const excludeStatuses = [RnsStatus.Discontinued, RnsStatus.Completed];
 
-        const basePrompt = await this.aiService.createBasePrompt(startup, this.em); // You'll implement this helper
-
-        const excludeStatuses = [RnsStatus.Discontinued, RnsStatus.Completed];
-
-        const tasks = await this.em.find(Rns, {
+    const tasks = await this.em.find(
+      Rns,
+      {
         startup: startup,
         status: { $nin: excludeStatuses },
-        }, {
+      },
+      {
         populate: ['targetLevel'],
-        });
+      },
+    );
 
-        const taskIds = tasks.map(task => task.id);
+    const taskIds = tasks.map((task) => task.id);
 
-        const initiatives = await this.em.find(Initiative, {
-            rns: { $in: taskIds },
-            status: { $nin: excludeStatuses },
-        });
+    const initiatives = await this.em.find(Initiative, {
+      rns: { $in: taskIds },
+      status: { $nin: excludeStatuses },
+    });
 
-        const tasksPrompt = tasks.map(task => `
+    const tasksPrompt = tasks
+      .map(
+        (task) => `
         priorityNumber: ${task.priorityNumber}
         readinessType: ${task.readinessType}
         targetLevel: ${task.targetLevel.level}
         description: ${task.description}
         taskType: ${RnsStatus[task.status]}
-        `).join('\n\n');
+        `,
+      )
+      .join('\n\n');
 
-        const initiativesPrompt = initiatives.map(initiative => `
+    const initiativesPrompt = initiatives
+      .map(
+        (initiative) => `
         initiativeNumber: ${initiative.initiativeNumber}
         description: ${initiative.description}
         measures: ${initiative.measures}
         targets: ${initiative.targets}
         remarks: ${initiative.remarks}
-        `).join('\n\n');
+        `,
+      )
+      .join('\n\n');
 
-
-        const prompt = `
+    const prompt = `
         ${basePrompt}
 
         Based on these tasks:
@@ -173,56 +205,63 @@ export class RoadblockService {
         - description and fix have 500 max length
         - return an empty list if no roadblock exists.
         `;
-        
-        if(dto.debug){
-            return prompt;
-        }
 
-        const resultData = await this.aiService.generateRoadblocksFromPrompt(prompt); // your JSON parser helper
-
-        // if(dto.debug){
-        //     return resultData;
-        // }
-
-        const roadblocks:Roadblock[] = [];
-        for (const data of resultData) {
-            const roadblock = new Roadblock();
-            roadblock.startup = startup;
-            roadblock.assignee = startup.user
-            roadblock.isAiGenerated = false;
-            roadblock.status = 1;
-            roadblock.riskNumber = Number(data.riskNumber);
-            roadblock.description = data.description;
-            roadblock.fix = data.fix;
-
-            await this.em.persistAndFlush(roadblock);
-        }
-
-        return roadblocks;
-        
+    if (dto.debug) {
+      return prompt;
     }
 
-    async refineRoadblock(
-        roadblockId: number,
-        chatHistory: { role: 'User' | 'Ai'; content: string }[],
-        latestPrompt: string
-    ): Promise<{ 
-        refinedDescription?: string; 
-        refinedFix?: string;
-        aiCommentary: string 
-    }> {
-        const roadblock = await this.em.findOne(Roadblock, { id: roadblockId }, { 
-            populate: ['startup', 'startup.capsuleProposal'] 
-        });
-        if (!roadblock) throw new NotFoundException('Roadblock not found');
+    const resultData =
+      await this.aiService.generateRoadblocksFromPrompt(prompt); // your JSON parser helper
 
-        const startup = roadblock.startup;
-        const capsuleProposalInfo = startup.capsuleProposal;
-        if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+    // if(dto.debug){
+    //     return resultData;
+    // }
 
-        const basePrompt = await createBasePrompt(startup, this.em);
+    const roadblocks: Roadblock[] = [];
+    for (const data of resultData) {
+      const roadblock = new Roadblock();
+      roadblock.startup = startup;
+      roadblock.assignee = startup.user;
+      roadblock.isAiGenerated = false;
+      roadblock.status = 1;
+      roadblock.riskNumber = Number(data.riskNumber);
+      roadblock.description = data.description;
+      roadblock.fix = data.fix;
 
-        let prompt = `${basePrompt}
+      await this.em.persistAndFlush(roadblock);
+    }
+
+    return roadblocks;
+  }
+
+  async refineRoadblock(
+    roadblockId: number,
+    chatHistory: { role: 'User' | 'Ai'; content: string }[],
+    latestPrompt: string,
+  ): Promise<{
+    refinedDescription?: string;
+    refinedFix?: string;
+    aiCommentary: string;
+  }> {
+    const roadblock = await this.em.findOne(
+      Roadblock,
+      { id: roadblockId },
+      {
+        populate: ['startup', 'startup.capsuleProposal'],
+      },
+    );
+    if (!roadblock) throw new NotFoundException('Roadblock not found');
+
+    const startup = roadblock.startup;
+    const capsuleProposalInfo = startup.capsuleProposal;
+    if (!capsuleProposalInfo)
+      throw new BadRequestException(
+        'No capsule proposal found for this startup.',
+      );
+
+    const basePrompt = await createBasePrompt(startup, this.em);
+
+    let prompt = `${basePrompt}
 
         Current Roadblock Details:
         Description: ${roadblock.description}
@@ -230,7 +269,7 @@ export class RoadblockService {
         Risk Level: ${roadblock.riskNumber}
 
         Chat History:
-        ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+        ${chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n')}
 
         User: ${latestPrompt}
 
@@ -270,35 +309,34 @@ export class RoadblockService {
         - Always include the ========= separator followed by your commentary
         `;
 
-        const result = await this.aiService.refineRoadblock(prompt);
+    const result = await this.aiService.refineRoadblock(prompt);
 
-        // Save chat history
-        const newMessages = [
-            new RoadblockChatHistory({
-                roadblock,
-                role: 'User',
-                content: latestPrompt
-            }),
-            new RoadblockChatHistory({
-                roadblock,
-                role: 'Ai',
-                content: result.aiCommentary,
-                refinedDescription: result.refinedDescription,
-                refinedFix: result.refinedFix
-            })
-        ];
+    // Save chat history
+    const newMessages = [
+      new RoadblockChatHistory({
+        roadblock,
+        role: 'User',
+        content: latestPrompt,
+      }),
+      new RoadblockChatHistory({
+        roadblock,
+        role: 'Ai',
+        content: result.aiCommentary,
+        refinedDescription: result.refinedDescription,
+        refinedFix: result.refinedFix,
+      }),
+    ];
 
-        await this.em.persistAndFlush(newMessages);
+    await this.em.persistAndFlush(newMessages);
 
-        return result;
-    }
+    return result;
+  }
 
-    async getRoadblockChatHistory(roadblockId: number) {
-        return this.em.find(
-            RoadblockChatHistory,
-            { roadblock: { id: roadblockId } },
-            { orderBy: { createdAt: 'ASC' } }
-        );
-    }
-
+  async getRoadblockChatHistory(roadblockId: number) {
+    return this.em.find(
+      RoadblockChatHistory,
+      { roadblock: { id: roadblockId } },
+      { orderBy: { createdAt: 'ASC' } },
+    );
+  }
 }

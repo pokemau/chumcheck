@@ -144,7 +144,7 @@
         onChange={(val) => update(rnsCopy.id, { assigneeId: val })}
       />
       <DetailsSection
-        label="RNS Priority No."
+        label="Related RNS No."
         value={typeof rnsCopy.rns === 'object'
           ? rnsCopy.rns.priorityNumber
           : (tasks.find((t: any) => t.id === rnsCopy.rns)?.priorityNumber ??

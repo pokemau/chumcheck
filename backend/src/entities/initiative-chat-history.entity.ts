@@ -1,9 +1,4 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-} from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
 import { Initiative } from './initiative.entity';
 
 @Entity()
@@ -11,7 +6,7 @@ export class InitiativeChatHistory {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => Initiative)
+  @ManyToOne(() => Initiative, { deleteRule: 'cascade' })
   initiative!: Initiative;
 
   @Property()
@@ -40,4 +35,5 @@ export class InitiativeChatHistory {
       Object.assign(this, data);
     }
   }
-} 
+}
+
