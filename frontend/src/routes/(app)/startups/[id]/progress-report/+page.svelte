@@ -2,14 +2,10 @@
   import { Skeleton } from '$lib/components/ui/skeleton';
   import * as Card from '$lib/components/ui/card';
   import Button from '$lib/components/ui/button/button.svelte';
-  import { Download, RocketIcon } from 'lucide-svelte';
-  import { StartupCard } from '$lib/components/startups';
-  import { Can, RadarChart, RadarChartV2 } from '$lib/components/shared';
+  import { Download } from 'lucide-svelte';
+  import { RadarChartV2 } from '$lib/components/shared';
   import { useQuery } from '@sveltestack/svelte-query';
-  import type { Role } from '$lib/types.js';
   import { getData } from '$lib/utils.js';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import Application from '$lib/components/startup/Application.svelte';
   import * as Table from '$lib/components/ui/table';
   import html2canvas from 'html2canvas';
   import { PDFDocument } from 'pdf-lib';
@@ -74,7 +70,7 @@
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `${$queryResult.data.name} - Progress Report.pdf`;
+      link.download = `${$queryResult.data.startup.name} - Progress Report.pdf`;
       link.click();
 
       // pages.forEach((page) => {
@@ -130,7 +126,7 @@
 
 {#if $queryResult.isLoading}
   <div class="flex h-full flex-col gap-3">
-    <div class="bg-background h-full w-full">
+    <div class="h-full w-full bg-background">
       <Skeleton class="h-full w-full" />
     </div>
   </div>
