@@ -10,6 +10,7 @@ import { StartupService } from '../startup/startup.service'; // Import StartupSe
 import { Startup } from '../entities/startup.entity'; // Import Startup entity
 import { CreateStartupDto } from './dto/create-startup.dto'; // Import CreateStartupDto
 import { UpdateStartupDto } from './dto/update-startup.dto'; // Import UpdateStartupDto
+import { AdminLoginDto } from './dto/admin-login.dto'; // Import AdminLoginDto
 
 @Injectable()
 export class AdminService {
@@ -33,14 +34,14 @@ export class AdminService {
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email, password, firstName, lastName, role } = createUserDto;
-    
+
     await this.authService.signup({
       email,
       password,
       firstName: firstName || '',
       lastName: lastName || '',
     });
-    
+
     const users = await this.userService.getUserByString(email);
     if (users.length > 0) {
       const createdUser = users[0];
@@ -121,5 +122,30 @@ export class AdminService {
   async deleteStartup(id: number): Promise<void> {
     await this.getStartupById(id); // Ensures startup exists before attempting delete
     await this.startupService.remove(id);
+  }
+
+  async authenticateAdmin(loginDto: AdminLoginDto): Promise<User> {
+    const { email, password } = loginDto;
+
+    // Find user by email
+    const user = await this.userService.getUserByString(email);
+    if (user.length === 0) {
+      throw new NotFoundException('Admin user not found');
+    }
+
+    const adminUser = user[0];
+
+    // Check if user has Manager role (admin access)
+    if (adminUser.role !== Role.Manager) {
+      throw new NotFoundException('Access denied. Admin privileges required.');
+    }
+
+    // Verify password
+    const passwordMatches = await argon.verify(adminUser.hash, password);
+    if (!passwordMatches) {
+      throw new NotFoundException('Invalid credentials');
+    }
+
+    return adminUser;
   }
 }

@@ -44,13 +44,26 @@ async function bootstrap() {
 
   // Flash messages middleware
   app.use(flash());
-
   // Global middleware to make flash messages available in templates
   app.use((req, res, next) => {
     res.locals.success_msg = req.flash('success');
     res.locals.error_msg = req.flash('error');
     res.locals.error = req.flash('form_error'); // For form validation errors
-    res.locals.formData = req.flash('formData')[0] || {}; // For repopulating form
+
+    // Parse formData from JSON string if it exists
+    const formDataArray = req.flash('formData');
+    if (formDataArray.length > 0) {
+      try {
+        res.locals.formData = typeof formDataArray[0] === 'string'
+          ? JSON.parse(formDataArray[0])
+          : formDataArray[0];
+      } catch (e) {
+        res.locals.formData = {};
+      }
+    } else {
+      res.locals.formData = {};
+    }
+
     next();
   });
 
@@ -68,13 +81,14 @@ async function bootstrap() {
   //   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   //   credentials: true,
   // });
-
   app.enableCors({
     origin: (origin, callback) => {
       const allowedOrigins = [
+        'http://localhost:3000', // Add the same origin for admin panel
         'http://localhost:5173',
         'https://chumcheck.vercel.app',
       ];
+      // Allow requests with no origin (same-origin requests, Postman, curl, etc.)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {

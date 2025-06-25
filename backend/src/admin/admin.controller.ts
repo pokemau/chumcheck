@@ -4,14 +4,63 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStartupDto } from './dto/create-startup.dto';
 import { UpdateStartupDto } from './dto/update-startup.dto';
+import { AdminLoginDto } from './dto/admin-login.dto';
+import { AdminAuthGuard } from './guard/admin-auth.guard';
 import { Request } from 'express'; // Import Request for flash messages
+import './types/session.types'; // Import session types
 
 @Controller('admin')
-// @UseGuards(AuthenticatedGuard) // Protect admin routes
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
+  @Get('login')
+  @Render('admin/login')
+  loginForm(@Req() req: Request) {
+    // If already logged in, redirect to dashboard
+    if (req.session?.user) {
+      return { redirect: '/admin' };
+    }
+    return { message: 'Admin Login' };
+  }
+
+  @Post('login')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  async login(@Body() loginDto: AdminLoginDto, @Req() req: Request, @Res() res) {
+    try {
+      const user = await this.adminService.authenticateAdmin(loginDto);
+
+      // Store user in session
+      req.session.user = {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      };
+
+      req.flash('success', 'Successfully logged in!');
+      return res.redirect('/admin');    } catch (error) {
+      console.error('Admin login error:', error);
+      req.flash('form_error', error.message || 'Invalid credentials');
+      req.flash('formData', JSON.stringify({ email: loginDto.email }));
+      return res.redirect('/admin/login');
+    }
+  }
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res) {
+    if (req.session) {
+      req.session.destroy((err) => {
+        if (err) {
+          console.error('Session destruction error:', err);
+        }
+      });
+    }
+    // Don't use flash after destroying session
+    return res.redirect('/admin/login');
+  }
+
   @Get()
+  @UseGuards(AdminAuthGuard) // Protect admin routes
   @Render('admin/dashboard')
   async dashboard(@Req() req: Request) {
     // Create static dashboard data instead of relying on API calls
@@ -40,25 +89,25 @@ export class AdminController {
         }
       ]
     };
-    
+
     return { user: req.user, message: 'Welcome to the Admin Dashboard!', dashboard: dashboardData };
   }
-
   @Get('users')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/users')
   async listUsers(@Req() req: Request) { // Add Request type
     const users = await this.adminService.getAllUsers();
     // req.flash('success', 'Successfully loaded users!'); // Example flash message
     return { user: req.user, users, message: 'Manage Users' };
   }
-
   @Get('users/create')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/create-user')
   createUserForm(@Req() req: Request) { // Add Request type
     return { user: req.user, message: 'Create New User' };
   }
-
   @Post('users/create')
+  @UseGuards(AdminAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
   async createUser(@Req() req: Request, @Body() createUserDto: CreateUserDto, @Res() res) {
     try {
@@ -72,10 +121,10 @@ export class AdminController {
       return res.redirect('/admin/users/create'); // Redirect back to the create form
     }
   }
-
   @Get('users/edit/:id')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/edit-user')
-  async editUserForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
+  async editUserForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {// Add Request type
     try {
       const editableUser = await this.adminService.getUserById(id);
       return { user: req.user, editableUser, message: `Edit User: ${editableUser.email}` };
@@ -89,8 +138,8 @@ export class AdminController {
       return res.redirect('/admin/users');
     }
   }
-
   @Post('users/edit/:id')
+  @UseGuards(AdminAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
@@ -110,9 +159,9 @@ export class AdminController {
     }
   }
 
-  // Changed to POST for better practice
-  @Post('users/delete/:id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
+  // Changed to POST for better practice  @Post('users/delete/:id')
+  @UseGuards(AdminAuthGuard)
+  async deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {// Add Request type
     try {
       await this.adminService.deleteUser(id);
       req.flash('success', 'User deleted successfully!');
@@ -125,22 +174,22 @@ export class AdminController {
   }
 
   // --- Startup Routes ---
-
   @Get('startups')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/startups')
   async listStartups(@Req() req: Request) {
     const startups = await this.adminService.getAllStartups();
     return { user: req.user, startups, message: 'Manage Startups' };
   }
-
   @Get('startups/create')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/create-startup')
   async createStartupForm(@Req() req: Request) {
     const users = await this.adminService.getAllUsers(); // Reverted: For selecting startup owner
     return { user: req.user, users, message: 'Create New Startup' };
   }
-
   @Post('startups/create')
+  @UseGuards(AdminAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
   async createStartup(@Req() req: Request, @Body() createStartupDto: CreateStartupDto, @Res() res) {
     try {
@@ -155,8 +204,8 @@ export class AdminController {
       return res.redirect('/admin/startups/create');
     }
   }
-
   @Get('startups/edit/:id')
+  @UseGuards(AdminAuthGuard)
   @Render('admin/edit-startup')
   async editStartupForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
     try {
@@ -173,8 +222,8 @@ export class AdminController {
       return res.redirect('/admin/startups');
     }
   }
-
   @Post('startups/edit/:id')
+  @UseGuards(AdminAuthGuard)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
   async updateStartup(
     @Param('id', ParseIntPipe) id: number,
@@ -194,8 +243,8 @@ export class AdminController {
       return res.redirect(`/admin/startups/edit/${id}`);
     }
   }
-
   @Post('startups/delete/:id')
+  @UseGuards(AdminAuthGuard)
   async deleteStartup(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
     try {
       await this.adminService.deleteStartup(id);

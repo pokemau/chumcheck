@@ -16,7 +16,7 @@ export default defineConfig({
   driver: PostgreSqlDriver,
   driverOptions: {
     connection: {
-      ssl: { rejectUnauthorized: false }
+      ssl: false
     }
   }
 });

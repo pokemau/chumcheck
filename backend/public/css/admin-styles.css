@@ -32,8 +32,14 @@ header {
     padding: 1.5rem 2rem;
     box-shadow: 0 3px 10px rgba(0,0,0,0.1);
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 header h1 {
@@ -45,6 +51,40 @@ header h1 {
 header p {
     margin: 0.5rem 0 0;
     opacity: 0.9;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.header-right .btn {
+    margin-left: 1rem;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.header-right .btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: white;
+    transform: translateY(-1px);
+}
+
+.header-right .btn-danger {
+    border-color: rgba(220, 53, 69, 0.8);
+    color: #dc3545;
+    background: transparent;
+}
+
+.header-right .btn-danger:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
 }
 
 /* Navigation Styles */
@@ -75,7 +115,7 @@ nav ul li a {
     border-bottom: 3px solid transparent;
 }
 
-nav ul li a:hover, 
+nav ul li a:hover,
 nav ul li a.active {
     color: var(--primary-blue);
     background-color: var(--light-blue-bg);
@@ -706,22 +746,22 @@ small {
     nav ul {
         flex-direction: column;
     }
-    
+
     nav ul li a {
         border-bottom: none;
         border-left: 3px solid transparent;
     }
-    
-    nav ul li a:hover, 
+
+    nav ul li a:hover,
     nav ul li a.active {
         border-bottom: none;
         border-left: 3px solid var(--primary-blue);
     }
-    
+
     .stats-container {
         grid-template-columns: 1fr;
     }
-    
+
     table {
         display: block;
         overflow-x: auto;
