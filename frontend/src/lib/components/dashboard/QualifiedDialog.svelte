@@ -43,34 +43,6 @@
               value={inf.name}
             />
           </div>
-
-          <div class="grid gap-2">
-            <Label for="email" class="flex gap-2"
-              >Capsule Proposal
-
-              {#if showCapsule}
-                <button on:click={toggleCapsule}>
-                  <EyeOff class="h-4 w-4 cursor-pointer" />
-                </button>
-              {:else}
-                <button on:click={toggleCapsule}>
-                  <Eye class="h-4 w-4 cursor-pointer" />
-                </button>
-              {/if}
-            </Label>
-            <div class="flex w-full justify-center">
-              {#if showCapsule}
-                <object
-                  data={inf.capsule_proposal}
-                  type="application/pdf"
-                  width="700"
-                  height="1000"
-                  title="capsule_proposal"
-                  transition:fade
-                />
-              {/if}
-            </div>
-          </div>
         </div>
         <!-- Group Information -->
         <div class="flex flex-col gap-3">
@@ -171,12 +143,24 @@
               min={0}
               max={9}
               data={[
-                lev.filter((r) => r.readinessLevel.readinessType === 'Technology')[0].readinessLevel.level,
-                lev.filter((r) => r.readinessLevel.readinessType === 'Organizational')[0].readinessLevel.level,
-                lev.filter((r) => r.readinessLevel.readinessType === 'Market')[0].readinessLevel.level,
-                lev.filter((r) => r.readinessLevel.readinessType === 'Regulatory')[0].readinessLevel.level,
-                lev.filter((r) => r.readinessLevel.readinessType === 'Acceptance')[0].readinessLevel.level,
-                lev.filter((r) => r.readinessLevel.readinessType === 'Investment')[0].readinessLevel.level
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Technology'
+                )[0].readinessLevel.level,
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Organizational'
+                )[0].readinessLevel.level,
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Market'
+                )[0].readinessLevel.level,
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Regulatory'
+                )[0].readinessLevel.level,
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Acceptance'
+                )[0].readinessLevel.level,
+                lev.filter(
+                  (r) => r.readinessLevel.readinessType === 'Investment'
+                )[0].readinessLevel.level
               ]}
               labels={[
                 'Technology',
