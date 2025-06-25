@@ -422,8 +422,6 @@
       });
     }
 
-    console.log($rnsQueries[1].data)
-
     if ($rnsQueries[1].data && $rnsQueries[4].data)
       selectedRNA = $rnsQueries[4].data
         .filter(
