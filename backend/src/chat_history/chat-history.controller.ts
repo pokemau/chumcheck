@@ -27,4 +27,9 @@ export class ChatHistoryController {
   async getRoadblockChatHistory(@Param('id', ParseIntPipe) roadblockId: number) {
     return await this.chatHistoryService.getRoadblockChatHistory(roadblockId);
   }
+
+  @Get('rna/:id')
+  async getRnaChatHistory(@Param('id', ParseIntPipe) rnaId: number) {
+    return await this.chatHistoryService.getRnaChatHistory(rnaId);
+  }
 } 

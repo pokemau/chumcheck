@@ -3,6 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { RnsChatHistory } from '../entities/rns-chat-history.entity';
 import { InitiativeChatHistory } from '../entities/initiative-chat-history.entity';
 import { RoadblockChatHistory } from '../entities/roadblock-chat-history.entity';
+import { RnaChatHistory } from '../entities/rna-chat-history.entity';
 
 @Injectable()
 export class ChatHistoryService {
@@ -66,6 +67,25 @@ export class ChatHistoryService {
       createdAt: message.createdAt,
       refinedDescription: message.refinedDescription,
       refinedFix: message.refinedFix
+    }));
+  }
+
+  async getRnaChatHistory(rnaId: number) {
+    const chatHistory = await this.em.find(
+      RnaChatHistory,
+      { rna: { id: rnaId } },
+      { 
+        orderBy: { createdAt: 'ASC' },
+        populate: ['rna']
+      }
+    );
+
+    return chatHistory.map(message => ({
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt,
+      refinedRna: message.refinedRna
     }));
   }
 } 

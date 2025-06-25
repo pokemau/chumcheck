@@ -37,6 +37,10 @@
     {
       queryKey: ['startupData'],
       queryFn: () => getData(`/startups/${startupId}`, access!)
+    },
+    {
+      queryKey: ['rnaComplete', startupId],
+      queryFn: () => getData(`/rna/${startupId}/check-complete`, access!)
     }
   ]);
 
@@ -60,6 +64,7 @@
     generatingRNA = false;
     toast.success('Successfuly generated RNA');
     $rnaQueries[1].refetch();
+    $rnaQueries[4].refetch();
   };
 
   const addToRNA = async (id: number) => {
@@ -93,6 +98,7 @@
     );
     toast.success('Successfuly added to RNA');
     $rnaQueries[1].refetch().then(() => (open = false));
+    $rnaQueries[4].refetch();
   };
 
   const createRNA = async (payload: any) => {
@@ -114,6 +120,7 @@
     toast.success('Successfully created the RNA');
     open = false;
     $rnaQueries[1].refetch();
+    $rnaQueries[4].refetch();
   };
 
   const editRNA = async (id: number, payload: any) => {
@@ -125,6 +132,7 @@
     toast.success('Successfuly updated the RNA');
     open = false;
     $rnaQueries[1].refetch();
+    $rnaQueries[4].refetch();
   };
 
   const deleteRNA = async (id: number, index: number) => {
@@ -135,6 +143,7 @@
     });
     toast.success('Successfuly deleted the RNA');
     $rnaQueries[1].refetch();
+    $rnaQueries[4].refetch();
   };
 
   const readinessData = $derived(
@@ -148,6 +157,19 @@
           )
       : []
   );
+
+  const isAllRNAComplete = $derived(
+    $rnaQueries[4].isSuccess && $rnaQueries[4].data === true
+  );
+
+  // Debug logging
+  $effect(() => {
+    console.log('RNA Complete Status:', {
+      isSuccess: $rnaQueries[4].isSuccess,
+      data: $rnaQueries[4].data,
+      isAllComplete: isAllRNAComplete
+    });
+  });
 </script>
 
 <svelte:head>
@@ -213,7 +235,7 @@
           ><Plus class="h-4 w-4" />Add</Button
         >
 
-        <Button onclick={generateRNA} disabled={generatingRNA}>
+        <Button onclick={generateRNA} disabled={generatingRNA || isAllRNAComplete}>
           {#if generatingRNA}
             <Loader class="mr-2 h-4 w-4 animate-spin" />
           {:else}

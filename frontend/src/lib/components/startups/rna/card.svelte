@@ -2,6 +2,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import * as Card from '$lib/components/ui/card';
   import {
+    RnaViewEditDeleteAiDialog,
     RnaViewEditDeleteDialog,
   } from '.';
 
@@ -41,15 +42,29 @@
   </Card.Content>
 </Card.Root>
 
-<RnaViewEditDeleteDialog
-  {open}
-  {onOpenChange}
-  {rna}
-  {update}
-  {deleteRna}
-  {readinessData}
-  {closeDialog}
-  {addToRna}
-  {role}
-/>
+{#if role === 'Startup'}
+  <RnaViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    {rna}
+    {update}
+    {deleteRna}
+    {readinessData}
+    {closeDialog}
+    {addToRna}
+    {role}
+  />
+{:else}
+  <RnaViewEditDeleteAiDialog
+    {open}
+    {onOpenChange}
+    {rna}
+    {update}
+    {deleteRna}
+    {readinessData}
+    {closeDialog}
+    {addToRna}
+    {role}
+  />
+{/if}
 
