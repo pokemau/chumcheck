@@ -35,7 +35,8 @@
     Sparkles,
     TableIcon,
     ChevronDown,
-    Check
+    Check,
+    Plus
   } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
@@ -580,6 +581,7 @@
           type="button"
           onclick={() => showDialog()}
         >
+          <Plus class="h-4 w-4" />
           Add
         </Button>
         <div class="flex gap-1">

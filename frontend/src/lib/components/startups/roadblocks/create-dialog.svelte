@@ -19,7 +19,7 @@
   const data = $state({
     description: '',
     fix: '',
-    assigneeId: '',
+    assigneeId: ''
     // startupId: startupId,
     // isAiGenerated: false,
     // status: 4
@@ -62,18 +62,18 @@
     <Dialog.Footer>
       <Button
         onclick={() => {
-         create({
-                ...data,
-                assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
-                startupId: Number(startupId),
-                status: status,
-                isAiGenerated: false,
-          })
-          
+          create({
+            ...data,
+            assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
+            startupId: Number(startupId),
+            status: status,
+            isAiGenerated: false
+          });
+
           data.description = '';
           data.fix = '';
           data.assigneeId = '';
-          }}
+        }}
         disabled={data.description === '' || data.fix === ''}>Create</Button
       >
     </Dialog.Footer>

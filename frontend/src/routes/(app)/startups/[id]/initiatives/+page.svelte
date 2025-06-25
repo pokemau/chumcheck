@@ -29,7 +29,7 @@
     InitiativeCard,
     InitiativeCreateDialog
   } from '$lib/components/startups/initiatives';
-  import { Ellipsis, Kanban, TableIcon, Loader, Sparkles } from 'lucide-svelte';
+  import { Ellipsis, Kanban, TableIcon, Loader, Sparkles, Plus } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
@@ -740,8 +740,9 @@
         <Button
           class="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
-          on:click={() => showDialog()}
+          onclick={() => showDialog()}
         >
+          <Plus class="h-4 w-4" />
           Add
         </Button>
         <div class="flex gap-1">

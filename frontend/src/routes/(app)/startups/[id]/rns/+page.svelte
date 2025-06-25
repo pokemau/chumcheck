@@ -37,7 +37,10 @@
     TableIcon,
     Loader,
     ChevronDown,
-    Sparkles
+    Sparkles,
+
+    Plus
+
   } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -607,6 +610,8 @@
           type="button"
           onclick={() => showDialog()}
         >
+          <Plus class="h-4 w-4" />
+
           Add
         </Button>
         <div class="flex gap-1">
@@ -741,7 +746,6 @@
 {/snippet}
 
 {#snippet fallback()}
-
   <!-- TODO: TEMP FIX RANI -->
 
   <div class="flex h-full flex-col gap-3">
