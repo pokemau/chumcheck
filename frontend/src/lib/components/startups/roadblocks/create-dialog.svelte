@@ -30,7 +30,7 @@
 <Dialog.Root bind:open {onOpenChange}>
   <Dialog.Content class="h-4/5  max-w-[600px] overflow-auto">
     <Dialog.Header>
-      <Dialog.Title>Create {getStatusName(status)} Roadblock</Dialog.Title>
+      <Dialog.Title>Create New Roadblock</Dialog.Title>
     </Dialog.Header>
     <div class="grid gap-4 py-4">
       <div class="flex flex-col gap-4">
