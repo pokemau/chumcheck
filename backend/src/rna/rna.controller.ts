@@ -12,7 +12,7 @@ import {
     UseGuards,
   } from '@nestjs/common';
 import { RnaService } from './rna.service';
-import { CreateStartupRnaDto, UpdateStartupRnaDto } from './dto/rna.dto';
+import { CreateStartupRnaDto, GenerateRNAsDto, UpdateStartupRnaDto } from './dto/rna.dto';
 
 @Controller('rna')
 export class RnaController {
@@ -41,5 +41,10 @@ export class RnaController {
     @Delete(':id')
     async delete(@Param('id', ParseIntPipe) id: number) {
       return this.rnaService.delete(id);
+    }
+
+    @Get(':id/generate-rna')
+    async generateTasks(@Param('id', ParseIntPipe) id: number) {
+      return await this.rnaService.generateRNA(id);
     }
 }
