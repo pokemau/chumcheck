@@ -194,18 +194,18 @@
     <Can role={['Mentor', 'Manager as Mentor']} userRole={role}>
       <div class="flex justify-between">
         <div class="flex h-fit justify-between rounded-lg bg-background">
-          <Tabs.Root value={selectedTab}>
-            <Tabs.List class="border bg-flutter-gray/20">
-              <Tabs.Trigger value="chart" class="capitalize" onclick={() => updateTab('chart')}
-                >Chart</Tabs.Trigger
-              >
-              <Tabs.Trigger
-                value="detailed"
-                class="capitalize"
-                onclick={() => updateTab('detailed')}>Detailed</Tabs.Trigger
-              >
-            </Tabs.List>
-          </Tabs.Root>
+          <!-- <Tabs.Root value={selectedTab}> -->
+          <!--   <Tabs.List class="border bg-flutter-gray/20"> -->
+          <!--     <Tabs.Trigger value="chart" class="capitalize" onclick={() => updateTab('chart')} -->
+          <!--       >Chart</Tabs.Trigger -->
+          <!--     > -->
+          <!--     <Tabs.Trigger -->
+          <!--       value="detailed" -->
+          <!--       class="capitalize" -->
+          <!--       onclick={() => updateTab('detailed')}>Detailed</Tabs.Trigger -->
+          <!--     > -->
+          <!--   </Tabs.List> -->
+          <!-- </Tabs.Root> -->
         </div>
         {#if selectedTab === 'detailed'}
           <div class="flex h-fit justify-between rounded-lg bg-background">
