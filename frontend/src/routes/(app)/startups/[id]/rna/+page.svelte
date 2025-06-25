@@ -245,5 +245,5 @@
 {/snippet}
 
 {#snippet fallback()}
-  <div>test</div>
+  <div>Something went wrong...</div>
 {/snippet}

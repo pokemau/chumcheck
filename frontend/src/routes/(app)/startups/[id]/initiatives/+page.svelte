@@ -629,7 +629,8 @@
 {:else if isAccessible}
   {@render accessible()}
 {:else}
-  {@render fallback()}
+  {@render loading()}
+  <!-- {@render fallback()} -->
 {/if}
 
 <HoveredRNSCard />
