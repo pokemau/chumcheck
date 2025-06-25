@@ -1717,6 +1717,7 @@
             "id"
           ],
           "referencedTableName": "public.roadblocks",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1976,6 +1977,7 @@
             "id"
           ],
           "referencedTableName": "public.rns",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2178,6 +2180,7 @@
             "id"
           ],
           "referencedTableName": "public.rns",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "initiatives_assignee_id_foreign": {
@@ -2319,6 +2322,7 @@
             "id"
           ],
           "referencedTableName": "public.initiatives",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

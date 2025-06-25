@@ -1,14 +1,8 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-  Enum,
-} from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Enum } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { Startup } from './startup.entity';
 import { Rns } from './rns.entity';
-import { RnsStatus } from './enums/rns.enum'; 
+import { RnsStatus } from './enums/rns.enum';
 
 @Entity({ tableName: 'initiatives' })
 export class Initiative {
@@ -36,7 +30,7 @@ export class Initiative {
   @Property({ default: 'Unchanged' })
   approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
 
-  @ManyToOne(() => Rns)
+  @ManyToOne(() => Rns, { deleteRule: 'cascade' })
   rns!: Rns;
 
   @Property()
@@ -64,5 +58,5 @@ export class Initiative {
   createdAt!: Date;
 
   @Property({ fieldName: 'datetime_updated', onUpdate: () => new Date() })
-  updatedAt: Date  = new Date();
+  updatedAt: Date = new Date();
 }

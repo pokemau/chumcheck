@@ -1,9 +1,4 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-} from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
 import { Roadblock } from './roadblock.entity';
 
 @Entity()
@@ -11,7 +6,7 @@ export class RoadblockChatHistory {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => Roadblock)
+  @ManyToOne(() => Roadblock, { deleteRule: 'cascade' })
   roadblock!: Roadblock;
 
   @Property()
@@ -34,4 +29,5 @@ export class RoadblockChatHistory {
       Object.assign(this, data);
     }
   }
-} 
+}
+

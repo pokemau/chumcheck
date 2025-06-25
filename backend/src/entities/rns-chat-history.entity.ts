@@ -1,9 +1,4 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-} from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
 import { Rns } from './rns.entity';
 
 @Entity()
@@ -11,7 +6,7 @@ export class RnsChatHistory {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => Rns)
+  @ManyToOne(() => Rns, { deleteRule: 'cascade' })
   rns!: Rns;
 
   @Property()
@@ -31,4 +26,5 @@ export class RnsChatHistory {
       Object.assign(this, data);
     }
   }
-} 
+}
+
