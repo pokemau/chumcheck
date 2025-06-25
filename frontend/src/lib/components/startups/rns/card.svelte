@@ -35,11 +35,29 @@
     return (role == 'Mentor' && !rns.clickedByMentor) || (role == 'Startup' && !rns.clickedByStartup);
   }
 
+  let rnsCopy = $state({ ...rns });
+
+  $effect(() => {
+    rnsCopy = { ...rns };
+  });
+
+  // console.log($inspect(rnsCopy));
+
+  const approveDialog = () => {
+    open = false;
+    update(rns.id, { ...rns, approvalStatus: 'Unchanged', status: rns.requestedStatus});
+  }
+
+  const denyDialog = () => {
+    open = false;
+    update(rns.id, { ...rns, approvalStatus: 'Unchanged', requestedStatus: rns.status});
+  }
+
 </script>
 
 <Card.Root
-  class={`bg-gray-900 border rounded-lg shadow-sm cursor-pointer${
-    isNewCard() ? 'border-sky-600 border-2 animate-pulse' : 'border-gray-700'}`}
+  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
+  ${ (isNewCard() || rnsCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -50,6 +68,9 @@
       <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</Badge>
       {#if isNewCard()}
         <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+      {/if}
+      {#if rnsCopy.approvalStatus !== 'Unchanged'}
+        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
       {/if}
       <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
     </div>
@@ -113,5 +134,7 @@
     {index}
     {addToRns}
     isEdit={!ai}
+    {approveDialog}
+    {denyDialog}
   />
 {/if} 

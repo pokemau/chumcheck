@@ -1512,6 +1512,26 @@
           "nullable": false,
           "mappedType": "enum"
         },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
+        },
         "risk_number": {
           "name": "risk_number",
           "type": "int",
@@ -1800,6 +1820,26 @@
           "nullable": false,
           "default": "1",
           "mappedType": "enum"
+        },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
         },
         "readiness_type": {
           "name": "readiness_type",

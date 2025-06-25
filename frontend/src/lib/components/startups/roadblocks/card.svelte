@@ -43,11 +43,29 @@
   const isNewCard = () => {
     return (role == 'Mentor' && !roadblocks.clickedByMentor) || (role == 'Startup' && !roadblocks.clickedByStartup);
   }
+
+  const approveDialog = () => {
+    open = false;
+    update(roadblocks.id, { ...roadblocks, approvalStatus: 'Unchanged', status: roadblocks.requestedStatus});
+  }
+
+  const denyDialog = () => {
+    open = false;
+    update(roadblocks.id, { ...roadblocks, approvalStatus: 'Unchanged', requestedStatus: roadblocks.status});
+  }
+
+  // console.log($inspect(roadblocks));
+
+  let roadblocksCopy = $state({ ...roadblocks });
+
+  $effect(() => {
+    roadblocksCopy = { ...roadblocks };
+  });
 </script>
 
 <Card.Root
-  class={`bg-gray-900 border rounded-lg shadow-sm cursor-pointer${
-    isNewCard() ? 'border-sky-600 border-2 animate-pulse' : 'border-gray-700'}`}
+  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
+  ${ (isNewCard() || roadblocksCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -60,6 +78,9 @@
       </Badge>
       {#if isNewCard()}
         <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+      {/if}
+      {#if roadblocksCopy.approvalStatus !== 'Unchanged'}
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
       {/if}
     </div>
     <div class="text-sm text-white mb-1 break-words whitespace-pre-wrap">
@@ -145,5 +166,7 @@
   {closeDialog}
   {update}
   {index}
+  {approveDialog}
+  {denyDialog}
 />
 {/if} 

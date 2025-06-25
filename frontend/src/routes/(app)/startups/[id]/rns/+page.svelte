@@ -64,6 +64,8 @@
     description: string;
     isAiGenerated: boolean;
     status: number;
+    requestedStatus: number;
+    approvalStatus: string;
     assignee?: { id: number };
     readinessType?: string;
     targetLevel?: number;
@@ -242,7 +244,7 @@
             const filteredItems = res.data
               .filter(
                 (data: any) =>
-                  data.isAiGenerated === false && data.status === column.value
+                  data.isAiGenerated === false && data.requestedStatus === column.value
               )
               .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
             column.items = filteredItems;
@@ -278,7 +280,7 @@
           column.items = res.data
             .filter(
               (data: any) =>
-                data.isAiGenerated === false && data.status === column.value
+                data.isAiGenerated === false && data.requestedStatus === column.value
             )
             .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
         });
@@ -313,7 +315,7 @@
         column.items = res.data
           .filter(
             (data: any) =>
-              data.isAiGenerated === false && data.status === column.value
+              data.isAiGenerated === false && data.requestedStatus === column.value
           )
           .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
@@ -355,7 +357,7 @@
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       if (task) {
         await axiosInstance.patch(
-          `/rns/${task.id}/`,
+          `/rns/${task.id}/roleDependent?role=${data.role}`,
           {
             status
           },
@@ -368,7 +370,8 @@
       }
 
       updatePriorityNumber();
-      setTimeout(() => $rnsQueries[1].refetch(), 250);
+      $rnsQueries[1].refetch();
+      // setTimeout(() => $rnsQueries[1].refetch(), 250);
     }
   }
 
@@ -412,7 +415,7 @@
           ? $rnsQueries[1].data
               .filter(
                 (data: any) =>
-                  data.isAiGenerated === false && data.status === column.value
+                  data.isAiGenerated === false && data.requestedStatus === column.value
               )
               .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber)
           : [];

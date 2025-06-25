@@ -57,6 +57,7 @@
     fix: string;
     isAiGenerated: boolean;
     status: number;
+    requestedStatus: number;
     riskNumber: number;
     assignee: number;
   }
@@ -148,7 +149,7 @@
     if (!isLoading) {
       columns.forEach((column) => {
         column.items = ($roadblocksQueries[1].data as Roadblock[]).filter(
-          (data: Roadblock) => data.status === column.value
+          (data: Roadblock) => data.requestedStatus === column.value
         );
       });
     }
@@ -164,14 +165,17 @@
         Authorization: `Bearer ${data.access}`
       }
     });
+  
     if (showToast) toast.success('Successfuly updated the RNA');
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
         column.items = (res.data as Roadblock[]).filter(
-          (data: Roadblock) => data.status === column.value
-        );
+          (data: Roadblock) => data.requestedStatus === column.value
+        ); 
       });
     });
+    $roadblocksQueries[2].refetch();
+    updateRiskNumber();
   };
 
   const deleteRoadblock = async (id: number) => {
@@ -186,11 +190,12 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = (res.data as Roadblock[]).filter(
-            (data: Roadblock) => data.status === column.value
+            (data: Roadblock) => data.requestedStatus === column.value
           );
         });
       })
       .finally(async () => await updateRiskNumber());
+    $roadblocksQueries[2].refetch();
   };
 
   function handleDndConsider(e: any, x: number) {
@@ -202,7 +207,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/roadblocks/${task.id}/`,
+        `/roadblocks/${task.id}/roleDependent?role=${data.role}`,
         {
           status
         },
@@ -215,6 +220,8 @@
     }
 
     updateRiskNumber();
+    $roadblocksQueries[1].refetch();
+    $roadblocksQueries[2].refetch();
   }
 
   const updateRiskNumber = async () => {

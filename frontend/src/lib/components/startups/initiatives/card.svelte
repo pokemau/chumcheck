@@ -7,6 +7,7 @@
   import type { Actions } from '$lib/types';
   import { goto } from '$app/navigation';
   import { hoveredRNSCard } from '$lib/stores/hoveredRNSCard';
+  import { RnsStatus } from '$lib/components/shared/rns.enum';
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
@@ -28,6 +29,16 @@
       update(initiative.id, { ...initiative, clickedByStartup: true }, false);
     }
   };
+
+  const approveDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', status: initiative.requestedStatus});
+  }
+
+  const denyDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', requestedStatus: initiative.status});
+  }
 
   function handleMouseEnter(event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -54,8 +65,8 @@
 </script>
 
 <Card.Root
-  class={`${initiativesCopy.approvalStatus === 'Unchanged' ? 'bg-gray-900' : 'bg-violet-950'} border 
-  ${ isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
+  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
+  ${ (isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -65,6 +76,9 @@
     <div class="flex relative items-center justify-between mb-1 relative">
       {#if isNewCard()}
         <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+      {/if}
+      {#if initiativesCopy.approvalStatus !== 'Unchanged'}
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
       {/if}
       <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
@@ -157,5 +171,7 @@
   {index}
   {tasks}
   isEdit={!ai}
+  {approveDialog}
+  {denyDialog}
   />
 {/if}

@@ -20,6 +20,12 @@ export class Roadblock {
   @Enum(() => RnsStatus)
   status!: RnsStatus;
 
+  @Enum(() => RnsStatus)
+  requestedStatus?: RnsStatus;
+
+  @Property({ default: 'Unchanged' })
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
+
   @Property()
   riskNumber!: number;
 

@@ -157,7 +157,7 @@
         column.items = $initiativesQueries[2].data
           .filter(
             (data: any) =>
-              data.isAiGenerated === false && data.status === column.value
+              data.isAiGenerated === false && data.requestedStatus === column.value
           )
           .sort((a: any, b: any) => a.initiativeNumber - b.initiativeNumber);
       });

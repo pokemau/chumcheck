@@ -96,7 +96,6 @@
     dataPrivacy: startup?.dataPrivacy ?? false,
     eligibility: startup?.eligibility ?? false
   };
-  console.log("Startup: ", startup);  
 
   const toggleDataPrivacy = (value: boolean) => {
     formData.dataPrivacy = value;

@@ -25,6 +25,7 @@ export class InitiativeService {
         initiative.priorityNumber = 0;
         initiative.status = dto.status;
         initiative.requestedStatus = dto.status;
+        initiative.approvalStatus = 'Unchanged';
         initiative.rns = this.em.getReference(Rns, dto.rnsId);
         initiative.isAiGenerated = dto.isAiGenerated;
         initiative.assignee = this.em.getReference(User, dto.assigneeId);
@@ -48,6 +49,14 @@ export class InitiativeService {
 
     if (dto.status !== undefined) {
         initiative.status = dto.status;
+    }
+
+    if (dto.requestedStatus !== undefined) {
+        initiative.requestedStatus = dto.requestedStatus;
+    }
+
+    if (dto.approvalStatus !== undefined) {
+        initiative.approvalStatus = dto.approvalStatus;
     }
 
     if (dto.isAiGenerated !== undefined) {
@@ -98,6 +107,10 @@ export class InitiativeService {
         const initiative = await this.em.findOne(Initiative, { id });
         if (!initiative) throw new NotFoundException('Initiative not found');
 
+        if(initiative.requestedStatus === dto.status){
+            return initiative;
+        }
+        
         if (role === "Startup") {
             if(initiative.status === dto.status){
                 initiative.approvalStatus = 'Unchanged';

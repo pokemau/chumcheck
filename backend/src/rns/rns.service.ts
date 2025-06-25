@@ -31,6 +31,8 @@ export class RnsService {
       targetLevelId: r.targetLevel.id,
       isAiGenerated: r.isAiGenerated,
       status: r.status,
+      requestedStatus: r.requestedStatus,
+      approvalStatus: r.approvalStatus,
       readinessType: r.readinessType,
       startup: r.startup.id,
       assignee: r.assignee,
@@ -50,6 +52,8 @@ export class RnsService {
     rns.startup = this.em.getReference(Startup, dto.startupId);
     rns.assignee = this.em.getReference(User, dto.assigneeId);
     rns.status = dto.status;
+    rns.requestedStatus = dto.status;
+    rns.approvalStatus = 'Unchanged';
 
     await this.em.persistAndFlush(rns);
     return rns;
@@ -92,6 +96,14 @@ export class RnsService {
       rns.status = dto.status;
     }
 
+    if (dto.requestedStatus !== undefined) {
+      rns.requestedStatus = dto.requestedStatus;
+    }
+
+    if (dto.approvalStatus !== undefined) {
+        rns.approvalStatus = dto.approvalStatus;
+    }
+
     if (dto.priorityNumber !== undefined) {
       rns.priorityNumber = dto.priorityNumber;
     }
@@ -111,6 +123,31 @@ export class RnsService {
     await this.em.flush();
     return rns;
   }
+
+      async statusChange(id: number, role: string, dto:UpdateRnsDto){
+          const rns = await this.em.findOne(Rns, { id });
+          if (!rns) throw new NotFoundException('Rns not found');
+  
+          if(rns.requestedStatus === dto.status){
+              return rns;
+          }
+          
+          if (role === "Startup") {
+              if(rns.status === dto.status){
+                  rns.approvalStatus = 'Unchanged';
+              }else{
+                  rns.approvalStatus = 'Pending';
+              }
+              rns.requestedStatus = dto.status;
+          } else {
+              rns.status = dto.status;
+              rns.approvalStatus = 'Unchanged';
+              rns.requestedStatus = dto.status;
+          }
+  
+          await this.em.flush();
+          return rns;
+      }
 
   async generateTasks(dto: GenerateTasksDto) {
     // 1. Validate startup exists

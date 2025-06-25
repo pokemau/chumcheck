@@ -12,6 +12,7 @@
   import type { ReadinessType } from '$lib/utils';
   import { TextEditor } from '$lib/components/shared';
   import { tick } from 'svelte';
+  import { RnsStatus } from '$lib/components/shared/rns.enum';
   import { Input } from '$lib/components/ui/input';
 
   type ChatMessage = {
@@ -34,7 +35,9 @@
     closeDialog,
     addToRns,
     index,
-    isEdit = false
+    isEdit = false,
+    approveDialog,
+    denyDialog
   } = $props();
 
   let rnsCopy = $state({ ...rns });
@@ -269,6 +272,22 @@
             ><Trash class="h-4 w-4" /> Delete</Button
           >
         </div>
+        {#if rns.approvalStatus === 'Pending'}
+          <div class="mb-4 rounded border p-2">
+            <Label
+              >This RNS was moved from <strong>{RnsStatus[rns.status]}</strong> by
+              a startup user. Approve or Deny status change.</Label
+            >
+            <div class="mt-2">
+              <Button variant="default" onclick={() => approveDialog()}
+                >Approve</Button
+              >
+              <Button variant="destructive" onclick={() => denyDialog()}
+                >Deny</Button
+              >
+            </div>
+          </div>
+        {/if}
         <div class="mb-4">
           <Label>Readiness Type</Label>
           <Select.Root
