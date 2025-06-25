@@ -262,9 +262,12 @@
       <div class="flex w-1/2 flex-col p-6">
         <div class="flex justify-between">
           <h2 class="mb-4 text-2xl font-semibold">RNS Details</h2>
-            <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
-              ><Trash class="h-4 w-4" /> Delete</Button
-            >
+          <Button
+            size="sm"
+            variant="destructive"
+            onclick={() => (deleteDialogOpen = true)}
+            ><Trash class="h-4 w-4" /> Delete</Button
+          >
         </div>
         <div class="mb-4">
           <Label>Readiness Type</Label>
@@ -396,15 +399,19 @@
       </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer>
-      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+      <AlertDialog.Cancel onclick={() => (deleteDialogOpen = false)}>
+        Cancel
+      </AlertDialog.Cancel>
       <AlertDialog.Action
         class="bg-red-500 hover:bg-red-600"
         onclick={async () => {
           await deleteRns(rns.id, index);
           deleteDialogOpen = false;
           closeDialog();
-        }}>Continue</AlertDialog.Action
+        }}
       >
+        Continue
+      </AlertDialog.Action>
     </AlertDialog.Footer>
   </AlertDialog.Content>
 </AlertDialog.Root>

@@ -221,7 +221,16 @@
 
       <!-- Roadblock Details -->
       <div class="flex flex-col w-1/2 p-6">
-        <h2 class="text-2xl font-semibold mb-4">Roadblock Details</h2>
+        <div class="flex justify-between">
+          <h2 class="mb-4 text-2xl font-semibold">Roadblock Details</h2>
+          <Button
+            size="sm"
+            variant="destructive"
+            onclick={() => (deleteDialogOpen = true)}
+            ><Trash class="h-4 w-4" /> Delete</Button
+          >
+        </div>
+
         <div class="flex flex-col gap-4 overflow-y-auto">
           <div class="mb-4">
             <Label>Description</Label>
