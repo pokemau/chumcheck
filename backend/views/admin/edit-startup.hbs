@@ -7,11 +7,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
 </head>
-<body>
-    <header>
-        <h1>ChumCheck Admin</h1>
+<body>    <header>
+        <div class="header-left">
+            <h1>ChumCheck Admin</h1>
+            {{#if user}}
+                <p>Welcome, {{user.email}}!</p>
+            {{/if}}
+        </div>
         {{#if user}}
-            <p>Welcome, {{user.email}}!</p>
+            <div class="header-right">
+                <form action="/admin/logout" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         {{/if}}
     </header>
     <nav>
@@ -64,7 +74,7 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="form-section">
                 <h3>Additional Details</h3>
                 <div>
@@ -82,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="form-section">
                 <h3>Agreements</h3>
                 <div class="checkbox-container">
@@ -94,7 +104,7 @@
                     <label for="eligibility" class="checkbox-label">Eligibility Requirements Confirmed</label>
                 </div>
             </div>
-            
+
             <div style="display: flex; gap: 10px; margin-top: 20px;">
                 <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Update Startup</button>
                 <a href="/admin/startups" class="btn"><i class="fas fa-arrow-left"></i> Back to Startup List</a>

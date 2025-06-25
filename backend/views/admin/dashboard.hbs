@@ -7,11 +7,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="/css/admin-styles.css">
 </head>
-<body>
-    <header>
-        <h1>ChumCheck Admin</h1>
+<body>    <header>
+        <div class="header-left">
+            <h1>ChumCheck Admin</h1>
+            {{#if user}}
+                <p>Welcome, {{user.email}}!</p>
+            {{/if}}
+        </div>
         {{#if user}}
-            <p>Welcome, {{user.email}}!</p>
+            <div class="header-right">
+                <form action="/admin/logout" method="POST">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
         {{/if}}
     </header>
     <nav>
@@ -20,15 +30,15 @@
             <li><a href="/admin/users"><i class="fas fa-users"></i> Manage Users</a></li>
             <li><a href="/admin/startups"><i class="fas fa-rocket"></i> Manage Startups</a></li>
         </ul>
-    </nav>
-    <main>        <div class="page-header">
+    </nav>    <main>
+        <div class="page-header">
             <h2><i class="fas fa-tachometer-alt"></i> {{message}}</h2>
         </div>
-        
+
         <div class="section-header">
             <h3><i class="fas fa-chart-bar"></i> Key Statistics</h3>
         </div>
-        
+
         {{#if success_msg}}
             <div class="alert alert-success">
                 {{#each success_msg}}
@@ -36,7 +46,7 @@
                 {{/each}}
             </div>
         {{/if}}
-        
+
         {{#if error_msg}}
             <div class="alert alert-danger">
                 {{#each error_msg}}
@@ -44,7 +54,7 @@
                 {{/each}}
             </div>
         {{/if}}
-        
+
         <div class="stats-container">
             <div class="stat-card">
                 <i class="fas fa-users fa-2x" style="color: #007bff;"></i>
@@ -52,21 +62,21 @@
                 <div class="number">{{dashboard.stats.totalUsers}}</div>
                 <p>Registered accounts</p>
             </div>
-            
+
             <div class="stat-card">
                 <i class="fas fa-rocket fa-2x" style="color: #007bff;"></i>
                 <h3>Startups</h3>
                 <div class="number">{{dashboard.stats.totalStartups}}</div>
                 <p>Registered startups</p>
             </div>
-            
+
             <div class="stat-card">
                 <i class="fas fa-check-circle fa-2x" style="color: #28a745;"></i>
                 <h3>Qualified</h3>
                 <div class="number">{{dashboard.stats.qualifiedStartups}}</div>
                 <p>Qualified startups</p>
             </div>
-            
+
             <div class="stat-card">
                 <i class="fas fa-clock fa-2x" style="color: #ffc107;"></i>
                 <h3>Pending</h3>
