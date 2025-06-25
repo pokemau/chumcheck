@@ -29,7 +29,7 @@
   <Label for="username" class="text-lg font-bold">{label}</Label>
 
   {#if !isTask}
-  <!-- {#if editMode && role !== 'Startup'}
+  {#if editMode && role !== 'Startup'}
     <Textarea
       rows={12}
       bind:value={data}
@@ -52,12 +52,12 @@
           editMode = true;
         }
       }}
-    > -->
+    >
     <Description>
       {data}
     </Description>
-    <!-- </button> -->
-  <!-- {/if} -->
+    </button>
+  {/if}
   {:else}
     <Description>
     {#if data}

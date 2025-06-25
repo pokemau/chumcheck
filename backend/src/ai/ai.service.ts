@@ -45,6 +45,35 @@ export class AiService {
     return res.text;
   }
 
+  async generateRNAsFromPrompt(
+    prompt: string
+  ): Promise<{ readiness_level_type:string, rna:string }[]> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
+
+    const text = res.text;
+
+    if (!text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    try {
+      const jsonStart = text.indexOf('[');
+      const jsonEnd = text.lastIndexOf(']');
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+
+      return JSON.parse(jsonString).map((entry: any) => ({
+        readiness_level_type: entry.readiness_level_type,
+        rna: entry.rna,
+      }));
+    } catch (err) {
+      console.error('Failed to parse AI response:', text);
+      throw new Error('AI returned an invalid RNA response');
+    }
+  }
+
   async generateTasksFromPrompt(prompt: string): Promise<{ target_level: number; description: string }[]> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',

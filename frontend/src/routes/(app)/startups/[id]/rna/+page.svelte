@@ -52,7 +52,7 @@
 
   const generateRNA = async () => {
     generatingRNA = true;
-    await axiosInstance.get(`/startups/${data.startupId}/generate-rna/`, {
+    await axiosInstance.get(`/rna/${data.startupId}/generate-rna/`, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
