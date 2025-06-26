@@ -119,7 +119,6 @@
       .filter((item: any) => item.readinessLevel !== 0);
 
     if (readinessToUpdate.length === 0) {
-      console.log('No readiness levels to update');
       return;
     }
 
@@ -141,7 +140,6 @@
 
     try {
       await axios.all(requests);
-      console.log('All readiness levels updated successfully');
       toast.success('Elevated successfully');
       elevatedReadiness = [0, 0, 0, 0, 0, 0];
       elevatedRemark = ['', '', '', '', '', ''];

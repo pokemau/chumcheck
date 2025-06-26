@@ -150,8 +150,6 @@
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
-    // console.log($initiativesQueries[2].data)
-
     if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
         column.items = $initiativesQueries[2].data

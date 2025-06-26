@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { EntityManager } from '@mikro-orm/core';
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { Startup } from 'src/entities/startup.entity';

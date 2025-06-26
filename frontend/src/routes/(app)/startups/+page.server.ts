@@ -151,7 +151,6 @@ export const actions: Actions = {
       categories.forEach((category) => {
         const answerId = formData.get(`${category}AnswerId`);
         const questionId = formData.get(`${category}`);
-        console.log(`Looking for ${category}AnswerId:`, answerId, `and ${category}:`, questionId);
         if (answerId && questionId) {
           calculatorAnswers.push({
             id: parseInt(answerId as string),
@@ -162,7 +161,6 @@ export const actions: Actions = {
 
       // Update URAT question answers
       for (const answer of answers) {
-        console.log(`Updating URAT answer ${answer.id} with response:`, answer.response);
         const response = await fetch(
           `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/${answer.id}`,
           {
@@ -178,7 +176,6 @@ export const actions: Actions = {
 
       // Update calculator question answers
       for (const answer of calculatorAnswers) {
-        console.log(`Updating calculator answer ${answer.id} with question ID:`, answer.calculatorQuestionId);
         const response = await fetch(
           `${PUBLIC_API_URL}/readinesslevel/calculator-question-answers/${answer.id}`,
           {
@@ -190,7 +187,6 @@ export const actions: Actions = {
             body: JSON.stringify({ calculatorQuestionId: answer.calculatorQuestionId })
           }
         );
-        console.log('Calculator update response:', response.status);
       }
       
       console.log('Finished URAT and calculator answer updates');

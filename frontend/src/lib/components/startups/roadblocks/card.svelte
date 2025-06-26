@@ -54,8 +54,6 @@
     update(roadblocks.id, { ...roadblocks, approvalStatus: 'Unchanged', requestedStatus: roadblocks.status});
   }
 
-  // console.log($inspect(roadblocks));
-
   let roadblocksCopy = $state({ ...roadblocks });
 
   $effect(() => {

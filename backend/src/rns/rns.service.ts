@@ -290,7 +290,6 @@ export class RnsService {
         console.warn(`AI did not return any tasks for RNA ID: ${rna.id}`);
         continue; // Skip to the next RNA if no tasks generated
       }
-      console.log('AI Tasks:', aiTasks);
       const targetReadinessLevel = {
         Technology: trl,
         Market: mrl,

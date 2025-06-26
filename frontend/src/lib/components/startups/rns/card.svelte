@@ -41,8 +41,6 @@
     rnsCopy = { ...rns };
   });
 
-  // console.log($inspect(rnsCopy));
-
   const approveDialog = () => {
     open = false;
     update(rns.id, { ...rns, approvalStatus: 'Unchanged', status: rns.requestedStatus});

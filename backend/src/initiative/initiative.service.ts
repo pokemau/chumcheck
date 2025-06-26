@@ -138,7 +138,6 @@ export class InitiativeService {
     }
 
     async generateInitiatives(dto: GenerateInitiativeDto) {
-        console.log("Number of initiatives to create: ", dto.no_of_initiatives_to_create)
         if (dto.rnsIds && dto.rnsIds.length > 0) {
             const initiatives: Initiative[] = [];
 
@@ -190,7 +189,6 @@ export class InitiativeService {
 
                 const resultText = await this.aiService.generateInitiativesFromPrompt(prompt);
 
-                console.log("Number of entries generated for RNS ID", rnsId, ":", resultText.length);
                 for (const entry of resultText) {
                     const initiative = new Initiative();
                     initiative.initiativeNumber = minInitiativeNumber + i; // assign initiativeNumber

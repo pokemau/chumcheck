@@ -74,15 +74,12 @@ export class StartupController {
     // If a capsule proposal file is uploaded, parse and create CapsuleProposal
     if (file) {
       try {
-        console.log('Capsule proposal file received:', file.originalname);
         const data = await PdfParse(file.buffer);
         let res = await this.aiService.getCapsuleProposalInfo(data.text);
-        console.log('AI service result:', res);
         if (res) {
           res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
           const parsed = JSON.parse(res);
-          console.log('Parsed capsule proposal:', parsed);
-          
+
           const capsuleProposalDto: CreateCapsuleProposalDto = {
             title: dto.name,
             description: parsed.startup_description,
@@ -92,8 +89,8 @@ export class StartupController {
             objectives: parsed.objectives,
             scope: parsed.scope,
             methodology: parsed.methodology,
-            startupId: -1,  //placeholder
-            fileName: file.originalname
+            startupId: -1, //placeholder
+            fileName: file.originalname,
           };
           const startup = await this.startupService.createStartup(dto);
           capsuleProposalDto.startupId = startup.id;
@@ -102,11 +99,13 @@ export class StartupController {
           return startup;
         } else {
           console.log('AI service did not return a result');
-          throw new BadRequestException('AI service did not return a result')
+          throw new BadRequestException('AI service did not return a result');
         }
       } catch (error) {
         console.error('Failed to parse and create capsule proposal:', error);
-        throw new BadRequestException('Failed to parse and create capsule proposal: ' + error.message);
+        throw new BadRequestException(
+          'Failed to parse and create capsule proposal: ' + error.message,
+        );
       }
     } else {
       console.log('No capsule proposal file uploaded');
@@ -203,21 +202,21 @@ export class StartupController {
 
   @Get(':startupId/allow-tasks')
   async allowTasks(
-    @Param('startupId', ParseIntPipe) startupId: number
+    @Param('startupId', ParseIntPipe) startupId: number,
   ): Promise<boolean> {
     return this.startupService.allowTasks(startupId);
   }
 
   @Get(':startupId/allow-initiatives')
   async allowInitiatives(
-    @Param('startupId', ParseIntPipe) startupId: number
+    @Param('startupId', ParseIntPipe) startupId: number,
   ): Promise<boolean> {
     return this.startupService.allowInitiatives(startupId);
   }
 
   @Get(':startupId/allow-roadblocks')
   async allowRoadblocks(
-    @Param('startupId', ParseIntPipe) startupId: number
+    @Param('startupId', ParseIntPipe) startupId: number,
   ): Promise<boolean> {
     return this.startupService.allowRoadblocks(startupId);
   }
@@ -225,7 +224,7 @@ export class StartupController {
   @Patch(':id')
   async updateStartup(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateStartupDto
+    @Body() dto: UpdateStartupDto,
   ) {
     return await this.startupService.update(id, dto);
   }
@@ -238,35 +237,49 @@ export class StartupController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     console.log('Controller - received raw DTO:', rawDto);
-    
+
     // Manually transform FormData values to proper types
     const dto: UpdateStartupDto = {
       name: rawDto.name,
       userId: rawDto.userId ? parseInt(rawDto.userId) : undefined,
-      qualificationStatus: rawDto.qualificationStatus ? parseInt(rawDto.qualificationStatus) : undefined,
-      dataPrivacy: rawDto.dataPrivacy ? rawDto.dataPrivacy === 'true' : undefined,
+      qualificationStatus: rawDto.qualificationStatus
+        ? parseInt(rawDto.qualificationStatus)
+        : undefined,
+      dataPrivacy: rawDto.dataPrivacy
+        ? rawDto.dataPrivacy === 'true'
+        : undefined,
       links: rawDto.links,
       groupName: rawDto.groupName,
       universityName: rawDto.universityName,
-      eligibility: rawDto.eligibility ? rawDto.eligibility === 'true' : undefined,
+      eligibility: rawDto.eligibility
+        ? rawDto.eligibility === 'true'
+        : undefined,
     };
-    
+
     console.log('Controller - transformed DTO:', dto);
-    console.log('Controller - qualificationStatus after transformation:', typeof dto.qualificationStatus, 'value:', dto.qualificationStatus);
+    console.log(
+      'Controller - qualificationStatus after transformation:',
+      typeof dto.qualificationStatus,
+      'value:',
+      dto.qualificationStatus,
+    );
 
     // If a capsule proposal file is uploaded, parse and update CapsuleProposal
     if (file) {
       try {
-        console.log('Capsule proposal file received for update:', file.originalname);
+        console.log(
+          'Capsule proposal file received for update:',
+          file.originalname,
+        );
         const data = await PdfParse(file.buffer);
         let res = await this.aiService.getCapsuleProposalInfo(data.text);
         console.log('AI service result for update:', res);
-        
+
         if (res) {
           res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
           const parsed = JSON.parse(res);
           console.log('Parsed capsule proposal for update:', parsed);
-          
+
           const capsuleProposalDto: CreateCapsuleProposalDto = {
             title: dto.name || 'Updated Startup',
             description: parsed.startup_description,
@@ -277,17 +290,25 @@ export class StartupController {
             scope: parsed.scope,
             methodology: parsed.methodology,
             startupId: id,
-            fileName: file.originalname
+            fileName: file.originalname,
           };
-          
-          return await this.startupService.updateWithCapsuleProposal(id, dto, capsuleProposalDto);
+
+          return await this.startupService.updateWithCapsuleProposal(
+            id,
+            dto,
+            capsuleProposalDto,
+          );
         } else {
           console.log('AI service did not return a result for update');
-          throw new BadRequestException('AI service did not return a result for update');
+          throw new BadRequestException(
+            'AI service did not return a result for update',
+          );
         }
       } catch (error) {
         console.error('Failed to parse and update capsule proposal:', error);
-        throw new BadRequestException('Failed to parse and update capsule proposal: ' + error.message);
+        throw new BadRequestException(
+          'Failed to parse and update capsule proposal: ' + error.message,
+        );
       }
     } else {
       // No file uploaded, just update the startup without capsule proposal changes
