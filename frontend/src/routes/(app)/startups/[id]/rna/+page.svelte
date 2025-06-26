@@ -162,14 +162,6 @@
     $rnaQueries[4].isSuccess && $rnaQueries[4].data === true
   );
 
-  // Debug logging
-  $effect(() => {
-    console.log('RNA Complete Status:', {
-      isSuccess: $rnaQueries[4].isSuccess,
-      data: $rnaQueries[4].data,
-      isAllComplete: isAllRNAComplete
-    });
-  });
 </script>
 
 <svelte:head>
