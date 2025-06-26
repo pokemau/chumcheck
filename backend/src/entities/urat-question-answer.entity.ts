@@ -13,7 +13,7 @@ export class UratQuestionAnswer {
   @PrimaryKey({ autoincrement: true })
   id!: number;
 
-  @Property()
+  @Property({ type: 'text' })
   response!: string;
 
   @Property()

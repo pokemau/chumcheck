@@ -14,6 +14,7 @@ import { User } from './entities/user.entity';
 import { Startup } from './entities/startup.entity';
 import { CapsuleProposal } from './entities/capsule-proposal.entity';
 import { UratQuestion } from './entities/urat-question.entity';
+import { RnaChatHistory } from './entities/rna-chat-history.entity';
 import { AppController } from './app.controller';
 import { RoadblockModule } from './roadblock/roadblock.module';
 import { RnaModule } from './rna/rna.module';
@@ -32,7 +33,7 @@ import { ElevateModule } from './elevate/elevate.module';
     UserModule,
     MikroOrmModule.forRoot(),
     MikroOrmModule.forFeature({
-      entities: [User, Startup, CapsuleProposal, UratQuestion],
+      entities: [User, Startup, CapsuleProposal, UratQuestion, RnaChatHistory],
     }),
     ConfigModule.forRoot({
       isGlobal: true,

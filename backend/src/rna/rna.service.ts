@@ -6,6 +6,8 @@ import { CreateStartupRnaDto, GenerateRNAsDto, UpdateStartupRnaDto  } from './dt
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { AiService } from 'src/ai/ai.service';
+import { createBasePrompt } from 'src/ai/utils/prompt.utils';
+import { RnaChatHistory } from 'src/entities/rna-chat-history.entity';
 
 @Injectable()
 export class RnaService {
@@ -71,15 +73,38 @@ export class RnaService {
       const capsuleProposalInfo = startup.capsuleProposal;
       if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found.');
   
-      // Readiness levels for prompt building
+      // 3. Get existing RNA entries for this startup
+      const existingRNAs = await this.em.find(StartupRNA, { startup: startup }, {
+        populate: ['readinessLevel']
+      });
+
+      // 4. Get all readiness levels for this startup
       const startupReadinessLevels = await this.em.find(
         StartupReadinessLevel,
         { startup: startup },
         { populate: ['readinessLevel'] },
       );
 
-      console.log(startupReadinessLevels);
-  
+      // 5. Find readiness levels that don't have RNA yet
+      const readinessLevelsWithoutRNA = startupReadinessLevels.filter(
+        (startupReadinessLevel) => 
+          !existingRNAs.some(
+            (existingRNA) => existingRNA.readinessLevel.id === startupReadinessLevel.readinessLevel.id
+          )
+      );
+
+      // 6. If all readiness levels already have RNA, return empty array
+      if (readinessLevelsWithoutRNA.length === 0) {
+        return [];
+      }
+
+      // 7. Build readiness level data for prompt
+      const readinessLevelData = startupReadinessLevels.map((srl, index) => ({
+        type: srl.readinessLevel.readinessType,
+        level: srl.readinessLevel.level,
+        hasRNA: existingRNAs.some(rna => rna.readinessLevel.id === srl.readinessLevel.id)
+      }));
+
       const trl = startupReadinessLevels[0]?.readinessLevel.level || 0;
       const mrl = startupReadinessLevels[1]?.readinessLevel.level || 0;
       const arl = startupReadinessLevels[2]?.readinessLevel.level || 0;
@@ -116,72 +141,39 @@ export class RnaService {
       IRL ${irl}
       `;
 
+      // 8. Create prompt for only missing readiness types
+      const missingReadinessTypes = readinessLevelsWithoutRNA.map(rl => rl.readinessLevel.readinessType);
       const prompt = `
       ${basePrompt}
       
-      TASK: Generate a RNA(Readiness and Needs Assessment) for each readiness level.
+      TASK: Generate a RNA(Readiness and Needs Assessment) for the following readiness levels that are missing: ${missingReadinessTypes.join(', ')}.
       Requirement: The response should be in a JSON format.
-      JSON format: {{"readiness_level_type": (string), "rna": ""(string)}}
+      JSON format: [{"readiness_level_type": (string), "rna": ""(string)}]
       Requirement:
-      - readiness_level_type consists of Technology, Market, Acceptance, Organizational, Regulatory, and Investment and should only be those with no additional text and in that order
-      - details has a max length of 500
-      - details should be for that readiness type only.
+      - readiness_level_type should only be one of: ${missingReadinessTypes.join(', ')}
+      - rna has a max length of 500
+      - rna should be specific to that readiness type only.
       `;
 
-      const targetReadinessLevel = {
-        "Technology": trl,
-        "Market": mrl,
-        "Acceptance": arl,
-        "Organizational": orl,
-        "Regulatory": rrl,
-        "Investment": irl,
-      }
-
       const generatedRNAs = await this.aiService.generateRNAsFromPrompt(prompt);
-      // const generatedRNAs = [
-      //   {
-      //       "readiness_level_type": "Technology",
-      //       "rna": "Current Technology Readiness Level (TRL) is 1, indicating basic principles are observed and reported. AgriNest needs significant work to move towards a functional prototype. Focus should be on identifying key technologies (sensors, embedded systems, app development framework) and proving their feasibility in a lab environment. A core need is expertise in IoT and AI, potentially through hiring or partnerships. Early-stage funding will be needed for component procurement and initial prototype development. This also includes defining the system architecture for data collection, processing, and presentation within the app. Moving to TRL 2-3 requires demonstrating that the core AgriNest concepts can actually work in controlled conditions."
-      //   },
-      //   {
-      //       "readiness_level_type": "Market",
-      //       "rna": "Current Market Readiness Level (MRL) is 4, indicating that the business has identified the market and its specific needs. The next step is to determine whether or not the business has a viable product and go-to-market strategy. This requires market testing and validation to determine whether or not customers want the product at the price. This must be done in parallel with product development to ensure a viable product and plan."
-      //   },
-      //   {
-      //       "readiness_level_type": "Acceptance",
-      //       "rna": "Current Acceptance Readiness Level (ARL) is 6, indicating that preliminary marketing work has taken place, and the business has demonstrated a minimal amount of user engagement in the form of likes and shares online. The next step is to get real user feedback to determine whether or not the idea has real-world application. This requires user surveys and testing, which will help the business refine its assumptions. This would validate or invalidate AgriNest's core assumptions around user preferences, pricing sensitivity, and feature priorities, and help optimize the user experience. This is an important step towards widespread user adoption."
-      //   },
-      //   {
-      //       "readiness_level_type": "Organizational",
-      //       "rna": "Current Organizational Readiness Level (ORL) is 1, indicating a lack of established processes, team structure, and operational infrastructure. A crucial need is defining roles and responsibilities within the founding team and establishing clear decision-making processes. The team may lack the skills and experiences necessary for the technical and marketing challenges ahead, so the organizational structure should reflect those needs. The startup must establish clear processes for prototyping, marketing, and sales to scale. A key step is to recruit key roles in product design, software development, and marketing. Moving to ORL 2-3 requires building a basic operational framework for managing the acceleration program's activities."
-      //   },
-      //   {
-      //       "readiness_level_type": "Regulatory",
-      //       "rna": "Current Regulatory Readiness Level (RRL) is 7, indicating that the business has identified the laws and regulations that pertain to the product. The next step is to ensure that the business has established a legal and regulatory plan. The business needs to identify and address any regulatory requirements related to electrical safety, materials used, and data privacy. The business should have a plan to protect intellectual property, including patent filing for the core technology. The team will need expertise in relevant regulations to avoid delays and legal issues."
-      //   },
-      //   {
-      //       "readiness_level_type": "Investment",
-      //       "rna": "Current Investment Readiness Level (IRL) is 9, indicating the team has already secured seed funding, or grants, or is bootstrapping from personal resources. While some resources are available, they may not be enough to meet the goals of mass production, market testing, and market strategy planning. Additional funding is required to refine the product, conduct proper testing, and begin to scale the business. The need is a comprehensive financial plan that outlines the required investment, projected revenue, and key milestones for investors. A pitch deck must be created to attract investors. The company needs to show revenue, profitability, and a scalable business model to move forward."
-      //   },
-      // ]
 
-
+      // 9. Create RNA entries only for missing readiness types
       const createdRNAs: StartupRNA[] = [];
-      for (let i = 0; i < generatedRNAs.length; i++) {
-          const anotherRNA = generatedRNAs[i];
-          //   const targetLevel = await this.em.findOne(StartupReadinessLevel, {
-          //     readinessType: readinessType,
-          //     level: Math.min(Number(task.target_level) || targetReadinessLevel[readinessType]+1, 9),
-          // });
+      for (const generatedRNA of generatedRNAs) {
+        const matchingReadinessLevel = readinessLevelsWithoutRNA.find(
+          rl => rl.readinessLevel.readinessType === generatedRNA.readiness_level_type
+        );
 
+        if (matchingReadinessLevel) {
           const newRNA = new StartupRNA();
-          newRNA.rna = anotherRNA.rna;
-          newRNA.isAiGenerated = false;
+          newRNA.rna = generatedRNA.rna;
+          newRNA.isAiGenerated = true; // Mark as AI generated
           newRNA.startup = startup;
-          newRNA.readinessLevel = startupReadinessLevels[i]?.readinessLevel;
+          newRNA.readinessLevel = matchingReadinessLevel.readinessLevel;
 
           await this.em.persist(newRNA);
           createdRNAs.push(newRNA);
+        }
       }
       await this.em.flush();
   
@@ -192,6 +184,105 @@ export class RnaService {
           startup: r.startup,
           readinessLevel: r.readinessLevel
       }));
+    }
+
+    async checkIfAllReadinessTypesHaveRNA(startupId: number): Promise<boolean> {
+      const startup = await this.em.findOne(Startup, { id: startupId });
+      if (!startup) throw new NotFoundException('Startup not found');
+
+      // Get all readiness levels for this startup
+      const startupReadinessLevels = await this.em.find(
+        StartupReadinessLevel,
+        { startup: startup },
+        { populate: ['readinessLevel'] },
+      );
+
+      // Get existing RNA entries for this startup
+      const existingRNAs = await this.em.find(StartupRNA, { startup: startup }, {
+        populate: ['readinessLevel']
+      });
+
+      // Check if all readiness levels have RNA
+      return startupReadinessLevels.every(
+        (startupReadinessLevel) => 
+          existingRNAs.some(
+            (existingRNA) => existingRNA.readinessLevel.id === startupReadinessLevel.readinessLevel.id
+          )
+      );
+    }
+
+    async refineRna(
+      rnaId: number,
+      chatHistory: { role: 'User' | 'Ai'; content: string }[],
+      latestPrompt: string
+    ): Promise<{ 
+      refinedRna?: string;
+      aiCommentary: string 
+    }> {
+      const rna = await this.em.findOne(StartupRNA, { id: rnaId }, { 
+        populate: ['startup', 'startup.capsuleProposal', 'readinessLevel'] 
+      });
+      if (!rna) throw new NotFoundException('RNA not found');
+
+      const startup = rna.startup;
+      const capsuleProposalInfo = startup.capsuleProposal;
+      if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+
+      const basePrompt = await createBasePrompt(startup, this.em);
+
+      let prompt = `${basePrompt}
+
+      Current RNA Details:
+      Readiness Type: ${rna.readinessLevel.readinessType}
+      Current Level: ${rna.readinessLevel.level}
+      RNA Description: ${rna.rna}
       
+      Chat History:
+      ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+
+      User: ${latestPrompt}
+
+      IMPORTANT INSTRUCTIONS:
+      1. Only refine the RNA description that the user explicitly asks to modify
+      2. Do not modify any other fields
+      3. Respond with a JSON object containing ONLY the requested refinements
+      4. If the user did not specify what to refine, refine the RNA description
+      5. Use the exact field name shown in the example
+
+      Example response format:
+      {
+          "refinedRna": "your refined RNA description here"
+      }
+      =========
+      Your commentary about the changes here.
+
+      Available fields:
+      - refinedRna (for RNA description updates)
+
+      Remember:
+      - Only include the refinedRna field if the user specifically asks to refine the RNA description
+      - The JSON must be valid and properly formatted
+      - Always include the ========= separator followed by your commentary`;
+
+      const result = await this.aiService.refineRna(prompt);
+
+      // Save chat history
+      const newMessages = [
+        new RnaChatHistory({
+          rna,
+          role: 'User',
+          content: latestPrompt
+        }),
+        new RnaChatHistory({
+          rna,
+          role: 'Ai',
+          content: result.aiCommentary,
+          refinedRna: result.refinedRna
+        })
+      ];
+
+      await this.em.persistAndFlush(newMessages);
+
+      return result;
     }
 }

@@ -22,7 +22,6 @@
   export let update: (id: number, payload: any) => Promise<void>;
   export let isTask:boolean = false;
   export let taskDescription = 'None';
-
 </script>
 
 <div class="flex flex-col gap-3 break-words">

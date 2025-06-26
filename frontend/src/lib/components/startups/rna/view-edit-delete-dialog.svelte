@@ -28,7 +28,8 @@
     }
   });
 
-  let editDescription = $state(false);
+  let editDescription = $state(role !== 'Startup');
+  console.log("Edit Description: ", editDescription);
 
   let deleteDialogOpen = $state(false);
   const deleteDialogOnOpenChange = () => {

@@ -47,4 +47,17 @@ export class RnaController {
     async generateTasks(@Param('id', ParseIntPipe) id: number) {
       return await this.rnaService.generateRNA(id);
     }
+
+    @Get(':id/check-complete')
+    async checkIfAllReadinessTypesHaveRNA(@Param('id', ParseIntPipe) id: number) {
+      return await this.rnaService.checkIfAllReadinessTypesHaveRNA(id);
+    }
+
+    @Post(':id/refine')
+    async refineRna(
+      @Param('id', ParseIntPipe) id: number,
+      @Body() body: { chatHistory: any[]; latestPrompt: string }
+    ) {
+      return await this.rnaService.refineRna(id, body.chatHistory, body.latestPrompt);
+    }
 }
