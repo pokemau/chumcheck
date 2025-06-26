@@ -47,17 +47,29 @@ export class RnsController {
   @Post(':id/refine')
   async refineRnsDescription(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { chatHistory: { role: 'User' | 'Ai'; content: string; refinedDescription: string | null; }[]; latestPrompt: string },
+    @Body()
+    dto: {
+      chatHistory: {
+        role: 'User' | 'Ai';
+        content: string;
+        refinedDescription: string | null;
+      }[];
+      latestPrompt: string;
+    },
   ) {
-    return await this.rnsService.refineRnsDescription(id, dto.chatHistory, dto.latestPrompt);
+    return await this.rnsService.refineRnsDescription(
+      id,
+      dto.chatHistory,
+      dto.latestPrompt,
+    );
   }
 
   @Patch(':id/roleDependent')
   async roleStatusUpdate(
-      @Param('id', ParseIntPipe) id: number,
-      @Query('role') role: string,
-      @Body() dto: UpdateRnsDto
+    @Param('id', ParseIntPipe) id: number,
+    @Query('role') role: string,
+    @Body() dto: UpdateRnsDto,
   ) {
-      return this.rnsService.statusChange(id, role, dto);
+    return this.rnsService.statusChange(id, role, dto);
   }
 }

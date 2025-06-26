@@ -1,5 +1,9 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { Rns } from 'src/entities/rns.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
@@ -15,7 +19,10 @@ import { RnsStatus } from 'src/entities/enums/rns.enum';
 
 @Injectable()
 export class RnsService {
-  constructor(private em: EntityManager, private readonly aiService: AiService) {}
+  constructor(
+    private em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
   async getStartupRns(startupId: number) {
     const rns = await this.em.find(
@@ -101,7 +108,7 @@ export class RnsService {
     }
 
     if (dto.approvalStatus !== undefined) {
-        rns.approvalStatus = dto.approvalStatus;
+      rns.approvalStatus = dto.approvalStatus;
     }
 
     if (dto.priorityNumber !== undefined) {
@@ -124,59 +131,72 @@ export class RnsService {
     return rns;
   }
 
-      async statusChange(id: number, role: string, dto:UpdateRnsDto){
-          const rns = await this.em.findOne(Rns, { id });
-          if (!rns) throw new NotFoundException('Rns not found');
-  
-          if(rns.requestedStatus === dto.status){
-              return rns;
-          }
-          
-          if (role === "Startup") {
-              if(rns.status === dto.status){
-                  rns.approvalStatus = 'Unchanged';
-              }else{
-                  rns.approvalStatus = 'Pending';
-              }
-              rns.requestedStatus = dto.status;
-          } else {
-              rns.status = dto.status;
-              rns.approvalStatus = 'Unchanged';
-              rns.requestedStatus = dto.status;
-          }
-  
-          await this.em.flush();
-          return rns;
+  async statusChange(id: number, role: string, dto: UpdateRnsDto) {
+    const rns = await this.em.findOne(Rns, { id });
+    if (!rns) throw new NotFoundException('Rns not found');
+
+    if (rns.requestedStatus === dto.status) {
+      return rns;
+    }
+
+    if (role === 'Startup') {
+      if (rns.status === dto.status) {
+        rns.approvalStatus = 'Unchanged';
+      } else {
+        rns.approvalStatus = 'Pending';
       }
+      rns.requestedStatus = dto.status;
+    } else {
+      rns.status = dto.status;
+      rns.approvalStatus = 'Unchanged';
+      rns.requestedStatus = dto.status;
+    }
+
+    await this.em.flush();
+    return rns;
+  }
 
   async generateTasks(dto: GenerateTasksDto) {
     // 1. Validate startup exists
-    const startup = await this.em.findOne(Startup, { id: dto.startup_id }, {
-      populate:['capsuleProposal']
-    });
+    const startup = await this.em.findOne(
+      Startup,
+      { id: dto.startup_id },
+      {
+        populate: ['capsuleProposal'],
+      },
+    );
     if (!startup) throw new NotFoundException('Startup not found');
 
     // 2. Get capsule proposal info
     const capsuleProposalInfo = startup.capsuleProposal;
-    if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found.');
+    if (!capsuleProposalInfo)
+      throw new BadRequestException('No capsule proposal found.');
 
     // Determine the source of RNS generation (selected RNS IDs or readinessType)
     let rnasToGenerateFrom: StartupRNA[] = [];
 
     if (dto.rnaIds && dto.rnaIds.length > 0) {
       // If RNS IDs are provided, fetch the corresponding StartupRNA entities
-      rnasToGenerateFrom = await this.em.find(StartupRNA, {
-        id: { $in: dto.rnaIds },
-        startup: startup,
-      }, {
-        populate: ['readinessLevel']
-      });
+      rnasToGenerateFrom = await this.em.find(
+        StartupRNA,
+        {
+          id: { $in: dto.rnaIds },
+          startup: startup,
+        },
+        {
+          populate: ['readinessLevel'],
+        },
+      );
 
       if (rnasToGenerateFrom.length === 0) {
-        throw new BadRequestException('No valid RNA found for the provided RNS IDs.');
+        throw new BadRequestException(
+          'No valid RNA found for the provided RNS IDs.',
+        );
       }
     } else {
-      throw new BadRequestException('Either rnaIds or readinessType must be provided.');
+      throw new BadRequestException(
+        'Either rnaIds or readinessType must be provided.',
+      );
     }
 
     // Readiness levels for prompt building
@@ -226,24 +246,29 @@ export class RnsService {
     let currentPriorityNumber = dto.startPriorityNumber || 1; // Use startPriorityNumber if provided, otherwise 1
 
     // Increment existing RNS priority numbers to make room for new ones
-    const existingRns = await this.em.find(Rns, { startup: startup }, { orderBy: { priorityNumber: 'ASC' } });
+    const existingRns = await this.em.find(
+      Rns,
+      { startup: startup },
+      { orderBy: { priorityNumber: 'ASC' } },
+    );
     if (dto.rnaIds && dto.rnaIds.length > 0) {
-        for (const rns of existingRns) {
-            rns.priorityNumber += (dto.no_of_tasks_to_create || 1) * rnasToGenerateFrom.length; // Increment by total expected new tasks
-            await this.em.persist(rns);
-        }
-        await this.em.flush(); // Flush once after all increments
+      for (const rns of existingRns) {
+        rns.priorityNumber +=
+          (dto.no_of_tasks_to_create || 1) * rnasToGenerateFrom.length; // Increment by total expected new tasks
+        this.em.persist(rns);
+      }
+      await this.em.flush(); // Flush once after all increments
     }
 
     for (const rna of rnasToGenerateFrom) {
-        const readinessType = rna.readinessLevel.readinessType;
-        // Term will be short-term for newly generated RNS, as it's not directly from an existing RNS
-        const term = "Short-term"; // Assuming newly generated RNS are short-term
+      const readinessType = rna.readinessLevel.readinessType;
+      // Term will be short-term for newly generated RNS, as it's not directly from an existing RNS
+      const term = 'Short-term'; // Assuming newly generated RNS are short-term
 
-        let startupRnaPrompt = `This is the RNA for ${readinessType} Readiness Type Of Startup:\n`;
-        startupRnaPrompt += `Readiness Level ${rna.readinessLevel.level}: ${rna.rna}\n`;
+      let startupRnaPrompt = `This is the RNA for ${readinessType} Readiness Type Of Startup:\n`;
+      startupRnaPrompt += `Readiness Level ${rna.readinessLevel.level}: ${rna.rna}\n`;
 
-        const prompt = `
+      const prompt = `
         ${basePrompt}
 
         ${startupRnaPrompt}
@@ -259,79 +284,99 @@ export class RnsService {
         - description has a max length of 500
         `;
 
-        const aiTasks = await this.aiService.generateTasksFromPrompt(prompt);
+      const aiTasks = await this.aiService.generateTasksFromPrompt(prompt);
 
-        if (!aiTasks || !Array.isArray(aiTasks) || aiTasks.length === 0) {
-            console.warn(`AI did not return any tasks for RNA ID: ${rna.id}`);
-            continue; // Skip to the next RNA if no tasks generated
+      if (!aiTasks || !Array.isArray(aiTasks) || aiTasks.length === 0) {
+        console.warn(`AI did not return any tasks for RNA ID: ${rna.id}`);
+        continue; // Skip to the next RNA if no tasks generated
+      }
+      console.log('AI Tasks:', aiTasks);
+      const targetReadinessLevel = {
+        Technology: trl,
+        Market: mrl,
+        Acceptance: arl,
+        Organizational: orl,
+        Regulatory: rrl,
+        Investment: irl,
+      };
+
+      for (let i = 0; i < aiTasks.length; i++) {
+        const task = aiTasks[i];
+        const targetLevel = await this.em.findOne(ReadinessLevel, {
+          readinessType: readinessType,
+          level: Math.min(
+            Number(task.target_level) ||
+              targetReadinessLevel[readinessType] + 1,
+            9,
+          ),
+        });
+        if (!targetLevel) {
+          console.warn(
+            `Target level not found for readinessType: ${readinessType}, level: ${task.target_level}`,
+          );
+          continue;
         }
-        console.log("AI Tasks:", aiTasks);
-        const targetReadinessLevel = {
-          "Technology": trl,
-          "Market": mrl,
-          "Acceptance": arl,
-          "Organizational": orl,
-          "Regulatory": rrl,
-          "Investment": irl,
-        }
 
-        for (let i = 0; i < aiTasks.length; i++) {
-            const task = aiTasks[i];
-            const targetLevel = await this.em.findOne(ReadinessLevel, {
-                readinessType: readinessType,
-                level: Math.min(Number(task.target_level) || targetReadinessLevel[readinessType]+1, 9),
-            });
-            if (!targetLevel) {
-                console.warn(`Target level not found for readinessType: ${readinessType}, level: ${task.target_level}`);
-                continue;
-            }
+        const newRns = new Rns();
+        newRns.priorityNumber = currentPriorityNumber++; // Assign and then increment for the next RNS
+        newRns.description = task.description;
+        newRns.targetLevel = targetLevel;
+        newRns.readinessType = readinessType;
+        newRns.startup = startup;
+        newRns.requestedStatus = 1;
+        newRns.status = 1; // Use provided term or default to short-term status (1)
+        newRns.assignee = startup.user;
 
-            const newRns = new Rns();
-            newRns.priorityNumber = currentPriorityNumber++; // Assign and then increment for the next RNS
-            newRns.description = task.description;
-            newRns.targetLevel = targetLevel;
-            newRns.readinessType = readinessType;
-            newRns.startup = startup;
-            newRns.status = 1; // Use provided term or default to short-term status (1)
-            newRns.assignee = startup.user;
-
-            await this.em.persist(newRns);
-            createdRns.push(newRns);
-        }
+        this.em.persist(newRns);
+        createdRns.push(newRns);
+      }
     }
     await this.em.flush(); // Flush all new RNS after the loop
 
     if (dto.debug) {
-      return { prompt: "See console for prompts if multiple RNS were generated." }; // Return placeholder for debug if multiple prompts
+      return {
+        prompt: 'See console for prompts if multiple RNS were generated.',
+      }; // Return placeholder for debug if multiple prompts
     } else {
-        return createdRns.map((r: Rns) => ({
-            id: r.id,
-            priorityNumber: r.priorityNumber,
-            description: r.description,
-            targetLevelId: r.targetLevel.id,
-            isAiGenerated: r.isAiGenerated,
-            status: r.status,
-            readinessType: r.readinessType,
-            startup: r.startup.id,
-        }));
+      return createdRns.map((r: Rns) => ({
+        id: r.id,
+        priorityNumber: r.priorityNumber,
+        description: r.description,
+        targetLevelId: r.targetLevel.id,
+        isAiGenerated: r.isAiGenerated,
+        status: r.status,
+        readinessType: r.readinessType,
+        startup: r.startup.id,
+      }));
     }
   }
 
   async refineRnsDescription(
-    rnsId: number, 
-    chatHistory: { role: 'User' | 'Ai'; content: string; refinedDescription: string | null }[], 
-    latestPrompt: string
+    rnsId: number,
+    chatHistory: {
+      role: 'User' | 'Ai';
+      content: string;
+      refinedDescription: string | null;
+    }[],
+    latestPrompt: string,
   ): Promise<{ refinedDescription: string; aiCommentary: string }> {
-    const rns = await this.em.findOne(Rns, { id: rnsId }, { populate: ['startup', 'targetLevel', 'startup.capsuleProposal'] });
+    const rns = await this.em.findOne(
+      Rns,
+      { id: rnsId },
+      { populate: ['startup', 'targetLevel', 'startup.capsuleProposal'] },
+    );
     if (!rns) throw new NotFoundException('RNS not found');
     const startup = rns.startup;
     const capsuleProposalInfo = startup.capsuleProposal;
-    if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
+    if (!capsuleProposalInfo)
+      throw new BadRequestException(
+        'No capsule proposal found for this startup.',
+      );
 
     const startupReadinessLevels = await this.em.find(
       StartupReadinessLevel,
       { startup: startup },
-      { populate: ['readinessLevel'] }
+      { populate: ['readinessLevel'] },
     );
     const trl = startupReadinessLevels[0]?.readinessLevel.level || 0;
     const mrl = startupReadinessLevels[1]?.readinessLevel.level || 0;
@@ -388,14 +433,14 @@ export class RnsService {
       new RnsChatHistory({
         rns,
         role: 'User',
-        content: latestPrompt
+        content: latestPrompt,
       }),
       new RnsChatHistory({
         rns,
         role: 'Ai',
         content: result.aiCommentary,
-        refinedDescription: result.refinedDescription
-      })
+        refinedDescription: result.refinedDescription,
+      }),
     ];
 
     await this.em.persistAndFlush(newMessages);
@@ -407,7 +452,7 @@ export class RnsService {
     const chatHistory = await this.em.find(
       RnsChatHistory,
       { rns: { id: rnsId } },
-      { orderBy: { createdAt: 'ASC' } }
+      { orderBy: { createdAt: 'ASC' } },
     );
 
     return chatHistory;
