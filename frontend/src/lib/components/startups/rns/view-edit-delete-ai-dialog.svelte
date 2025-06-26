@@ -1,4 +1,6 @@
 <script lang="ts">
+
+import { PUBLIC_API_URL } from '$env/static/public';
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Textarea } from '$lib/components/ui/textareav2';
@@ -55,7 +57,7 @@
     isLoadingHistory = true;
     try {
       const response = await fetch(
-        `http://localhost:3000/chat-history/rns/${rns.id}`
+        `${PUBLIC_API_URL}/chat-history/rns/${rns.id}`
       );
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
@@ -126,7 +128,7 @@
 
     try {
       const response = await fetch(
-        `http://localhost:3000/rns/${rns.id}/refine`,
+        `${PUBLIC_API_URL}/rns/${rns.id}/refine`,
         {
           method: 'POST',
           headers: {

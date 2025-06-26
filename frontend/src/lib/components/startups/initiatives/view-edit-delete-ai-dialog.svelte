@@ -12,6 +12,7 @@
   import { tick } from 'svelte';
   import { RnsStatus } from '$lib/components/shared/rns.enum';
   import { Input } from '$lib/components/ui/input';
+  import { PUBLIC_API_URL } from '$env/static/public';
 
   type ChatMessage = {
     id?: number;
@@ -52,7 +53,7 @@
   async function loadChatHistory() {
     isLoadingHistory = true;
     try {
-      const response = await fetch(`http://localhost:3000/chat-history/initiatives/${initiative.id}`);
+      const response = await fetch(`${PUBLIC_API_URL}/chat-history/initiatives/${initiative.id}`);
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
       chatHistory = history;
@@ -103,7 +104,7 @@
     isLoading = true;
 
     try {
-      const response = await fetch(`http://localhost:3000/initiatives/${initiative.id}/refine`, {
+      const response = await fetch(`${PUBLIC_API_URL}/initiatives/${initiative.id}/refine`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

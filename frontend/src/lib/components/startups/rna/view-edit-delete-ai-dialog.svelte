@@ -11,6 +11,7 @@
   import { TextEditor } from '$lib/components/shared';
   import { tick } from 'svelte';
   import { Input } from '$lib/components/ui/input';
+  import { PUBLIC_API_URL } from '$env/static/public';
 
   type ChatMessage = {
     id?: number;
@@ -45,7 +46,7 @@
   async function loadChatHistory() {
     isLoadingHistory = true;
     try {
-      const response = await fetch(`http://localhost:3000/chat-history/rna/${rna.id}`);
+      const response = await fetch(`${PUBLIC_API_URL}/chat-history/rna/${rna.id}`);
       if (!response.ok) throw new Error('Failed to load chat history');
       const history = await response.json();
       chatHistory = history;
@@ -96,7 +97,7 @@
     isLoading = true;
 
     try {
-      const response = await fetch(`http://localhost:3000/rna/${rna.id}/refine`, {
+      const response = await fetch(`${PUBLIC_API_URL}/rna/${rna.id}/refine`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
