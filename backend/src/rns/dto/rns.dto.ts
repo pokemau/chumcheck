@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -9,6 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
+import { RnsStatus } from 'src/entities/enums/rns.enum';
 
 export class CreateRnsDto {
   @IsNotEmpty()
@@ -33,8 +35,8 @@ export class CreateRnsDto {
 
   @IsNotEmpty()
   @IsNumber()
-  @Type(() => Number)
-  status!: number;
+  @IsEnum(RnsStatus)
+  status!: RnsStatus;
 
   @IsNotEmpty()
   @IsEnum(ReadinessType)
@@ -78,9 +80,17 @@ export class UpdateRnsDto {
   priorityNumber?: number;
 
   @IsOptional()
-  @IsNumber()
-  @Type(() => Number)
-  status?: number;
+  @IsEnum(RnsStatus)
+  status: RnsStatus;
+
+  @IsOptional()
+  @IsEnum(RnsStatus)
+  requestedStatus: RnsStatus;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Pending', 'Approved', 'Denied', 'Unchanged'])
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
 
   @IsOptional()
   @IsBoolean()

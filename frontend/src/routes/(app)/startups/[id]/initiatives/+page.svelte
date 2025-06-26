@@ -25,8 +25,11 @@
   import axios from 'axios';
   import { toast } from 'svelte-sonner';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-  import { InitiativeCard, InitiativeCreateDialog } from '$lib/components/startups/initiatives';
-  import { Ellipsis, Kanban, TableIcon, Loader } from 'lucide-svelte';
+  import {
+    InitiativeCard,
+    InitiativeCreateDialog
+  } from '$lib/components/startups/initiatives';
+  import { Ellipsis, Kanban, TableIcon, Loader, Sparkles, Plus } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
@@ -39,7 +42,8 @@
   const initiativesQueries = useQueries([
     {
       queryKey: ['allowRNS', startupId],
-      queryFn: () => getData(`/startups/${startupId}/allow-initiatives/`, access!)
+      queryFn: () =>
+        getData(`/startups/${startupId}/allow-initiatives/`, access!)
     },
     {
       queryKey: ['rnsDataInitiative'],
@@ -90,16 +94,30 @@
     $initiativesQueries[3].isSuccess
       ? (() => {
           const data = $initiativesQueries[3].data;
-          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
-            userId: id,
-            startupId: data.id,
-            firstName,
-            lastName,
-            email,
-            selected: false
-          }));
+          const baseMembers: Member[] = data.members.map(
+            ({
+              id,
+              email,
+              firstName,
+              lastName
+            }: {
+              id: number;
+              email: string;
+              firstName: string;
+              lastName: string;
+            }) => ({
+              userId: id,
+              startupId: data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          );
 
-          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some(
+            (member: Member) => member.userId === data.user.id
+          );
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -118,45 +136,72 @@
   );
 
   const tasks = $derived(
-    $initiativesQueries[1].isSuccess ? ($initiativesQueries[1].data as RNSTask[]) : []
+    $initiativesQueries[1].isSuccess
+      ? ($initiativesQueries[1].data as RNSTask[])
+      : []
   );
 
   let status = $state(1);
   let selectedFormat = $state('board');
   const selectedMembers: any = $state([]);
 
-  $effect(() => {   
+  $effect(() => {
     // Handle URL params and column data
     const searchParam = $page.url.searchParams.get('tab');
     selectedTab = getSavedTab('initiatives', searchParam);
 
+    // console.log($initiativesQueries[2].data)
+
     if (!isLoading && $initiativesQueries[2].isSuccess) {
       columns.forEach((column) => {
-        column.items = $initiativesQueries[2].data.filter(
-          (data: any) => data.isAiGenerated === false && data.status === column.value
-        );
+        column.items = $initiativesQueries[2].data
+          .filter(
+            (data: any) =>
+              data.isAiGenerated === false && data.requestedStatus === column.value
+          )
+          .sort((a: any, b: any) => a.initiativeNumber - b.initiativeNumber);
       });
     }
 
     // Handle RNS task selection
     if ($initiativesQueries[1].isSuccess && $initiativesQueries[2].isSuccess) {
       // Get all RNS IDs that already have initiatives
-      const rnsWithInitiatives = new Set($initiativesQueries[2].data.map((initiative: any) => initiative.rns));
-      
+      const rnsWithInitiatives = new Set(
+        $initiativesQueries[2].data.map((initiative: any) => initiative.rns)
+      );
+
       selectedRNS = tasks
-        .filter(task => 
-          !rnsWithInitiatives.has(task.id) && 
-          task.status !== 7
-        )
-        .map(task => task.id);
+        .filter((task) => !rnsWithInitiatives.has(task.id) && task.status !== 7)
+        .map((task) => task.id);
     }
   });
 
   const createInitiative = async (payload: any) => {
+    // Increment existing priority numbers
+    const currentItems = await axiosInstance.get(
+      `/initiatives/?startupId=${startupId}`,
+      {
+        headers: { Authorization: `Bearer ${access}` }
+      }
+    );
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(
+        `/initiatives/${item.id}/`,
+        {
+          priorityNumber: (item.priorityNumber || 0) + 1
+        },
+        {
+          headers: { Authorization: `Bearer ${access}` }
+        }
+      )
+    );
+    await Promise.all(updatePromises);
+
     await axiosInstance.post(
       '/initiatives/',
       {
-        ...payload
+        ...payload,
+        priorityNumber: 1
       },
       {
         headers: {
@@ -172,12 +217,13 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) =>
+              data.isAiGenerated === false &&
+              data.requestedStatus === column.value
           );
         });
       })
       .finally(async () => await updateInitiativeNumber());
-      
   };
 
   const deleteInitiative = async (id: number) => {
@@ -187,26 +233,32 @@
       }
     });
     toast.success('Successfuly deleted a task');
-    
+
     $initiativesQueries[2]
       .refetch()
       .then((res) => {
         columns.forEach((column) => {
           column.items = res.data.filter(
-            (data: any) => data.isAiGenerated === false && data.status === column.value
+            (data: any) =>
+              data.isAiGenerated === false &&
+              data.requestedStatus === column.value
           );
         });
       })
       .finally(async () => await updateInitiativeNumber());
   };
 
-  const updatedEditInitiative = async (id: number, payload: any) => {
+  const updatedEditInitiative = async (
+    id: number,
+    payload: any,
+    showToast: boolean = true
+  ) => {
     await axiosInstance.patch(`/initiatives/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated Initiatives');
+    if (showToast) toast.success('Successfuly updated Initiatives');
     $initiativesQueries[1].refetch();
     $initiativesQueries[2].refetch();
 
@@ -222,7 +274,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/initiatives/${task.id}/`,
+        `/initiatives/${task.id}/roleDependent?role=${data.role}`,
         {
           status
         },
@@ -235,6 +287,8 @@
     }
 
     updateInitiativeNumber();
+    $initiativesQueries[1].refetch();
+    $initiativesQueries[2].refetch();
   }
 
   const updateInitiativeNumber = async () => {
@@ -345,7 +399,7 @@
 
       const initiativeNumber = counters[indexOf]; // Get the current counter value
       item.initiativeNumber = initiativeNumber;
-      
+
       updatePromises.push(
         axiosInstance.patch(
           `/initiatives/${item.id}/`,
@@ -425,7 +479,9 @@
         .then((res) => {
           columns.forEach((column) => {
             column.items = res.data.filter(
-              (data: any) => data.isAiGenerated === false && data.status === column.value
+              (data: any) =>
+                data.isAiGenerated === false &&
+                data.requestedStatus === column.value
             );
           });
         })
@@ -470,7 +526,7 @@
   };
 
   let selectedRNS: number[] = $state([]);
-  
+
   const toggleRNSSelection = (id: number) => {
     const index = selectedRNS.indexOf(id);
     if (index !== -1) {
@@ -489,14 +545,17 @@
     generatingInitiatives = true;
     try {
       // First, get all current initiatives
-      const currentItems = await axiosInstance.get(`/initiatives/?startupId=${startupId}`, {
-        headers: {
-          Authorization: `Bearer ${data.access}`
+      const currentItems = await axiosInstance.get(
+        `/initiatives/?startupId=${startupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
         }
-      });
+      );
 
       // Increment priority numbers of all existing items so that new initiatives will be at the top of the column
-      const updatePromises = currentItems.data.map((item: any) => 
+      const updatePromises = currentItems.data.map((item: any) =>
         axiosInstance.patch(
           `/initiatives/${item.id}/`,
           { priorityNumber: (item.priorityNumber || 0) + selectedRNS.length }, // Increment by number of new items
@@ -507,7 +566,7 @@
           }
         )
       );
-      
+
       await Promise.all(updatePromises);
 
       // Generate new initiatives with priority numbers starting from 1
@@ -543,11 +602,13 @@
       //     }
       //   );
       // }
-      
+
       // selectedRNS = [];
       toast.success('Successfully generated initiatives for selected RNS');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to generate initiatives');
+      toast.error(
+        error.response?.data?.message || 'Failed to generate initiatives'
+      );
     } finally {
       generatingInitiatives = false;
     }
@@ -568,7 +629,8 @@
 {:else if isAccessible}
   {@render accessible()}
 {:else}
-  {@render fallback()}
+  {@render loading()}
+  <!-- {@render fallback()} -->
 {/if}
 
 <HoveredRNSCard />
@@ -670,63 +732,81 @@
       </div>
       <MembersFilter {members} {toggleMemberSelection} {selectedMembers} />
     </div>
-    <div class="flex gap-4 items-center">
+    <div class="flex items-center gap-4">
       {#if selectedFormat === 'board'}
         <ShowHideColumns {views} />
       {/if}
       {#if data.role !== 'Startup'}
+        <Button
+          class="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          type="button"
+          onclick={() => showDialog()}
+        >
+          <Plus class="h-4 w-4" />
+          Add
+        </Button>
         <div class="flex gap-1">
           <Button
-            class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
+            class="rounded-br-none rounded-tr-none border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingInitiatives}
             onclick={() => generateInitiativesForSelected()}
           >
             {#if generatingInitiatives}
-              <Loader class="h-4 w-4 animate-spin" />
+              <Loader class="mr-2 h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              <Sparkles class="h-4 w-4" />Generate
             {/if}
           </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button
-                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
+                class="rounded-bl-none rounded-tl-none border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingInitiatives}
               >
                 <ChevronDown class="h-4 w-4" />
               </Button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content 
-              align="end" 
-              class="w-[300px] max-h-[300px] overflow-y-auto"
+            <DropdownMenu.Content
+              align="end"
+              class="max-h-[300px] w-[300px] overflow-y-auto"
               closeOnItemClick={false}
             >
               <DropdownMenu.Group class="space-y-1">
                 {#each tasks
-                  .filter(task => task.status !== 7)
+                  .filter((task) => task.status !== 7)
                   .sort((a, b) => a.priorityNumber - b.priorityNumber) as task}
-                  <div 
-                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$initiativesQueries[2].data?.some((i: any) => i.rns === task.id) ? 'opacity-50' : ''}"
+                  <div
+                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$initiativesQueries[2].data?.some(
+                      (i: any) => i.rns === task.id
+                    )
+                      ? 'opacity-50'
+                      : ''}"
                     on:click|stopPropagation={() => toggleRNSSelection(task.id)}
                     on:keydown|stopPropagation
                   >
                     <div class="flex items-center gap-2">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selectedRNS.includes(task.id)}
                         class="h-4 w-4"
                       />
                       <div class="flex flex-col gap-0.5">
                         <div class="flex items-center gap-2">
-                          <span class="font-medium">RNS #{task.priorityNumber}</span>
+                          <span class="font-medium"
+                            >RNS #{task.priorityNumber}</span
+                          >
                           {#if $initiativesQueries[2].data?.some((i: any) => i.rns === task.id)}
-                            <span class="text-xs text-muted-foreground">(Has initiatives)</span>
+                            <span class="text-xs text-muted-foreground"
+                              >(Has initiatives)</span
+                            >
                           {/if}
                         </div>
-                        <span class="text-xs text-muted-foreground line-clamp-2">
+                        <span
+                          class="line-clamp-2 text-xs text-muted-foreground"
+                        >
                           {task.description}
                         </span>
                       </div>
@@ -767,14 +847,21 @@
             {#each $initiativesQueries[2].data.filter((item: RNSTask) => item.isAiGenerated === false) as item}
               {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
                 <Table.Row class="h-14 cursor-pointer">
-                  <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
+                  <Table.Cell class="pl-5"
+                    >{item.description.substring(0, 100)}</Table.Cell
+                  >
                   <Table.Cell class="">
-                    {tasks.filter((task: RNSTask) => task.id === item.rns)[0]?.priorityNumber}
+                    {tasks.filter((task: RNSTask) => task.id === item.rns)[0]
+                      ?.priorityNumber}
                   </Table.Cell>
                   <Table.Cell class="">{item?.initiativeNumber}</Table.Cell>
                   <Table.Cell class="">
-                    {members.filter((member: Member) => member.userId === item.assignee)[0]?.firstName}
-                    {members.filter((member: Member) => member.userId === item.assignee)[0]?.lastName}
+                    {members.filter(
+                      (member: Member) => member.userId === item.assignee
+                    )[0]?.firstName}
+                    {members.filter(
+                      (member: Member) => member.userId === item.assignee
+                    )[0]?.lastName}
                   </Table.Cell>
                 </Table.Row>
               {/if}

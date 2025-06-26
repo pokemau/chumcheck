@@ -10,6 +10,7 @@
   import { Check, Trash, Copy } from 'lucide-svelte';
   import { TextEditor } from '$lib/components/shared';
   import { tick } from 'svelte';
+  import { RnsStatus } from '$lib/components/shared/rns.enum';
   import { Input } from '$lib/components/ui/input';
 
   type ChatMessage = {
@@ -33,7 +34,9 @@
     addToInitiative,
     index,
     tasks,
-    isEdit = false
+    isEdit = false,
+    approveDialog,
+    denyDialog,
   } = $props();
 
   let initiativeCopy = $state({ ...initiative });
@@ -259,8 +262,25 @@
 
       <!-- Initiative Details -->
       <div class="flex flex-col w-1/2 p-6">
-        <h2 class="text-2xl font-semibold mb-4">Initiative Details</h2>
+        <div class="flex justify-between">
+          <h2 class="mb-4 text-2xl font-semibold">Initiative Details</h2>
+          <Button
+            size="sm"
+            variant="destructive"
+            onclick={() => (deleteDialogOpen = true)}
+            ><Trash class="h-4 w-4" /> Delete</Button
+          >
+        </div>
         <div class="flex flex-col gap-4 overflow-y-auto">
+          {#if initiative.approvalStatus === 'Pending'}
+            <div class="mb-4 border p-2 rounded">
+              <Label>This initiative was moved from <strong>{RnsStatus[initiative.status]}</strong> by a startup user. Approve or Deny status change.</Label>
+              <div class="mt-2">
+                <Button variant="default" onclick={() => approveDialog()}>Approve</Button>
+                <Button variant="destructive" onclick={() => denyDialog()}>Deny</Button>
+              </div>
+            </div>
+          {/if}
           <div class="mb-4">
             <Label>Description</Label>
             <!-- <Textarea

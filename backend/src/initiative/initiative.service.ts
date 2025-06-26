@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Initiative } from 'src/entities/initiative.entity';
 import { CreateInitiativeDto, GenerateInitiativeDto, UpdateInitiativeDto } from './dto/initiative.dto';
 import { Rns } from 'src/entities/rns.entity';
@@ -22,7 +22,10 @@ export class InitiativeService {
     async createInitiative(dto: CreateInitiativeDto) {
         const initiative = new Initiative();
         initiative.initiativeNumber = dto.initiativeNumber;
+        initiative.priorityNumber = 0;
         initiative.status = dto.status;
+        initiative.requestedStatus = dto.status;
+        initiative.approvalStatus = 'Unchanged';
         initiative.rns = this.em.getReference(Rns, dto.rnsId);
         initiative.isAiGenerated = dto.isAiGenerated;
         initiative.assignee = this.em.getReference(User, dto.assigneeId);
@@ -46,6 +49,14 @@ export class InitiativeService {
 
     if (dto.status !== undefined) {
         initiative.status = dto.status;
+    }
+
+    if (dto.requestedStatus !== undefined) {
+        initiative.requestedStatus = dto.requestedStatus;
+    }
+
+    if (dto.approvalStatus !== undefined) {
+        initiative.approvalStatus = dto.approvalStatus;
     }
 
     if (dto.isAiGenerated !== undefined) {
@@ -80,16 +91,41 @@ export class InitiativeService {
         initiative.remarks = dto.remarks;
     }
 
-    if (dto.clickedByMentor) {
+    if (dto.clickedByMentor !== undefined) {
         initiative.clickedByMentor = dto.clickedByMentor;
     }
 
-    if (dto.clickedByStartup) {
+    if (dto.clickedByStartup !== undefined) {
         initiative.clickedByStartup = dto.clickedByStartup;
     }
 
     await this.em.flush();
     return initiative;
+    }
+
+    async statusChange(id: number, role: string, dto:UpdateInitiativeDto){
+        const initiative = await this.em.findOne(Initiative, { id });
+        if (!initiative) throw new NotFoundException('Initiative not found');
+
+        if(initiative.requestedStatus === dto.status){
+            return initiative;
+        }
+        
+        if (role === "Startup") {
+            if(initiative.status === dto.status){
+                initiative.approvalStatus = 'Unchanged';
+            }else{
+                initiative.approvalStatus = 'Pending';
+            }
+            initiative.requestedStatus = dto.status;
+        } else {
+            initiative.status = dto.status;
+            initiative.approvalStatus = 'Unchanged';
+            initiative.requestedStatus = dto.status;
+        }
+
+        await this.em.flush();
+        return initiative;
     }
 
 
@@ -107,13 +143,13 @@ export class InitiativeService {
             const initiatives: Initiative[] = [];
 
             // Get current minimum priority number
-            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { priorityNumber: 'ASC' } });
-            let minPriorityNumber = existingInitiatives.length > 0 ? existingInitiatives[0].priorityNumber : 1;
-            if (minPriorityNumber > 1) minPriorityNumber = 1;
+            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { initiativeNumber: 'ASC' } });
+            let minInitiativeNumber = existingInitiatives.length > 0 ? existingInitiatives[0].initiativeNumber : 1;
+            if (minInitiativeNumber > 1) minInitiativeNumber = 1;
 
             // Increment existing initiatives' priority numbers to make room for new ones
             for (const initiative of existingInitiatives) {
-                initiative.priorityNumber += dto.rnsIds.length;
+                initiative.initiativeNumber += dto.rnsIds.length;
                 await this.em.persistAndFlush(initiative);
             }
             
@@ -157,7 +193,7 @@ export class InitiativeService {
                 console.log("Number of entries generated for RNS ID", rnsId, ":", resultText.length);
                 for (const entry of resultText) {
                     const initiative = new Initiative();
-                    initiative.initiativeNumber = maxInitiativeNumber; // assign initiativeNumber
+                    initiative.initiativeNumber = minInitiativeNumber + i; // assign initiativeNumber
                     initiative.description = entry.description;
                     initiative.measures = entry.measures;
                     initiative.targets = entry.targets;
@@ -167,7 +203,7 @@ export class InitiativeService {
                     initiative.startup = rns.startup;
                     initiative.assignee = rns.startup.user;
                     initiative.status = 1;
-                    initiative.priorityNumber = minPriorityNumber + i;
+                    initiative.priorityNumber = 0;
 
                     await this.em.persistAndFlush(initiative);
                     initiatives.push(initiative);
@@ -177,22 +213,19 @@ export class InitiativeService {
             return initiatives;
         } else if (dto.rnsId) {
             // Similar logic for single RNS
-            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { priorityNumber: 'ASC' } });
-            let minPriorityNumber = existingInitiatives.length > 0 ? existingInitiatives[0].priorityNumber : 1;
-            if (minPriorityNumber > 1) minPriorityNumber = 1;
+            const existingInitiatives = await this.em.find(Initiative, {}, { orderBy: { initiativeNumber: 'ASC' } });
+            let minInitiativeNumber = existingInitiatives.length > 0 ? existingInitiatives[0].initiativeNumber : 1;
+            if (minInitiativeNumber > 1) minInitiativeNumber = 1;
 
             // Increment existing initiatives' priority numbers
             for (const initiative of existingInitiatives) {
-                initiative.priorityNumber += 1;
+                initiative.initiativeNumber += 1;
                 await this.em.persistAndFlush(initiative);
             }
 
             const rns = await this.em.findOneOrFail(Rns, { id: dto.rnsId },
                 { populate: ['startup', 'startup.capsuleProposal', 'readinessType', 'status', 'targetLevel'] }
             );
-
-            // Get the current max initiativeNumber for this startup
-            const maxInitiativeNumber = await this.em.count(Initiative, { startup: rns.startup }) + 1;
 
             const basePrompt = await createBasePrompt(rns.startup, this.em);
             if (!basePrompt) throw new BadRequestException('No capsule proposal found');
@@ -226,7 +259,7 @@ export class InitiativeService {
 
             for (const entry of resultText) {
                 const initiative = new Initiative();
-                initiative.initiativeNumber = maxInitiativeNumber; // assign initiativeNumber
+                initiative.initiativeNumber = minInitiativeNumber; // assign initiativeNumber
                 initiative.description = entry.description;
                 initiative.measures = entry.measures;
                 initiative.targets = entry.targets;
@@ -236,7 +269,7 @@ export class InitiativeService {
                 initiative.startup = rns.startup;
                 initiative.assignee = rns.startup.user;
                 initiative.status = 1;
-                initiative.priorityNumber = minPriorityNumber;
+                initiative.priorityNumber = 0;
 
                 await this.em.persistAndFlush(initiative);
                 initiatives.push(initiative);

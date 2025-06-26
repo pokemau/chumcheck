@@ -1,11 +1,13 @@
 <script lang="ts">
   import { Badge } from '$lib/components/ui/badge';
   import * as Card from '$lib/components/ui/card';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { Edit, Ellipsis, Plus, Trash } from 'lucide-svelte';
-  import { RnaCreateDialog, RnaViewEditDeleteDialog, RnaViewEditDeleteAiDialog } from '.';
-  let { rna, update, ai, addToRna, deleteRna, role, readinessData, checkIfExist } = $props();
-  
+  import {
+    RnaViewEditDeleteAiDialog,
+    RnaViewEditDeleteDialog,
+  } from '.';
+
+  let { rna, update, deleteRna, addToRna, role, readinessData } = $props();
+
   let open = $state(false);
 
   const onOpenChange = () => {
@@ -29,19 +31,18 @@
         {rna.readinessLevel.readinessType}
       </h2>
     </div>
-    <div class="text-sm text-muted-foreground break-words">
+    <div class="break-words text-sm text-muted-foreground">
       {rna.rna.substring(0, 150) + `${rna.rna.length > 150 ? '...' : ''}`}
     </div>
     <div class="text-sm text-muted-foreground">
       Current Level: <Badge variant="secondary"
         >{rna.readinessLevel.level}
-        </Badge
-      >
+      </Badge>
     </div>
   </Card.Content>
 </Card.Root>
 
-{#if !ai}
+{#if role === 'Startup'}
   <RnaViewEditDeleteDialog
     {open}
     {onOpenChange}
@@ -58,8 +59,12 @@
     {open}
     {onOpenChange}
     {rna}
+    {update}
+    {deleteRna}
     {readinessData}
     {closeDialog}
     {addToRna}
+    {role}
   />
 {/if}
+

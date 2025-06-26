@@ -8,6 +8,7 @@ import {
   IsOptional,
   IsPositive,
   IsArray,
+  IsIn,
 } from 'class-validator';
 import { RnsStatus } from '../../entities/enums/rns.enum';
 import { Type } from 'class-transformer';
@@ -15,7 +16,7 @@ import { Type } from 'class-transformer';
 export class CreateInitiativeDto {
   @IsInt()
   initiativeNumber: number;
-
+  
   @IsEnum(RnsStatus)
   status: RnsStatus;
 
@@ -62,6 +63,15 @@ export class UpdateInitiativeDto {
   @IsOptional()
   @IsEnum(RnsStatus)
   status: RnsStatus;
+
+  @IsOptional()
+  @IsEnum(RnsStatus)
+  requestedStatus: RnsStatus;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Pending', 'Approved', 'Denied', 'Unchanged'])
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
 
   @IsOptional()
   @IsNumber()

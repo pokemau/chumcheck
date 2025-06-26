@@ -1,6 +1,7 @@
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -56,7 +57,16 @@ export class UpdateRoadblockDto {
 
   @IsOptional()
   @IsEnum(RnsStatus)
-  status?: RnsStatus;
+  status: RnsStatus;
+
+  @IsOptional()
+  @IsEnum(RnsStatus)
+  requestedStatus: RnsStatus;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['Pending', 'Approved', 'Denied', 'Unchanged'])
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
 
   @IsOptional()
   @IsNumber()

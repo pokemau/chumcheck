@@ -34,17 +34,29 @@ export class StartupService {
 
     switch (user.role) {
       case Role.Startup:
-        return await this.em.find(Startup, {
-          user: userId,
-        });
+        return await this.em.find(
+          Startup,
+          { user: userId },
+          {
+            populate: [
+              'user',
+              'members',
+              'capsuleProposal',
+              'mentors',
+              'readinessLevels.readinessLevel',
+              'uratQuestionAnswers.uratQuestion',
+              'calculatorQuestionAnswers.question'
+            ]
+          }
+        );
       case Role.Mentor:
         return await this.em.find(
           Startup,
           { mentors: { id: userId } },
-          { populate: ['mentors'] },
+          { populate: ['mentors', 'capsuleProposal'] },
         );
       case Role.Manager:
-        return await this.em.findAll(Startup);
+        return await this.em.findAll(Startup, { populate: ['user', 'mentors', 'members', 'capsuleProposal'] });
     }
   }
 
@@ -99,7 +111,73 @@ export class StartupService {
       startup.user = user;
     }
 
-    this.em.assign(startup, dto);
+    // Apply all other fields from the DTO
+    if (dto.name) startup.name = dto.name;
+    if (dto.qualificationStatus) startup.qualificationStatus = dto.qualificationStatus;
+    if (dto.dataPrivacy) startup.dataPrivacy = dto.dataPrivacy;
+    if (dto.links) startup.links = dto.links;
+    if (dto.groupName) startup.groupName = dto.groupName;
+    if (dto.universityName) startup.universityName = dto.universityName;
+    if (dto.eligibility) startup.eligibility = dto.eligibility;
+
+    await this.em.flush();
+    return startup;
+  }
+
+  async updateWithCapsuleProposal(
+    id: number, 
+    dto: UpdateStartupDto, 
+    capsuleProposalDto?: CreateCapsuleProposalDto
+  ): Promise<Startup> {
+    console.log('updateWithCapsuleProposal - received DTO:', dto);
+    console.log('updateWithCapsuleProposal - qualificationStatus type:', typeof dto.qualificationStatus, 'value:', dto.qualificationStatus);
+    
+    const startup = await this.getStartupById(id);
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${id} not found`);
+    }
+
+    // Update basic startup fields
+    if (dto.userId) {
+      const user = await this.em.findOne(User, { id: dto.userId });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${dto.userId} not found`);
+      }
+      startup.user = user;
+    }
+
+    // Apply all other fields from the DTO
+    if (dto.name) startup.name = dto.name;
+    if (dto.qualificationStatus !== undefined) {
+      console.log('Setting qualificationStatus to:', dto.qualificationStatus);
+      startup.qualificationStatus = dto.qualificationStatus;
+    }
+    if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
+    if (dto.links) startup.links = dto.links;
+    if (dto.groupName) startup.groupName = dto.groupName;
+    if (dto.universityName) startup.universityName = dto.universityName;
+    if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
+
+    // Handle capsule proposal update if provided
+    if (capsuleProposalDto) {
+      // Update existing capsule proposal or create new one
+      if (startup.capsuleProposal) {
+        // Update existing capsule proposal
+        startup.capsuleProposal.title = capsuleProposalDto.title;
+        startup.capsuleProposal.description = capsuleProposalDto.description;
+        startup.capsuleProposal.problemStatement = capsuleProposalDto.problemStatement;
+        startup.capsuleProposal.targetMarket = capsuleProposalDto.targetMarket;
+        startup.capsuleProposal.solutionDescription = capsuleProposalDto.solutionDescription;
+        startup.capsuleProposal.objectives = capsuleProposalDto.objectives;
+        startup.capsuleProposal.scope = capsuleProposalDto.scope;
+        startup.capsuleProposal.methodology = capsuleProposalDto.methodology;
+        startup.capsuleProposal.fileName = capsuleProposalDto.fileName;
+      } else {
+        // Create new capsule proposal
+        await this.createCapsuleProposal(capsuleProposalDto);
+      }
+      console.log('CapsuleProposal updated successfully');
+    }
 
     await this.em.flush();
     return startup;
@@ -438,7 +516,7 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.qualificationStatus = QualificationStatus.QUALIFIED;
-    this.createStartupReadinessLevels(startupId);
+    await this.createStartupReadinessLevels(startupId);
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been approved.` };
@@ -767,6 +845,7 @@ export class StartupService {
     proposal.objectives = dto.objectives;
     proposal.scope = dto.scope;
     proposal.methodology = dto.methodology;
+    proposal.fileName = dto.fileName;
     proposal.startup = startup;
     await this.em.persistAndFlush(proposal);
     return proposal;

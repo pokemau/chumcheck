@@ -1,13 +1,7 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-  Enum,
-} from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne, Enum } from '@mikro-orm/core';
 import { User } from './user.entity';
 import { Startup } from './startup.entity';
-import { RnsStatus } from './enums/rns.enum'; 
+import { RnsStatus } from './enums/rns.enum';
 
 @Entity({ tableName: 'roadblocks' })
 export class Roadblock {
@@ -25,6 +19,12 @@ export class Roadblock {
 
   @Enum(() => RnsStatus)
   status!: RnsStatus;
+
+  @Enum(() => RnsStatus)
+  requestedStatus?: RnsStatus;
+
+  @Property({ default: 'Unchanged' })
+  approvalStatus: 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
 
   @Property()
   riskNumber!: number;

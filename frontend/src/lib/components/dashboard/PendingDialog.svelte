@@ -84,33 +84,6 @@
             />
           </div>
 
-          <div class="grid gap-2">
-            <Label for="email" class="flex gap-2"
-              >Capsule Proposal
-
-              {#if showCapsule}
-                <button on:click={toggleCapsule}>
-                  <EyeOff class="h-4 w-4 cursor-pointer" />
-                </button>
-              {:else}
-                <button on:click={toggleCapsule}>
-                  <Eye class="h-4 w-4 cursor-pointer" />
-                </button>
-              {/if}
-            </Label>
-            <div class="flex w-full justify-center">
-              {#if showCapsule}
-                <object
-                  data={inf.capsule_proposal}
-                  type="application/pdf"
-                  width="700"
-                  height="1000"
-                  title="capsule_proposal"
-                  transition:fade
-                ></object>
-              {/if}
-            </div>
-          </div>
         </div>
         <!-- Group Information -->
         <div class="flex flex-col gap-3">

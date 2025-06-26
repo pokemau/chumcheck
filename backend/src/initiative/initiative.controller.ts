@@ -48,4 +48,13 @@ export class InitiativeController {
             dto.latestPrompt
         );
     }
+
+    @Patch(':id/roleDependent')
+    async roleStatusUpdate(
+        @Param('id', ParseIntPipe) id: number,
+        @Query('role') role: string,
+        @Body() dto: UpdateInitiativeDto
+    ) {
+        return this.initiativeService.statusChange(id, role, dto);
+    }
 }

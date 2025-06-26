@@ -14,7 +14,7 @@
     getColumns,
     getSavedTab,
     getSelectedTab,
-    updateTab,
+    updateTab
     // getReadiness
   } from '$lib/utils';
   import { useQueriesState } from '$lib/stores/useQueriesState.svelte.js';
@@ -26,8 +26,18 @@
   import { toast } from 'svelte-sonner';
   import { Badge } from '$lib/components/ui/badge/index.js';
   import { RoadblocksCard } from '$lib/components/startups/roadblocks';
+  import { RoadblocksCreateDialog } from '$lib/components/startups/roadblocks';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-  import { Ellipsis, Kanban, Loader, Sparkles, TableIcon, ChevronDown, Check } from 'lucide-svelte';
+  import {
+    Ellipsis,
+    Kanban,
+    Loader,
+    Sparkles,
+    TableIcon,
+    ChevronDown,
+    Check,
+    Plus
+  } from 'lucide-svelte';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
   import { Button } from '$lib/components/ui/button';
@@ -47,6 +57,7 @@
     fix: string;
     isAiGenerated: boolean;
     status: number;
+    requestedStatus: number;
     riskNumber: number;
     assignee: number;
   }
@@ -57,7 +68,8 @@
   const roadblocksQueries = useQueries([
     {
       queryKey: ['allowRoadblocks', startupId],
-      queryFn: () => getData(`/startups/${startupId}/allow-roadblocks/`, access!)
+      queryFn: () =>
+        getData(`/startups/${startupId}/allow-roadblocks/`, access!)
     },
     {
       queryKey: ['roadblocksData'],
@@ -77,17 +89,31 @@
     $roadblocksQueries[2].isSuccess
       ? (() => {
           const data = $roadblocksQueries[2].data;
-          const baseMembers: Member[] = data.members.map(({ id, email, firstName, lastName }: { id: number, email: string, firstName: string, lastName: string }) => ({
-            userId: id,
-            startupId: data.id,
-            firstName,
-            lastName,
-            email,
-            selected: false
-          }));
+          const baseMembers: Member[] = data.members.map(
+            ({
+              id,
+              email,
+              firstName,
+              lastName
+            }: {
+              id: number;
+              email: string;
+              firstName: string;
+              lastName: string;
+            }) => ({
+              userId: id,
+              startupId: data.id,
+              firstName,
+              lastName,
+              email,
+              selected: false
+            })
+          );
 
           // Check if user is already in members
-          const isUserInMembers = baseMembers.some((member: Member) => member.userId === data.user.id);
+          const isUserInMembers = baseMembers.some(
+            (member: Member) => member.userId === data.user.id
+          );
 
           if (!isUserInMembers) {
             baseMembers.push({
@@ -109,7 +135,8 @@
 
   $effect(() => {
     if ($roadblocksQueries[1].isSuccess) {
-      const roadblocksCount = ($roadblocksQueries[1].data as Roadblock[]).length;
+      const roadblocksCount = ($roadblocksQueries[1].data as Roadblock[])
+        .length;
       if (roadblocksCount >= 3) {
         numToGenerate = 1;
       } else if (roadblocksCount >= 1) {
@@ -122,26 +149,33 @@
     if (!isLoading) {
       columns.forEach((column) => {
         column.items = ($roadblocksQueries[1].data as Roadblock[]).filter(
-          (data: Roadblock) => data.status === column.value
+          (data: Roadblock) => data.requestedStatus === column.value
         );
       });
     }
   });
 
-  const updatedEditRoadblock = async (id: number, payload: any) => {
+  const updatedEditRoadblock = async (
+    id: number,
+    payload: any,
+    showToast: boolean = true
+  ) => {
     await axiosInstance.patch(`/roadblocks/${id}/`, payload, {
       headers: {
         Authorization: `Bearer ${data.access}`
       }
     });
-    toast.success('Successfuly updated the RNA');
+  
+    if (showToast) toast.success('Successfuly updated the RNA');
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
         column.items = (res.data as Roadblock[]).filter(
-          (data: Roadblock) => data.status === column.value
-        );
+          (data: Roadblock) => data.requestedStatus === column.value
+        ); 
       });
     });
+    $roadblocksQueries[2].refetch();
+    updateRiskNumber();
   };
 
   const deleteRoadblock = async (id: number) => {
@@ -156,11 +190,12 @@
       .then((res) => {
         columns.forEach((column) => {
           column.items = (res.data as Roadblock[]).filter(
-            (data: Roadblock) => data.status === column.value
+            (data: Roadblock) => data.requestedStatus === column.value
           );
         });
       })
       .finally(async () => await updateRiskNumber());
+    $roadblocksQueries[2].refetch();
   };
 
   function handleDndConsider(e: any, x: number) {
@@ -172,7 +207,7 @@
     if (e.detail.info.trigger == 'droppedIntoZone') {
       const task = e.detail.items.find((t: any) => t.id == e.detail.info.id);
       await axiosInstance.patch(
-        `/roadblocks/${task.id}/`,
+        `/roadblocks/${task.id}/roleDependent?role=${data.role}`,
         {
           status
         },
@@ -185,6 +220,8 @@
     }
 
     updateRiskNumber();
+    $roadblocksQueries[1].refetch();
+    $roadblocksQueries[2].refetch();
   }
 
   const updateRiskNumber = async () => {
@@ -294,9 +331,89 @@
   };
 
   let generatingRoadblocks: boolean = $state(false);
+  let open = $state(false);
+
+  const showDialog = () => {
+    open = true;
+  };
+
+  const onOpenChange = () => {
+    open = !open;
+  };
+
+  const createRoadblock = async (payload: any) => {
+    // Increment existing risk numbers
+    const currentItems = await axiosInstance.get(
+      `/roadblocks/?startupId=${startupId}`,
+      {
+        headers: { Authorization: `Bearer ${access}` }
+      }
+    );
+    const updatePromises = currentItems.data.map((item: any) =>
+      axiosInstance.patch(
+        `/roadblocks/${item.id}/`,
+        {
+          riskNumber: (item.riskNumber || 0) + 1
+        },
+        {
+          headers: { Authorization: `Bearer ${access}` }
+        }
+      )
+    );
+    await Promise.all(updatePromises);
+
+    await axiosInstance.post(
+      '/roadblocks/',
+      {
+        ...payload,
+        riskNumber: 1,
+        status: 1
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${data.access}`
+        }
+      }
+    );
+    toast.success('Successfully created the Roadblock');
+    open = false;
+    $roadblocksQueries[1]
+      .refetch()
+      .then((res) => {
+        columns.forEach((column) => {
+          column.items = (res.data as Roadblock[])
+            .filter((data: Roadblock) => data.status === column.value)
+            .sort((a: any, b: any) => b.riskNumber - a.riskNumber);
+        });
+      })
+      .finally(async () => {
+        await updateRiskNumber();
+      });
+  };
+
   const generateRoadblocks = async (count: number) => {
     generatingRoadblocks = true;
     try {
+      // Increment existing risk numbers
+      const currentItems = await axiosInstance.get(
+        `/roadblocks/?startupId=${startupId}`,
+        {
+          headers: { Authorization: `Bearer ${access}` }
+        }
+      );
+      const updatePromises = currentItems.data.map((item: any) =>
+        axiosInstance.patch(
+          `/roadblocks/${item.id}/`,
+          {
+            riskNumber: (item.riskNumber || 0) + count
+          },
+          {
+            headers: { Authorization: `Bearer ${access}` }
+          }
+        )
+      );
+      await Promise.all(updatePromises);
+
       await axiosInstance.post(
         `/roadblocks/generate-roadblocks/`,
         {
@@ -311,15 +428,17 @@
       );
 
       await $roadblocksQueries[1].refetch(); // Refetch all roadblocks including new AI-generated ones
+      await updateRiskNumber();
 
       toast.success(`Successfully generated ${count} Roadblocks`);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to generate roadblocks');
+      toast.error(
+        error.response?.data?.message || 'Failed to generate roadblocks'
+      );
     } finally {
       generatingRoadblocks = false;
     }
   };
-
 
   let status = $state(4);
   const updateStatus = (newStatus: number) => {
@@ -363,8 +482,18 @@
 {:else if isAccessible}
   {@render accessible()}
 {:else}
-  {@render fallback()}
+  {@render loading()}
+  <!-- {@render fallback()} -->
 {/if}
+
+<RoadblocksCreateDialog
+  {open}
+  {onOpenChange}
+  create={createRoadblock}
+  {startupId}
+  {members}
+  {status}
+/>
 
 {#snippet card(roadblocks: any, index: number)}
   <RoadblocksCard
@@ -454,9 +583,17 @@
     <div class="flex items-center gap-3">
       <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
+        <Button
+          class="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          type="button"
+          onclick={() => showDialog()}
+        >
+          <Plus class="h-4 w-4" />
+          Add
+        </Button>
         <div class="flex gap-1">
           <Button
-            class="border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tr-none rounded-br-none"
+            class="rounded-br-none rounded-tr-none border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingRoadblocks}
             onclick={() => generateRoadblocks(numToGenerate)}
@@ -465,25 +602,32 @@
               <Loader class="mr-2 h-4 w-4 animate-spin" />
               Generating...
             {:else}
-              + Add
+              <Sparkles class="h-4 w-4" />Generate
             {/if}
-          </Button> 
+          </Button>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button
-                class="border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 rounded-tl-none rounded-bl-none"
+                class="rounded-bl-none rounded-tl-none border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRoadblocks}
               >
                 <ChevronDown class="h-4 w-4" />
               </Button>
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content align="end" class="w-[100px] max-h-[150px] overflow-y-auto">
-              <DropdownMenu.RadioGroup value={numToGenerate.toString()} onValueChange={(val) => numToGenerate = Number(val)} class="space-y-1">
+            <DropdownMenu.Content
+              align="end"
+              class="max-h-[150px] w-[100px] overflow-y-auto"
+            >
+              <DropdownMenu.RadioGroup
+                value={numToGenerate.toString()}
+                onValueChange={(val) => (numToGenerate = Number(val))}
+                class="space-y-1"
+              >
                 {#each [1, 2, 3, 4, 5] as count}
                   <DropdownMenu.RadioItem
                     value={count.toString()}
-                    class="flex items-center justify-between cursor-pointer px-2 py-1.5 hover:bg-accent"
+                    class="flex cursor-pointer items-center justify-between px-2 py-1.5 hover:bg-accent"
                   >
                     <span>{count}</span>
                     <!-- <Check class="h-4 w-4 ml-auto" /> -->
@@ -502,10 +646,11 @@
         {columns}
         {handleDndFinalize}
         {handleDndConsider}
-        card={card}
+        {card}
         role={data.role}
         {updateStatus}
         {selectedMembers}
+        {showDialog}
       />
     {:else}
       <div class="h-fit w-full rounded-md border">
@@ -521,13 +666,17 @@
             {#each ($roadblocksQueries[1].data as Roadblock[]).filter((item: Roadblock) => item.isAiGenerated === false) as item}
               {#if selectedMembers.includes(item.assignee) || selectedMembers.length === 0}
                 <Table.Row class="h-14 cursor-pointer">
-                  <Table.Cell class="pl-5">{item.description.substring(0, 100)}</Table.Cell>
+                  <Table.Cell class="pl-5"
+                    >{item.description.substring(0, 100)}</Table.Cell
+                  >
                   <Table.Cell class="">{item.riskNumber}</Table.Cell>
                   <Table.Cell class=""
-                    >{members.filter((member: Member) => member.userId === item.assignee)[0]
-                      ?.firstName}
-                    {members.filter((member: Member) => member.userId === item.assignee)[0]
-                      ?.lastName}</Table.Cell
+                    >{members.filter(
+                      (member: Member) => member.userId === item.assignee
+                    )[0]?.firstName}
+                    {members.filter(
+                      (member: Member) => member.userId === item.assignee
+                    )[0]?.lastName}</Table.Cell
                   >
                 </Table.Row>
               {/if}

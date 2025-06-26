@@ -51,4 +51,13 @@ export class RnsController {
   ) {
     return await this.rnsService.refineRnsDescription(id, dto.chatHistory, dto.latestPrompt);
   }
+
+  @Patch(':id/roleDependent')
+  async roleStatusUpdate(
+      @Param('id', ParseIntPipe) id: number,
+      @Query('role') role: string,
+      @Body() dto: UpdateRnsDto
+  ) {
+      return this.rnsService.statusChange(id, role, dto);
+  }
 }

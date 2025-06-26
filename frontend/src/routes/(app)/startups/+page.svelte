@@ -97,9 +97,25 @@
   }
 
   let showApplicationForm = $state(false);
+  let selectedStartup = $state(null);
   const toggleApplicationForm = () => {
     showApplicationForm = !showApplicationForm;
+    if (!showApplicationForm) {
+      selectedStartup = null;
+    }
   };
+
+  $effect(() => {
+    const handleOpenApplication = (event: CustomEvent) => {
+      selectedStartup = event.detail.startup;
+      showApplicationForm = true;
+    };
+
+    window.addEventListener('openApplication', handleOpenApplication as EventListener);
+    return () => {
+      window.removeEventListener('openApplication', handleOpenApplication as EventListener);
+    };
+  });
 
   $effect(() => {
     const success = $page.url.searchParams.get('success');
@@ -192,7 +208,7 @@
   <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
     <div class="text-muted-foreground text-sm">Initiatives Progress</div>
     <div class="flex items-center gap-2">
-      <span class="text-2xl font-bold">{allInitiatives.filter(initiative => initiative.status === 4).length} / {allInitiatives.length}</span>
+      <span class="text-2xl font-bold">{allInitiatives?.filter(initiative => initiative?.status === 4)?.length || 0} / {allInitiatives?.length || 0}</span>
       <span class="ml-auto text-sm">{completedInitiativesPercentage.toFixed(0)}%</span>
     </div>
     <div class="w-full h-2 bg-gray-800 rounded">
@@ -203,7 +219,7 @@
   <div class="rounded-lg bg-background p-5 flex flex-col gap-2 border border-border">
     <div class="text-muted-foreground text-sm">Completion Rate</div>
     <div class="flex items-center gap-2">
-      <span class="text-2xl font-bold">{ completedStartups.length / listOfStartups().length * 100 || 0 }%</span>
+      <span class="text-2xl font-bold">{ listOfStartups().length > 0 ? (completedStartups.length / listOfStartups().length * 100) : 0 }%</span>
     </div>
     <div class="text-muted-foreground text-sm">{completedStartups.length} of {listOfStartups().length} startups completed</div>
   </div>
@@ -306,6 +322,6 @@
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
   <Dialog.Content class="h-4/5 max-w-[800px]">
-    <Application access={data.access!} />
+    <Application access={data.access!} startup={selectedStartup} />
   </Dialog.Content>
 </Dialog.Root>

@@ -1,13 +1,13 @@
 import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
-import { Rns } from './rns.entity';
+import { StartupRNA } from './rna.entity';
 
 @Entity()
-export class RnsChatHistory {
+export class RnaChatHistory {
   @PrimaryKey()
   id!: number;
 
-  @ManyToOne(() => Rns, { deleteRule: 'cascade' })
-  rns!: Rns;
+  @ManyToOne(() => StartupRNA, { deleteRule: 'cascade' })
+  rna!: StartupRNA;
 
   @Property()
   role!: string;
@@ -19,12 +19,11 @@ export class RnsChatHistory {
   createdAt: Date = new Date();
 
   @Property({ nullable: true, type: 'text' })
-  refinedDescription?: string;
+  refinedRna?: string;
 
-  constructor(data?: Partial<RnsChatHistory>) {
+  constructor(data?: Partial<RnaChatHistory>) {
     if (data) {
       Object.assign(this, data);
     }
   }
-}
-
+} 

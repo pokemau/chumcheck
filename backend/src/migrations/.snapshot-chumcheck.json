@@ -606,13 +606,12 @@
         },
         "response": {
           "name": "response",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "score": {
           "name": "score",
@@ -926,6 +925,97 @@
             "id"
           ],
           "referencedTableName": "public.startups",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "rna_id": {
+          "name": "rna_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "role": {
+          "name": "role",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "refined_rna": {
+          "name": "refined_rna",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "rna_chat_history",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "rna_chat_history_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "rna_chat_history_rna_id_foreign": {
+          "constraintName": "rna_chat_history_rna_id_foreign",
+          "columnNames": [
+            "rna_id"
+          ],
+          "localTableName": "public.rna_chat_history",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.rna",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1331,6 +1421,16 @@
           "nullable": false,
           "mappedType": "text"
         },
+        "file_name": {
+          "name": "file_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "startup_id": {
           "name": "startup_id",
           "type": "int",
@@ -1501,6 +1601,26 @@
           "primary": false,
           "nullable": false,
           "mappedType": "enum"
+        },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
         },
         "risk_number": {
           "name": "risk_number",
@@ -1707,6 +1827,7 @@
             "id"
           ],
           "referencedTableName": "public.roadblocks",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1789,6 +1910,26 @@
           "nullable": false,
           "default": "1",
           "mappedType": "enum"
+        },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
         },
         "readiness_type": {
           "name": "readiness_type",
@@ -1966,6 +2107,7 @@
             "id"
           ],
           "referencedTableName": "public.rns",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2028,6 +2170,26 @@
           "primary": false,
           "nullable": false,
           "mappedType": "enum"
+        },
+        "requested_status": {
+          "name": "requested_status",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        },
+        "approval_status": {
+          "name": "approval_status",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "default": "'Unchanged'",
+          "mappedType": "string"
         },
         "rns_id": {
           "name": "rns_id",
@@ -2148,6 +2310,7 @@
             "id"
           ],
           "referencedTableName": "public.rns",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "initiatives_assignee_id_foreign": {
@@ -2289,6 +2452,7 @@
             "id"
           ],
           "referencedTableName": "public.initiatives",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

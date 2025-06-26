@@ -62,6 +62,7 @@
   let data: any;
   let doneFetching = false;
   export let access: string;
+  export let startup: any = null;
 
   const steps = [
     'data-privacy',
@@ -92,8 +93,8 @@
 
   let currentActive = 0;
   let formData = {
-    dataPrivacy: false,
-    eligibility: false
+    dataPrivacy: startup?.dataPrivacy ?? false,
+    eligibility: startup?.eligibility ?? false
   };
 
   const toggleDataPrivacy = (value: boolean) => {
@@ -124,29 +125,35 @@
   class="flex flex-col gap-5 p-3"
   enctype="multipart/form-data"
 >
+  {#if startup?.id}
+    <input type="hidden" name="startupId" value={startup.id} />
+  {/if}
   <h1 class="px-1 text-2xl font-semibold">{labels[currentActive]}</h1>
   <DataPrivacy
     dataPrivacy={formData.dataPrivacy}
     {toggleDataPrivacy}
     {currentActive}
+    {startup}
   />
   <EligibilityAgreement
     {currentActive}
     {toggleEligibility}
     eligibility={formData.eligibility}
+    {startup}
   />
-  <ProjectDetails {currentActive} {access} />
-  <GroupInformation {currentActive} {access} />
+  <ProjectDetails {currentActive} {access} {startup} />
+  <GroupInformation {currentActive} {access} {startup} />
   {#if doneFetching && data}
-    <Technology {currentActive} question={data.technologyQuestions} />
-    <Market {currentActive} question={data.marketQuestions} />
-    <Regulatory {currentActive} question={data.regulatoryQuestions} />
-    <Acceptance {currentActive} question={data.acceptanceQuestions} />
-    <Organizational {currentActive} question={data.organizationalQuestions} />
-    <Investment {currentActive} question={data.investmentQuestions} />
+    <Technology {currentActive} question={data.technologyQuestions} {startup} />
+    <Market {currentActive} question={data.marketQuestions} {startup} />
+    <Regulatory {currentActive} question={data.regulatoryQuestions} {startup} />
+    <Acceptance {currentActive} question={data.acceptanceQuestions} {startup} />
+    <Organizational {currentActive} question={data.organizationalQuestions} {startup} />
+    <Investment {currentActive} question={data.investmentQuestions} {startup} />
     <TechnologyCalculator
       {currentActive}
       calculatorQuestions={data.calculator}
+      {startup}
     />
   {/if}
   <div class="flex justify-end gap-3">

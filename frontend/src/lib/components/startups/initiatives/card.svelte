@@ -7,6 +7,7 @@
   import type { Actions } from '$lib/types';
   import { goto } from '$app/navigation';
   import { hoveredRNSCard } from '$lib/stores/hoveredRNSCard';
+  import { RnsStatus } from '$lib/components/shared/rns.enum';
   let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
     $props();
 
@@ -22,12 +23,22 @@
   const closeDialog = () => {
     open = false;
     if (!initiative.clickedByMentor && role === 'Mentor') {
-      update(initiative.id, { ...initiative, clickedByMentor: true });
+      update(initiative.id, { ...initiative, clickedByMentor: true }, false);
     }
     if (!initiative.clickedByStartup && role === 'Startup') {
-      update(initiative.id, { ...initiative, clickedByStartup: true });
+      update(initiative.id, { ...initiative, clickedByStartup: true }, false);
     }
   };
+
+  const approveDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', status: initiative.requestedStatus});
+  }
+
+  const denyDialog = () => {
+    open = false;
+    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', requestedStatus: initiative.status});
+  }
 
   function handleMouseEnter(event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -45,11 +56,17 @@
     return (role == 'Mentor' && !initiative.clickedByMentor) || (role == 'Startup' && !initiative.clickedByStartup)
   }
 
+  let initiativesCopy = $state({ ...initiative });
+
+  $effect(() => {
+    initiativesCopy = { ...initiative };
+  });
+
 </script>
 
 <Card.Root
-  class={`bg-gray-900 border ${
-  isNewCard() ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} rounded-lg shadow-sm cursor-pointer`}
+  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
+  ${ (isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -59,6 +76,9 @@
     <div class="flex relative items-center justify-between mb-1 relative">
       {#if isNewCard()}
         <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+      {/if}
+      {#if initiativesCopy.approvalStatus !== 'Unchanged'}
+        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
       {/if}
       <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
@@ -122,8 +142,25 @@
   </Card.Content>
 </Card.Root>
 
-<!-- {#if ai} -->
-<InitiativeViewEditDeleteAiDialog
+{#if role === 'Startup'}
+ <InitiativeViewEditDeleteDialog
+  {open}
+  {onOpenChange}
+  rns={initiative}
+  {update}
+  {action}
+  deleteRns={deleteInitiative}
+  {members}
+  {assignedMember}
+  {closeDialog}
+  {tasks}
+  {addToInitiative}
+  {ai}
+  {index}
+  {role}
+/>
+{:else}
+  <InitiativeViewEditDeleteAiDialog
   {open}
   {onOpenChange}
   initiative={initiative}
@@ -134,22 +171,7 @@
   {index}
   {tasks}
   isEdit={!ai}
-/>
-<!-- {:else} -->
-  <!-- <InitiativeViewEditDeleteDialog
-    {open}
-    {onOpenChange}
-    rns={initiative}
-    update={update}
-    {action}
-    deleteRns={deleteInitiative}
-    {members}
-    {assignedMember}
-    {closeDialog}
-    {tasks}
-    {addToInitiative}
-    {ai}
-    {index}
-    {role}
-  /> -->
-<!-- {/if} -->
+  {approveDialog}
+  {denyDialog}
+  />
+{/if}

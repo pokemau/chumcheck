@@ -45,6 +45,35 @@ export class AiService {
     return res.text;
   }
 
+  async generateRNAsFromPrompt(
+    prompt: string
+  ): Promise<{ readiness_level_type:string, rna:string }[]> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt,
+    });
+
+    const text = res.text;
+
+    if (!text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    try {
+      const jsonStart = text.indexOf('[');
+      const jsonEnd = text.lastIndexOf(']');
+      const jsonString = text.substring(jsonStart, jsonEnd + 1);
+
+      return JSON.parse(jsonString).map((entry: any) => ({
+        readiness_level_type: entry.readiness_level_type,
+        rna: entry.rna,
+      }));
+    } catch (err) {
+      console.error('Failed to parse AI response:', text);
+      throw new Error('AI returned an invalid RNA response');
+    }
+  }
+
   async generateTasksFromPrompt(prompt: string): Promise<{ target_level: number; description: string }[]> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
@@ -268,6 +297,41 @@ async generateRoadblocksFromPrompt(
 
       const hasRefinements = refinements.refinedDescription || 
                            refinements.refinedFix; 
+      
+      if (!hasRefinements) {
+        console.warn('AI response contained no refinements');
+      }
+
+      return {
+        ...refinements,
+        aiCommentary: commentary || 'Changes applied successfully.'
+      };
+    } catch (err) {
+      console.error('Failed to parse AI response:', content);
+      console.error('Parse error:', err);
+      throw new Error('AI returned an invalid JSON response');
+    }
+  }
+
+  async refineRna(prompt: string): Promise<{
+    refinedRna?: string;
+    aiCommentary: string;
+  }> {
+    const response = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: prompt
+    });
+
+    const content = response.text;
+    if (!content) throw new Error('No content in response');
+
+    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
+    const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+    
+    try {
+      const refinements = JSON.parse(cleanJsonStr);
+
+      const hasRefinements = refinements.refinedRna;
       
       if (!hasRefinements) {
         console.warn('AI response contained no refinements');

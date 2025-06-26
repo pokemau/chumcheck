@@ -22,14 +22,13 @@
   export let update: (id: number, payload: any) => Promise<void>;
   export let isTask:boolean = false;
   export let taskDescription = 'None';
-
 </script>
 
 <div class="flex flex-col gap-3 break-words">
   <Label for="username" class="text-lg font-bold">{label}</Label>
 
   {#if !isTask}
-  <!-- {#if editMode && role !== 'Startup'}
+  {#if editMode && role !== 'Startup'}
     <Textarea
       rows={12}
       bind:value={data}
@@ -52,12 +51,12 @@
           editMode = true;
         }
       }}
-    > -->
+    >
     <Description>
       {data}
     </Description>
-    <!-- </button> -->
-  <!-- {/if} -->
+    </button>
+  {/if}
   {:else}
     <Description>
     {#if data}
