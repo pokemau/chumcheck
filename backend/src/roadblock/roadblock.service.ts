@@ -223,6 +223,7 @@ export class RoadblockService {
       roadblock.riskNumber = Number(data.riskNumber);
       roadblock.description = data.description;
       roadblock.fix = data.fix;
+      roadblock.requestedStatus = 1;
 
       await this.em.persistAndFlush(roadblock);
     }

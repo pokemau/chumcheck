@@ -204,6 +204,7 @@ export class InitiativeService {
                     initiative.assignee = rns.startup.user;
                     initiative.status = 1;
                     initiative.priorityNumber = 0;
+                    initiative.requestedStatus = 1;
 
                     await this.em.persistAndFlush(initiative);
                     initiatives.push(initiative);
