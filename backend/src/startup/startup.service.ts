@@ -129,9 +129,7 @@ export class StartupService {
     dto: UpdateStartupDto, 
     capsuleProposalDto?: CreateCapsuleProposalDto
   ): Promise<Startup> {
-    console.log('updateWithCapsuleProposal - received DTO:', dto);
-    console.log('updateWithCapsuleProposal - qualificationStatus type:', typeof dto.qualificationStatus, 'value:', dto.qualificationStatus);
-    
+
     const startup = await this.getStartupById(id);
     if (!startup) {
       throw new NotFoundException(`Startup with ID ${id} not found`);

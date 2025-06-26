@@ -19,8 +19,6 @@ export const actions: Actions = {
     const startupId = startupIdRaw ? Number(startupIdRaw) : null;
     let response, data;
 
-    console.log('Form submission - startupId:', startupId);
-    console.log('All form data keys:', Array.from(formData.keys()));
 
     // Update existing startup
     if (startupId) {
@@ -72,8 +70,6 @@ export const actions: Actions = {
         });
       }
       data = await response.json();
-      console.log('Startup update response status:', response.status);
-      console.log('Startup update response data:', data);
     } else {
       // Create new startup (file required)
       const newFormData = new FormData();
@@ -128,8 +124,6 @@ export const actions: Actions = {
     ];
 
     if (startupId) {
-      console.log('Starting URAT and calculator answer updates...');
-      
       // Update existing URAT question answers
       const answers: {
         id: number;
@@ -139,7 +133,6 @@ export const actions: Actions = {
       types.forEach((type) => {
         for (let i = 0; i < 3; i++) {
           const answerId = formData.get(`${type}${i}answerId`);
-          console.log(`Looking for ${type}${i}answerId:`, answerId);
           if (answerId) {
             answers.push({
               id: Number.parseInt(answerId as string),
@@ -167,9 +160,6 @@ export const actions: Actions = {
         }
       });
 
-      console.log('URAT answers to update:', answers);
-      console.log('Calculator answers to update:', calculatorAnswers);
-
       // Update URAT question answers
       for (const answer of answers) {
         console.log(`Updating URAT answer ${answer.id} with response:`, answer.response);
@@ -184,7 +174,6 @@ export const actions: Actions = {
             body: JSON.stringify({ response: answer.response })
           }
         );
-        console.log('URAT update response:', response.status);
       }
 
       // Update calculator question answers
