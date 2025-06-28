@@ -1,11 +1,29 @@
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Injectable } from '@nestjs/common';
+import { hash } from 'argon2';
+import { CreateUserDto } from 'src/admin/dto/create-user.dto';
 import { Role } from 'src/entities/enums/role.enum';
 import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(private em: EntityManager) {}
+
+  async create(dto: CreateUserDto) {
+    const hashedPassword = await hash(dto.password);
+
+    const user = new User();
+    user.email = dto.email;
+    user.firstName = dto.firstName;
+    user.lastName = dto.lastName;
+    user.hash = hashedPassword;
+
+    return await this.em.persistAndFlush(user);
+  }
+
+  async findByEmail(email: string) {
+    return await this.em.findOne(User, { email });
+  }
 
   async findAll() {
     return await this.em.find(User, {});

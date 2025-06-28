@@ -30,10 +30,10 @@ const Hero = () => {
             </span>
           </p>
           <p className="text-xl font-medium">
-            Your startup's path to empowerment <br /> and success
+            Your startup&apos;s path to empowerment <br /> and success
           </p>
           <Link data-sveltekit-reload href="/register">
-            <Button className="shadow-flutter-blue/50 text-white shadow-lg">Get Started!</Button>
+            <Button className="shadow-flutter-blue text-white shadow-lg">Get Started!</Button>
           </Link>
         </div>
         <div className="relative flex-1">

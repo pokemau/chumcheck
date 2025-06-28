@@ -1,5 +1,12 @@
-import { IsString, IsNotEmpty, IsInt, IsEnum, IsOptional, IsBoolean, IsUrl } from 'class-validator';
-import { Type, Transform } from 'class-transformer'; // Re-added Transform
+import {
+  IsString,
+  IsNotEmpty,
+  IsInt,
+  IsEnum,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
+import { Type, Transform } from 'class-transformer';
 import { QualificationStatus } from '../../entities/enums/qualification-status.enum';
 
 export class CreateStartupDto {
@@ -13,11 +20,13 @@ export class CreateStartupDto {
   userId!: number;
 
   @Transform(({ value }) => {
-    // Check if the value is a string and a valid key in the QualificationStatus enum
-    if (typeof value === 'string' && QualificationStatus[value as keyof typeof QualificationStatus] !== undefined) {
-      return QualificationStatus[value as keyof typeof QualificationStatus]; // Return the numeric value
+    if (
+      typeof value === 'string' &&
+      QualificationStatus[value as keyof typeof QualificationStatus] !==
+        undefined
+    ) {
+      return QualificationStatus[value as keyof typeof QualificationStatus];
     }
-    // If it's already a number (e.g., from a raw JSON body or already transformed), or invalid, pass it through for @IsEnum to validate
     return value;
   })
   @IsEnum(QualificationStatus)

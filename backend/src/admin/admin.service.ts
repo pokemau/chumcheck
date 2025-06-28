@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common'; // Added InternalServerErrorException
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common'; // Added InternalServerErrorException
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { Role } from '../entities/enums/role.enum';
 import * as argon from 'argon2';
 import { StartupService } from '../startup/startup.service'; // Import StartupService
 import { Startup } from '../entities/startup.entity'; // Import Startup entity
@@ -32,28 +35,30 @@ export class AdminService {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, firstName, lastName, role } = createUserDto;
-    
-    await this.authService.signup({
-      email,
-      password,
-      firstName: firstName || '',
-      lastName: lastName || '',
-    });
-    
+    const { email, role } = createUserDto;
+
+    await this.authService.signup(createUserDto);
+
     const users = await this.userService.getUserByString(email);
     if (users.length > 0) {
       const createdUser = users[0];
       if (createdUser.role !== role) {
-        const updatedUserWithRole = await this.userService.update(createdUser.id, { role });
+        const updatedUserWithRole = await this.userService.update(
+          createdUser.id,
+          { role },
+        );
         if (!updatedUserWithRole) {
-          throw new InternalServerErrorException(`Could not update role for user ID "${createdUser.id}" after creation.`);
+          throw new InternalServerErrorException(
+            `Could not update role for user ID "${createdUser.id}" after creation.`,
+          );
         }
         return updatedUserWithRole;
       }
       return createdUser;
     }
-    throw new InternalServerErrorException('Could not retrieve user after creation via signup.');
+    throw new InternalServerErrorException(
+      'Could not retrieve user after creation via signup.',
+    );
   }
 
   async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -68,7 +73,9 @@ export class AdminService {
 
     const updatedUser = await this.userService.update(id, updateData);
     if (!updatedUser) {
-      throw new InternalServerErrorException(`User with ID "${id}" could not be updated`);
+      throw new InternalServerErrorException(
+        `User with ID "${id}" could not be updated`,
+      );
     }
     return updatedUser;
   }
@@ -97,24 +104,36 @@ export class AdminService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Could not create startup. ' + error.message);
+      throw new InternalServerErrorException(
+        'Could not create startup. ' + error.message,
+      );
     }
   }
 
-  async updateStartup(id: number, updateStartupDto: UpdateStartupDto): Promise<Startup> {
+  async updateStartup(
+    id: number,
+    updateStartupDto: UpdateStartupDto,
+  ): Promise<Startup> {
     await this.getStartupById(id); // Ensures startup exists
 
     try {
-      const updatedStartup = await this.startupService.update(id, updateStartupDto);
+      const updatedStartup = await this.startupService.update(
+        id,
+        updateStartupDto,
+      );
       if (!updatedStartup) {
-        throw new InternalServerErrorException(`Startup with ID "${id}" could not be updated`);
+        throw new InternalServerErrorException(
+          `Startup with ID "${id}" could not be updated`,
+        );
       }
       return updatedStartup;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Could not update startup. ' + error.message);
+      throw new InternalServerErrorException(
+        'Could not update startup. ' + error.message,
+      );
     }
   }
 
