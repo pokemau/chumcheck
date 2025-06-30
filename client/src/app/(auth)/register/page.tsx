@@ -33,7 +33,7 @@ const Register = () => {
         </div>
       </div>
       <div className="flex h-full flex-1 items-center justify-center rounded-br-xl rounded-tr-xl bg-background text-flutter-gray dark:text-flutter-white">
-        <form method="post" className="flex items-center justify-center py-12">
+        {/* <form method="post" className="flex items-center justify-center py-12"> */}
           <div className="mx-auto grid w-[350px] gap-6">
             <div className="grid gap-2 text-center">
               <h1 className="text-3xl font-bold">Register</h1>
@@ -51,7 +51,7 @@ const Register = () => {
               </Link>
             </div>
           </div>
-        </form>
+        {/* </form> */}
       </div>
     </div>
   );

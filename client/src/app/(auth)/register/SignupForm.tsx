@@ -1,13 +1,24 @@
 "use client";
 
-import { signup } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useActionState } from "react";
+import { registerUser } from "@/lib/actions";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
 
 const SignupForm = () => {
-  const [state, action, pending] = useActionState(signup, undefined);
+  const [state, action] = useActionState(registerUser, undefined);
+
+  useEffect(() => {
+    if (state?.message) {
+      if (state.success) {
+        toast.success(state.message);
+      } else {
+        toast.error(state.message);
+      }
+    }
+  }, [state]);
 
   return (
     <form action={action} className="flex items-center justify-center">
@@ -24,6 +35,9 @@ const SignupForm = () => {
               required
               placeholder="John"
             />
+            {state?.error?.firstName && (
+              <p className="text-sm text-red-500">{state.error.firstName}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
@@ -36,6 +50,10 @@ const SignupForm = () => {
               required
               placeholder="Doe"
             />
+
+            {state?.error?.lastName && (
+              <p className="text-sm text-red-500">{state.error.lastName}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label>Email</Label>
@@ -46,24 +64,39 @@ const SignupForm = () => {
               placeholder="johndoe@example.com"
               required
             />
+
+            {state?.error?.email && (
+              <p className="text-sm text-red-500">{state.error.email}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label>Password</Label>
             </div>
             <Input name="password" id="password" type="password" required />
+
+            {state?.error?.password && (
+              <p className="text-sm text-red-500">{state.error.password}</p>
+            )}
+            {state?.error?.repeatPassword && (
+              <p className="text-sm text-red-500">{state.error.repeatPassword}</p>
+            )}
           </div>
-          {/* <div className="grid gap-2"> */}
-          {/*   <div className="flex items-center"> */}
-          {/*     <Label>Repeat Password</Label> */}
-          {/*   </div> */}
-          {/*   <Input */}
-          {/*     name="repeatPassword" */}
-          {/*     id="repeatPassword" */}
-          {/*     type="password" */}
-          {/*     required */}
-          {/*   /> */}
-          {/* </div> */}
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label>Repeat Password</Label>
+            </div>
+            <Input
+              name="repeatPassword"
+              id="repeatPassword"
+              type="password"
+              required
+            />
+
+            {state?.error?.repeatPassword && (
+              <p className="text-sm text-red-500">{state.error.repeatPassword}</p>
+            )}
+          </div>
           <Button type="submit" className="w-full">
             Create Account
           </Button>
