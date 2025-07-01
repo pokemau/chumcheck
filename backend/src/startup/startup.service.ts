@@ -26,6 +26,27 @@ import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
 export class StartupService {
   constructor(private em: EntityManager) {}
 
+  async createStartupTest(userId: number) {
+    const user = await this.em.findOne(User, { id: userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} does not exist.`);
+    }
+
+    const startup = this.em.create(Startup, {
+      name: 'Test',
+      user: user, // Assign the fetched user entity
+      qualificationStatus: QualificationStatus.PENDING,
+      dataPrivacy: false,
+      links: '',
+      groupName: 'groupName',
+      universityName: 'universityName',
+      eligibility: true,
+    });
+
+    await this.em.persistAndFlush(startup);
+    return startup;
+  }
+
   async getStartups(userId: number) {
     const user = await this.em.findOne(User, { id: userId });
 
@@ -45,9 +66,9 @@ export class StartupService {
               'mentors',
               'readinessLevels.readinessLevel',
               'uratQuestionAnswers.uratQuestion',
-              'calculatorQuestionAnswers.question'
-            ]
-          }
+              'calculatorQuestionAnswers.question',
+            ],
+          },
         );
       case Role.Mentor:
         return await this.em.find(
@@ -56,12 +77,16 @@ export class StartupService {
           { populate: ['mentors', 'capsuleProposal'] },
         );
       case Role.Manager:
-        return await this.em.findAll(Startup, { populate: ['user', 'mentors', 'members', 'capsuleProposal'] });
+        return await this.em.findAll(Startup, {
+          populate: ['user', 'mentors', 'members', 'capsuleProposal'],
+        });
     }
   }
 
   async findAll(): Promise<Startup[]> {
-    return this.em.findAll(Startup, { populate: ['user', 'mentors', 'members', 'capsuleProposal'] });
+    return this.em.findAll(Startup, {
+      populate: ['user', 'mentors', 'members', 'capsuleProposal'],
+    });
   }
 
   async getStartupById(startupId: number): Promise<Startup | null> {
@@ -71,7 +96,9 @@ export class StartupService {
       { populate: ['user', 'members', 'capsuleProposal'] },
     );
     if (!startup) {
-      throw new NotFoundException(`Startup with ID ${startupId} does not exist!`);
+      throw new NotFoundException(
+        `Startup with ID ${startupId} does not exist!`,
+      );
     }
     return startup;
   }
@@ -113,7 +140,8 @@ export class StartupService {
 
     // Apply all other fields from the DTO
     if (dto.name) startup.name = dto.name;
-    if (dto.qualificationStatus) startup.qualificationStatus = dto.qualificationStatus;
+    if (dto.qualificationStatus)
+      startup.qualificationStatus = dto.qualificationStatus;
     if (dto.dataPrivacy) startup.dataPrivacy = dto.dataPrivacy;
     if (dto.links) startup.links = dto.links;
     if (dto.groupName) startup.groupName = dto.groupName;
@@ -125,13 +153,18 @@ export class StartupService {
   }
 
   async updateWithCapsuleProposal(
-    id: number, 
-    dto: UpdateStartupDto, 
-    capsuleProposalDto?: CreateCapsuleProposalDto
+    id: number,
+    dto: UpdateStartupDto,
+    capsuleProposalDto?: CreateCapsuleProposalDto,
   ): Promise<Startup> {
     console.log('updateWithCapsuleProposal - received DTO:', dto);
-    console.log('updateWithCapsuleProposal - qualificationStatus type:', typeof dto.qualificationStatus, 'value:', dto.qualificationStatus);
-    
+    console.log(
+      'updateWithCapsuleProposal - qualificationStatus type:',
+      typeof dto.qualificationStatus,
+      'value:',
+      dto.qualificationStatus,
+    );
+
     const startup = await this.getStartupById(id);
     if (!startup) {
       throw new NotFoundException(`Startup with ID ${id} not found`);
@@ -165,9 +198,11 @@ export class StartupService {
         // Update existing capsule proposal
         startup.capsuleProposal.title = capsuleProposalDto.title;
         startup.capsuleProposal.description = capsuleProposalDto.description;
-        startup.capsuleProposal.problemStatement = capsuleProposalDto.problemStatement;
+        startup.capsuleProposal.problemStatement =
+          capsuleProposalDto.problemStatement;
         startup.capsuleProposal.targetMarket = capsuleProposalDto.targetMarket;
-        startup.capsuleProposal.solutionDescription = capsuleProposalDto.solutionDescription;
+        startup.capsuleProposal.solutionDescription =
+          capsuleProposalDto.solutionDescription;
         startup.capsuleProposal.objectives = capsuleProposalDto.objectives;
         startup.capsuleProposal.scope = capsuleProposalDto.scope;
         startup.capsuleProposal.methodology = capsuleProposalDto.methodology;
@@ -571,9 +606,10 @@ export class StartupService {
     };
   }
 
-  async allowRNAs(startupId: number): Promise<boolean>{
-    return await this.em.count(StartupReadinessLevel,
-      { startup: startupId }) > 0;
+  async allowRNAs(startupId: number): Promise<boolean> {
+    return (
+      (await this.em.count(StartupReadinessLevel, { startup: startupId })) > 0
+    );
   }
 
   async allowTasks(startupId: number): Promise<boolean> {
@@ -781,10 +817,14 @@ export class StartupService {
       // );
 
       // Average to range of 1-5
-      const normalizedScore = Math.ceil(scoresByReadinessType[readinessType] / 3);
+      const normalizedScore = Math.ceil(
+        scoresByReadinessType[readinessType] / 3,
+      );
       // Scale from 1-5 range to 1-9 range using the formula:
       // newScore = (((oldScore - oldMin) * (newMax - newMin)) / (oldMax - oldMin)) + newMin
-      const scaledScore = Math.ceil((((normalizedScore - 1) * (9 - 1)) / (5 - 1)) + 1);
+      const scaledScore = Math.ceil(
+        ((normalizedScore - 1) * (9 - 1)) / (5 - 1) + 1,
+      );
       scoresByReadinessType[readinessType] = scaledScore;
     }
 

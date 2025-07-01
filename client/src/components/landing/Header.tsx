@@ -21,16 +21,16 @@ const Header = () => {
         <div className="flex-none font-medium">
           <ul className="flex flex-1 cursor-pointer items-center gap-7 text-[15px]">
             <li className="hover:text-flutter-blue active:scale-95">
-              <Link href="#hero">Home</Link>
+              <Link href="#hero" className="block h-full">Home</Link>
             </li>
             <li className="hover:text-flutter-blue active:scale-95">
-              <Link href="#howitwork">How it Works</Link>
+              <Link href="#howitwork" className="block h-full">How it Works</Link>
             </li>
             <li className="hover:text-flutter-blue active:scale-95">
-              <Link href="#aboutus">About Us</Link>
+              <Link href="#aboutus" className="block h-full">About Us</Link>
             </li>
             <li className="hover:text-flutter-blue active:scale-95">
-              <Link data-sveltekit-reload href="/login">Login</Link>
+              <Link href="/login" className="block h-full">Login</Link>
             </li>
           </ul>
         </div>

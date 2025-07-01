@@ -3,6 +3,7 @@ import Header from "@/components/landing/Header"
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-full flex-col overflow-x-hidden">
+      
 
       <div
         className="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#ecf3fc_1px,transparent_1px)] [background-size:2.5rem_2.5rem] [mask-image:radial-gradient(ellipse_100%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#171e31_1px,transparent_1px)]"

@@ -3,13 +3,12 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { AuthSignInDto } from './dto';
+import { AuthDto, AuthSignInDto } from './dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from 'src/entities/user.entity';
-import { CreateUserDto } from 'src/admin/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()
@@ -21,7 +20,7 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async signup(dto: CreateUserDto) {
+  async signup(dto: AuthDto) {
     const user = await this.userService.findByEmail(dto.email);
     if (user) throw new ConflictException('User already exists!');
     return this.userService.create(dto);

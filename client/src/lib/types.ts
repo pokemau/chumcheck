@@ -1,3 +1,11 @@
+import {
+  CalculatorQuestionCategory,
+  QualificationStatus,
+  ReadinessType,
+  Role,
+  TaskStatus
+} from './enums';
+
 export type User = {
   email: string;
   firstName: string;
@@ -13,6 +21,7 @@ export type Startup = {
   dateTimeDeleted: Date;
   eligibility: boolean;
   groupName: string;
+  initiatives: Initiative[];
   id: number;
   links: string;
   members: User[];
@@ -23,6 +32,27 @@ export type Startup = {
   universityName: string;
   uratQuestionAnswers: UratQuestionAnswer;
   user: User;
+};
+
+export type Initiative = {
+  id: number;
+  priorityNumber: number;
+  initiativeNumber: number;
+  clickedByMentor: boolean;
+  clickedByStartup: boolean;
+  status: TaskStatus;
+  requestedStatus: TaskStatus;
+  approvalStatus: InitiativeApprovalStatus;
+  rns: number;
+  isAiGenerated: boolean;
+  assignee: number;
+  startup: number;
+  description: string;
+  measures: string;
+  targets: string;
+  remarks: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 export type CalculatorQuestionAnswer = {
@@ -82,37 +112,4 @@ export type ReadinessLevel = {
   readinessType: ReadinessType;
 };
 
-export enum ReadinessType {
-  Technology = 'Technology',
-  Market = 'Market',
-  Acceptance = 'Acceptance',
-  Organizational = 'Organizational',
-  Regulatory = 'Regulatory',
-  Investment = 'Investment',
-}
-
-export enum QualificationStatus {
-  PENDING = 1,
-  RATED = 2,
-  QUALIFIED = 3,
-  REJECTED = 4,
-  PAUSED = 5,
-  COMPLETED = 6,
-}
-
-export enum CalculatorQuestionCategory {
-  Technology = 'Technology',
-  Product_Development = 'Product Development',
-  Product_Definition_Design = 'Product Definition/Design',
-  Competitive_Landscape = 'Competitive Landscape',
-  Team = 'Team',
-  Go_To_Market = 'Go-To-Market',
-  Manufacturing_Supply_Chain = 'Manufacturing/Supply Chain',
-}
-
-export enum Role {
-  Startup = 'Startup',
-  Mentor = 'Mentor',
-  Manager = 'Manager',
-}
-
+export type InitiativeApprovalStatus = 'Pending' | 'Approved' | 'Denied' | 'Unchanged';

@@ -1,23 +1,37 @@
 import { requireAccessTokenOrRedirect } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getStartups } from "@/services/startup.service";
-// import Startups from "./_components/Startups";
+import Startups from "./_components/Startups";
+import { QualificationStatus } from "@/lib/enums";
 
 export default async function Page() {
   await requireAccessTokenOrRedirect();
 
   const startups = await getStartups();
-  console.log(startups)
 
   const pendingStartups = startups.filter(s => s.qualificationStatus < 3);
-  const qualifiedStartups = startups.filter(s => s.qualificationStatus === 3);
-  const rejectedStartups = startups.filter(s => s.qualificationStatus === 4);
-  const pausedStartups = startups.filter(s => s.qualificationStatus === 5);
-  const completedStartups = startups.filter(s => s.qualificationStatus === 6);
+  const qualifiedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.QUALIFIED);
+  const rejectedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.REJECTED);
+  const pausedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.PAUSED);
+  const completedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.COMPLETED);
+
+  const allInitiatives = startups.flatMap(startup => startup.initiatives);
+  const completedCount = completedStartups.length;
+  const initiativesTotalCount = allInitiatives.length;
+  const percent = initiativesTotalCount === 0 ? 0 : Math.round((completedCount / initiativesTotalCount) * 100);
+
+  const completedQualifiedStartups = qualifiedStartups.filter(s => s.qualificationStatus === QualificationStatus.COMPLETED);
+
+  const qualifiedCount = qualifiedStartups.length;
+  const completedQualifiedCount = completedQualifiedStartups.length;
+  const completionRate = qualifiedCount === 0 ? 0 : Math.round((completedQualifiedCount / qualifiedCount) * 100);
 
   return (
     <div>
-      <h1>STARTUPS</h1>
+      <div className="mb-4">
+        <h1 className="text-4xl font-extrabold">Startups</h1>
+        <p>Manage assigned startups</p>
+      </div>
 
       <div className="grid grid-cols-3 gap-5 mb-8">
 
@@ -66,11 +80,11 @@ export default async function Page() {
 
           <CardContent>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl font-bold">2/6</span>
-              <span className="ml-auto text-sm">20%</span>
+              <span className="text-2xl font-bold">{completedCount}/{initiativesTotalCount}</span>
+              <span className="ml-auto text-sm">{percent}%</span>
             </div>
             <div className="w-full h-2 bg-gray-800 rounded">
-              <div className="h-2 bg-white rounded w-full"></div>
+              <div className="h-2 bg-white rounded" style={{ width: `${percent}%` }} ></div>
             </div>
           </CardContent>
         </Card>
@@ -84,13 +98,16 @@ export default async function Page() {
 
           <CardContent>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl font-bold">0%</span>
+              <span className="text-2xl font-bold">{completionRate}%</span>
             </div>
-            <CardDescription>0 of 1 startups completed</CardDescription>
+            <CardDescription>
+              {completedQualifiedCount} of {qualifiedCount} startups completed
+            </CardDescription>
           </CardContent>
         </Card>
       </div>
 
+      <Startups startups={startups} />
     </div>
 
   )

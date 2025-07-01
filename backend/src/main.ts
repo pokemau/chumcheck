@@ -73,6 +73,7 @@ async function bootstrap() {
     origin: (origin, callback) => {
       const allowedOrigins = [
         'http://localhost:5173',
+        'http://localhost:5174',
         'https://chumcheck.vercel.app',
       ];
       if (!origin || allowedOrigins.includes(origin)) {
