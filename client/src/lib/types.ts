@@ -112,4 +112,17 @@ export type ReadinessLevel = {
   readinessType: ReadinessType;
 };
 
-export type InitiativeApprovalStatus = 'Pending' | 'Approved' | 'Denied' | 'Unchanged';
+export type InitiativeApprovalStatus =
+  | 'Pending'
+  | 'Approved'
+  | 'Denied'
+  | 'Unchanged';
+
+export type RNA = {
+  id: number;
+  isAiGenerated: false;
+  readinessLevel: ReadinessLevel;
+  rna: string;
+  createdAt: Date;
+  updatedAt: Date;
+};

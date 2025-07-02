@@ -1,6 +1,6 @@
 import { requireAccessTokenOrRedirect } from "@/lib/auth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getStartups } from "@/services/startup.service";
+import { getStartups } from "@/services/server/startup.service";
 import Startups from "./_components/Startups";
 import { QualificationStatus } from "@/lib/enums";
 
