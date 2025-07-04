@@ -43,11 +43,6 @@ export class StartupController {
 
   @Get('/startups')
   getStartups(@Req() req: any) {
-    console.log("RUN HERE")
-    console.log("RUN HERE")
-    console.log("RUN HERE")
-    console.log("RUN HERE")
-    console.log("RUN HERE")
     return this.startupService.getStartups(req.user.id);
   }
 

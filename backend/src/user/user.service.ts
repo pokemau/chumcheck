@@ -1,5 +1,5 @@
 import { EntityManager } from '@mikro-orm/postgresql';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { hash } from 'argon2';
 import { AuthDto } from 'src/auth/dto';
 import { Role } from 'src/entities/enums/role.enum';
@@ -8,6 +8,16 @@ import { User } from 'src/entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(private em: EntityManager) {}
+
+  async getUser(userId: number) {
+    const user = await this.em.findOne(User, { id: userId });
+    if (!user)
+      throw new NotFoundException(`User with id ${userId} does not exist.`);
+
+    return {
+      role: user.role,
+    };
+  }
 
   async create(dto: AuthDto) {
     const hashedPassword = await hash(dto.password);

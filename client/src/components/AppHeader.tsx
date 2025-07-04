@@ -1,18 +1,18 @@
 'use client'
-import { Role } from "@/lib/enums";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import clsx from "clsx";
+import { User } from "@/lib/types";
 
 interface NavLink {
   name: string;
   href: string;
 }
 
-export function AppHeader({ role }: { role: Role }) {
+export function AppHeader({ user }: { user: User }) {
 
   const pathName = usePathname();
 
@@ -96,7 +96,7 @@ export function AppHeader({ role }: { role: Role }) {
         <Badge
           variant="outline"
           className="bg-flutter-gray/20 h-8 rounded-full text-sm font-normal"
-        >{role}</Badge>
+        >{user.role}</Badge>
 
       </nav>
 

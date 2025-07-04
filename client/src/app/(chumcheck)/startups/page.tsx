@@ -5,8 +5,8 @@ import Startups from "./_components/Startups";
 import { QualificationStatus } from "@/lib/enums";
 
 export default async function Page() {
-  await requireAccessTokenOrRedirect();
 
+  await requireAccessTokenOrRedirect();
   const startups = await getStartups();
 
   const pendingStartups = startups.filter(s => s.qualificationStatus < 3);

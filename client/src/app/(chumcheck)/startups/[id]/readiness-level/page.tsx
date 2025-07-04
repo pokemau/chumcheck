@@ -1,14 +1,14 @@
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { id: startupId } = await params;
 
 
-  console.log('params', id);
+  console.log('params', startupId);
 
   return (
     <div>
       {/* <RadarChart /> */}
-      <h1>RADAR CHART {id}</h1>
+      <h1>RADAR CHART</h1>
     </div>
   );
 }

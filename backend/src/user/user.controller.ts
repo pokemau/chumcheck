@@ -3,6 +3,7 @@ import {
   Get,
   ParseEnumPipe,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
@@ -13,6 +14,11 @@ import { Role } from 'src/entities/enums/role.enum';
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
+
+  @Get()
+  getUser(@Req() req: any) {
+    return this.userService.getUser(req.user.id);
+  }
 
   @Get()
   async getUsers(@Query('userRole', new ParseEnumPipe(Role)) userRole: Role) {
