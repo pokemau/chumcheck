@@ -1,40 +1,49 @@
-import { requireAccessTokenOrRedirect } from "@/lib/auth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getStartups } from "@/services/server/startup.service";
-import Startups from "./_components/Startups";
-import { QualificationStatus } from "@/lib/enums";
+import { requireAccessTokenOrRedirect } from '@/lib/auth';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getStartups } from '@/services/server/startup.service';
+import Startups from './_components/Startups';
+import { QualificationStatus } from '@/lib/enums';
+import ApplyStartup from './_components/ApplyStartup';
+import { getCalculatorQuestions, getUratQuestions } from '@/services/server/readiness-level.service';
 
 export default async function Page() {
-
   await requireAccessTokenOrRedirect();
   const startups = await getStartups();
 
-  const pendingStartups = startups.filter(s => s.qualificationStatus < 3);
-  const qualifiedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.QUALIFIED);
-  const rejectedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.REJECTED);
-  const pausedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.PAUSED);
-  const completedStartups = startups.filter(s => s.qualificationStatus === QualificationStatus.COMPLETED);
+  const pendingStartups = startups.filter((s) => s.qualificationStatus < 3);
+  const qualifiedStartups = startups.filter((s) => s.qualificationStatus === QualificationStatus.QUALIFIED);
+  const rejectedStartups = startups.filter((s) => s.qualificationStatus === QualificationStatus.REJECTED);
+  const pausedStartups = startups.filter((s) => s.qualificationStatus === QualificationStatus.PAUSED);
+  const completedStartups = startups.filter((s) => s.qualificationStatus === QualificationStatus.COMPLETED);
 
-  const allInitiatives = startups.flatMap(startup => startup.initiatives);
+  const allInitiatives = startups.flatMap((startup) => startup.initiatives);
   const completedCount = completedStartups.length;
   const initiativesTotalCount = allInitiatives.length;
   const percent = initiativesTotalCount === 0 ? 0 : Math.round((completedCount / initiativesTotalCount) * 100);
 
-  const completedQualifiedStartups = qualifiedStartups.filter(s => s.qualificationStatus === QualificationStatus.COMPLETED);
+  const completedQualifiedStartups = qualifiedStartups.filter(
+    (s) => s.qualificationStatus === QualificationStatus.COMPLETED
+  );
 
   const qualifiedCount = qualifiedStartups.length;
   const completedQualifiedCount = completedQualifiedStartups.length;
   const completionRate = qualifiedCount === 0 ? 0 : Math.round((completedQualifiedCount / qualifiedCount) * 100);
 
+  const uratQuestions = await getUratQuestions();
+  const calculatorQuestions = await getCalculatorQuestions();
+
   return (
     <div>
-      <div className="mb-4">
-        <h1 className="text-4xl font-extrabold">Startups</h1>
-        <p>Manage assigned startups</p>
+      <div className="flex justify-between">
+        <div className="mb-4">
+          <h1 className="text-4xl font-extrabold">Startups</h1>
+          <p>Manage assigned startups</p>
+        </div>
+
+        <ApplyStartup uratQuestions={uratQuestions} calculatorQuestions={calculatorQuestions} />
       </div>
 
       <div className="grid grid-cols-3 gap-5 mb-8">
-
         <Card className="rounded-lg bg-background p-5 flex flex-col gap-1 border border-border">
           <CardHeader>
             <CardTitle className="text-xl">
@@ -80,11 +89,13 @@ export default async function Page() {
 
           <CardContent>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl font-bold">{completedCount}/{initiativesTotalCount}</span>
+              <span className="text-2xl font-bold">
+                {completedCount}/{initiativesTotalCount}
+              </span>
               <span className="ml-auto text-sm">{percent}%</span>
             </div>
             <div className="w-full h-2 bg-gray-800 rounded">
-              <div className="h-2 bg-white rounded" style={{ width: `${percent}%` }} ></div>
+              <div className="h-2 bg-white rounded" style={{ width: `${percent}%` }}></div>
             </div>
           </CardContent>
         </Card>
@@ -109,7 +120,6 @@ export default async function Page() {
 
       <Startups startups={startups} />
     </div>
-
-  )
+  );
 }
 

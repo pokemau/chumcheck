@@ -68,6 +68,11 @@ export type CalculatorQuestion = {
   score: number;
 };
 
+export type CalculatorQuestionsApiRes = {
+  category: CalculatorQuestionCategory;
+  questions: CalculatorQuestion[];
+}
+
 export type UratQuestionAnswer = {
   id: number;
   response: string;
