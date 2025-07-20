@@ -53,7 +53,6 @@ export default function ApplyStartup({
     if (state?.success) {
       setIsOpen(false);
       setCurrentStep(0);
-      router.refresh();
     }
   }, [state, router]);
 

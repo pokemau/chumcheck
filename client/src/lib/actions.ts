@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { FormState, LoginSchema, RegisterSchema } from './definitions';
 import { requireAccessTokenOrRedirect } from './auth';
+import { revalidatePath } from 'next/cache';
 
 export async function registerUser(state: FormState, formData: FormData) {
   const registerFields = RegisterSchema.safeParse({
@@ -77,20 +78,27 @@ export async function loginUser(state: FormState, formData: FormData) {
 export async function applyStartup(state: FormState, formData: FormData) {
   const access = await requireAccessTokenOrRedirect();
 
-  console.log(formData);
+  const rawFormData = {
+    name: formData.get('startupName'),
+    dataPrivacy: true,
+    eligibility: true
+  };
 
   const response = await fetch(`${BACKEND_API_URL}/startups/create-startup`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${access}`,
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access}`
     },
-    body: formData
+    body: JSON.stringify(rawFormData)
   });
 
-  console.log(response);
-
-  return {
-    success: true,
-    message: 'yeah'
-  };
+  if (response.ok) {
+    revalidatePath('/startups');
+    return { success: true, message: 'yeah' };
+  } else {
+    const errorData = await response.json();
+    console.error('Error:', errorData);
+    return { success: false, error: errorData };
+  }
 }

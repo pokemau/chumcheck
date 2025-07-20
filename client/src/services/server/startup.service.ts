@@ -9,7 +9,7 @@ export async function getStartups(): Promise<Startup[]> {
 
   const access = await requireAccessTokenOrRedirect();
 
-  const response = await fetch(`${BACKEND_API_URL}/startups/startups`, {
+  const response = await fetch(`${BACKEND_API_URL}/startups`, {
     headers: {
       Authorization: `Bearer ${access}`
     }

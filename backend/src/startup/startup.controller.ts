@@ -27,6 +27,7 @@ import { Request } from 'express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
 import { ValidationPipe } from '@nestjs/common';
+import { GetUser } from 'src/auth/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -37,13 +38,13 @@ export class StartupController {
   ) {}
 
   @Post('create-test')
-  createStartupTest(@Req() req: any) {
-    return this.startupService.createStartupTest(req.user.id);
+  createStartupTest(@GetUser('id') userId: number) {
+    return this.startupService.createStartupTest(userId);
   }
 
-  @Get('/startups')
-  getStartups(@Req() req: any) {
-    return this.startupService.getStartups(req.user.id);
+  @Get()
+  getStartups(@GetUser('id') userId: number) {
+    return this.startupService.getStartups(userId);
   }
 
   @Get('/criterion-answers')
@@ -73,52 +74,53 @@ export class StartupController {
   @Post('/create-startup')
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async createStartup(
+    @GetUser('id') userId: number,
     @Body() dto: StartupApplicationDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // If a capsule proposal file is uploaded, parse and create CapsuleProposal
-    if (file) {
-      try {
-        console.log('Capsule proposal file received:', file.originalname);
-        const data = await PdfParse(file.buffer);
-        let res = await this.aiService.getCapsuleProposalInfo(data.text);
-        console.log('AI service result:', res);
-        if (res) {
-          res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-          const parsed = JSON.parse(res);
-          console.log('Parsed capsule proposal:', parsed);
-
-          const capsuleProposalDto: CreateCapsuleProposalDto = {
-            title: dto.name,
-            description: parsed.startup_description,
-            problemStatement: parsed.problem_statement,
-            targetMarket: parsed.target_market,
-            solutionDescription: parsed.solution_description,
-            objectives: parsed.objectives,
-            scope: parsed.scope,
-            methodology: parsed.methodology,
-            startupId: -1, //placeholder
-            fileName: file.originalname,
-          };
-          const startup = await this.startupService.createStartup(dto);
-          capsuleProposalDto.startupId = startup.id;
-          await this.startupService.createCapsuleProposal(capsuleProposalDto);
-          console.log('CapsuleProposal created successfully');
-          return startup;
-        } else {
-          console.log('AI service did not return a result');
-          throw new BadRequestException('AI service did not return a result');
-        }
-      } catch (error) {
-        console.error('Failed to parse and create capsule proposal:', error);
-        throw new BadRequestException(
-          'Failed to parse and create capsule proposal: ' + error.message,
-        );
-      }
-    } else {
-      console.log('No capsule proposal file uploaded');
-      throw new BadRequestException('No capsule proposal file uploaded');
-    }
+    await this.startupService.createStartup(userId, dto);
+    // if (file) {
+    //   try {
+    //     console.log('Capsule proposal file received:', file.originalname);
+    //     const data = await PdfParse(file.buffer);
+    //     let res = await this.aiService.getCapsuleProposalInfo(data.text);
+    //     console.log('AI service result:', res);
+    //     if (res) {
+    //       res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    //       const parsed = JSON.parse(res);
+    //       console.log('Parsed capsule proposal:', parsed);
+    //
+    //       const capsuleProposalDto: CreateCapsuleProposalDto = {
+    //         title: dto.name,
+    //         description: parsed.startup_description,
+    //         problemStatement: parsed.problem_statement,
+    //         targetMarket: parsed.target_market,
+    //         solutionDescription: parsed.solution_description,
+    //         objectives: parsed.objectives,
+    //         scope: parsed.scope,
+    //         methodology: parsed.methodology,
+    //         startupId: -1, //placeholder
+    //         fileName: file.originalname,
+    //       };
+    //       const startup = await this.startupService.createStartup(dto);
+    //       capsuleProposalDto.startupId = startup.id;
+    //       await this.startupService.createCapsuleProposal(capsuleProposalDto);
+    //       console.log('CapsuleProposal created successfully');
+    //       return startup;
+    //     } else {
+    //       console.log('AI service did not return a result');
+    //       throw new BadRequestException('AI service did not return a result');
+    //     }
+    //   } catch (error) {
+    //     console.error('Failed to parse and create capsule proposal:', error);
+    //     throw new BadRequestException(
+    //       'Failed to parse and create capsule proposal: ' + error.message,
+    //     );
+    //   }
+    // } else {
+    //   console.log('No capsule proposal file uploaded');
+    //   throw new BadRequestException('No capsule proposal file uploaded');
+    // }
   }
 
   @Post('add-member')

@@ -226,22 +226,22 @@ export class StartupService {
     await this.em.removeAndFlush(startup);
   }
 
-  async createStartup(dto: StartupApplicationDto) {
+  async createStartup(userId: number, dto: StartupApplicationDto) {
     const startup = new Startup();
 
-    const user = await this.em.findOne(User, { id: dto.userId });
+    const user = await this.em.findOne(User, { id: userId });
     if (!user) {
-      throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
+      throw new NotFoundException(`User with ID ${userId} does not exist.`);
     }
 
     startup.name = dto.name;
 
     startup.user = user;
-    startup.dataPrivacy = dto.dataPrivacy;
-    startup.eligibility = dto.eligibility;
-    if (dto.links) startup.links = dto.links;
-    if (dto.groupName) startup.groupName = dto.groupName;
-    if (dto.universityName) startup.universityName = dto.universityName;
+    // startup.dataPrivacy = dto.dataPrivacy;
+    // startup.eligibility = dto.eligibility;
+    // if (dto.links) startup.links = dto.links;
+    // if (dto.groupName) startup.groupName = dto.groupName;
+    // if (dto.universityName) startup.universityName = dto.universityName;
 
     await this.em.persistAndFlush(startup);
     return startup;

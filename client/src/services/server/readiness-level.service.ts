@@ -1,7 +1,7 @@
 'use server'
 
 import { BACKEND_API_URL } from "@/lib/constants";
-import { CalculatorQuestion, UratQuestion } from "@/lib/types";
+import { CalculatorQuestionsApiRes, UratQuestion } from "@/lib/types";
 
 export async function getUratQuestions(): Promise<UratQuestion[]> {
   const res = await fetch(`${BACKEND_API_URL}/readinesslevel/urat-questions`, {
@@ -12,7 +12,7 @@ export async function getUratQuestions(): Promise<UratQuestion[]> {
 }
 
 
-export async function getCalculatorQuestions(): Promise<CalculatorQuestion[]> {
+export async function getCalculatorQuestions(): Promise<CalculatorQuestionsApiRes[]> {
   const res = await fetch(`${BACKEND_API_URL}/readinesslevel/calculator-questions`, {
     next: { revalidate: 60 * 60 }
   });
