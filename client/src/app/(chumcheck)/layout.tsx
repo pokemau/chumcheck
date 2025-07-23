@@ -1,5 +1,5 @@
 import { AppHeader } from "@/components/AppHeader";
-import { getUser, getUserRole } from "@/lib/auth";
+import { getUser } from "@/lib/auth";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   // const role = await getUserRole();
