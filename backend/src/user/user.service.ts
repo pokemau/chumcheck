@@ -44,9 +44,16 @@ export class UserService {
   }
 
   async getUserByRole(userRole: Role) {
-    return await this.em.find(User, {
+    const t = await this.em.find(User, {
       role: userRole,
     });
+    console.log('=====================')
+    console.log('=====================')
+    console.log(t)
+    console.log('=====================')
+    console.log('=====================')
+
+    return t;
   }
 
   async getUserByString(query: string) {

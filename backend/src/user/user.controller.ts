@@ -3,21 +3,21 @@ import {
   Get,
   ParseEnumPipe,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guard';
 import { UserService } from './user.service';
 import { Role } from 'src/entities/enums/role.enum';
+import { GetUser } from 'src/auth/decorator';
 
 @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Get()
-  getUser(@Req() req: any) {
-    return this.userService.getUser(req.user.id);
+  @Get('me')
+  getUser(@GetUser('id') userId: number) {
+    return this.userService.getUser(userId);
   }
 
   @Get()

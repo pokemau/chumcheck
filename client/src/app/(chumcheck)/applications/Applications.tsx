@@ -4,17 +4,19 @@ import { use, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { QualificationStatus } from '@/lib/enums';
-import { Startup } from '@/lib/types';
+import { Startup, User } from '@/lib/types';
 import PendingStartupDialog from './PendingStartupDialog';
 import RatedStartupDialog from './RatedStartupDialog';
 import QualifiedStartupDialog from './QualifiedStartupDialog';
 
 interface ApplicationsProps {
   startupsPromise: Promise<Startup[]>;
+  mentorsPromise: Promise<User[]>;
 }
 
-export default function Applications({ startupsPromise }: ApplicationsProps) {
+export default function Applications({ startupsPromise, mentorsPromise }: ApplicationsProps) {
   const startups = use(startupsPromise);
+  const mentors = use(mentorsPromise);
 
   const [selectedStartupId, setSelectedStartupId] = useState<number | null>(null);
   const [dialogType, setDialogType] = useState<'pending' | 'rated' | 'qualified' | null>(null);
@@ -154,7 +156,7 @@ export default function Applications({ startupsPromise }: ApplicationsProps) {
       )}
 
       {selectedStartupId && dialogType === 'rated' && (
-        <RatedStartupDialog open={true} onOpenChange={closeDialog} startupId={selectedStartupId} />
+        <RatedStartupDialog open={true} onOpenChange={closeDialog} startupId={selectedStartupId} mentors={mentors} />
       )}
 
       {selectedStartupId && dialogType === 'qualified' && (

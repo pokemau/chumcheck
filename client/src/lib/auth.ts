@@ -24,7 +24,7 @@ export async function getUser(): Promise<User> {
     redirect('/login');
   }
 
-  const res = await fetch(`${BACKEND_API_URL}/users`, {
+  const res = await fetch(`${BACKEND_API_URL}/users/me`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }
@@ -46,7 +46,7 @@ export async function getUserRole(): Promise<Role> {
     redirect('/login');
   }
 
-  const res = await fetch(`${BACKEND_API_URL}/users`, {
+  const res = await fetch(`${BACKEND_API_URL}/users/me`, {
     headers: {
       Authorization: `Bearer ${accessToken}`
     }

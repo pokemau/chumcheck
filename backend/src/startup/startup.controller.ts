@@ -8,11 +8,9 @@ import {
   ParseIntPipe,
   Post,
   Query,
-  Req,
   UseGuards,
   UseInterceptors,
   Patch,
-  UsePipes,
 } from '@nestjs/common';
 import { readFile } from 'fs/promises';
 
@@ -23,10 +21,8 @@ import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { StartupService } from './startup.service';
 import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { ValidationPipe } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorator';
 
 @UseGuards(JwtGuard)
@@ -172,6 +168,17 @@ export class StartupController {
   async getCalculatorFinalScores(@Param('startupId') startupId: number) {
     return await this.startupService.getCalculatorFinalScores(startupId);
   }
+
+  /////////////////////////// TESTING PURPOSES ////////////////////////////////
+  @Post(':startupId/set-to-rated')
+  async setToRated(@Param('startupId') startupId: number) {
+    return await this.startupService.setToRated(startupId);
+  }
+  @Post(':startupId/approve-temp')
+  async approveTemp(@Param('startupId') startupId: number) {
+    return await this.startupService.approveTemp(startupId);
+  }
+  ///////////////////////// END TESTING PURPOSES //////////////////////////////
 
   @Post(':startupId/rate-applicant')
   async rateApplicant(

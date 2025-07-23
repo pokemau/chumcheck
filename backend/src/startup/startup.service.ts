@@ -498,6 +498,27 @@ export class StartupService {
     return scoresByCategory;
   }
 
+  /////////////////////////// TESTING PURPOSES ////////////////////////////////
+  async setToRated(startupId: number) {
+    const startup = await this.em.findOneOrFail(
+      Startup,
+      { id: startupId },
+      {
+        failHandler: () => new Error(`Startup with ID ${startupId} not found`),
+      },
+    );
+
+    if (startup.qualificationStatus === QualificationStatus.PENDING) {
+      startup.qualificationStatus = QualificationStatus.RATED;
+    }
+    await this.em.flush();
+  }
+
+  async approveTemp(startupId) {
+
+  }
+  ///////////////////////// END TESTING PURPOSES //////////////////////////////
+
   async rateApplicant(
     startupId: number,
     scores: { readinessType: string; questionId: number; score: number }[],

@@ -1,14 +1,19 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { QualificationStatus } from './enums';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const startupStatusMap: Record<
-  number,
-  { label: string; border: string; text: string; bg: string }
-> = {
+export function getQualificationStatusText(status: number | undefined): string {
+  if (!status) return 'Loading...';
+  const text = QualificationStatus[status];
+  if (!text) return 'Unknown';
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+export const startupStatusMap: Record<number, { label: string; border: string; text: string; bg: string }> = {
   1: {
     label: 'Pending',
     border: 'border-yellow-400',
