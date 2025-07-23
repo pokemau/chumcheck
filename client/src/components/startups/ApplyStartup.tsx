@@ -1,5 +1,10 @@
 'use client';
 
+import CalculatorStep from '@/components/startups/application-steps/CalculatorStep';
+import DataPrivacyStep from '@/components/startups/application-steps/DataPrivacyStep';
+import EligibilityStep from '@/components/startups/application-steps/EligibilityStep';
+import ProjectDetailsStep from '@/components/startups/application-steps/ProjectDetailsStep';
+import TechnologyRLStep from '@/components/startups/application-steps/TechnologyRLStep';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -10,15 +15,10 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import DataPrivacyStep from './application-steps/DataPrivacyStep';
-import { useActionState, useEffect, useState } from 'react';
-import EligibilityStep from './application-steps/EligibilityStep';
-import ProjectDetailsStep from './application-steps/ProjectDetailsStep';
 import { applyStartup } from '@/lib/actions';
-import { CalculatorQuestionsApiRes, UratQuestion } from '@/lib/types';
-import TechnologyRLStep from './application-steps/TechnologyRLStep';
-import CalculatorStep from './application-steps/CalculatorStep';
+import { UratQuestion, CalculatorQuestionsApiRes } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { useState, useActionState, useEffect } from 'react';
 
 export default function ApplyStartup({
   uratQuestions,

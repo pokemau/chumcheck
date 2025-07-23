@@ -1,11 +1,11 @@
 import { getCurrentUser, requireAccessTokenOrRedirect } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStartups } from '@/services/server/startup.service';
-import Startups from './_components/Startups';
 import { QualificationStatus } from '@/lib/enums';
-import ApplyStartup from './_components/ApplyStartup';
 import { getCalculatorQuestions, getUratQuestions } from '@/services/server/readiness-level.service';
 import { redirect } from 'next/navigation';
+import ApplyStartup from '@/components/startups/ApplyStartup';
+import Startups from '@/components/startups/Startups';
 
 export default async function Page() {
   await requireAccessTokenOrRedirect();
