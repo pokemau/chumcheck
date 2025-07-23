@@ -1,14 +1,20 @@
-import { requireAccessTokenOrRedirect } from '@/lib/auth';
+import { getCurrentUser, requireAccessTokenOrRedirect } from '@/lib/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getStartups } from '@/services/server/startup.service';
 import Startups from './_components/Startups';
 import { QualificationStatus } from '@/lib/enums';
 import ApplyStartup from './_components/ApplyStartup';
 import { getCalculatorQuestions, getUratQuestions } from '@/services/server/readiness-level.service';
+import { redirect } from 'next/navigation';
 
 export default async function Page() {
   await requireAccessTokenOrRedirect();
   const startups = await getStartups();
+  const user = await getCurrentUser();
+
+  if (user?.role == 'Manager') {
+    redirect('/applications');
+  }
 
   const pendingStartups = startups.filter((s) => s.qualificationStatus < 3);
   const qualifiedStartups = startups.filter((s) => s.qualificationStatus === QualificationStatus.QUALIFIED);

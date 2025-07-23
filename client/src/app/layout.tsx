@@ -4,6 +4,7 @@ import "./globals.css";
 // import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import QueryProvider from "@/components/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,16 +33,18 @@ export default function RootLayout({
       >
 
         <Toaster richColors />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* <Navbar /> */}
-          {children}
+        <QueryProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {/* <Navbar /> */}
+            {children}
 
-        </ThemeProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );
