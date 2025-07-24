@@ -1,6 +1,7 @@
-'use client'
+'use client';
 
-import { RNA } from "@/lib/types";
+import { RNA } from '@/lib/types';
+import { useState } from 'react';
 
 import {
   Dialog,
@@ -10,37 +11,52 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+  DialogTrigger
+} from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useGetStartupRna } from '@/hooks/useGetStartupRna';
+import RnaCardsSkeletonGrid from './RnaSkeleton';
+import CreateRnaDialog from './CreateRnaDialog';
 
-
-export default function RnaCards({ rnaData }: { rnaData: RNA[] }) {
-
-  return (
-    <div className="grid grid-cols-4 gap-5">
-      {rnaData.map(rna => (
-        <RnaCard key={rna.id} rna={rna} />
-      ))}
-    </div>
-  )
-
-
-
+interface Props {
+  startupId: number;
 }
 
+export default function RnaCards({ startupId }: Props) {
+  const { data: rnaData, isLoading, error } = useGetStartupRna(startupId);
+  const [open, setOpen] = useState(false);
+
+  if (isLoading) {
+    return <RnaCardsSkeletonGrid />;
+  }
+
+  if (error) {
+    return <h1>Something went wrong...</h1>;
+  }
+
+  return (
+    <>
+      <CreateRnaDialog open={open} setOpen={setOpen} />
+      <Button onClick={() => setOpen(true)}>Add</Button>
+      <Button>Generate</Button>
+      <div className="grid grid-cols-4 gap-5">
+        {Array.isArray(rnaData) ? rnaData.map((rna) => <RnaCard key={rna.id} rna={rna} />) : <h1>There are currently no RNAs created...</h1>}
+      </div>
+    </>
+  );
+}
 
 function RnaCard({ rna }: { rna: RNA }) {
   // Helper function to get level color
   const getLevelColor = (level: number) => {
-    if (level >= 8) return "bg-green-100 text-green-800";
-    if (level >= 6) return "bg-yellow-100 text-yellow-800";
-    if (level >= 4) return "bg-orange-100 text-orange-800";
-    return "bg-red-100 text-red-800";
+    if (level >= 8) return 'bg-green-100 text-green-800';
+    if (level >= 6) return 'bg-yellow-100 text-yellow-800';
+    if (level >= 4) return 'bg-orange-100 text-orange-800';
+    return 'bg-red-100 text-red-800';
   };
 
   return (
@@ -50,15 +66,11 @@ function RnaCard({ rna }: { rna: RNA }) {
           <CardHeader className="pb-3">
             <div className="flex justify-between items-start">
               <CardTitle className="text-lg">{rna.readinessLevel.readinessType}</CardTitle>
-              <Badge className={getLevelColor(rna.readinessLevel.level)}>
-                Level {rna.readinessLevel.level}
-              </Badge>
+              <Badge className={getLevelColor(rna.readinessLevel.level)}>Level {rna.readinessLevel.level}</Badge>
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {rna.rna}
-            </p>
+            <p className="text-sm text-gray-600 leading-relaxed">{rna.rna}</p>
           </CardContent>
         </Card>
       </DialogTrigger>

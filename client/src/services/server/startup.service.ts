@@ -11,6 +11,9 @@ export async function getStartupById(startupId: number): Promise<Startup> {
   const response = await fetch(`${BACKEND_API_URL}/startups/${startupId}`, {
     headers: {
       Authorization: `Bearer ${access}`
+    },
+    next: {
+      revalidate: 3600
     }
   });
 
@@ -32,7 +35,7 @@ export async function setStartupToRated(startupId: number) {
     }
   });
 
-  revalidatePath('/applications')
+  revalidatePath('/applications');
 
   if (!response.ok) {
     throw new Error('Failed to fetch startup data');
@@ -49,7 +52,7 @@ export async function setStartupToQualified(startupId: number) {
     }
   });
 
-  revalidatePath('/applications')
+  revalidatePath('/applications');
 
   if (!response.ok) {
     throw new Error('Failed to fetch startup data');
@@ -66,7 +69,7 @@ export async function rejectStartup(startupId: number) {
     }
   });
 
-  revalidatePath('/applications')
+  revalidatePath('/applications');
 
   if (!response.ok) {
     throw new Error('Failed to reject startup');
@@ -98,9 +101,9 @@ export async function approveStartup(startupId: number, mentorId: number) {
     body: JSON.stringify({
       mentorId: mentorId
     })
-  })
+  });
 
-  revalidatePath('/applications')
+  revalidatePath('/applications');
 }
 
 export async function getStartups(): Promise<Startup[]> {
@@ -159,7 +162,7 @@ export async function getStartupRna(startupId: number): Promise<RNA[]> {
     // next: { revalidate: 60 }
   });
 
-  const data = await res.json();
+  const data: RNA[] = await res.json();
 
   return data;
 }

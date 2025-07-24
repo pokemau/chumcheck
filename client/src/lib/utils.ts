@@ -6,6 +6,19 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function getCurrentTab(currentTab: string) {
+  switch(currentTab) {
+    case 'readiness-level':
+      return 'Readiness Level';
+    case 'rns':
+      return "Recommended Next Steps"
+    case 'rna':
+      return 'Readiness and Needs Assessment';
+    default:
+      return currentTab.charAt(0).toUpperCase() + currentTab.slice(1);
+  }
+}
+
 export function getQualificationStatusText(status: number | undefined): string {
   if (!status) return 'Loading...';
   const text = QualificationStatus[status];
