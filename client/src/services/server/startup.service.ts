@@ -73,10 +73,10 @@ export async function rejectStartup(startupId: number) {
   }
 }
 
-export async function approveStartup(startupId: number, mentorId?: number) {
+export async function approveStartup(startupId: number, mentorId: number) {
   const access = await requireAccessTokenOrRedirect();
 
-  const response = await fetch(`${BACKEND_API_URL}/startups/${startupId}/approve`, {
+  const response = await fetch(`${BACKEND_API_URL}/startups/${startupId}/approve-temp`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${access}`,
@@ -85,11 +85,22 @@ export async function approveStartup(startupId: number, mentorId?: number) {
     body: JSON.stringify({ mentorId })
   });
 
-  revalidatePath('/applications')
-
   if (!response.ok) {
     throw new Error('Failed to approve startup');
   }
+
+  await fetch(`${BACKEND_API_URL}/startups/${startupId}/appoint-mentor-temp`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${access}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      mentorId: mentorId
+    })
+  })
+
+  revalidatePath('/applications')
 }
 
 export async function getStartups(): Promise<Startup[]> {

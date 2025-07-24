@@ -514,8 +514,42 @@ export class StartupService {
     await this.em.flush();
   }
 
-  async approveTemp(startupId) {
+  async approveTemp(startupId: number) {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(
+        `Startup with ID ${startupId} does not exist.`,
+      );
+    }
 
+    if (startup.qualificationStatus === QualificationStatus.RATED) {
+      startup.qualificationStatus = QualificationStatus.QUALIFIED;
+    }
+    await this.em.flush();
+  }
+
+  async appointMentor(startupId: number, mentorId: number) {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(
+        `Startup with ID ${startupId} does not exist.`,
+      );
+    }
+
+    const mentor = await this.em.findOne(User, {
+      id: mentorId,
+      role: Role.Mentor,
+    });
+
+    if (!mentor) {
+      throw new NotFoundException(`User with ID ${startupId} does not exist.`);
+    }
+    startup.mentors.add(mentor);
+
+    await this.em.flush();
+    return {
+      message: `Mentors have been successfully assigned to Startup ID ${startupId}.`,
+    };
   }
   ///////////////////////// END TESTING PURPOSES //////////////////////////////
 

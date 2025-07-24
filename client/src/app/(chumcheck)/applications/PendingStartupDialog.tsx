@@ -3,9 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/shadcn-io/spinner';
+import { useGetStartupData } from '@/hooks/useGetStartup';
 import { getQualificationStatusText } from '@/lib/utils';
-import { getStartupById, setStartupToRated } from '@/services/server/startup.service';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { setStartupToRated } from '@/services/server/startup.service';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface Props {
   open: boolean;
@@ -20,27 +21,17 @@ export default function PendingStartupDialog({ open, onOpenChange, startupId }: 
     data: startupData,
     isLoading,
     error
-  } = useQuery({
-    queryKey: ['startup', startupId],
-    queryFn: () => getStartupById(startupId),
-    enabled: open && startupId > 0,
-    staleTime: 5 * 60 * 1000
-  });
+  } = useGetStartupData(startupId, open);
 
-  // Mutation for updating startup status
   const saveRatingMutation = useMutation({
     mutationFn: () => setStartupToRated(startupId),
     onSuccess: () => {
-      // Refetch the specific startup data
       queryClient.invalidateQueries({ queryKey: ['startup', startupId] });
-      // Refetch the startups list (for the pending tab)
       queryClient.invalidateQueries({ queryKey: ['startups'] });
-      // Close the dialog
       onOpenChange(false);
     },
     onError: (error) => {
       console.error('Failed to save rating:', error);
-      // You can add toast notification here
     }
   });
 

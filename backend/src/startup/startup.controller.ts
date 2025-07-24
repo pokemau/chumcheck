@@ -175,8 +175,15 @@ export class StartupController {
     return await this.startupService.setToRated(startupId);
   }
   @Post(':startupId/approve-temp')
-  async approveTemp(@Param('startupId') startupId: number) {
+  async approveTemp(@Param('startupId', ParseIntPipe) startupId: number) {
     return await this.startupService.approveTemp(startupId);
+  }
+  @Post(':startupId/appoint-mentor-temp')
+  async appointMentor(
+    @Param('startupId') startupId: number,
+    @Body('mentorId', ParseIntPipe) mentorId: number,
+  ) {
+    return await this.startupService.appointMentor(startupId, mentorId);
   }
   ///////////////////////// END TESTING PURPOSES //////////////////////////////
 

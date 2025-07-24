@@ -50,7 +50,7 @@ export default function RatedStartupDialog({ open, onOpenChange, startupId, ment
 
   // Mutation for approving startup
   const approveMutation = useMutation({
-    mutationFn: () => approveStartup(startupId, selectedMentorId ? parseInt(selectedMentorId) : undefined),
+    mutationFn: () => approveStartup(startupId, parseInt(selectedMentorId)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['startup', startupId] });
       queryClient.invalidateQueries({ queryKey: ['startups'] });
