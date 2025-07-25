@@ -11,7 +11,7 @@ export default defineConfig({
   dbName: process.env.DB_NAME,
   entities: ['./dist/**/*.entity.js'],
   entitiesTs: ['./src/**/*.entity.ts'],
-  debug: true,
+  debug: false,
   driver: PostgreSqlDriver,
   driverOptions: {
     connection: {
