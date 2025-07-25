@@ -1,5 +1,4 @@
-import { defineConfig } from '@mikro-orm/postgresql';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { defineConfig, PostgreSqlDriver } from '@mikro-orm/postgresql';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -16,7 +15,7 @@ export default defineConfig({
   driver: PostgreSqlDriver,
   driverOptions: {
     connection: {
-      ssl: { rejectUnauthorized: false }
+      ssl: { rejectUnauthorized: false },
     },
   },
 });
