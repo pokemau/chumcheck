@@ -11,5 +11,8 @@
       "src": "/(.*)",
       "dest": "dist/main.js"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": false
+  }
 }
