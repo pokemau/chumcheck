@@ -6,7 +6,6 @@ import { Role } from "./enums"
 import { User } from "./types"
 import { headers } from "next/headers"
 import { BACKEND_API_URL } from "@/constants/api"
-// import { jwtVerify } from 'jose';
 
 export async function requireAccessTokenOrRedirect() {
   const cookieStore = await cookies()

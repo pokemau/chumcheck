@@ -1,11 +1,11 @@
-'use client';
+"use client"
 
-import CalculatorStep from '@/components/startups/application-steps/CalculatorStep';
-import DataPrivacyStep from '@/components/startups/application-steps/DataPrivacyStep';
-import EligibilityStep from '@/components/startups/application-steps/EligibilityStep';
-import ProjectDetailsStep from '@/components/startups/application-steps/ProjectDetailsStep';
-import TechnologyRLStep from '@/components/startups/application-steps/TechnologyRLStep';
-import { Button } from '@/components/ui/button';
+import CalculatorStep from "@/components/startups/application-steps/CalculatorStep"
+import DataPrivacyStep from "@/components/startups/application-steps/DataPrivacyStep"
+import EligibilityStep from "@/components/startups/application-steps/EligibilityStep"
+import ProjectDetailsStep from "@/components/startups/application-steps/ProjectDetailsStep"
+import TechnologyRLStep from "@/components/startups/application-steps/TechnologyRLStep"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -14,47 +14,47 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from '@/components/ui/dialog';
-import { applyStartup } from '@/lib/actions';
-import { UratQuestion, CalculatorQuestionsApiRes } from '@/lib/types';
-import { useRouter } from 'next/navigation';
-import { useState, useActionState, useEffect } from 'react';
+} from "@/components/ui/dialog"
+import { UratQuestion, CalculatorQuestionsApiRes } from "@/lib/types"
+import { applyStartup } from "@/services/server/auth.service"
+import { useRouter } from "next/navigation"
+import { useState, useActionState, useEffect } from "react"
 
 export default function ApplyStartup({
   uratQuestions,
   calculatorQuestions
 }: {
-  uratQuestions: UratQuestion[];
-  calculatorQuestions: CalculatorQuestionsApiRes[];
+  uratQuestions: UratQuestion[]
+  calculatorQuestions: CalculatorQuestionsApiRes[]
 }) {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isOpen, setIsOpen] = useState(false);
-  const [state, action] = useActionState(applyStartup, undefined);
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isOpen, setIsOpen] = useState(false)
+  const [state, action] = useActionState(applyStartup, undefined)
 
-  const router = useRouter();
+  const router = useRouter()
 
   function nextStep() {
-    setCurrentStep((prev: number) => prev + 1);
+    setCurrentStep((prev: number) => prev + 1)
   }
 
   function prevStep() {
-    setCurrentStep((prev: number) => prev - 1);
+    setCurrentStep((prev: number) => prev - 1)
   }
 
   const steps = [
-    'Data Privacy and Consent',
-    'Eligibility and Agreement',
-    'Project Details',
-    'Technology Readiness Level',
-    'Calculator'
-  ];
+    "Data Privacy and Consent",
+    "Eligibility and Agreement",
+    "Project Details",
+    "Technology Readiness Level",
+    "Calculator"
+  ]
 
   useEffect(() => {
     if (state?.success) {
-      setIsOpen(false);
-      setCurrentStep(0);
+      setIsOpen(false)
+      setCurrentStep(0)
     }
-  }, [state, router]);
+  }, [state, router])
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -94,5 +94,5 @@ export default function ApplyStartup({
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }
