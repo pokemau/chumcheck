@@ -1,22 +1,21 @@
-'use server'
+"use server"
 
-import { BACKEND_API_URL } from "@/lib/constants";
-import { CalculatorQuestionsApiRes, UratQuestion } from "@/lib/types";
+import { BACKEND_API_URL } from "@/constants/api"
+import { CalculatorQuestionsApiRes, UratQuestion } from "@/lib/types"
 
 export async function getUratQuestions(): Promise<UratQuestion[]> {
   const res = await fetch(`${BACKEND_API_URL}/readinesslevel/urat-questions`, {
     next: { revalidate: 60 * 60 }
-  });
-  const data = await res.json();
-  return data;
+  })
+  const data = await res.json()
+  return data
 }
-
 
 export async function getCalculatorQuestions(): Promise<CalculatorQuestionsApiRes[]> {
   const res = await fetch(`${BACKEND_API_URL}/readinesslevel/calculator-questions`, {
     next: { revalidate: 60 * 60 }
-  });
-  const data = await res.json();
-  return data;
+  })
+  const data = await res.json()
+  return data
 }
 

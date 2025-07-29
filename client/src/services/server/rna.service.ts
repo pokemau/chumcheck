@@ -1,5 +1,4 @@
-'use server'
+"use server"
 
-export async function createRna() {
+export async function createRna() {}
 
-}
