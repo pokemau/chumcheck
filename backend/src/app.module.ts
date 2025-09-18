@@ -9,7 +9,6 @@ import { AiModule } from './ai/ai.module';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ChatHistoryModule } from './chat_history/chat-history.module';
 import { AdminModule } from './admin/admin.module';
-
 import { User } from './entities/user.entity';
 import { Startup } from './entities/startup.entity';
 import { CapsuleProposal } from './entities/capsule-proposal.entity';
@@ -28,10 +27,9 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 @Module({
   controllers: [AppController],
   imports: [
-    AiModule,
-    AuthModule,
-    StartupModule,
-    UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MikroOrmModule.forRoot({
       host: process.env.DB_HOST,
       port: +(process.env.DB_PORT || 5432),
@@ -44,16 +42,17 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
       driver: PostgreSqlDriver,
       driverOptions: {
         connection: {
-          ssl: { rejectUnauthorized: false },
+          // ssl: { rejectUnauthorized: false },
         },
       },
     }),
     MikroOrmModule.forFeature({
       entities: [User, Startup, CapsuleProposal, UratQuestion, RnaChatHistory],
     }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    AiModule,
+    AuthModule,
+    StartupModule,
+    UserModule,
     ReadinesslevelModule,
     RnaModule,
     RnsModule,
