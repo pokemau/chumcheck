@@ -1,6 +1,6 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card';
-  import type { Role } from '$lib/types';
+  import type { Role } from '$lib/types/user.types';
   let {
     children,
     name,

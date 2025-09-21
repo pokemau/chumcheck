@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { Role } from '$lib/types';
+  import type { Role } from "$lib/types/user.types";
+
 
   let {
     children,

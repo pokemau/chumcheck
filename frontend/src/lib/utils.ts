@@ -1,10 +1,10 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { browser } from '$app/environment';
-import type { RNSItem } from './types';
-// import type { Role } from './types';
 import axiosInstance from './axios';
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { RNSItem } from './types/rns.types';
+import type { Role } from './types/user.types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -29,25 +29,25 @@ export enum ReadinessType {
   Investment = 'Investment'
 }
 
-export enum Role {
-  Manager = 'Manager',
-  Mentor = 'Mentor',
-  Startup = 'Startup',
-  Manager_as_Mentor = 'Manager as Mentor'
-}
+// export enum Role {
+//   Manager = 'Manager',
+//   Mentor = 'Mentor',
+//   Startup = 'Startup',
+//   ManagerAsMentor = 'Manager as Mentor'
+// }
 
-export const getRole = (
-  role: 'Manager' | 'Mentor' | 'Startup' | 'Manager_as_Mentor'
-) => {
-  const roles = {
-    Manager: 'Manager',
-    Mentor: 'Mentor',
-    Startup: 'Startup',
-    Manager_as_Mentor: 'Manager as Mentor'
-  };
-
-  return roles[`${role}`];
-};
+// export const getRole = (
+//   role: Role
+// ) => {
+//   const roles = {
+//     Manager: 'Manager',
+//     Mentor: 'Mentor',
+//     Startup: 'Startup',
+//     ManagerAsMentor: 'Manager as Mentor'
+//   };
+//
+//   return roles[`${role}`];
+// };
 
 export const setLocal = (name: string, value: any) => {
   if (browser) {
@@ -193,9 +193,7 @@ export const getAllowedTabs = (name: string) => {
 };
 
 export const isMentor = (role: Role) => {
-  if (['Mentor', 'Manager as Mentor'].includes(role)) return true;
-
-  return false;
+  return ['Mentor', 'Manager as Mentor'].includes(role);
 };
 
 export const getSelectedTab = (name: string): string => {

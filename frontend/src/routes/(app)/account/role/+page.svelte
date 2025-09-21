@@ -3,10 +3,7 @@
   import * as Card from '$lib/components/ui/card';
   import { Label } from '$lib/components/ui/label/index.js';
   import { Switch } from '$lib/components/ui/switch/index.js';
-  import { Input } from '$lib/components/ui/input';
-  import { enhance } from '$app/forms';
-  import { goto } from '$app/navigation';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { toast } from 'svelte-sonner';
 
   let { data } = $props();
@@ -21,12 +18,11 @@
   });
 
   $effect(() => {
-    const success = $page.url.searchParams.get('success');
+    const success = page.url.searchParams.get('success');
 
     if (success === 'true') {
       toast.success('You are now in mentor view.');
-      // Remove the 'success' parameter from the URL
-      const url = new URL($page.url.href);
+      const url = new URL(page.url.href);
       url.searchParams.delete('success');
       history.replaceState(null, '', url);
     }
