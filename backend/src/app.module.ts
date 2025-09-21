@@ -22,7 +22,6 @@ import { InitiativeModule } from './initiative/initiative.module';
 import { ProgressModule } from './progress/progress.module';
 import { OverviewModule } from './overview/overview.module';
 import { ElevateModule } from './elevate/elevate.module';
-import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 
 @Module({
   controllers: [AppController],
@@ -30,22 +29,7 @@ import { PostgreSqlDriver } from '@mikro-orm/postgresql';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    MikroOrmModule.forRoot({
-      host: process.env.DB_HOST,
-      port: +(process.env.DB_PORT || 5432),
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      dbName: process.env.DB_NAME,
-      entities: ['./dist/**/*.entity.js'],
-      entitiesTs: ['./src/**/*.entity.ts'],
-      debug: false,
-      driver: PostgreSqlDriver,
-      driverOptions: {
-        connection: {
-          // ssl: { rejectUnauthorized: false },
-        },
-      },
-    }),
+    MikroOrmModule.forRoot(),
     MikroOrmModule.forFeature({
       entities: [User, Startup, CapsuleProposal, UratQuestion, RnaChatHistory],
     }),
