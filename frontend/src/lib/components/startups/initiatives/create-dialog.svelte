@@ -14,7 +14,8 @@
   import { Input } from '$lib/components/ui/input/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
   import * as Select from '$lib/components/ui/select/index.js';
-  let { open, onOpenChange, create, members, startupId, tasks, status } = $props();
+  let { open, onOpenChange, create, members, startupId, tasks, status } =
+    $props();
 
   const data = $state({
     description: '',
@@ -22,11 +23,9 @@
     targets: '',
     remarks: '',
     rnsId: '',
-    assigneeId: '',
+    assigneeId: ''
   });
-  $effect(() => {
- 
-  });
+  $effect(() => {});
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>
@@ -47,7 +46,9 @@
           >
           <Select.Content>
             {#each tasks as task}
-              <Select.Item value={`${task.id}`}>{task.description.substring(0, 90)}</Select.Item>
+              <Select.Item value={`${task.id}`}
+                >{task.description.substring(0, 90)}</Select.Item
+              >
             {/each}
           </Select.Content>
         </Select.Root>
@@ -79,14 +80,16 @@
         >
         <Select.Content>
           {#each members as member}
-            <Select.Item value={member.userId}>{member.firstName} {member.lastName}</Select.Item>
+            <Select.Item value={member.userId}
+              >{member.firstName} {member.lastName}</Select.Item
+            >
           {/each}
         </Select.Content>
       </Select.Root>
     </div>
     <Dialog.Footer>
       <Button
-        onclick={() =>{
+        onclick={() => {
           create({
             ...data,
             initiativeNumber: 1,
@@ -94,8 +97,8 @@
             assigneeId: data.assigneeId ? Number(data.assigneeId) : undefined,
             startupId: Number(startupId),
             status: status,
-            isAiGenerated: false,
-          })
+            isAiGenerated: false
+          });
 
           data.description = '';
           data.measures = '';
@@ -104,13 +107,11 @@
           data.rnsId = '';
           data.assigneeId = '';
         }}
-        disabled={
-          data.description === '' ||
+        disabled={data.description === '' ||
           data.measures === '' ||
           data.targets === '' ||
           data.remarks === '' ||
-          data.rnsId === ''
-        }
+          data.rnsId === ''}
       >
         Create
       </Button>

@@ -1,7 +1,8 @@
 <script lang="ts">
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 
-  let { open, onOpenChange, rns, deleteAction, name, closeDialog, index } = $props();
+  let { open, onOpenChange, rns, deleteAction, name, closeDialog, index } =
+    $props();
 </script>
 
 <AlertDialog.Root bind:open {onOpenChange}>

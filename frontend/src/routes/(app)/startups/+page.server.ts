@@ -19,14 +19,17 @@ export const actions: Actions = {
     const startupId = startupIdRaw ? Number(startupIdRaw) : null;
     let response, data;
 
-
     // Update existing startup
     if (startupId) {
       console.log('Processing existing startup update for ID:', startupId);
-      
+
       // Check if a new capsule proposal file was uploaded
       const capsuleProposalFile = formData.get('capsuleProposal');
-      if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
+      if (
+        capsuleProposalFile &&
+        capsuleProposalFile instanceof File &&
+        capsuleProposalFile.size > 0
+      ) {
         console.log('Capsule proposal file found, using file upload endpoint');
         // Use the new endpoint that handles file uploads
         const newFormData = new FormData();
@@ -34,19 +37,31 @@ export const actions: Actions = {
         newFormData.append('userId', locals.user.id.toString());
         newFormData.append('links', formData.get('links') as string);
         newFormData.append('groupName', formData.get('group_name') as string);
-        newFormData.append('universityName', formData.get('university_name') as string);
+        newFormData.append(
+          'universityName',
+          formData.get('university_name') as string
+        );
         newFormData.append('qualificationStatus', '1'); // Set to PENDING when updating
-        newFormData.append('dataPrivacy', formData.get('data_privacy') as string);
-        newFormData.append('eligibility', formData.get('eligibility') as string);
+        newFormData.append(
+          'dataPrivacy',
+          formData.get('data_privacy') as string
+        );
+        newFormData.append(
+          'eligibility',
+          formData.get('eligibility') as string
+        );
         newFormData.append('capsuleProposal', capsuleProposalFile);
-        
-        response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/with-capsule-proposal`, {
-          method: 'PATCH',
-          headers: {
-            Authorization: `Bearer ${cookies.get('Access')}`
-          },
-          body: newFormData
-        });
+
+        response = await fetch(
+          `${PUBLIC_API_URL}/startups/${startupId}/with-capsule-proposal`,
+          {
+            method: 'PATCH',
+            headers: {
+              Authorization: `Bearer ${cookies.get('Access')}`
+            },
+            body: newFormData
+          }
+        );
       } else {
         console.log('No capsule proposal file, using regular update endpoint');
         // Use the regular update endpoint (no file upload)
@@ -58,7 +73,7 @@ export const actions: Actions = {
           links: formData.get('links'),
           groupName: formData.get('group_name'),
           universityName: formData.get('university_name'),
-          qualificationStatus: 1, // Set to PENDING when updating
+          qualificationStatus: 1 // Set to PENDING when updating
         };
         response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}`, {
           method: 'PATCH',
@@ -78,15 +93,25 @@ export const actions: Actions = {
       newFormData.append('name', formData.get('startup_name') as string);
       newFormData.append('userId', locals.user.id.toString());
       const capsuleProposalFile = formData.get('capsuleProposal');
-      if (capsuleProposalFile && capsuleProposalFile instanceof File && capsuleProposalFile.size > 0) {
+      if (
+        capsuleProposalFile &&
+        capsuleProposalFile instanceof File &&
+        capsuleProposalFile.size > 0
+      ) {
         newFormData.append('capsuleProposal', capsuleProposalFile);
       }
       newFormData.append('links', formData.get('links') as string);
       newFormData.append('groupName', formData.get('group_name') as string);
-      newFormData.append('universityName', formData.get('university_name') as string);
+      newFormData.append(
+        'universityName',
+        formData.get('university_name') as string
+      );
       for (let i = 2; i < 5; i++) {
         if (formData.get(`member_${i}`) !== null) {
-          newFormData.append('set_members', formData.get(`member_${i}`) as string);
+          newFormData.append(
+            'set_members',
+            formData.get(`member_${i}`) as string
+          );
         }
       }
       response = await fetch(`${PUBLIC_API_URL}/startups/create-startup`, {
@@ -184,11 +209,13 @@ export const actions: Actions = {
               'Content-type': 'application/json',
               Authorization: `Bearer ${cookies.get('Access')}`
             },
-            body: JSON.stringify({ calculatorQuestionId: answer.calculatorQuestionId })
+            body: JSON.stringify({
+              calculatorQuestionId: answer.calculatorQuestionId
+            })
           }
         );
       }
-      
+
       console.log('Finished URAT and calculator answer updates');
     } else {
       // Create new URAT question answers

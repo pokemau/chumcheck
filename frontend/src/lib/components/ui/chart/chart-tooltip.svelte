@@ -2,7 +2,10 @@
   import { cn } from '$lib/utils.js';
   import type { WithElementRef, WithoutChildren } from 'bits-ui';
   import type { HTMLAttributes } from 'svelte/elements';
-  import { type ChartConfig, getPayloadConfigFromPayload } from './chart-utils.js';
+  import {
+    type ChartConfig,
+    getPayloadConfigFromPayload
+  } from './chart-utils.js';
 
   let {
     ref = $bindable(null),
@@ -51,12 +54,16 @@
             <item.icon />
           {:else if !hideIndicator}
             <div
-              class={cn('shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]', {
-                'h-2.5 w-2.5': indicator === 'dot',
-                'w-1': indicator === 'line',
-                'w-0 border-[1.5px] border-dashed bg-transparent': indicator === 'dashed',
-                'my-0.5': nestLabel && indicator === 'dashed'
-              })}
+              class={cn(
+                'shrink-0 rounded-[2px] border-[--color-border] bg-[--color-bg]',
+                {
+                  'h-2.5 w-2.5': indicator === 'dot',
+                  'w-1': indicator === 'line',
+                  'w-0 border-[1.5px] border-dashed bg-transparent':
+                    indicator === 'dashed',
+                  'my-0.5': nestLabel && indicator === 'dashed'
+                }
+              )}
               style="--color-bg: {item?.color}; --color-border: {item?.color};"
             ></div>
           {/if}

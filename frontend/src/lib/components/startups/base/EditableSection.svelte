@@ -20,7 +20,7 @@
   export let dataId = 0;
   export let dataColumn = '';
   export let update: (id: number, payload: any) => Promise<void>;
-  export let isTask:boolean = false;
+  export let isTask: boolean = false;
   export let taskDescription = 'None';
 </script>
 
@@ -28,40 +28,38 @@
   <Label for="username" class="text-lg font-bold">{label}</Label>
 
   {#if !isTask}
-  {#if editMode && role !== 'Startup'}
-    <Textarea
-      rows={12}
-      bind:value={data}
-      class="text-justify text-base"
-    />
-    <div class="ml-auto flex gap-2">
-      <Button size="sm" variant="outline" onclick={() => (editMode = false)}>Cancel</Button>
-      <Button
-        size="sm"
-        onclick={async () => {
-          await update(dataId, { [dataColumn]: data });
-          editMode = false;
+    {#if editMode && role !== 'Startup'}
+      <Textarea rows={12} bind:value={data} class="text-justify text-base" />
+      <div class="ml-auto flex gap-2">
+        <Button size="sm" variant="outline" onclick={() => (editMode = false)}
+          >Cancel</Button
+        >
+        <Button
+          size="sm"
+          onclick={async () => {
+            await update(dataId, { [dataColumn]: data });
+            editMode = false;
+          }}>Save</Button
+        >
+      </div>
+    {:else}
+      <button
+        on:click={() => {
+          if (role !== 'Startup') {
+            editMode = true;
+          }
         }}
-      >Save</Button>
-    </div>
-  {:else}
-    <button
-      on:click={() => {
-        if (role !== 'Startup') {
-          editMode = true;
-        }
-      }}
-    >
-    <Description>
-      {data}
-    </Description>
-    </button>
-  {/if}
-  {:else}
-    <Description>
-    {#if data}
-      {taskDescription}
+      >
+        <Description>
+          {data}
+        </Description>
+      </button>
     {/if}
+  {:else}
+    <Description>
+      {#if data}
+        {taskDescription}
+      {/if}
     </Description>
   {/if}
 </div>

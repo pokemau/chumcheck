@@ -12,11 +12,21 @@
 
   const getDisplay = () => {
     if (typeof value === 'object' && value !== null) {
-      return displayFn ? displayFn(value) : (displayKey ? value[displayKey] ?? 'None' : JSON.stringify(value));
+      return displayFn
+        ? displayFn(value)
+        : displayKey
+          ? (value[displayKey] ?? 'None')
+          : JSON.stringify(value);
     }
     if (options.length > 0 && valueKey) {
       const match = options.find((opt) => opt[valueKey] === value);
-      return match ? (displayFn ? displayFn(match) : (displayKey ? match[displayKey] : 'None')) : 'None';
+      return match
+        ? displayFn
+          ? displayFn(match)
+          : displayKey
+            ? match[displayKey]
+            : 'None'
+        : 'None';
     }
     return value ?? 'None';
   };
@@ -26,12 +36,18 @@
   <p class="w-[130px]">{label}</p>
 
   {#if editable && editableCondition}
-    <Select.Root type="single" bind:value={value} onValueChange={() => onChange(value)}>
-      <Select.Trigger class="w-[200px] border-none">{getDisplay()}</Select.Trigger>
+    <Select.Root type="single" bind:value onValueChange={() => onChange(value)}>
+      <Select.Trigger class="w-[200px] border-none"
+        >{getDisplay()}</Select.Trigger
+      >
       <Select.Content class="border-none">
         {#each options as option}
           <Select.Item value={option[valueKey]}>
-            {displayFn ? displayFn(option) : (displayKey ? option[displayKey] : 'Unknown')}
+            {displayFn
+              ? displayFn(option)
+              : displayKey
+                ? option[displayKey]
+                : 'Unknown'}
           </Select.Item>
         {/each}
       </Select.Content>

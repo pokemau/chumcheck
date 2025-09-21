@@ -68,7 +68,6 @@
 
       const answers_data = await urat_answers.json();
 
-
       const calculator = await fetch(
         `${PUBLIC_API_URL}/readinesslevel/${startupId}/calculator-final-scores/`,
         {

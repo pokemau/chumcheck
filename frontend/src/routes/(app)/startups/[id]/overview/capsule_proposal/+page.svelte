@@ -24,7 +24,6 @@
       refetchOnWindowFocus: false
     }
   );
-
 </script>
 
 <svelte:head>

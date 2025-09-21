@@ -150,7 +150,14 @@
       <Label for="links"
         >Links to any supporting materials (e.g., website, explainer video)</Label
       >
-      <Input name="links" id="links" type="text" placeholder="links" required bind:value={formData.links}/>
+      <Input
+        name="links"
+        id="links"
+        type="text"
+        placeholder="links"
+        required
+        bind:value={formData.links}
+      />
     </div>
   </div>
 </div>

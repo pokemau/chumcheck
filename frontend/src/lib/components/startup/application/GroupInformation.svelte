@@ -13,7 +13,7 @@
   let searchedUsers: any[] = [];
   let formData = {
     groupName: startup?.groupName ?? '',
-    universityName: startup?.universityName ?? '',
+    universityName: startup?.universityName ?? ''
     // Add other fields as needed
   };
 
@@ -47,7 +47,14 @@
   <div class="flex h-0 flex-col gap-5">
     <div class="grid gap-2">
       <Label for="group_name">Group name</Label>
-      <Input name="group_name" id="group_name" type="text" placeholder="group name" required bind:value={formData.groupName} />
+      <Input
+        name="group_name"
+        id="group_name"
+        type="text"
+        placeholder="group name"
+        required
+        bind:value={formData.groupName}
+      />
     </div>
 
     <div class="grid gap-2">
@@ -84,7 +91,9 @@
     </div>
     <form on:submit|preventDefault={searchUsers}>
       <div class="grid gap-2">
-        <Label for="email">Type an email, then invite them to your startup.</Label>
+        <Label for="email"
+          >Type an email, then invite them to your startup.</Label
+        >
         <Input
           name="email"
           id="email"
@@ -107,7 +116,9 @@
             />
             <p>{user.email}</p>
           </div>
-          <button on:click|preventDefault={() => addMember(user)}> <Add class="h-4 w-4" /> </button>
+          <button on:click|preventDefault={() => addMember(user)}>
+            <Add class="h-4 w-4" />
+          </button>
         </div>
       {/each}
     </div>

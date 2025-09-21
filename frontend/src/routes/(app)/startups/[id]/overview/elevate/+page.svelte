@@ -48,7 +48,6 @@
     }
   );
 
-
   const readinessData = useQuery(
     'readinessData',
     async () =>

@@ -1,13 +1,8 @@
 <script lang="ts">
   import { useQueriesState } from '$lib/stores/useQueriesState.svelte.js';
-  import {
-    getData,
-  } from '$lib/utils';
+  import { getData } from '$lib/utils';
   import { useQueries } from '@sveltestack/svelte-query';
-  import {
-    RnaCard,
-    RnaCreateDialog,
-  } from '$lib/components/startups/rna';
+  import { RnaCard, RnaCreateDialog } from '$lib/components/startups/rna';
   import { Button } from '$lib/components/ui/button';
   import { Loader, Plus, Sparkles } from 'lucide-svelte';
   import axiosInstance from '$lib/axios';
@@ -161,7 +156,6 @@
   const isAllRNAComplete = $derived(
     $rnaQueries[4].isSuccess && $rnaQueries[4].data === true
   );
-
 </script>
 
 <svelte:head>
@@ -227,7 +221,10 @@
           ><Plus class="h-4 w-4" />Add</Button
         >
 
-        <Button onclick={generateRNA} disabled={generatingRNA || isAllRNAComplete}>
+        <Button
+          onclick={generateRNA}
+          disabled={generatingRNA || isAllRNAComplete}
+        >
           {#if generatingRNA}
             <Loader class="mr-2 h-4 w-4 animate-spin" />
           {:else}

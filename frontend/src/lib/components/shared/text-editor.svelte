@@ -26,13 +26,13 @@
         StarterKit,
         Underline,
         TextAlign.configure({ types: ['heading', 'paragraph'] }),
-        Placeholder.configure({ placeholder }),
+        Placeholder.configure({ placeholder })
       ],
       content: value || '<p></p>',
       editorProps: {
         attributes: {
-          class: classNames,
-        },
+          class: classNames
+        }
       },
       onUpdate: ({ editor }) => {
         value = editor.getHTML();
@@ -44,7 +44,7 @@
         isBoldActive = editor.isActive('bold');
         isItalicActive = editor.isActive('italic');
         isUnderlineActive = editor.isActive('underline');
-      },
+      }
     });
     await tick();
     isBoldActive = editor.isActive('bold');
@@ -75,17 +75,11 @@
     const { state } = editor;
     const { selection } = state;
     const currentNode = state.doc.nodeAt(selection.from);
-    
+
     if (currentNode && currentNode.textContent.trim().length > 0) {
-      editor.chain()
-        .focus()
-        .insertContent('\n• ')
-        .run();
+      editor.chain().focus().insertContent('\n• ').run();
     } else {
-      editor.chain()
-        .focus()
-        .insertContent('• ')
-        .run();
+      editor.chain().focus().insertContent('• ').run();
     }
   }
 
@@ -98,42 +92,52 @@
   <div class="toolbar mb-2 flex flex-wrap gap-2">
     <button
       onclick={toggleBold}
-      class="px-1.5 py-1 border rounded text-white text-xs
-        {isBoldActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
-      aria-pressed={isBoldActive}
-    ><b>B</b></button>
+      class="rounded border px-1.5 py-1 text-xs text-white
+        {isBoldActive
+        ? 'border-blue-600 bg-blue-600 hover:bg-blue-600'
+        : ' border-gray-700 bg-gray-700 hover:bg-gray-800'}"
+      aria-pressed={isBoldActive}><b>B</b></button
+    >
     <button
       onclick={toggleItalic}
-      class="px-1.5 py-1 border rounded text-white text-xs
-        {isItalicActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
-      aria-pressed={isItalicActive}
-    ><i>I</i></button>
+      class="rounded border px-1.5 py-1 text-xs text-white
+        {isItalicActive
+        ? 'border-blue-600 bg-blue-600 hover:bg-blue-600'
+        : ' border-gray-700 bg-gray-700 hover:bg-gray-800'}"
+      aria-pressed={isItalicActive}><i>I</i></button
+    >
     <button
       onclick={toggleUnderline}
-      class="px-1.5 py-1 border rounded text-white text-xs
-        {isUnderlineActive ? 'bg-blue-600 border-blue-600 hover:bg-blue-600' : ' bg-gray-700 border-gray-700 hover:bg-gray-800'}"
-      aria-pressed={isUnderlineActive}
-    ><u>U</u></button>
+      class="rounded border px-1.5 py-1 text-xs text-white
+        {isUnderlineActive
+        ? 'border-blue-600 bg-blue-600 hover:bg-blue-600'
+        : ' border-gray-700 bg-gray-700 hover:bg-gray-800'}"
+      aria-pressed={isUnderlineActive}><u>U</u></button
+    >
     <button
       onclick={addBulletPoint}
-      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
-    >Bullet</button>
+      class="rounded border border-gray-600 bg-gray-700 px-1.5 py-1 text-xs text-white hover:bg-gray-600"
+      >Bullet</button
+    >
     <button
       onclick={() => setTextAlign('left')}
-      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
-    >Align Left</button>
+      class="rounded border border-gray-600 bg-gray-700 px-1.5 py-1 text-xs text-white hover:bg-gray-600"
+      >Align Left</button
+    >
     <button
       onclick={() => setTextAlign('center')}
-      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
-    >Align Center</button>
+      class="rounded border border-gray-600 bg-gray-700 px-1.5 py-1 text-xs text-white hover:bg-gray-600"
+      >Align Center</button
+    >
     <button
       onclick={() => setTextAlign('right')}
-      class="px-1.5 py-1 bg-gray-700 text-xs border border-gray-600 rounded text-white hover:bg-gray-600"
-    >Align Right</button>
+      class="rounded border border-gray-600 bg-gray-700 px-1.5 py-1 text-xs text-white hover:bg-gray-600"
+      >Align Right</button
+    >
   </div>
-  <div class="border border-[#333] rounded-lg">
-    <div 
-      bind:this={element} 
+  <div class="rounded-lg border border-[#333]">
+    <div
+      bind:this={element}
       style="width:100%;height:{editorHeight};overflow-y:auto;"
       class="prose-invert"
     ></div>
@@ -147,7 +151,7 @@
     border: none;
     padding: 0.5rem;
   }
-  
+
   :global(.ProseMirror p) {
     margin: 0;
   }

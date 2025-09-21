@@ -38,9 +38,7 @@
     Loader,
     ChevronDown,
     Sparkles,
-
     Plus
-
   } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
@@ -244,7 +242,8 @@
             const filteredItems = res.data
               .filter(
                 (data: any) =>
-                  data.isAiGenerated === false && data.requestedStatus === column.value
+                  data.isAiGenerated === false &&
+                  data.requestedStatus === column.value
               )
               .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
             column.items = filteredItems;
@@ -280,7 +279,8 @@
           column.items = res.data
             .filter(
               (data: any) =>
-                data.isAiGenerated === false && data.requestedStatus === column.value
+                data.isAiGenerated === false &&
+                data.requestedStatus === column.value
             )
             .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
         });
@@ -315,7 +315,8 @@
         column.items = res.data
           .filter(
             (data: any) =>
-              data.isAiGenerated === false && data.requestedStatus === column.value
+              data.isAiGenerated === false &&
+              data.requestedStatus === column.value
           )
           .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber);
       });
@@ -415,7 +416,8 @@
           ? $rnsQueries[1].data
               .filter(
                 (data: any) =>
-                  data.isAiGenerated === false && data.requestedStatus === column.value
+                  data.isAiGenerated === false &&
+                  data.requestedStatus === column.value
               )
               .sort((a: any, b: any) => a.priorityNumber - b.priorityNumber)
           : [];

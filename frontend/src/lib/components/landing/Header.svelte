@@ -27,10 +27,14 @@
   class:border-b={isBlurred}
   class:backdrop-blur-lg={isBlurred}
 >
-  <nav class="flex h-16 w-4/5 items-center p-[var(--navbar-padding,0.5rem)] px-0">
+  <nav
+    class="flex h-16 w-4/5 items-center p-[var(--navbar-padding,0.5rem)] px-0"
+  >
     <div class="flex flex-1 cursor-pointer gap-2">
       <img src="/logo.png" alt="citeams_logo" class="h-7 w-7" />
-      <a href="/" class="cursor-pointer text-xl font-black normal-case">ChumCheck</a>
+      <a href="/" class="cursor-pointer text-xl font-black normal-case"
+        >ChumCheck</a
+      >
     </div>
     <div class="flex-none font-medium">
       <ul class="flex flex-1 cursor-pointer items-center gap-7 text-[15px]">

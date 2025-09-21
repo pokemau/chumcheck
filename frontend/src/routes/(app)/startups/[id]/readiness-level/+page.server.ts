@@ -22,15 +22,24 @@ export const actions = {
       'investment'
     ];
 
-    const answers: { startup_id: number; criterion_id: number; score: number; remark: string }[] =
-      [];
+    const answers: {
+      startup_id: number;
+      criterion_id: number;
+      score: number;
+      remark: string;
+    }[] = [];
 
-    const readinesslevels: { startup_id: number; readiness_level_id: number }[] = [];
+    const readinesslevels: {
+      startup_id: number;
+      readiness_level_id: number;
+    }[] = [];
 
     types.forEach((type) => {
       readinesslevels.push({
         startup_id: Number.parseInt(params.id as string),
-        readiness_level_id: parseInt(formData.get(`${type}ReadinessLevel`) as string)
+        readiness_level_id: parseInt(
+          formData.get(`${type}ReadinessLevel`) as string
+        )
       });
       for (let level = 1; level <= 9; level++) {
         for (let criteria = 1; criteria <= 6; criteria++) {
@@ -39,7 +48,9 @@ export const actions = {
             criterion_id: Number.parseInt(
               formData.get(`${type}Criteria${level}${criteria}`) as string
             ),
-            score: Number.parseInt(formData.get(`${type}${level}${criteria}`) as string),
+            score: Number.parseInt(
+              formData.get(`${type}${level}${criteria}`) as string
+            ),
             remark: ''
           });
         }
@@ -62,16 +73,19 @@ export const actions = {
       );
 
       if (rubrics_scores.ok) {
-        const levels = await fetch(`${PUBLIC_API_URL}/startup-readiness-levels/bulk-create/`, {
-          method: 'post',
-          headers: {
-            'Content-type': 'application/json',
-            Authorization: `Bearer ${cookies.get('Access')}`
-          },
-          body: JSON.stringify({
-            startup_readiness_levels: readinesslevels
-          })
-        });
+        const levels = await fetch(
+          `${PUBLIC_API_URL}/startup-readiness-levels/bulk-create/`,
+          {
+            method: 'post',
+            headers: {
+              'Content-type': 'application/json',
+              Authorization: `Bearer ${cookies.get('Access')}`
+            },
+            body: JSON.stringify({
+              startup_readiness_levels: readinesslevels
+            })
+          }
+        );
 
         if (levels.ok) {
           throw redirect(302, `/mentor/startups/qualified/${params.id}`);

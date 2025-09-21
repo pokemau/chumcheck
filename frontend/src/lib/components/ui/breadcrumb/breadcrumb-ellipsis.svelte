@@ -8,7 +8,9 @@
     ref = $bindable(null),
     class: className,
     ...restProps
-  }: WithoutChildren<WithElementRef<HTMLAttributes<HTMLSpanElement>>> = $props();
+  }: WithoutChildren<
+    WithElementRef<HTMLAttributes<HTMLSpanElement>>
+  > = $props();
 </script>
 
 <span

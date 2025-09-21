@@ -6,13 +6,11 @@
 
     const data = await uratQuestions.json();
     if (uratQuestions.ok) {
-
       const calculatorQuestions = await fetch(
         `${PUBLIC_API_URL}/readinesslevel/calculator-questions/`
       );
 
       const data2 = await calculatorQuestions.json();
-
 
       if (calculatorQuestions.ok) {
         return {
@@ -148,7 +146,11 @@
     <Market {currentActive} question={data.marketQuestions} {startup} />
     <Regulatory {currentActive} question={data.regulatoryQuestions} {startup} />
     <Acceptance {currentActive} question={data.acceptanceQuestions} {startup} />
-    <Organizational {currentActive} question={data.organizationalQuestions} {startup} />
+    <Organizational
+      {currentActive}
+      question={data.organizationalQuestions}
+      {startup}
+    />
     <Investment {currentActive} question={data.investmentQuestions} {startup} />
     <TechnologyCalculator
       {currentActive}

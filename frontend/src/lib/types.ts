@@ -1,4 +1,4 @@
-import type { ReadinessType } from "./utils";
+import type { ReadinessType } from './utils';
 
 export type Role = 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
 export type Application = {

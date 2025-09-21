@@ -32,8 +32,11 @@
   };
 
   const isNewCard = () => {
-    return (role == 'Mentor' && !rns.clickedByMentor) || (role == 'Startup' && !rns.clickedByStartup);
-  }
+    return (
+      (role == 'Mentor' && !rns.clickedByMentor) ||
+      (role == 'Startup' && !rns.clickedByStartup)
+    );
+  };
 
   let rnsCopy = $state({ ...rns });
 
@@ -43,58 +46,86 @@
 
   const approveDialog = () => {
     open = false;
-    update(rns.id, { ...rns, approvalStatus: 'Unchanged', status: rns.requestedStatus});
-  }
+    update(rns.id, {
+      ...rns,
+      approvalStatus: 'Unchanged',
+      status: rns.requestedStatus
+    });
+  };
 
   const denyDialog = () => {
     open = false;
-    update(rns.id, { ...rns, approvalStatus: 'Unchanged', requestedStatus: rns.status});
-  }
-
+    update(rns.id, {
+      ...rns,
+      approvalStatus: 'Unchanged',
+      requestedStatus: rns.status
+    });
+  };
 </script>
 
 <Card.Root
-  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
-  ${ (isNewCard() || rnsCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
+  class={`cursor-pointer rounded-lg border bg-gray-900 shadow-sm
+  ${isNewCard() || rnsCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse border-sky-600' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
   }}
 >
-  <Card.Content class="flex flex-col relative gap-2 p-4">
-    <div class="flex items-center justify-between mb-1">
-      <Badge class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">#{rns.priorityNumber ? rns.priorityNumber : ''}</Badge>
+  <Card.Content class="relative flex flex-col gap-2 p-4">
+    <div class="mb-1 flex items-center justify-between">
+      <Badge
+        class="rounded border-2 border-sky-600 bg-blue-950 px-2 py-0.5 text-xs font-semibold text-sky-600"
+        >#{rns.priorityNumber ? rns.priorityNumber : ''}</Badge
+      >
       {#if isNewCard()}
-        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+        <div
+          class="z-100 absolute -right-2 -top-2 rounded-[2px] bg-primary p-[1px] text-xs"
+        >
+          New
+        </div>
       {/if}
       {#if rnsCopy.approvalStatus !== 'Unchanged'}
-        <div class="absolute -top-2 -right-2 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
+        <div
+          class="z-100 absolute -right-2 -top-2 rounded-[2px] bg-primary p-[1px] text-xs"
+        >
+          Pending Approval
+        </div>
       {/if}
-      <Badge class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}>{rns.readinessType}</Badge>
+      <Badge
+        class={`text-xs font-bold ${getReadinessStyles(rns.readinessType)}`}
+        >{rns.readinessType}</Badge
+      >
     </div>
-    <div class="text-sm break-words whitespace-pre-wrap">
+    <div class="whitespace-pre-wrap break-words text-sm">
       {@html rns.description.substring(0, 100) +
         `${rns.description.length > 100 ? '...' : ''}`}
     </div>
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-1 text-xs text-muted-foreground ">
+      <div class="flex items-center gap-1 text-xs text-muted-foreground">
         <Target class="h-4 w-4" /> Target Level: {rns.targetLevelScore}
       </div>
 
       <div class="flex items-center gap-1 text-xs">
         {#if assignedMember}
-          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
+          <div
+            class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
+          >
             {assignedMember.firstName.charAt(0)}
           </div>
           <span class="text-muted-foreground">
-            {#if (assignedMember.firstName.length + assignedMember.lastName.length + 1) > 15}
-              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(0, 15) + '...'}
+            {#if assignedMember.firstName.length + assignedMember.lastName.length + 1 > 15}
+              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(
+                0,
+                15
+              ) + '...'}
             {:else}
               {assignedMember.firstName} {assignedMember.lastName}
             {/if}
           </span>
         {:else}
-          <div class="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
+          <div
+            class="flex h-5 w-5 items-center justify-center rounded-full bg-muted"
+          >
             <User class="h-4 w-4" />
           </div>
           <span>Unassigned</span>
@@ -103,12 +134,12 @@
     </div>
     <div class="flex items-center gap-1 text-xs text-muted-foreground">
       <img src="/clock.png" alt="Clock" class="h-4 w-4" />
-      <span>{rns.status === 7 ? "Long Term" : "Short Term"}</span>
+      <span>{rns.status === 7 ? 'Long Term' : 'Short Term'}</span>
     </div>
   </Card.Content>
 </Card.Root>
 
-{#if  role === 'Startup'}
+{#if role === 'Startup'}
   <RnsViewEditDeleteDialog
     {open}
     {onOpenChange}
@@ -135,4 +166,4 @@
     {approveDialog}
     {denyDialog}
   />
-{/if} 
+{/if}

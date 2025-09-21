@@ -56,9 +56,12 @@
     }
   ]);
 
-  const isLoading = $derived($analyticsQueries[0].isLoading || $analyticsQueries[1].isLoading);
-  const isError = $derived($analyticsQueries[0].isError || $analyticsQueries[1].isError);
-
+  const isLoading = $derived(
+    $analyticsQueries[0].isLoading || $analyticsQueries[1].isLoading
+  );
+  const isError = $derived(
+    $analyticsQueries[0].isError || $analyticsQueries[1].isError
+  );
 </script>
 
 <div class="flex h-full flex-col gap-3">
@@ -66,8 +69,8 @@
     <div>
       <h2 class="text-3xl font-bold">Cohorts</h2>
       <p class="text-muted-foreground">
-        Manage startup batches, track progress, and analyze trends to measure your platform's
-        impact.
+        Manage startup batches, track progress, and analyze trends to measure
+        your platform's impact.
       </p>
     </div>
   </div>
@@ -95,59 +98,88 @@
 {#snippet fallback()}
   <div class="grid h-[175px] grid-cols-4 gap-3">
     <Card.Root>
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
         <Card.Title class="text-lg font-medium">Number of Users</Card.Title>
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content>
-        <div class="text-4xl font-bold">{$analyticsQueries[0].data.num_of_users}</div>
+        <div class="text-4xl font-bold">
+          {$analyticsQueries[0].data.num_of_users}
+        </div>
       </Card.Content>
     </Card.Root>
     <Card.Root>
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
         <Card.Title class="text-lg font-medium">Number of Startups</Card.Title>
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content>
-        <div class="text-4xl font-bold">{$analyticsQueries[0].data.num_startups}</div>
+        <div class="text-4xl font-bold">
+          {$analyticsQueries[0].data.num_startups}
+        </div>
       </Card.Content>
     </Card.Root>
     <Card.Root>
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Card.Title class="text-lg font-medium">Number of Elevated Startups</Card.Title>
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
+        <Card.Title class="text-lg font-medium"
+          >Number of Elevated Startups</Card.Title
+        >
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content>
-        <div class="text-2xl font-bold">{$analyticsQueries[0].data.num_elevated_startups}</div>
+        <div class="text-2xl font-bold">
+          {$analyticsQueries[0].data.num_elevated_startups}
+        </div>
       </Card.Content>
     </Card.Root>
     <Card.Root>
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Card.Title class="text-lg font-medium">Average Completed Tasks</Card.Title>
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
+        <Card.Title class="text-lg font-medium"
+          >Average Completed Tasks</Card.Title
+        >
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content>
-        <div class="text-2xl font-bold">{$analyticsQueries[0].data.average_completed_tasks}</div>
+        <div class="text-2xl font-bold">
+          {$analyticsQueries[0].data.average_completed_tasks}
+        </div>
       </Card.Content>
     </Card.Root>
   </div>
   <div class="flex flex-1 gap-3">
     <Card.Root class="h-full w-4/6">
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
         <Card.Title class="font-medium">Elevated Startups per Type</Card.Title>
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content class="flex h-[500px] w-full items-center justify-center">
-        <BarChart id={1123} x={$analyticsQueries[0].data.elevated_startups_per_type} />
+        <BarChart
+          id={1123}
+          x={$analyticsQueries[0].data.elevated_startups_per_type}
+        />
       </Card.Content>
     </Card.Root>
     <Card.Root class="h-full flex-1">
-      <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card.Header
+        class="flex flex-row items-center justify-between space-y-0 pb-2"
+      >
         <Card.Title class="font-medium">Elevated Logs</Card.Title>
         <Users class="h-4 w-4 text-muted-foreground" />
       </Card.Header>
       <Card.Content>
-        <ul class="flex h-[500px] list-disc flex-col gap-3 overflow-scroll pl-2">
+        <ul
+          class="flex h-[500px] list-disc flex-col gap-3 overflow-scroll pl-2"
+        >
           {#each $analyticsQueries[1].data.logs as item}
             <li><div class="text-base">{item}</div></li>
           {/each}

@@ -1,4 +1,3 @@
-
 /*@import url('/fonts/Geist-Black.ttf');*/
 /*@import url('/fonts/Geist-Bold.ttf');*/
 /*@import url('/fonts/Geist-Regular.ttf');*/
@@ -7,7 +6,6 @@
 /*@import url('/fonts/Geist-ExtraLight.ttf');*/
 /*@import url('/fonts/Geist-Light.ttf');*/
 /*@import url('/fonts/Geist-Thin.ttf');*/
-
 
 @tailwind base;
 @tailwind components;

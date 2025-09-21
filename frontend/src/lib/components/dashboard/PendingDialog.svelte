@@ -39,22 +39,31 @@
 
   const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
     const apiKeyMapping: Record<string, string> = {
-      [CalculatorCategory.Technology]: "Technology",
-      [CalculatorCategory.Product_Development]: "Product Development",
-      [CalculatorCategory.Product_Definition]: "Product Definition/Design",
-      [CalculatorCategory.Competitive_Landscape]: "Competitive Landscape",
-      [CalculatorCategory.Team]: "Team",
-      [CalculatorCategory.Go_To_Market]: "Go-To-Market",
-      [CalculatorCategory.Supply_Chain]: "Manufacturing/Supply Chain",
+      [CalculatorCategory.Technology]: 'Technology',
+      [CalculatorCategory.Product_Development]: 'Product Development',
+      [CalculatorCategory.Product_Definition]: 'Product Definition/Design',
+      [CalculatorCategory.Competitive_Landscape]: 'Competitive Landscape',
+      [CalculatorCategory.Team]: 'Team',
+      [CalculatorCategory.Go_To_Market]: 'Go-To-Market',
+      [CalculatorCategory.Supply_Chain]: 'Manufacturing/Supply Chain'
     };
 
     const apiKey = apiKeyMapping[label];
     return calc[apiKey] || 0;
   });
 
-  let scores: { readinessType: string; questionId: number; score: number }[] = [];
+  let scores: { readinessType: string; questionId: number; score: number }[] =
+    [];
 
-  function updateScore({ readinessType, questionId, score }: { readinessType: string; questionId: number; score: number }) {
+  function updateScore({
+    readinessType,
+    questionId,
+    score
+  }: {
+    readinessType: string;
+    questionId: number;
+    score: number;
+  }) {
     // Update or add the score for the given questionId
     const existingIndex = scores.findIndex((s) => s.questionId === questionId);
     if (existingIndex !== -1) {
@@ -83,7 +92,6 @@
               value={inf.name}
             />
           </div>
-
         </div>
         <!-- Group Information -->
         <div class="flex flex-col gap-3">
@@ -241,7 +249,8 @@
           </div>
         </div>
         <div class="flex justify-end">
-          <Button onclick={() => saveRating(inf.id, scores)}>Save Rating</Button>
+          <Button onclick={() => saveRating(inf.id, scores)}>Save Rating</Button
+          >
         </div>
       </div>
     </div></Dialog.Content

@@ -29,17 +29,26 @@
     </Table.Header>
     <Table.Body>
       {#each table.getRowModel().rows as row (row.id)}
-        <Table.Row data-state={row.getIsSelected() && 'selected'} onclick={() => (open = true)}>
+        <Table.Row
+          data-state={row.getIsSelected() && 'selected'}
+          onclick={() => (open = true)}
+        >
           {#each row.getVisibleCells() as cell (cell.id)}
-            <Table.Cell class="h-14 cursor-pointer [&:has([role=checkbox])]:pl-3">
-              <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+            <Table.Cell
+              class="h-14 cursor-pointer [&:has([role=checkbox])]:pl-3"
+            >
+              <FlexRender
+                content={cell.column.columnDef.cell}
+                context={cell.getContext()}
+              />
             </Table.Cell>
           {/each}
         </Table.Row>
       {:else}
         <Table.Row>
-          <Table.Cell colspan={table.getAllColumns().length} class="h-24 text-center"
-            >No results.</Table.Cell
+          <Table.Cell
+            colspan={table.getAllColumns().length}
+            class="h-24 text-center">No results.</Table.Cell
           >
         </Table.Row>
       {/each}
@@ -77,24 +86,24 @@
       <Dialog.Header>
         <Dialog.Title>pending</Dialog.Title>
         <Dialog.Description>
-          This action cannot be undone. This will permanently delete your account and remove your
-          data from our servers.
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers.
         </Dialog.Description>
       </Dialog.Header>
     {:else if selectedTab === 'rated'}
       <Dialog.Header>
         <Dialog.Title>rated</Dialog.Title>
         <Dialog.Description>
-          This action cannot be undone. This will permanently delete your account and remove your
-          data from our servers.
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers.
         </Dialog.Description>
       </Dialog.Header>
     {:else}
       <Dialog.Header>
         <Dialog.Title>qualified</Dialog.Title>
         <Dialog.Description>
-          This action cannot be undone. This will permanently delete your account and remove your
-          data from our servers.
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers.
         </Dialog.Description>
       </Dialog.Header>
     {/if}

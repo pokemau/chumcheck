@@ -32,7 +32,7 @@
   </Card.Header>
   <Card.Content class="mt-1 grid w-full grid-cols-[250px_1fr] gap-10">
     <div class="grid w-full grid-cols-[250px_1fr] gap-14">
-      <nav class="text-muted-foreground flex flex-1 flex-col gap-3 text-sm">
+      <nav class="flex flex-1 flex-col gap-3 text-sm text-muted-foreground">
         {#each modules as item}
           {@const isActive = currentModule === item.link}
           <a
@@ -49,7 +49,7 @@
             >
               {#if isActive}
                 <div
-                  class="bg-muted absolute inset-0 rounded-md"
+                  class="absolute inset-0 rounded-md bg-muted"
                   in:send={{ key: 'active-sidebar-tab' }}
                   out:receive={{ key: 'active-sidebar-tab' }}
                 ></div>

@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { RadioGroup as RadioGroupPrimitive, type WithoutChildrenOrChild } from 'bits-ui';
+  import {
+    RadioGroup as RadioGroupPrimitive,
+    type WithoutChildrenOrChild
+  } from 'bits-ui';
   import Check from 'svelte-radix/Check.svelte';
   import { cn } from '$lib/utils.js';
 

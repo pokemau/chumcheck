@@ -41,7 +41,14 @@
       </div>
       <div class="grid gap-2">
         <Label for="email">Email</Label>
-        <Input name="email" id="email" type="email" value={data.user.email} required readonly />
+        <Input
+          name="email"
+          id="email"
+          type="email"
+          value={data.user.email}
+          required
+          readonly
+        />
       </div>
     </div>
   </Card.Content>

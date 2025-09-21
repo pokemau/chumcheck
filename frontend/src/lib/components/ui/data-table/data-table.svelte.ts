@@ -32,7 +32,9 @@ import {
  * </table>
  * ```
  */
-export function createSvelteTable<TData extends RowData>(options: TableOptions<TData>) {
+export function createSvelteTable<TData extends RowData>(
+  options: TableOptions<TData>
+) {
   const resolvedOptions: TableOptionsResolved<TData> = mergeObjects(
     {
       state: {},
@@ -82,7 +84,11 @@ export function createSvelteTable<TData extends RowData>(options: TableOptions<T
  */
 export function mergeObjects<T>(source: T): T;
 export function mergeObjects<T, U>(source: T, source1: U): T & U;
-export function mergeObjects<T, U, V>(source: T, source1: U, source2: V): T & U & V;
+export function mergeObjects<T, U, V>(
+  source: T,
+  source1: U,
+  source2: V
+): T & U & V;
 export function mergeObjects<T, U, V, W>(
   source: T,
   source1: U,

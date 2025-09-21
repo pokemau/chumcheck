@@ -26,19 +26,35 @@
           />
           <Table.Cell class="w-1/4 pl-5">{criteria.criteria}</Table.Cell>
           <Table.Cell class="w-[200px]">
-            <RadioButton name={`${type}${questionnaire.level}${i + 1}`} value="5" />
+            <RadioButton
+              name={`${type}${questionnaire.level}${i + 1}`}
+              value="5"
+            />
           </Table.Cell>
           <Table.Cell class="w-[200px]">
-            <RadioButton name={`${type}${questionnaire.level}${i + 1}`} value="4" />
+            <RadioButton
+              name={`${type}${questionnaire.level}${i + 1}`}
+              value="4"
+            />
           </Table.Cell>
           <Table.Cell class="w-[200px]">
-            <RadioButton name={`${type}${questionnaire.level}${i + 1}`} value="3" />
+            <RadioButton
+              name={`${type}${questionnaire.level}${i + 1}`}
+              value="3"
+            />
           </Table.Cell>
           <Table.Cell class="w-[200px]">
-            <RadioButton name={`${type}${questionnaire.level}${i + 1}`} value="2" />
+            <RadioButton
+              name={`${type}${questionnaire.level}${i + 1}`}
+              value="2"
+            />
           </Table.Cell>
           <Table.Cell class="w-[200px]">
-            <RadioButton name={`${type}${questionnaire.level}${i + 1}`} value="1" checked />
+            <RadioButton
+              name={`${type}${questionnaire.level}${i + 1}`}
+              value="1"
+              checked
+            />
           </Table.Cell>
         </Table.Row>
       {/each}

@@ -6,20 +6,28 @@
   import * as RadioGroup from '$lib/components/ui/radio-group';
 
   // Sort calculator answers by question ID
-  $: calculatorAnswers = startup?.calculatorQuestionAnswers
-    ?.sort((a: any, b: any) => a.question.id - b.question.id) ?? [];
+  $: calculatorAnswers =
+    startup?.calculatorQuestionAnswers?.sort(
+      (a: any, b: any) => a.question.id - b.question.id
+    ) ?? [];
 
   // Create a map of category to selected question ID
-  $: selectedAnswers = calculatorAnswers.reduce((acc: Record<string, number>, answer: any) => {
-    acc[answer.question.category] = answer.question.id;
-    return acc;
-  }, {});
+  $: selectedAnswers = calculatorAnswers.reduce(
+    (acc: Record<string, number>, answer: any) => {
+      acc[answer.question.category] = answer.question.id;
+      return acc;
+    },
+    {}
+  );
 
   // Create a map of category to answer ID
-  $: answerIds = calculatorAnswers.reduce((acc: Record<string, number>, answer: any) => {
-    acc[answer.question.category] = answer.id;
-    return acc;
-  }, {});
+  $: answerIds = calculatorAnswers.reduce(
+    (acc: Record<string, number>, answer: any) => {
+      acc[answer.question.category] = answer.id;
+      return acc;
+    },
+    {}
+  );
 </script>
 
 <div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 10}>
@@ -46,7 +54,11 @@
           <!-- <RadioGroup.Input name={category.category} /> -->
         </RadioGroup.Root>
         {#if answerIds[category.category]}
-          <input type="hidden" name={`${category.category}AnswerId`} value={`${answerIds[category.category]}`} />
+          <input
+            type="hidden"
+            name={`${category.category}AnswerId`}
+            value={`${answerIds[category.category]}`}
+          />
         {/if}
       </div>
     {/each}

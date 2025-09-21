@@ -1,4 +1,3 @@
-
-<div class="h-[dvh] min-h-dvw p-3 rounded-sm border border-slate-700">
-    <div class="text-justify break-keep text-base"><slot/></div>
+<div class="min-h-dvw h-[dvh] rounded-sm border border-slate-700 p-3">
+  <div class="break-keep text-justify text-base"><slot /></div>
 </div>

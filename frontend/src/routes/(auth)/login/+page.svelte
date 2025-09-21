@@ -31,11 +31,13 @@
 </svelte:head>
 
 <div
-  class="bg-muted/40 text-flutter-gray dark:text-flutter-white relative flex h-full flex-1 flex-col items-center rounded-bl-xl rounded-tl-xl"
+  class="relative flex h-full flex-1 flex-col items-center rounded-bl-xl rounded-tl-xl bg-muted/40 text-flutter-gray dark:text-flutter-white"
 >
   <div class="absolute flex w-full cursor-pointer items-center gap-2 p-5">
     <img src="launchlab_logo.png" alt="citeams_logo" class="h-7 w-7" />
-    <a href="/" class="cursor-pointer text-xl font-black normal-case">ChumCheck</a>
+    <a href="/" class="cursor-pointer text-xl font-black normal-case"
+      >ChumCheck</a
+    >
   </div>
 
   <div class="flex flex-1 items-center justify-center">
@@ -43,13 +45,17 @@
   </div>
 </div>
 <div
-  class="bg-background text-flutter-gray dark:text-flutter-white flex h-full flex-1 items-center justify-center rounded-br-xl rounded-tr-xl"
+  class="flex h-full flex-1 items-center justify-center rounded-br-xl rounded-tr-xl bg-background text-flutter-gray dark:text-flutter-white"
 >
-  <form method="post" use:enhance class="flex items-center justify-center py-12">
+  <form
+    method="post"
+    use:enhance
+    class="flex items-center justify-center py-12"
+  >
     <div class="mx-auto grid w-[350px] gap-6">
       <div class="grid gap-2 text-center">
         <h1 class="text-3xl font-bold">Login</h1>
-        <p class="text-muted-foreground text-balance text-[15px]">
+        <p class="text-balance text-[15px] text-muted-foreground">
           Enter your email below to login to your account
         </p>
       </div>

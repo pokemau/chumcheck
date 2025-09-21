@@ -64,27 +64,30 @@
     <EditableSection
       label="Description"
       editMode={editDescription}
-      role={role}
+      {role}
       data={rnsCopy.description}
       dataId={rnsCopy.id}
       dataColumn="description"
-      update={update}
+      {update}
     />
     <EditableSection
       label="Fix"
       editMode={editFix}
-      role={role}
+      {role}
       data={rnsCopy.fix}
       dataId={rnsCopy.id}
       dataColumn="fix"
-      update={update}
-    />      
+      {update}
+    />
   </svelte:fragment>
 
   <svelte:fragment slot="detailsSection">
     <div class="flex gap-3">
       {#if role !== 'Startup'}
-        <Button size="sm" variant="destructive" onclick={() => (deleteDialogOpen = true)}
+        <Button
+          size="sm"
+          variant="destructive"
+          onclick={() => (deleteDialogOpen = true)}
           ><Trash class="h-4 w-4" /> Delete</Button
         >
       {/if}
@@ -100,27 +103,31 @@
     </div>
     <DetailsSectionContainer>
       <DetailsSection
-      label="Assignee"
-      value={rnsCopy.assignee}
-      editable={true}
-      editableCondition={role !== 'Startup'}
-      options={members}
-      valueKey="userId"
-      displayFn={(member) => `${member.firstName} ${member.lastName}`}
-      onChange={() => {
-        update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
-      }}
+        label="Assignee"
+        value={rnsCopy.assignee}
+        editable={true}
+        editableCondition={role !== 'Startup'}
+        options={members}
+        valueKey="userId"
+        displayFn={(member) => `${member.firstName} ${member.lastName}`}
+        onChange={() => {
+          update(rnsCopy.id, { assigneeId: rnsCopy.assignee });
+        }}
       />
     </DetailsSectionContainer>
   </svelte:fragment>
 </ViewEditDeleteDialog>
 
-<AlertDialog.Root bind:open={deleteDialogOpen} onOpenChange={deleteDialogOnOpenChange}>
+<AlertDialog.Root
+  bind:open={deleteDialogOpen}
+  onOpenChange={deleteDialogOnOpenChange}
+>
   <AlertDialog.Content>
     <AlertDialog.Header>
       <AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
       <AlertDialog.Description>
-        This action cannot be undone. This will permanently delete this Roadblocks.
+        This action cannot be undone. This will permanently delete this
+        Roadblocks.
       </AlertDialog.Description>
     </AlertDialog.Header>
     <AlertDialog.Footer>

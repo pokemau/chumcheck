@@ -1,6 +1,10 @@
 <script lang="ts">
   export let questions, answers, type, access;
-  export let onScoreChange: (data: { readinessType: string; questionId: number; score: number }) => void;
+  export let onScoreChange: (data: {
+    readinessType: string;
+    questionId: number;
+    score: number;
+  }) => void;
 
   import { Textarea } from '$lib/components/ui/textarea';
   import { Label } from '$lib/components/ui/label/index.js';

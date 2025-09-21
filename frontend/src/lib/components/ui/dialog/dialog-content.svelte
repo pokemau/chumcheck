@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Dialog as DialogPrimitive, type WithoutChildrenOrChild } from 'bits-ui';
+  import {
+    Dialog as DialogPrimitive,
+    type WithoutChildrenOrChild
+  } from 'bits-ui';
   import Cross2 from 'svelte-radix/Cross2.svelte';
   import type { Snippet } from 'svelte';
   import * as Dialog from './index.js';

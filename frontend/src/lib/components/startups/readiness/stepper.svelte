@@ -56,7 +56,9 @@
         </span>
       </li>
     {:else}
-      <li class={`${current >= index ? 'dark:text-blue-500' : ''} flex items-center`}>
+      <li
+        class={`${current >= index ? 'dark:text-blue-500' : ''} flex items-center`}
+      >
         {@render currentStep(index)}
         {step}
       </li>

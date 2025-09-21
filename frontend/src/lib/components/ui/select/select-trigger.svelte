@@ -22,4 +22,3 @@
   {@render children?.()}
   <CaretSort class="size-4 opacity-50" />
 </SelectPrimitive.Trigger>
-

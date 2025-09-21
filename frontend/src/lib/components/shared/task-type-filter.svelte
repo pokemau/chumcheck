@@ -20,7 +20,9 @@
     <DropdownMenu.Group>
       <DropdownMenu.RadioGroup bind:value={status}>
         {#each statuses as s}
-          <DropdownMenu.RadioItem value={s.value}>{s.name}</DropdownMenu.RadioItem>
+          <DropdownMenu.RadioItem value={s.value}
+            >{s.name}</DropdownMenu.RadioItem
+          >
         {/each}
       </DropdownMenu.RadioGroup>
     </DropdownMenu.Group>

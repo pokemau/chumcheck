@@ -2,7 +2,10 @@
   import { cn } from '$lib/utils.js';
   import type { WithElementRef } from 'bits-ui';
   import type { HTMLAttributes } from 'svelte/elements';
-  import { type ChartConfig, getPayloadConfigFromPayload } from './chart-utils.js';
+  import {
+    type ChartConfig,
+    getPayloadConfigFromPayload
+  } from './chart-utils.js';
 
   let {
     ref = $bindable(null),
@@ -33,7 +36,11 @@
     {...restProps}
   >
     {#each itemConfig as item}
-      <div class={cn('flex items-center gap-1.5 [&>svg]:size-3 [&>svg]:text-muted-foreground')}>
+      <div
+        class={cn(
+          'flex items-center gap-1.5 [&>svg]:size-3 [&>svg]:text-muted-foreground'
+        )}
+      >
         {#if item?.icon && !hideIcon}
           <item.icon />
         {:else}

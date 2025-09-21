@@ -151,12 +151,12 @@
     <Dialog.Footer>
       <Button
         onclick={() => {
-          create(data)
-          data.readinessType = ''
-          data.description = ''
-          data.assigneeId = ''
-          data.targetLevelId = ''
-          }}
+          create(data);
+          data.readinessType = '';
+          data.description = '';
+          data.assigneeId = '';
+          data.targetLevelId = '';
+        }}
         disabled={data.targetLevelId === '' || data.description === ''
           ? true
           : false}>Create</Button

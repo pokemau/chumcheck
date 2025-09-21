@@ -8,7 +8,11 @@
   import Rubric from '$lib/components/startups/readiness/rubric.svelte';
   import * as Card from '$lib/components/ui/card/index.js';
   import * as Chart from '$lib/components/ui/chart/index.js';
-  import { Can, RadarChart, RadarChartV2 } from '$lib/components/shared/index.js';
+  import {
+    Can,
+    RadarChart,
+    RadarChartV2
+  } from '$lib/components/shared/index.js';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
   const { data } = $props();
@@ -27,19 +31,26 @@
       queryKey: ['haveScores', startupId],
       queryFn: () =>
         getData(
-          `/startups/startup-readiness-level?startupId=${startupId}`, access!
+          `/startups/startup-readiness-level?startupId=${startupId}`,
+          access!
         )
     },
     {
       queryKey: ['readinessLevel', startupId],
-      queryFn: () => getData(`/startups/startup-readiness-level?startupId=${startupId}`, access!)
+      queryFn: () =>
+        getData(
+          `/startups/startup-readiness-level?startupId=${startupId}`,
+          access!
+        )
     }
   ]);
-  const { isLoading, isError } = $derived(useQueriesState($readinessLevelQueries));
+  const { isLoading, isError } = $derived(
+    useQueriesState($readinessLevelQueries)
+  );
 
   const isRated = $derived(() => {
-  const q = $readinessLevelQueries[2];
-  return q.isSuccess && q.data?.length > 0;
+    const q = $readinessLevelQueries[2];
+    return q.isSuccess && q.data?.length > 0;
   });
 
   let selectedTab = $state('chart');
@@ -59,36 +70,56 @@
     }
 
     return {
-      technology: query.data.filter((r: any) => r.readiness_type === 'Technology'),
+      technology: query.data.filter(
+        (r: any) => r.readiness_type === 'Technology'
+      ),
       market: query.data.filter((r: any) => r.readiness_type === 'Market'),
-      acceptance: query.data.filter((r: any) => r.readiness_type === 'Acceptance'),
-      organizational: query.data.filter((r: any) => r.readiness_type === 'Organizational'),
-      regulatory: query.data.filter((r: any) => r.readiness_type === 'Regulatory'),
-      investment: query.data.filter((r: any) => r.readiness_type === 'Investment')
+      acceptance: query.data.filter(
+        (r: any) => r.readiness_type === 'Acceptance'
+      ),
+      organizational: query.data.filter(
+        (r: any) => r.readiness_type === 'Organizational'
+      ),
+      regulatory: query.data.filter(
+        (r: any) => r.readiness_type === 'Regulatory'
+      ),
+      investment: query.data.filter(
+        (r: any) => r.readiness_type === 'Investment'
+      )
     };
   });
 
   const scores = $derived(() => {
-  const query = $readinessLevelQueries[2];
-  if (!query.isSuccess || !query.data) {
-    return {
-      technology: [],
-      market: [],
-      acceptance: [],
-      organizational: [],
-      regulatory: [],
-      investment: []
-    };
-  }
+    const query = $readinessLevelQueries[2];
+    if (!query.isSuccess || !query.data) {
+      return {
+        technology: [],
+        market: [],
+        acceptance: [],
+        organizational: [],
+        regulatory: [],
+        investment: []
+      };
+    }
 
-  return {
-    technology: query.data.filter((r: any) => r.readiness_type === 'Technology'),
-    market: query.data.filter((r: any) => r.readiness_type === 'Market'),
-    acceptance: query.data.filter((r: any) => r.readiness_type === 'Acceptance'),
-    organizational: query.data.filter((r: any) => r.readiness_type === 'Organizational'),
-    regulatory: query.data.filter((r: any) => r.readiness_type === 'Regulatory'),
-    investment: query.data.filter((r: any) => r.readiness_type === 'Investment')
-  };
+    return {
+      technology: query.data.filter(
+        (r: any) => r.readiness_type === 'Technology'
+      ),
+      market: query.data.filter((r: any) => r.readiness_type === 'Market'),
+      acceptance: query.data.filter(
+        (r: any) => r.readiness_type === 'Acceptance'
+      ),
+      organizational: query.data.filter(
+        (r: any) => r.readiness_type === 'Organizational'
+      ),
+      regulatory: query.data.filter(
+        (r: any) => r.readiness_type === 'Regulatory'
+      ),
+      investment: query.data.filter(
+        (r: any) => r.readiness_type === 'Investment'
+      )
+    };
   });
 
   const readiness = $derived(() => {
@@ -107,7 +138,7 @@
     }
 
     const getLevel = (type: string) => {
-    const match = latest.find(
+      const match = latest.find(
         (r: any) => r.readinessLevel.readinessType === type
       );
       return match?.readinessLevel.level ?? 0;
@@ -214,32 +245,38 @@
                 <Tabs.Trigger
                   value="technology"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('technology')}>Technology</Tabs.Trigger
+                  onclick={() => updateReadinessTab('technology')}
+                  >Technology</Tabs.Trigger
                 >
                 <Tabs.Trigger
                   value="acceptance"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('acceptance')}>Acceptance</Tabs.Trigger
+                  onclick={() => updateReadinessTab('acceptance')}
+                  >Acceptance</Tabs.Trigger
                 >
                 <Tabs.Trigger
                   value="market"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('market')}>Market</Tabs.Trigger
+                  onclick={() => updateReadinessTab('market')}
+                  >Market</Tabs.Trigger
                 >
                 <Tabs.Trigger
                   value="organizational"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('organizational')}>Organizational</Tabs.Trigger
+                  onclick={() => updateReadinessTab('organizational')}
+                  >Organizational</Tabs.Trigger
                 >
                 <Tabs.Trigger
                   value="regulatory"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('regulatory')}>Regulatory</Tabs.Trigger
+                  onclick={() => updateReadinessTab('regulatory')}
+                  >Regulatory</Tabs.Trigger
                 >
                 <Tabs.Trigger
                   value="investment"
                   class="capitalize"
-                  onclick={() => updateReadinessTab('investment')}>Investment</Tabs.Trigger
+                  onclick={() => updateReadinessTab('investment')}
+                  >Investment</Tabs.Trigger
                 >
               </Tabs.List>
             </Tabs.Root>
@@ -335,24 +372,51 @@
 
 {#snippet mentor()}
   <div class="flex h-full flex-col gap-3">
-    <Stepper {current} />    
+    <Stepper {current} />
     <div class="flex h-full flex-col overflow-scroll">
       <form method="post" bind:this={form} class="flex h-0 flex-col">
-        <Rubric questionnaires={rubrics().technology} step={1} {current} type={'technology'} />
-        <Rubric questionnaires={rubrics().acceptance} step={2} {current} type={'acceptance'} />
-        <Rubric questionnaires={rubrics().market} step={3} {current} type={'market'} />
-        <Rubric questionnaires={rubrics().regulatory} step={4} {current} type={'regulatory'} />
+        <Rubric
+          questionnaires={rubrics().technology}
+          step={1}
+          {current}
+          type={'technology'}
+        />
+        <Rubric
+          questionnaires={rubrics().acceptance}
+          step={2}
+          {current}
+          type={'acceptance'}
+        />
+        <Rubric
+          questionnaires={rubrics().market}
+          step={3}
+          {current}
+          type={'market'}
+        />
+        <Rubric
+          questionnaires={rubrics().regulatory}
+          step={4}
+          {current}
+          type={'regulatory'}
+        />
         <Rubric
           questionnaires={rubrics().organizational}
           step={5}
           {current}
           type={'organizational'}
         />
-        <Rubric questionnaires={rubrics().investment} step={6} {current} type={'investment'} />
+        <Rubric
+          questionnaires={rubrics().investment}
+          step={6}
+          {current}
+          type={'investment'}
+        />
       </form>
     </div>
     <div class="ml-auto flex gap-2">
-      <Button variant="secondary" onclick={previous} disabled={current === 0}>Previous</Button>
+      <Button variant="secondary" onclick={previous} disabled={current === 0}
+        >Previous</Button
+      >
       {#if current === 5}
         <Button onclick={() => form.submit()}>Submit</Button>
       {:else}

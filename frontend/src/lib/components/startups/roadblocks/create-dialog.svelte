@@ -24,7 +24,6 @@
     // isAiGenerated: false,
     // status: 4
   });
-
 </script>
 
 <Dialog.Root bind:open {onOpenChange}>

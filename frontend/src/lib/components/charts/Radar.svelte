@@ -9,7 +9,14 @@
     irl = 0;
 
   const data = {
-    labels: ['Technology', 'Market', 'Regulatory', 'Acceptance', 'Organizational', 'Investment'],
+    labels: [
+      'Technology',
+      'Market',
+      'Regulatory',
+      'Acceptance',
+      'Organizational',
+      'Investment'
+    ],
     datasets: [
       {
         label: 'Readiness Levels',
@@ -34,7 +41,14 @@
     LineElement
   } from 'chart.js';
 
-  ChartJS.register(Title, Tooltip, Legend, PointElement, RadialLinearScale, LineElement);
+  ChartJS.register(
+    Title,
+    Tooltip,
+    Legend,
+    PointElement,
+    RadialLinearScale,
+    LineElement
+  );
 
   export let classNames: string;
 </script>
@@ -51,7 +65,10 @@
             stepSize: 1
           },
           grid: {
-            color: $theme === 'light' ? 'rgba(54, 162, 235, 1)' : 'rgba(54, 162, 235, 0.2)'
+            color:
+              $theme === 'light'
+                ? 'rgba(54, 162, 235, 1)'
+                : 'rgba(54, 162, 235, 0.2)'
           }
         }
       },

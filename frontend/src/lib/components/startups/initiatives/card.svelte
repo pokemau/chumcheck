@@ -3,15 +3,29 @@
   import * as Card from '$lib/components/ui/card';
   import { User } from 'lucide-svelte';
   import { getProfileColor, getReadinessStyles, zIndex } from '$lib/utils';
-  import { InitiativeViewEditDeleteDialog, InitiativeViewEditDeleteAiDialog } from '.';
+  import {
+    InitiativeViewEditDeleteDialog,
+    InitiativeViewEditDeleteAiDialog
+  } from '.';
   import type { Actions } from '$lib/types';
   import { goto } from '$app/navigation';
   import { hoveredRNSCard } from '$lib/stores/hoveredRNSCard';
   import { RnsStatus } from '$lib/components/shared/rns.enum';
-  let { initiative, ai, members, update, addToInitiative, deleteInitiative, role, tasks, index } =
-    $props();
+  let {
+    initiative,
+    ai,
+    members,
+    update,
+    addToInitiative,
+    deleteInitiative,
+    role,
+    tasks,
+    index
+  } = $props();
 
-  const assignedRNS = tasks.filter((task: any) => task.id === initiative.rns)[0];
+  const assignedRNS = tasks.filter(
+    (task: any) => task.id === initiative.rns
+  )[0];
   const assignedMember = assignedRNS.assignee;
 
   let open = $state(false);
@@ -32,13 +46,21 @@
 
   const approveDialog = () => {
     open = false;
-    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', status: initiative.requestedStatus});
-  }
+    update(initiative.id, {
+      ...initiative,
+      approvalStatus: 'Unchanged',
+      status: initiative.requestedStatus
+    });
+  };
 
   const denyDialog = () => {
     open = false;
-    update(initiative.id, { ...initiative, approvalStatus: 'Unchanged', requestedStatus: initiative.status});
-  }
+    update(initiative.id, {
+      ...initiative,
+      approvalStatus: 'Unchanged',
+      requestedStatus: initiative.status
+    });
+  };
 
   function handleMouseEnter(event: MouseEvent) {
     const rect = (event.target as HTMLElement).getBoundingClientRect();
@@ -53,86 +75,120 @@
   }
 
   const isNewCard = () => {
-    return (role == 'Mentor' && !initiative.clickedByMentor) || (role == 'Startup' && !initiative.clickedByStartup)
-  }
+    return (
+      (role == 'Mentor' && !initiative.clickedByMentor) ||
+      (role == 'Startup' && !initiative.clickedByStartup)
+    );
+  };
 
   let initiativesCopy = $state({ ...initiative });
 
   $effect(() => {
     initiativesCopy = { ...initiative };
   });
-
 </script>
 
 <Card.Root
-  class={`border bg-gray-900 rounded-lg shadow-sm cursor-pointer
-  ${ (isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged') ? 'border-3 border-sky-600 animate-pulse' : 'border-gray-700'} `}
+  class={`cursor-pointer rounded-lg border bg-gray-900 shadow-sm
+  ${isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse border-sky-600' : 'border-gray-700'} `}
   onclick={() => {
     open = true;
     action = 'View';
   }}
 >
   <Card.Content class="flex flex-col gap-2 p-4">
-    <div class="flex relative items-center justify-between mb-1 relative">
+    <div class="relative mb-1 flex items-center justify-between">
       {#if isNewCard()}
-        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">New</div>
+        <div
+          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+        >
+          New
+        </div>
       {/if}
       {#if initiativesCopy.approvalStatus !== 'Unchanged'}
-        <div class="absolute -top-5 -right-5 z-100 bg-primary text-xs p-[1px] rounded-[2px]">Pending Approval</div>
+        <div
+          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+        >
+          Pending Approval
+        </div>
       {/if}
-      <Badge class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">
+      <Badge
+        class="rounded border-2 border-sky-600 bg-blue-950 px-2 py-0.5 text-xs text-sky-600"
+      >
         #{initiative.initiativeNumber ? initiative.initiativeNumber : ''}
       </Badge>
       <Badge
-        class="text-xs border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5"
+        class="rounded border-2 border-sky-600 bg-blue-950 px-2 py-0.5 text-xs text-sky-600"
         onmouseenter={handleMouseEnter}
         onmouseleave={handleMouseLeave}
         onclick={() => goto(`rns?tab=rns`)}
       >
         RNS #{assignedRNS?.priorityNumber ?? ''}
       </Badge>
-      <Badge class={`text-xs font-bold ${getReadinessStyles(assignedRNS.readinessType)}`}>
+      <Badge
+        class={`text-xs font-bold ${getReadinessStyles(assignedRNS.readinessType)}`}
+      >
         {assignedRNS.readinessType}
       </Badge>
     </div>
-    <div class="text-sm text-white break-words whitespace-pre-wrap">
-      Task: {@html assignedRNS?.description?.substring(0, 40) + (assignedRNS?.description?.length > 40 ? '...' : '')}
+    <div class="whitespace-pre-wrap break-words text-sm text-white">
+      Task: {@html assignedRNS?.description?.substring(0, 40) +
+        (assignedRNS?.description?.length > 40 ? '...' : '')}
     </div>
     {#if initiative.description}
-      <div class="text-xs break-words whitespace-pre-wrap">
-        Description: <span class="text-muted-foreground">{@html initiative.description.substring(0, 50) + (initiative.description.length > 50 ? '...' : '')}</span>
+      <div class="whitespace-pre-wrap break-words text-xs">
+        Description: <span class="text-muted-foreground"
+          >{@html initiative.description.substring(0, 50) +
+            (initiative.description.length > 50 ? '...' : '')}</span
+        >
       </div>
     {/if}
     {#if initiative.measures}
-      <div class="text-xs break-words whitespace-pre-wrap">
-        Measures: <span class="text-muted-foreground">{@html initiative.measures.substring(0, 50) + (initiative.measures.length > 50 ? '...' : '')}</span>
+      <div class="whitespace-pre-wrap break-words text-xs">
+        Measures: <span class="text-muted-foreground"
+          >{@html initiative.measures.substring(0, 50) +
+            (initiative.measures.length > 50 ? '...' : '')}</span
+        >
       </div>
     {/if}
     {#if initiative.targets}
-      <div class="text-xs break-words whitespace-pre-wrap">
-        Targets: <span class="text-muted-foreground">{@html initiative.targets.substring(0, 50) + (initiative.targets.length > 50 ? '...' : '')}</span>
+      <div class="whitespace-pre-wrap break-words text-xs">
+        Targets: <span class="text-muted-foreground"
+          >{@html initiative.targets.substring(0, 50) +
+            (initiative.targets.length > 50 ? '...' : '')}</span
+        >
       </div>
     {/if}
     {#if initiative.remarks}
-      <div class="text-xs break-words whitespace-pre-wrap">
-        Remarks: <span class="text-muted-foreground">{@html initiative.remarks.substring(0, 50) + (initiative.remarks.length > 50 ? '...' : '')}</span>
+      <div class="whitespace-pre-wrap break-words text-xs">
+        Remarks: <span class="text-muted-foreground"
+          >{@html initiative.remarks.substring(0, 50) +
+            (initiative.remarks.length > 50 ? '...' : '')}</span
+        >
       </div>
     {/if}
-    <div class="flex items-center gap-2 mt-1 text-xs">
+    <div class="mt-1 flex items-center gap-2 text-xs">
       <div class="flex items-center gap-1">
         {#if assignedMember}
-          <div class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}>
+          <div
+            class={`flex h-5 w-5 items-center justify-center rounded-full ${getProfileColor(assignedMember.firstName)}`}
+          >
             {assignedMember.firstName.charAt(0)}
           </div>
           <span class="text-muted-foreground">
-            {#if (assignedMember.firstName.length + assignedMember.lastName.length + 1) > 15}
-              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(0, 15) + '...'}
+            {#if assignedMember.firstName.length + assignedMember.lastName.length + 1 > 15}
+              {(assignedMember.firstName + ' ' + assignedMember.lastName).slice(
+                0,
+                15
+              ) + '...'}
             {:else}
               {assignedMember.firstName} {assignedMember.lastName}
             {/if}
           </span>
         {:else}
-          <div class="flex h-5 w-5 items-center justify-center rounded-full bg-muted">
+          <div
+            class="flex h-5 w-5 items-center justify-center rounded-full bg-muted"
+          >
             <User class="h-4 w-4" />
           </div>
           <span>Unassigned</span>
@@ -143,35 +199,35 @@
 </Card.Root>
 
 {#if role === 'Startup'}
- <InitiativeViewEditDeleteDialog
-  {open}
-  {onOpenChange}
-  rns={initiative}
-  {update}
-  {action}
-  deleteRns={deleteInitiative}
-  {members}
-  {assignedMember}
-  {closeDialog}
-  {tasks}
-  {addToInitiative}
-  {ai}
-  {index}
-  {role}
-/>
+  <InitiativeViewEditDeleteDialog
+    {open}
+    {onOpenChange}
+    rns={initiative}
+    {update}
+    {action}
+    deleteRns={deleteInitiative}
+    {members}
+    {assignedMember}
+    {closeDialog}
+    {tasks}
+    {addToInitiative}
+    {ai}
+    {index}
+    {role}
+  />
 {:else}
   <InitiativeViewEditDeleteAiDialog
-  {open}
-  {onOpenChange}
-  initiative={initiative}
-  {deleteInitiative}
-  {members}
-  {closeDialog}
-  {addToInitiative}
-  {index}
-  {tasks}
-  isEdit={!ai}
-  {approveDialog}
-  {denyDialog}
+    {open}
+    {onOpenChange}
+    {initiative}
+    {deleteInitiative}
+    {members}
+    {closeDialog}
+    {addToInitiative}
+    {index}
+    {tasks}
+    isEdit={!ai}
+    {approveDialog}
+    {denyDialog}
   />
 {/if}

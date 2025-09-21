@@ -4,7 +4,11 @@
   import { Textarea } from '$lib/components/ui/textareav2';
   import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
-  import { getReadinessLevels, getReadinessTypes, ReadinessType } from '$lib/utils';
+  import {
+    getReadinessLevels,
+    getReadinessTypes,
+    ReadinessType
+  } from '$lib/utils';
   import * as Select from '$lib/components/ui/select/index.js';
   import { DeleteDialog } from '$lib/components/shared';
   import Header from '$lib/components/shared/header.svelte';
@@ -80,7 +84,7 @@
     );
 
     return matchingLevels.length > 0 ? matchingLevels[0].id : '';
-};
+  };
 
   function handleDialogStateChange(newOpen: boolean) {
     onOpenChange(newOpen);
@@ -88,7 +92,6 @@
       closeDialog();
     }
   }
-
 </script>
 
 <ViewEditDeleteDialog {open} onOpenChange={handleDialogStateChange}>
@@ -97,12 +100,12 @@
     <EditableSection
       label="Description"
       editMode={editDescription}
-      role={role}
+      {role}
       data={rnsCopy.description}
       dataId={rnsCopy.id}
       dataColumn="description"
-      update={update}
-    />  
+      {update}
+    />
   </svelte:fragment>
 
   <svelte:fragment slot="detailsSection">
@@ -118,29 +121,32 @@
     </div>
     <DetailsSectionContainer>
       <DetailsSection
-      label="Readiness Type"
-      value={rnsCopy.readinessType}
-      editable={true}
-      editableCondition={role !== 'Startup'}
-      options={getReadinessTypes()}
-      valueKey="name"
-      displayKey="name"
-      onChange={(newType) => {
-        if (!newType) {
-          newType = 'Technology';
-        }
+        label="Readiness Type"
+        value={rnsCopy.readinessType}
+        editable={true}
+        editableCondition={role !== 'Startup'}
+        options={getReadinessTypes()}
+        valueKey="name"
+        displayKey="name"
+        onChange={(newType) => {
+          if (!newType) {
+            newType = 'Technology';
+          }
 
-        const newLevels = getReadinessLevels(newType);
-        const newTargetLevel = getLevelId(rnsCopy.targetLevelScore, newLevels);
+          const newLevels = getReadinessLevels(newType);
+          const newTargetLevel = getLevelId(
+            rnsCopy.targetLevelScore,
+            newLevels
+          );
 
-        rnsCopy.readinessType = newType;
-        rnsCopy.targetLevelId = newTargetLevel;
+          rnsCopy.readinessType = newType;
+          rnsCopy.targetLevelId = newTargetLevel;
 
-        update(rnsCopy.id, {
-          readinessType: newType,
-          targetLevel: newTargetLevel,
-        });
-      }}
+          update(rnsCopy.id, {
+            readinessType: newType,
+            targetLevel: newTargetLevel
+          });
+        }}
       />
       <DetailsSection
         label="Target Level"
@@ -152,7 +158,7 @@
         displayKey="level"
         onChange={(newLevel) => {
           update(rnsCopy.id, {
-            targetLevel: newLevel,
+            targetLevel: newLevel
           });
         }}
       />
@@ -166,7 +172,7 @@
         displayFn={(member) => `${member.firstName} ${member.lastName}`}
         onChange={(newVal) => {
           update(rnsCopy.id, {
-            assigneeId: newVal,
+            assigneeId: newVal
           });
         }}
       />

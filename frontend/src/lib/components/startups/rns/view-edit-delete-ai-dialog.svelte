@@ -1,6 +1,5 @@
 <script lang="ts">
-
-import { PUBLIC_API_URL } from '$env/static/public';
+  import { PUBLIC_API_URL } from '$env/static/public';
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { Textarea } from '$lib/components/ui/textareav2';
@@ -127,20 +126,17 @@ import { PUBLIC_API_URL } from '$env/static/public';
     isLoading = true;
 
     try {
-      const response = await fetch(
-        `${PUBLIC_API_URL}/rns/${rns.id}/refine`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json'
-          },
-          body: JSON.stringify({
-            chatHistory,
-            latestPrompt: currentInput
-          })
-        }
-      );
+      const response = await fetch(`${PUBLIC_API_URL}/rns/${rns.id}/refine`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify({
+          chatHistory,
+          latestPrompt: currentInput
+        })
+      });
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);

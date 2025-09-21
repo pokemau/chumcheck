@@ -25,7 +25,6 @@
       staleTime: 0
     }
   );
-
 </script>
 
 <svelte:head>

@@ -14,10 +14,14 @@
     duration: 250,
     easing: cubicInOut
   });
-  let modules = access.roles[`${data.user.role as 'Startup' | 'Mentor' | 'Manager'}`].modules;
+  let modules =
+    access.roles[`${data.user.role as 'Startup' | 'Mentor' | 'Manager'}`]
+      .modules;
 
   const currentModule = $derived(
-    $page.url.pathname.slice(1).split('/')[$page.url.pathname.slice(1).split('/').length - 1]
+    $page.url.pathname.slice(1).split('/')[
+      $page.url.pathname.slice(1).split('/').length - 1
+    ]
   );
 
   const module = $derived($page.url.pathname.slice(1).split('/')[0]);

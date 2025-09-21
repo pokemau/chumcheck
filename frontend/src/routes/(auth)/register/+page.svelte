@@ -21,7 +21,6 @@
 
   const { form, errors, enhance, message, submitting } = superForm(data.form);
 
-
   $effect(() => {
     if ($submitting) {
       toast.dismiss();

@@ -1,14 +1,15 @@
 <script lang="ts">
-    export let label = '';
+  export let label = '';
 </script>
+
 <div class="flex w-4/6 flex-col gap-5">
-<h1 class="text-2xl font-semibold">{label}</h1>
-<div class="flex h-[550px] flex-col gap-5 overflow-y-scroll">
+  <h1 class="text-2xl font-semibold">{label}</h1>
+  <div class="flex h-[550px] flex-col gap-5 overflow-y-scroll">
     <slot />
-</div>
+  </div>
 </div>
 
-          <!-- <EditableSection
+<!-- <EditableSection
           label="Tasks"
           editMode={editDescription}
           role={role}

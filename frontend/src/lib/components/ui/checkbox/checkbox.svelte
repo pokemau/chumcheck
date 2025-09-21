@@ -1,5 +1,8 @@
 <script lang="ts">
-  import { Checkbox as CheckboxPrimitive, type WithoutChildrenOrChild } from 'bits-ui';
+  import {
+    Checkbox as CheckboxPrimitive,
+    type WithoutChildrenOrChild
+  } from 'bits-ui';
   import Check from 'svelte-radix/Check.svelte';
   import Minus from 'svelte-radix/Minus.svelte';
   import { cn } from '$lib/utils.js';

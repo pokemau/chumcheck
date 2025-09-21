@@ -165,13 +165,13 @@
         Authorization: `Bearer ${data.access}`
       }
     });
-  
+
     if (showToast) toast.success('Successfuly updated the RNA');
     $roadblocksQueries[1].refetch().then((res) => {
       columns.forEach((column) => {
         column.items = (res.data as Roadblock[]).filter(
           (data: Roadblock) => data.requestedStatus === column.value
-        ); 
+        );
       });
     });
     $roadblocksQueries[2].refetch();

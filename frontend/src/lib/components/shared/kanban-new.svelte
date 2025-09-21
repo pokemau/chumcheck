@@ -78,7 +78,6 @@
               ></div>
             {:else}
               {#each column.items as item (item.id)}
-
                 <div
                   animate:flip={{ duration: flipDurationMs }}
                   class:hidden={!selectedMembers.includes(

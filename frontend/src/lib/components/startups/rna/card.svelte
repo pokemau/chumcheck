@@ -1,10 +1,7 @@
 <script lang="ts">
   import { Badge } from '$lib/components/ui/badge';
   import * as Card from '$lib/components/ui/card';
-  import {
-    RnaViewEditDeleteAiDialog,
-    RnaViewEditDeleteDialog,
-  } from '.';
+  import { RnaViewEditDeleteAiDialog, RnaViewEditDeleteDialog } from '.';
 
   let { rna, update, deleteRna, addToRna, role, readinessData } = $props();
 
@@ -67,4 +64,3 @@
     {role}
   />
 {/if}
-

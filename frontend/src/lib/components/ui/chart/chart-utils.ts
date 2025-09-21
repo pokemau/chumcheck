@@ -13,7 +13,10 @@ export type ChartConfig = {
 };
 
 // Helper to extract item config from a payload.
-export function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown) {
+export function getPayloadConfigFromPayload(
+  config: ChartConfig,
+  payload: unknown
+) {
   // Ensure the payload is an object
   if (typeof payload === 'object' && payload !== null) {
     // Get all the keys in the payload dynamically

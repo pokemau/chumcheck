@@ -7,11 +7,19 @@
   const { children, data } = $props();
   const { access, startupId } = data;
 
-  const startupQuery = useQuery('startupData', () => getData(`/startups/${startupId}`, access!));
+  const startupQuery = useQuery('startupData', () =>
+    getData(`/startups/${startupId}`, access!)
+  );
 
   const info: any = $derived($startupQuery.isSuccess ? $startupQuery.data : {});
 
-  type m = 'readiness-level' | 'progress-report' | 'rns' | 'rna' | 'initiatives' | 'roadblocks';
+  type m =
+    | 'readiness-level'
+    | 'progress-report'
+    | 'rns'
+    | 'rna'
+    | 'initiatives'
+    | 'roadblocks';
 
   const getModule = (module: m) => {
     const modules = {
@@ -35,7 +43,9 @@
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Page>{$startupQuery.isLoading ? 'Loading...' : info.name}</Breadcrumb.Page>
+        <Breadcrumb.Page
+          >{$startupQuery.isLoading ? 'Loading...' : info.name}</Breadcrumb.Page
+        >
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
@@ -48,7 +58,9 @@
   </Breadcrumb.Root>
   <div class="flex items-center justify-between">
     <div>
-      <h2 class="text-3xl font-bold">{$startupQuery.isLoading ? 'Loading...' : info.name}</h2>
+      <h2 class="text-3xl font-bold">
+        {$startupQuery.isLoading ? 'Loading...' : info.name}
+      </h2>
     </div>
   </div>
   {@render children()}

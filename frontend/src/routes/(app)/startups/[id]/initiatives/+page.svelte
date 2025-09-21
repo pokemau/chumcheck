@@ -29,7 +29,14 @@
     InitiativeCard,
     InitiativeCreateDialog
   } from '$lib/components/startups/initiatives';
-  import { Ellipsis, Kanban, TableIcon, Loader, Sparkles, Plus } from 'lucide-svelte';
+  import {
+    Ellipsis,
+    Kanban,
+    TableIcon,
+    Loader,
+    Sparkles,
+    Plus
+  } from 'lucide-svelte';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
   import * as Table from '$lib/components/ui/table';
@@ -155,7 +162,8 @@
         column.items = $initiativesQueries[2].data
           .filter(
             (data: any) =>
-              data.isAiGenerated === false && data.requestedStatus === column.value
+              data.isAiGenerated === false &&
+              data.requestedStatus === column.value
           )
           .sort((a: any, b: any) => a.initiativeNumber - b.initiativeNumber);
       });

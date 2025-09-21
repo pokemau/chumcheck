@@ -22,14 +22,19 @@
   } = $props();
 </script>
 
-<Card.Root class={`h-full min-w-0 bg-background border border-gray-700 rounded-xl shadow-sm ${classNames}`}>
-  <Card.Header class="flex items-center justify-between px-4 pt-4 pb-2">
-    <div class="w-full flex items-center justify-between">
+<Card.Root
+  class={`h-full min-w-0 rounded-xl border border-gray-700 bg-background shadow-sm ${classNames}`}
+>
+  <Card.Header class="flex items-center justify-between px-4 pb-2 pt-4">
+    <div class="flex w-full items-center justify-between">
       <h2 class="text-base font-semibold tracking-tight">{name}</h2>
-      <span class="text-xs font-semibold border-2 border-sky-600 text-sky-600 bg-blue-950 rounded px-2 py-0.5">{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</span>
+      <span
+        class="rounded border-2 border-sky-600 bg-blue-950 px-2 py-0.5 text-xs font-semibold text-sky-600"
+        >{itemCount} {itemCount === 1 ? 'Item' : 'Items'}</span
+      >
     </div>
-  </Card.Header>  
-  <Card.Content class="flex flex-col gap-3 px-4 pb-4 h-[430px] overflow-y-auto">
+  </Card.Header>
+  <Card.Content class="flex h-[430px] flex-col gap-3 overflow-y-auto px-4 pb-4">
     {@render children()}
   </Card.Content>
 </Card.Root>

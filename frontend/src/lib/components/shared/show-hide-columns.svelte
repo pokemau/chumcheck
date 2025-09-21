@@ -15,7 +15,9 @@
   <DropdownMenu.Content align="end">
     <DropdownMenu.Group>
       {#each views as view}
-        <DropdownMenu.CheckboxItem bind:checked={view.show}>{view.name}</DropdownMenu.CheckboxItem>
+        <DropdownMenu.CheckboxItem bind:checked={view.show}
+          >{view.name}</DropdownMenu.CheckboxItem
+        >
       {/each}
     </DropdownMenu.Group>
   </DropdownMenu.Content>
