@@ -59,6 +59,9 @@ importers:
       class-validator:
         specifier: ^0.14.2
         version: 0.14.2
+      dotenv:
+        specifier: ^17.2.2
+        version: 17.2.2
       passport:
         specifier: ^0.7.0
         version: 0.7.0
