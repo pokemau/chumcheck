@@ -163,23 +163,14 @@ export class StartupController {
     return await this.startupService.getCalculatorFinalScores(startupId);
   }
 
-  @Post(':startupId/rate-applicant')
-  async rateApplicant(
-    @Param('startupId') startupId: number,
-    @Body('scores')
-    scores: { readinessType: string; questionId: number; score: number }[],
-  ) {
-    return this.startupService.rateApplicant(startupId, scores);
-  }
-
   @Post(':startupId/approve-applicant')
   async approveApplicant(@Param('startupId') startupId: number) {
     return await this.startupService.approveApplicant(startupId);
   }
 
-  @Post(':startupId/reject-applicant')
-  async rejectApplicant(@Param('startupId') startupId: number) {
-    return await this.startupService.rejectApplicant(startupId);
+  @Post(':startupId/whitelist-applicant')
+  async whitelistApplicant(@Param('startupId') startupId: number) {
+    return await this.startupService.whitelistApplicant(startupId);
   }
 
   @Post(':startupId/appoint-mentors')

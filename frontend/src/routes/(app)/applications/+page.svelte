@@ -103,27 +103,28 @@
   }
 
   async function saveRating(startupId: string, scores: Record<number, number>) {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
-      {
-        method: 'post',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${access}`
-        },
-        body: JSON.stringify({
-          scores
-        })
-      }
-    );
+    // COMMENT FOR NOW, NEED TO IMPLEMENT  BACKEND FIRST
+    // const response = await fetch(
+    //   `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
+    //   {
+    //     method: 'post',
+    //     headers: {
+    //       'Content-type': 'application/json',
+    //       Authorization: `Bearer ${access}`
+    //     },
+    //     body: JSON.stringify({
+    //       scores
+    //     })
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    if (response.ok) {
-      window.location.href = '/applications';
-    }
+    // if (response.ok) {
+    //   window.location.href = '/applications';
+    // }
   }
-  // rated
+  // whitelisted
   const uratReadinessScores: Record<ReadinessType, number> = {
     [ReadinessType.Technology]: 0,
     [ReadinessType.Organizational]: 0,
@@ -132,7 +133,7 @@
     [ReadinessType.Acceptance]: 0,
     [ReadinessType.Investment]: 0
   };
-  async function getRatedStartupInformation(startupId: number) {
+  async function getWhitelistedStartupInformation(startupId: number) {
     const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
       method: 'get',
       headers: {
@@ -244,7 +245,7 @@
         // if (startup) {
         //   startup.qualificationStatus = 3;
         // }
-        window.location.href = '/applications?tab=rated';
+        window.location.href = '/applications?tab=pending';
       }
       toggleDialog();
     }
@@ -252,7 +253,7 @@
 
   async function rejectStartup(startupId: number) {
     const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/reject-applicant/`,
+      `${PUBLIC_API_URL}/startups/${startupId}/whitelist-applicant/`,
       {
         method: 'post',
         headers: {
@@ -269,7 +270,7 @@
       // if (startup) {
       //   startup.qualificationStatus = 4;
       // }
-      window.location.href = '/applications?tab=rated';
+      window.location.href = '/applications?tab=pending';
     }
     toggleDialog();
   }
@@ -360,13 +361,17 @@
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 1
         );
-      } else if (selectedTab === 'rated') {
+      } else if (selectedTab === 'whitelisted') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 2
         );
-      } else {
+      } else if (selectedTab === 'qualified') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 3
+        );
+      } else if (selectedTab === 'completed') {
+        applicants = $queries[0].data.filter(
+          (applicant: any) => applicant.qualificationStatus === 4
         );
       }
     } else {
@@ -405,11 +410,11 @@
             }}>Pending</Tabs.Trigger
           >
           <Tabs.Trigger
-            value="rated"
+            value="whitelisted"
             onclick={() => {
-              selectedTab = 'rated';
-              goto('/applications?tab=rated');
-            }}>Rated</Tabs.Trigger
+              selectedTab = 'whitelisted';
+              goto('/applications?tab=whitelisted');
+            }}>Whitelisted</Tabs.Trigger
           >
           <Tabs.Trigger
             value="qualified"
@@ -417,6 +422,13 @@
               selectedTab = 'qualified';
               goto('/applications?tab=qualified');
             }}>Qualified</Tabs.Trigger
+          >
+          <Tabs.Trigger
+            value="completed"
+            onclick={() => {
+              selectedTab = 'completed';
+              goto('/applications?tab=completed');
+            }}>Completed</Tabs.Trigger
           >
         </Tabs.List>
       </Tabs.Root>
@@ -428,7 +440,7 @@
             <Table.Head class="pl-5">Startup</Table.Head>
             <Table.Head class="">Group</Table.Head>
             <Table.Head class="">Leader</Table.Head>
-            {#if selectedTab === 'qualified'}
+            {#if selectedTab === 'qualified' || selectedTab === 'completed'}
               <Table.Head>Mentor</Table.Head>
             {/if}
           </Table.Row>
@@ -443,9 +455,11 @@
                   dialogLoading = true;
                   if (selectedTab === 'pending') {
                     await getPendingStartupInformation(applicant.id);
-                  } else if (selectedTab === 'rated') {
-                    await getRatedStartupInformation(applicant.id);
-                  } else {
+                  } else if (selectedTab === 'whitelisted') {
+                    await getWhitelistedStartupInformation(applicant.id);
+                  } else if (selectedTab === 'qualified') {
+                    await getQualifiedStartupInformation(applicant.id);
+                  } else if (selectedTab === 'completed') {
                     await getQualifiedStartupInformation(applicant.id);
                   }
                   dialogLoading = false;
@@ -456,7 +470,7 @@
                 <Table.Cell class=""
                   >{applicant.user.firstName} {applicant.user.lastName}
                 </Table.Cell>
-                {#if selectedTab === 'qualified'}
+                {#if selectedTab === 'qualified' || selectedTab === 'completed'}
                   <Table.Cell
                     >{applicant?.mentors[0]?.firstName}
                     {applicant?.mentors[0]?.lastName}</Table.Cell
@@ -498,8 +512,9 @@
         {access}
       />
       <!-- {/if} -->
-    {:else if selectedTab === 'rated'}
+    {:else if selectedTab === 'whitelisted'}
       {#if calc}
+        <!-- AS IS FOR NOW, I DO NOT KNOW WHAT PARAMETERS TO GIVE, HAVE TO WAIT UNTIL STARTUP APPLICATION IS FINISHED IMPLEMENTED -->
         <RatedDialog
           {inf}
           {que}
@@ -513,7 +528,9 @@
           {toggleDialog}
         />
       {/if}
-    {:else}
+    {:else if selectedTab === 'qualified'}
+      <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} />
+    {:else if selectedTab === 'completed'}
       <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} />
     {/if}
   {/if}
