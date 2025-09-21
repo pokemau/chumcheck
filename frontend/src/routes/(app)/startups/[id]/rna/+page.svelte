@@ -15,11 +15,11 @@
   const rnaQueries = useQueries([
     {
       queryKey: ['allowRNA', startupId],
-      queryFn: () => getData(`/startups/${startupId}/allow-rnas/`, access!)
+      queryFn: () => getData(`/startups/${startupId}/allow-rnas/`, access)
     },
     {
       queryKey: ['rnaData'],
-      queryFn: () => getData(`/rna/?startupId=${startupId}`, access!)
+      queryFn: () => getData(`/rna/?startupId=${startupId}`, access)
     },
     {
       queryKey: ['readinessData'],
@@ -31,11 +31,11 @@
     },
     {
       queryKey: ['startupData'],
-      queryFn: () => getData(`/startups/${startupId}`, access!)
+      queryFn: () => getData(`/startups/${startupId}`, access)
     },
     {
       queryKey: ['rnaComplete', startupId],
-      queryFn: () => getData(`/rna/${startupId}/check-complete`, access!)
+      queryFn: () => getData(`/rna/${startupId}/check-complete`, access)
     }
   ]);
 

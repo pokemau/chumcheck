@@ -4,6 +4,11 @@ const startupModule = {
   hideSubmodule: true,
   subModule: [
     {
+      name: 'Assessment',
+      link: 'assessment',
+      subModule: []
+    },
+    {
       name: 'Readiness',
       link: 'readiness-level',
       subModule: []
