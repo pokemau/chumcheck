@@ -1,11 +1,14 @@
 // See https://svelte.dev/docs/kit/types#app.d.ts
+
+import type { Role } from '$lib/types/user.types';
+
 // for information about these interfaces
 declare global {
   namespace App {
     interface Locals {
       user: {
         id: number;
-        role: 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
+        role: Role;
         email: string;
         firstName: string | undefined;
         lastName: string | undefined;
