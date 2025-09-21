@@ -22,7 +22,9 @@ export const actions: Actions = {
     });
 
     if (isMentorRole === 'yes') {
-      redirect(302, '/account/role?success=true');
+      redirect(302, '/startups');
+    } else {
+      redirect(302, '/applications');
     }
   }
 };

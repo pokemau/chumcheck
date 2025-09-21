@@ -1,6 +1,5 @@
 import type { ReadinessType } from './utils';
 
-export type Role = 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
 export type Application = {
   id: string;
   startupName: string;

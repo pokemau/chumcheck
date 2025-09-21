@@ -1,41 +1,34 @@
-import { PUBLIC_API_URL } from '$env/static/public';
 import { JWT_SECRET } from '$env/static/private';
-import { getRole } from '$lib/utils';
 import type { Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
-import { Play } from 'lucide-svelte';
+import { redirect } from '@sveltejs/kit';
 
-const setUser = async (event: any, resolve: any, access: any) => {
-  try {
-    // const secret = new TextEncoder().encode(
-    //   'django-insecure-vak*mz%99+#882*g*87x8$%!r=trnnqd)zh2)i$w51ra4cd&eg'
-    // );
-
-    const secret = new TextEncoder().encode(
-      'django-insecure-vakmz%99+#882g*87x8$%!r=trnnqd)zh2)i$w51ra4cd&eg'
-    );
-    const { payload }: { payload: any } = await jwtVerify(access, secret);
-
-    event.locals.user = {
-      id: payload.user_id,
-      role: getRole(payload.user_type) as
-        | 'Manager'
-        | 'Mentor'
-        | 'Startup'
-        | 'Manager as Mentor',
-      email: payload.email,
-      firstName: payload.first_name,
-      lastName: payload.last_name
-    };
-  } catch (error) {
-    return await resolve(event);
-  }
-};
+const protectedRoutes = [
+  '/account',
+  '/analytics',
+  '/applications',
+  '/startups',
+  '/admin'
+];
+const publicOnlyRoutes = ['/login', '/register'];
 
 export const handle: Handle = async ({ event, resolve }) => {
   let accessToken = event.cookies.get('Access');
+  const pathname = event.url.pathname;
 
-  if (!accessToken) return await resolve(event);
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+  const isPublicOnlyRoute = publicOnlyRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if (!accessToken) {
+    if (isProtectedRoute) {
+      throw redirect(302, `/login?redirectTo=${encodeURIComponent(pathname)}`);
+    }
+    return await resolve(event);
+  }
 
   try {
     const secret = new TextEncoder().encode(JWT_SECRET);
@@ -55,9 +48,17 @@ export const handle: Handle = async ({ event, resolve }) => {
       firstName: payload.firstName ?? undefined,
       lastName: payload.lastName ?? undefined
     };
+
+    if (isPublicOnlyRoute) {
+      throw redirect(302, '/startups');
+    }
   } catch (error) {
     console.error(`[ HANDLE ERROR ]`);
     console.error(error);
+    if (isProtectedRoute) {
+      throw redirect(302, `/login?redirectTo=${encodeURIComponent(pathname)}`);
+    }
+
     return await resolve(event);
   }
 
