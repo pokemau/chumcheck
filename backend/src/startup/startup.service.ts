@@ -468,48 +468,6 @@ export class StartupService {
     return scoresByCategory;
   }
 
-  async rateApplicant(
-    startupId: number,
-    scores: { readinessType: string; questionId: number; score: number }[],
-  ) {
-    // Fetch the startup
-    const startup = await this.em.findOneOrFail(
-      Startup,
-      { id: startupId },
-      {
-        failHandler: () => new Error(`Startup with ID ${startupId} not found`),
-      },
-    );
-
-    // Update scores for the provided URAT Question Answers
-    for (const { questionId, score } of scores) {
-      const uratQuestionAnswer = await this.em.findOneOrFail(
-        UratQuestionAnswer,
-        { id: questionId, startup }, // Ensure the question belongs to the given startup
-        {
-          failHandler: () =>
-            new Error(
-              `UratQuestionAnswer with ID ${questionId} not found for Startup ID ${startupId}`,
-            ),
-        },
-      );
-
-      uratQuestionAnswer.score = score;
-    }
-
-    // Update the qualification status of the startup
-    if (startup.qualificationStatus === QualificationStatus.PENDING) {
-      startup.qualificationStatus = QualificationStatus.RATED;
-    }
-
-    // Persist changes to the database
-    await this.em.flush();
-
-    return {
-      message: 'Scores updated and qualification status updated successfully!',
-    };
-  }
-
   async approveApplicant(startupId: number) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
@@ -527,7 +485,7 @@ export class StartupService {
     return { message: `Startup with ID ${startupId} has been approved.` };
   }
 
-  async rejectApplicant(startupId: number) {
+  async whitelistApplicant(startupId: number) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -538,7 +496,7 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.datetimeDeleted = new Date();
-    startup.qualificationStatus = QualificationStatus.REJECTED;
+    startup.qualificationStatus = QualificationStatus.WHITELISTED;
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been rejected.` };
