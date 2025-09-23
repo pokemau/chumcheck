@@ -485,7 +485,7 @@ export class StartupService {
     return { message: `Startup with ID ${startupId} has been approved.` };
   }
 
-  async whitelistApplicant(startupId: number) {
+  async waitlistApplicant(startupId: number) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -496,7 +496,7 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.datetimeDeleted = new Date();
-    startup.qualificationStatus = QualificationStatus.WHITELISTED;
+    startup.qualificationStatus = QualificationStatus.WAITLISTED;
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been rejected.` };

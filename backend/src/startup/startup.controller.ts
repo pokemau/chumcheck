@@ -168,9 +168,9 @@ export class StartupController {
     return await this.startupService.approveApplicant(startupId);
   }
 
-  @Post(':startupId/whitelist-applicant')
-  async whitelistApplicant(@Param('startupId') startupId: number) {
-    return await this.startupService.whitelistApplicant(startupId);
+  @Post(':startupId/waitlist-applicant')
+  async waitlistApplicant(@Param('startupId') startupId: number) {
+    return await this.startupService.waitlistApplicant(startupId);
   }
 
   @Post(':startupId/appoint-mentors')
