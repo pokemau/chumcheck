@@ -124,7 +124,7 @@
     //   window.location.href = '/applications';
     // }
   }
-  // whitelisted
+  // waitlisted
   const uratReadinessScores: Record<ReadinessType, number> = {
     [ReadinessType.Technology]: 0,
     [ReadinessType.Organizational]: 0,
@@ -133,7 +133,7 @@
     [ReadinessType.Acceptance]: 0,
     [ReadinessType.Investment]: 0
   };
-  async function getWhitelistedStartupInformation(startupId: number) {
+  async function getWaitlistedStartupInformation(startupId: number) {
     const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
       method: 'get',
       headers: {
@@ -253,7 +253,7 @@
 
   async function rejectStartup(startupId: number) {
     const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/whitelist-applicant/`,
+      `${PUBLIC_API_URL}/startups/${startupId}/waitlist-applicant/`,
       {
         method: 'post',
         headers: {
@@ -361,7 +361,7 @@
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 1
         );
-      } else if (selectedTab === 'whitelisted') {
+      } else if (selectedTab === 'waitlisted') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 2
         );
@@ -410,11 +410,11 @@
             }}>Pending</Tabs.Trigger
           >
           <Tabs.Trigger
-            value="whitelisted"
+            value="waitlisted"
             onclick={() => {
-              selectedTab = 'whitelisted';
-              goto('/applications?tab=whitelisted');
-            }}>Whitelisted</Tabs.Trigger
+              selectedTab = 'waitlisted';
+              goto('/applications?tab=waitlisted');
+            }}>Waitlisted</Tabs.Trigger
           >
           <Tabs.Trigger
             value="qualified"
@@ -455,8 +455,8 @@
                   dialogLoading = true;
                   if (selectedTab === 'pending') {
                     await getPendingStartupInformation(applicant.id);
-                  } else if (selectedTab === 'whitelisted') {
-                    await getWhitelistedStartupInformation(applicant.id);
+                  } else if (selectedTab === 'waitlisted') {
+                    await getWaitlistedStartupInformation(applicant.id);
                   } else if (selectedTab === 'qualified') {
                     await getQualifiedStartupInformation(applicant.id);
                   } else if (selectedTab === 'completed') {
@@ -512,7 +512,7 @@
         {access}
       />
       <!-- {/if} -->
-    {:else if selectedTab === 'whitelisted'}
+    {:else if selectedTab === 'waitlisted'}
       {#if calc}
         <!-- AS IS FOR NOW, I DO NOT KNOW WHAT PARAMETERS TO GIVE, HAVE TO WAIT UNTIL STARTUP APPLICATION IS FINISHED IMPLEMENTED -->
         <RatedDialog
