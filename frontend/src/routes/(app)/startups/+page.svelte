@@ -3,6 +3,9 @@
   import Button from '$lib/components/ui/button/button.svelte';
   import { RocketIcon } from 'lucide-svelte';
   import { StartupCard } from '$lib/components/startups';
+  import StartupStatusCard from '$lib/components/startups/base/StartupStatusCard.svelte'
+  import StartupFilterButton from '$lib/components/startups/base/StartupFilterButton.svelte';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   import { Can } from '$lib/components/shared';
   import { useQuery } from '@sveltestack/svelte-query';
   import { getData } from '$lib/utils.js';
@@ -36,8 +39,7 @@
       if (role === 'Mentor') {
         return $queryResult.data.filter(
           (startup: any) =>
-            startup.qualificationStatus !== 1 &&
-            startup.qualificationStatus !== 2
+            startup.qualificationStatus !== QualificationStatus.PENDING
         );
       }
       return $queryResult.data;
@@ -51,48 +53,39 @@
   let completedInitiativesPercentage = $state(0);
 
   const pendingStartups = $derived(
-    listOfStartups().filter(
-      (startup: any) =>
-        startup.qualificationStatus === 1 || startup.qualificationStatus === 2
-    )
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.PENDING)
+  );
+  const waitlistedStartups = $derived(
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.WAITLISTED)
   );
   const qualifiedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 3)
-  );
-  const rejectedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 4)
-  );
-  const pausedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 5)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.QUALIFIED)
   );
   const completedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 6)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.COMPLETED)
   );
 
   const filteredStartups = $derived(() => {
     let base;
     if (filter === 'All Startups')
       base = pendingStartups
+        .concat(waitlistedStartups)
         .concat(qualifiedStartups)
-        .concat(rejectedStartups)
-        .concat(pausedStartups)
         .concat(completedStartups);
     else if (filter === 'Pending') base = pendingStartups;
+    else if (filter === 'Waitlisted') base = waitlistedStartups;
     else if (filter === 'Qualified') base = qualifiedStartups;
-    else if (filter === 'Rejected') base = rejectedStartups;
-    else if (filter === 'Paused') base = pausedStartups;
     else if (filter === 'Completed') base = completedStartups;
     else
       base = pendingStartups
+        .concat(waitlistedStartups)
         .concat(qualifiedStartups)
-        .concat(rejectedStartups)
-        .concat(pausedStartups)
         .concat(completedStartups);
 
     if (role === 'Mentor') {
       base = base.filter(
         (startup: any) =>
-          startup.qualificationStatus !== 1 && startup.qualificationStatus !== 2
+          startup.qualificationStatus !== QualificationStatus.PENDING
       );
     }
 
@@ -214,44 +207,43 @@
     <span class="mb-2 text-sm text-muted-foreground">Total Startups</span>
     <div class="mt-2 flex flex-wrap justify-start gap-3">
       {#if role === 'Startup'}
-        <div
-          class="flex w-[74px] flex-col items-center rounded-xl border border-blue-500 bg-slate-900 p-2 text-xs font-semibold text-blue-500"
-        >
-          <span class="text-base">{qualifiedStartups.length}</span>
-          <span>Qualified</span>
-        </div>
-        <div
-          class="flex w-[74px] flex-col items-center rounded-xl border border-yellow-400 bg-yellow-900 p-2 text-xs font-semibold text-yellow-400"
-        >
-          <span class="text-base">{pendingStartups.length}</span>
-          <span>Pending</span>
-        </div>
+        <StartupStatusCard
+          count={pendingStartups.length}
+          label="Pending"
+          borderColor="border-yellow-400"
+          bgColor="bg-yellow-900"
+          textColor="text-yellow-400"
+        />
+        <StartupStatusCard
+          count={waitlistedStartups.length}
+          label="Waitlisted"
+          borderColor="border-purple-400"
+          bgColor="bg-purple-900"
+          textColor="text-purple-400"
+        />
+        <StartupStatusCard  
+          count={qualifiedStartups.length}
+          label="Qualified"
+          borderColor="border-blue-500"
+          bgColor="bg-slate-900"
+          textColor="text-blue-500"
+        />
       {:else if role === 'Mentor'}
-        <div
-          class="flex w-[74px] flex-col items-center rounded-xl border border-blue-500 bg-slate-900 p-2 text-xs font-semibold text-blue-500"
-        >
-          <span class="text-base">{qualifiedStartups.length}</span>
-          <span>Active</span>
-        </div>
+        <StartupStatusCard
+          count={qualifiedStartups.length}
+          label="Active"
+          borderColor="border-blue-500"
+          bgColor="bg-slate-900"
+          textColor="text-blue-500"
+        />
       {/if}
-      <div
-        class="flex w-[74px] flex-col items-center rounded-xl border border-red-400 bg-red-900 p-2 text-xs font-semibold text-red-400"
-      >
-        <span class="text-base">{rejectedStartups.length}</span>
-        <span>Rejected</span>
-      </div>
-      <div
-        class="flex w-[74px] flex-col items-center rounded-xl border border-gray-400 bg-gray-900 p-2 text-xs font-semibold text-gray-400"
-      >
-        <span class="text-base">{pausedStartups.length}</span>
-        <span>Paused</span>
-      </div>
-      <div
-        class="flex w-[74px] flex-col items-center rounded-xl border border-green-500 bg-green-900 p-2 text-xs font-semibold text-green-500"
-      >
-        <span class="text-base">{completedStartups.length}</span>
-        <span>Completed</span>
-      </div>
+        <StartupStatusCard
+          count={completedStartups.length}
+          label="Completed"
+          borderColor="border-green-500"
+          bgColor="bg-green-900"
+          textColor="text-green-500"
+        />
     </div>
   </div>
 
@@ -313,73 +305,42 @@
     </div>
   </div>
   <div class="flex w-fit gap-0.5 rounded-xl border border-border">
-    <button
-      class="rounded-bl-lg rounded-tl-lg px-4 py-1.5 text-xs font-semibold text-white focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-      'All Startups'
-        ? 'bg-blue-600 font-bold text-white'
-        : ''}"
+    <StartupFilterButton
+      label="All Startups"
+      active={filter === 'All Startups'}
       onclick={() => (filter = 'All Startups')}
-    >
-      All Startups
-    </button>
+      rounded="left"
+    />
 
     {#if role === 'Startup'}
-      <button
-        class="px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-        'Qualified'
-          ? 'bg-blue-600 font-bold text-white'
-          : ''}"
-        onclick={() => (filter = 'Qualified')}
-      >
-        Qualified
-      </button>
-      <button
-        class="px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-        'Pending'
-          ? 'bg-blue-600 font-bold text-white'
-          : ''}"
+      <StartupFilterButton
+        label="Pending"
+        active={filter === 'Pending'}
         onclick={() => (filter = 'Pending')}
-      >
-        Pending
-      </button>
-    {:else if role === 'Mentor'}
-      <button
-        class="px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-        'Qualified'
-          ? 'bg-blue-600 font-bold text-white'
-          : ''}"
+      />
+      <StartupFilterButton
+        label="Waitlisted"
+        active={filter === 'Waitlisted'}
+        onclick={() => (filter = 'Waitlisted')}
+      />
+      <StartupFilterButton
+        label="Qualified"
+        active={filter === 'Qualified'}
         onclick={() => (filter = 'Qualified')}
-      >
-        Active
-      </button>
+      />
+    {:else if role === 'Mentor'}
+      <StartupFilterButton
+        label="Active"
+        active={filter === 'Qualified'}
+        onclick={() => (filter = 'Qualified')}
+      />
     {/if}
-    <button
-      class="px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-      'Rejected'
-        ? 'bg-blue-600 font-bold text-white'
-        : ''}"
-      onclick={() => (filter = 'Rejected')}
-    >
-      Rejected
-    </button>
-    <button
-      class="px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-      'Paused'
-        ? 'bg-blue-600 font-bold text-white'
-        : ''}"
-      onclick={() => (filter = 'Paused')}
-    >
-      Paused
-    </button>
-    <button
-      class="rounded-br-lg rounded-tr-lg px-4 py-1.5 text-xs font-semibold text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-700 {filter ===
-      'Completed'
-        ? 'bg-blue-600 font-bold text-white'
-        : ''}"
+    <StartupFilterButton
+      label="Completed"
+      active={filter === 'Completed'}
       onclick={() => (filter = 'Completed')}
-    >
-      Completed
-    </button>
+      rounded="right"
+    />
   </div>
 </div>
 

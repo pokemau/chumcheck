@@ -43,6 +43,7 @@
   import { onMount } from 'svelte';
 
   import Button from '../ui/button/button.svelte';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   import DataPrivacy from './application/DataPrivacy.svelte';
   import EligibilityAgreement from './application/EligibilityAgreement.svelte';
   import ProjectDetails from './application/ProjectDetails.svelte';
@@ -62,7 +63,7 @@
   export let access: string;
   export let startup: any = null;
 
-  const steps = [
+  let steps = [
     'data-privacy',
     'eligibility-agreement',
     'project-details',
@@ -75,7 +76,8 @@
     'investment',
     'calculator'
   ];
-  const labels = [
+  
+  let labels = [
     'Data Privacy and Consent',
     'Eligibility and Agreement',
     'Project Details',
@@ -89,7 +91,14 @@
     'Technology and Commercialization Readiness Level Calculator'
   ];
 
+  if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
+    steps = ['waitlisted', ...steps];
+    labels = ['Your startup is currently waitlisted....', ...labels];
+  }   
+
   let currentActive = 0;
+  let currentStep = steps[currentActive];
+  
   let formData = {
     dataPrivacy: startup?.dataPrivacy ?? false,
     eligibility: startup?.eligibility ?? false
@@ -104,6 +113,7 @@
   };
   function handleStep(stepIncrement: number) {
     currentActive += stepIncrement;
+    currentStep = steps[currentActive];
   }
 
   onMount(() => {
@@ -127,33 +137,35 @@
     <input type="hidden" name="startupId" value={startup.id} />
   {/if}
   <h1 class="px-1 text-2xl font-semibold">{labels[currentActive]}</h1>
+  <!-- TO ADD WAITLISTED SCREEN -->
   <DataPrivacy
+    stepName="data-privacy"
+    {currentStep}
     dataPrivacy={formData.dataPrivacy}
     {toggleDataPrivacy}
-    {currentActive}
-    {startup}
   />
   <EligibilityAgreement
-    {currentActive}
+    stepName="eligibility-agreement"
+    {currentStep}
     {toggleEligibility}
     eligibility={formData.eligibility}
-    {startup}
   />
-  <ProjectDetails {currentActive} {access} {startup} />
-  <GroupInformation {currentActive} {access} {startup} />
+  <ProjectDetails stepName="project-details" {currentStep} {access} {startup} />
+  <GroupInformation stepName="group-information" {currentStep} {access} {startup} />
   {#if doneFetching && data}
-    <Technology {currentActive} question={data.technologyQuestions} {startup} />
-    <Market {currentActive} question={data.marketQuestions} {startup} />
-    <Regulatory {currentActive} question={data.regulatoryQuestions} {startup} />
-    <Acceptance {currentActive} question={data.acceptanceQuestions} {startup} />
+    <Technology stepName="technology" {currentStep} question={data.technologyQuestions} {startup} />
+    <Market stepName="market" {currentStep} question={data.marketQuestions} {startup} />
+    <Regulatory stepName="regulatory" {currentStep} question={data.regulatoryQuestions} {startup} />
+    <Acceptance stepName="acceptance" {currentStep} question={data.acceptanceQuestions} {startup} />
     <Organizational
-      {currentActive}
+      stepName="organizational" {currentStep}
       question={data.organizationalQuestions}
       {startup}
     />
-    <Investment {currentActive} question={data.investmentQuestions} {startup} />
+    <Investment stepName="investment" {currentStep} question={data.investmentQuestions} {startup} />
     <TechnologyCalculator
-      {currentActive}
+      stepName="calculator" 
+      {currentStep}
       calculatorQuestions={data.calculator}
       {startup}
     />
