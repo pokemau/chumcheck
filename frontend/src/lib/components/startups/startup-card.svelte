@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card/index.js';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   let {
     startup,
     role,
@@ -17,10 +18,10 @@
       bg: 'bg-yellow-900'
     },
     2: {
-      label: 'Pending',
-      border: 'border-yellow-400',
-      text: 'text-yellow-400',
-      bg: 'bg-yellow-900'
+      label: 'Waitlisted',
+      border: 'border-purple-400',
+      text: 'text-purple-400',
+      bg: 'bg-purple-900'
     },
     3: {
       label: 'Qualified',
@@ -29,23 +30,23 @@
       bg: 'bg-slate-900'
     },
     4: {
+      label: 'Completed',
+      border: 'border-green-500',
+      text: 'text-green-500',
+      bg: 'bg-green-900'
+    },
+    5: {
       label: 'Rejected',
       border: 'border-red-400',
       text: 'text-red-400',
       bg: 'bg-red-900'
     },
-    5: {
+    6: {
       label: 'Paused',
       border: 'border-gray-400',
       text: 'text-gray-400',
       bg: 'bg-gray-900'
     },
-    6: {
-      label: 'Completed',
-      border: 'border-green-500',
-      text: 'text-green-500',
-      bg: 'bg-green-900'
-    }
   };
   const status = $derived(
     statusMap[startup?.qualificationStatus] ?? statusMap[1]
@@ -56,7 +57,7 @@
   href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
   class="block"
   on:click={(e) => {
-    if (startup?.qualificationStatus === 4) {
+    if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
       e.preventDefault();
       const event = new CustomEvent('openApplication', { detail: { startup } });
       window.dispatchEvent(event);

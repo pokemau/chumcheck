@@ -2,10 +2,11 @@
   import { Label } from '$lib/components/ui/label';
   import * as RadioGroup from '$lib/components/ui/radio-group';
   export let dataPrivacy: boolean, toggleDataPrivacy: Function;
-  export let currentActive: number;
+  export let stepName: string;
+  export let currentStep: string;
 </script>
 
-<div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 0}>
+<div class="flex-1 overflow-auto px-1" class:hidden={currentStep !== stepName}>
   <div class="flex h-0 flex-col gap-5">
     <label class="label" for="data_privacy">
       <span class="label-text text-base"
