@@ -5,6 +5,7 @@
   import { StartupCard } from '$lib/components/startups';
   import StartupStatusCard from '$lib/components/startups/base/StartupStatusCard.svelte'
   import StartupFilterButton from '$lib/components/startups/base/StartupFilterButton.svelte';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   import { Can } from '$lib/components/shared';
   import { useQuery } from '@sveltestack/svelte-query';
   import { getData } from '$lib/utils.js';
@@ -12,7 +13,6 @@
   import Application from '$lib/components/startup/Application.svelte';
   import { page } from '$app/stores';
   import { toast } from 'svelte-sonner';
-  import * as Accordion from '$lib/components/ui/accordion/index.js';
   import axiosInstance from '$lib/axios';
 
   let { data, form } = $props();
@@ -33,7 +33,7 @@
       if (role === 'Mentor') {
         return $queryResult.data.filter(
           (startup: any) =>
-            startup.qualificationStatus !== 1
+            startup.qualificationStatus !== QualificationStatus.PENDING
         );
       }
       return $queryResult.data;
@@ -47,16 +47,16 @@
   let completedInitiativesPercentage = $state(0);
 
   const pendingStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 1)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.PENDING)
   );
   const waitlistedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 2)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.WAITLISTED)
   );
   const qualifiedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 3)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.QUALIFIED)
   );
   const completedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === 4)
+    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.COMPLETED)
   );
 
   const filteredStartups = $derived(() => {
@@ -79,7 +79,7 @@
     if (role === 'Mentor') {
       base = base.filter(
         (startup: any) =>
-          startup.qualificationStatus !== 1
+          startup.qualificationStatus !== QualificationStatus.PENDING
       );
     }
 

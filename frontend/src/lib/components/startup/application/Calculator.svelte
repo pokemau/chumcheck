@@ -1,5 +1,6 @@
 <script lang="ts">
-  export let currentActive: number;
+  export let stepName: string;
+  export let currentStep: string;
   export let calculatorQuestions: any;
   export let startup: any = null;
   import { Label } from '$lib/components/ui/label';
@@ -30,7 +31,7 @@
   );
 </script>
 
-<div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 10}>
+<div class="flex-1 overflow-auto px-1" class:hidden={currentStep !== stepName}>
   <div class="flex h-0 flex-col gap-5">
     {#each calculatorQuestions as category}
       <div class="form-control">

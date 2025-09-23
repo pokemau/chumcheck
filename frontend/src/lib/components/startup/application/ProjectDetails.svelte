@@ -1,6 +1,7 @@
 <script lang="ts">
   import { PUBLIC_API_URL } from '$env/static/public';
-  export let currentActive: number;
+  export let stepName: string;
+  export let currentStep: string;
   import { Input } from '$lib/components/ui/input/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
   import Spinner from 'lucide-svelte/icons/loader-circle';
@@ -75,7 +76,7 @@
   }
 </script>
 
-<div class="flex-1 overflow-auto px-1" class:hidden={currentActive !== 2}>
+<div class="flex-1 overflow-auto px-1" class:hidden={currentStep !== stepName}>
   <div class="flex h-0 flex-col gap-5">
     <div class="grid gap-2">
       <Label for="startup_name">Startup name</Label>

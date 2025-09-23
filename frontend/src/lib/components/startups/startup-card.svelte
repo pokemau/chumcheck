@@ -1,5 +1,6 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card/index.js';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   let {
     startup,
     role,
@@ -56,7 +57,7 @@
   href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
   class="block"
   on:click={(e) => {
-    if (startup?.qualificationStatus === 4) {
+    if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
       e.preventDefault();
       const event = new CustomEvent('openApplication', { detail: { startup } });
       window.dispatchEvent(event);
