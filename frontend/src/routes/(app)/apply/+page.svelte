@@ -13,9 +13,13 @@
   import IncubationPlanStep from './IncubationPlanStep.svelte';
   import TeamMembersStep from './TeamMembersStep.svelte';
   import { get } from 'svelte/store';
+  import { toast } from 'svelte-sonner';
+  import { goto } from '$app/navigation';
 
   let { data }: { data: PageData } = $props();
-  const { form, errors, enhance, message, submitting } = superForm(data.form, {dataType: 'json'});
+  const { form, errors, enhance, message, submitting } = superForm(data.form, {
+    dataType: 'json'
+  });
 
   const steps = [
     {
@@ -50,10 +54,13 @@
     }
   }
 
-  // function test() {
-  //   console.log(get(form))
-  // }
-
+  $effect(() => {
+    if ($message && !$submitting) {
+      toast.dismiss();
+      toast.success('Application submitted');
+      goto('/startups');
+    }
+  });
 
   const progress = $derived(() => (currentStep / steps.length) * 100);
   const currentStepData = $derived(() => steps[currentStep - 1]);

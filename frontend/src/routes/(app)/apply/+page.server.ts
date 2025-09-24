@@ -4,7 +4,7 @@ import {
 } from '$lib/validators/application.validator';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { message, superValidate } from 'sveltekit-superforms';
+import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { PUBLIC_API_URL } from '$env/static/public';
 import axiosInstance from '$lib/axios';
@@ -25,19 +25,7 @@ export const actions: Actions = {
       return fail(400, { form });
     }
 
-    console.log('========');
-    console.log(JSON.stringify(form.data, null, 2));
-    console.log('========');
-
     const application = form.data;
-
-    // const response = await fetch(`${PUBLIC_API_URL}/startups/apply`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-type': 'application/json'
-    //   },
-    //   body:  JSON.stringify(application)
-    // });
 
     try {
       const { data } = await axiosInstance.post(
@@ -49,7 +37,9 @@ export const actions: Actions = {
           }
         }
       );
-      console.log(data);
+      return message(form, {
+        text: 'Your application has been submitted'
+      });
     } catch (error: any) {
       console.error('API Error:', error.response?.data || error.message);
       return fail(400, {
@@ -57,12 +47,5 @@ export const actions: Actions = {
         message: error.response?.data?.message || 'Failed to submit application'
       });
     }
-
-
-    console.log('CREATE ACCOUNT SUCCESS');
-    return message(form, {
-      success: true,
-      text: 'Account created successfully'
-    });
   }
 };
