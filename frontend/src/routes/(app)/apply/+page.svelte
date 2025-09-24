@@ -9,12 +9,12 @@
   import { ChevronLeft, ChevronRight } from 'lucide-svelte';
   import { superForm } from 'sveltekit-superforms';
   import { type PageData } from './$types';
-  import StartupDetailsStep from './StartupDetailsStep.svelte';
-  import IncubationPlanStep from './IncubationPlanStep.svelte';
-  import TeamMembersStep from './TeamMembersStep.svelte';
   import { get } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
+  import StartupDetailsStep from '$lib/components/startup/application/StartupDetailsStep.svelte';
+  import IncubationPlanStep from '$lib/components/startup/application/IncubationPlanStep.svelte';
+  import TeamMembersStep from '$lib/components/startup/application/TeamMembersStep.svelte';
 
   let { data }: { data: PageData } = $props();
   const { form, errors, enhance, message, submitting } = superForm(data.form, {
