@@ -2,13 +2,21 @@ import { redirect, type Actions, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PUBLIC_API_URL } from '$env/static/public';
 
-export const load: PageServerLoad = ({ cookies, locals }) => {
+export const load: PageServerLoad = async ({ cookies, locals }) => {
   if (locals.user.role === 'Manager') {
     redirect(302, '/applications');
   }
+  const access = cookies.get('Access')!;
+  const res = await fetch(`${PUBLIC_API_URL}/startups/startups`, {
+    headers: { Authorization: `Bearer ${access}` }
+  });
+
+  const startups = await res.json();
+
   return {
-    access: cookies.get('Access'),
-    role: locals.user.role
+    access,
+    role: locals.user.role,
+    startups
   };
 };
 

@@ -11,17 +11,23 @@
   import { getData } from '$lib/utils.js';
   import * as Dialog from '$lib/components/ui/dialog';
   import Application from '$lib/components/startup/Application.svelte';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { toast } from 'svelte-sonner';
   import axiosInstance from '$lib/axios';
 
   let { data, form } = $props();
 
-  const queryResult = useQuery('startupData', () =>
-    getData(`/startups/startups`, data.access!)
+  const queryResult = useQuery(
+    ['startups', 'list'],
+    () => getData(`/startups/startups`, data.access),
+    {
+      initialData: data.startups,
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false
+    }
   );
 
-  const role: any = data.role;
+  const role = data.role;
 
   const isLoading = $derived($queryResult.isLoading);
   const isError = $derived($queryResult.isError);
@@ -134,7 +140,7 @@
   });
 
   $effect(() => {
-    const success = $page.url.searchParams.get('success');
+    const success = page.url.searchParams.get('success');
 
     if (form?.error) {
       let formError =
@@ -147,7 +153,7 @@
     if (success === 'true') {
       toast.success('Application successfull.');
       // Remove the 'success' parameter from the URL
-      const url = new URL($page.url.href);
+      const url = new URL(page.url.href);
       url.searchParams.delete('success');
       history.replaceState(null, '', url);
     }
@@ -183,12 +189,11 @@
   </div>
   <Can role={['Startup']} userRole={role}>
     <div class="flex gap-5">
-      <Button
-        class="flex items-center justify-center gap-2 rounded-lg"
-        onclick={toggleApplicationForm}
-      >
-        <RocketIcon class="h-4 w-4" /> Apply
-      </Button>
+      <a href="/apply">
+        <Button class="flex items-center justify-center gap-2 rounded-lg">
+          <RocketIcon class="h-4 w-4" /> Apply
+        </Button>
+      </a>
     </div>
   </Can>
 </div>

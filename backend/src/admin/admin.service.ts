@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common'; // Added InternalServerErrorException
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common'; // Added InternalServerErrorException
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,46 +35,46 @@ export class AdminService {
     return user;
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, firstName, lastName, role } = createUserDto;
-    
-    await this.authService.signup({
-      email,
-      password,
-      firstName: firstName || '',
-      lastName: lastName || '',
-    });
-    
-    const users = await this.userService.getUserByString(email);
-    if (users.length > 0) {
-      const createdUser = users[0];
-      if (createdUser.role !== role) {
-        const updatedUserWithRole = await this.userService.update(createdUser.id, { role });
-        if (!updatedUserWithRole) {
-          throw new InternalServerErrorException(`Could not update role for user ID "${createdUser.id}" after creation.`);
-        }
-        return updatedUserWithRole;
-      }
-      return createdUser;
-    }
-    throw new InternalServerErrorException('Could not retrieve user after creation via signup.');
+  async createUser(createUserDto: CreateUserDto) {
+    // const { email, password, firstName, lastName, role } = createUserDto;
+    //
+    // await this.authService.signup({
+    //   email,
+    //   password,
+    //   firstName: firstName || '',
+    //   lastName: lastName || '',
+    // });
+    //
+    // const users = await this.userService.getUserByString(email);
+    // if (users.length > 0) {
+    //   const createdUser = users[0];
+    //   if (createdUser.role !== role) {
+    //     const updatedUserWithRole = await this.userService.update(createdUser.id, { role });
+    //     if (!updatedUserWithRole) {
+    //       throw new InternalServerErrorException(`Could not update role for user ID "${createdUser.id}" after creation.`);
+    //     }
+    //     return updatedUserWithRole;
+    //   }
+    //   return createdUser;
+    // }
+    // throw new InternalServerErrorException('Could not retrieve user after creation via signup.');
   }
 
-  async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.getUserById(id); // Ensures user exists
-
-    const { password: newPassword, ...userData } = updateUserDto;
-    const updateData: Partial<User> = { ...userData };
-
-    if (newPassword) {
-      updateData.hash = await argon.hash(newPassword);
-    }
-
-    const updatedUser = await this.userService.update(id, updateData);
-    if (!updatedUser) {
-      throw new InternalServerErrorException(`User with ID "${id}" could not be updated`);
-    }
-    return updatedUser;
+  async updateUser(id: number, updateUserDto: UpdateUserDto) {
+    // await this.getUserById(id); // Ensures user exists
+    //
+    // const { password: newPassword, ...userData } = updateUserDto;
+    // const updateData: Partial<User> = { ...userData };
+    //
+    // if (newPassword) {
+    //   updateData.hash = await argon.hash(newPassword);
+    // }
+    //
+    // const updatedUser = await this.userService.update(id, updateData);
+    // if (!updatedUser) {
+    //   throw new InternalServerErrorException(`User with ID "${id}" could not be updated`);
+    // }
+    // return updatedUser;
   }
 
   async deleteUser(id: number): Promise<void> {
@@ -90,32 +94,32 @@ export class AdminService {
     return startup;
   }
 
-  async createStartup(createStartupDto: CreateStartupDto): Promise<Startup> {
-    try {
-      return await this.startupService.create(createStartupDto);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Could not create startup. ' + error.message);
-    }
+  async createStartup(createStartupDto: CreateStartupDto) {
+    // try {
+    //   return await this.startupService.create(createStartupDto);
+    // } catch (error) {
+    //   if (error instanceof NotFoundException) {
+    //     throw error;
+    //   }
+    //   throw new InternalServerErrorException('Could not create startup. ' + error.message);
+    // }
   }
 
-  async updateStartup(id: number, updateStartupDto: UpdateStartupDto): Promise<Startup> {
-    await this.getStartupById(id); // Ensures startup exists
-
-    try {
-      const updatedStartup = await this.startupService.update(id, updateStartupDto);
-      if (!updatedStartup) {
-        throw new InternalServerErrorException(`Startup with ID "${id}" could not be updated`);
-      }
-      return updatedStartup;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Could not update startup. ' + error.message);
-    }
+  async updateStartup(id: number, updateStartupDto: UpdateStartupDto) {
+    // await this.getStartupById(id); // Ensures startup exists
+    //
+    // try {
+    //   const updatedStartup = await this.startupService.update(id, updateStartupDto);
+    //   if (!updatedStartup) {
+    //     throw new InternalServerErrorException(`Startup with ID "${id}" could not be updated`);
+    //   }
+    //   return updatedStartup;
+    // } catch (error) {
+    //   if (error instanceof NotFoundException) {
+    //     throw error;
+    //   }
+    //   throw new InternalServerErrorException('Could not update startup. ' + error.message);
+    // }
   }
 
   async deleteStartup(id: number): Promise<void> {
