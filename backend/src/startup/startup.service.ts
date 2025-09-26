@@ -19,6 +19,7 @@ import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
 import { StartupApplicationDto, StartupApplicationDtoOld } from './dto';
+import { CreateStartupDto } from '../admin/dto/create-startup.dto';
 
 @Injectable()
 export class StartupService {
@@ -854,5 +855,26 @@ export class StartupService {
     await this.em.flush();
 
     return startupReadinessLevels;
+  }
+
+  async adminCreate(dto: CreateStartupDto): Promise<Startup> {
+    const user = await this.em.findOne(User, { id: dto.userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${dto.userId} not found`);
+    }
+
+    const startup = this.em.create(Startup, {
+      name: dto.name,
+      user,
+      qualificationStatus: dto.qualificationStatus,
+      dataPrivacy: dto.dataPrivacy ?? false,
+      links: dto.links,
+      groupName: dto.groupName,
+      universityName: dto.universityName,
+      eligibility: dto.eligibility ?? false,
+    });
+
+    await this.em.persistAndFlush(startup);
+    return startup;
   }
 }

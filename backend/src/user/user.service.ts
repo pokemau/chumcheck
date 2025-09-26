@@ -15,6 +15,10 @@ export class UserService {
     return await this.em.findOne(User, { id });
   }
 
+  async findOneByEmail(email: string): Promise<User | null> {
+    return await this.em.findOne(User, { email });
+  }
+
   async getUserByRole(userRole: Role) {
     return await this.em.find(User, {
       role: userRole,

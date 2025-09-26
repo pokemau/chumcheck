@@ -5,11 +5,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStartupDto } from './dto/create-startup.dto';
 import { UpdateStartupDto } from './dto/update-startup.dto';
 import { Request } from 'express'; // Import Request for flash messages
+import { EntityManager } from '@mikro-orm/postgresql';
+import { ActivityLog } from '../entities/activity-log.entity';
 
 @Controller('admin')
 // @UseGuards(AuthenticatedGuard) // Protect admin routes
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService, private readonly em: EntityManager) {}
 
   @Get()
   @Render('admin/dashboard')
@@ -22,26 +24,21 @@ export class AdminController {
         qualifiedStartups: 1,
         pendingStartups: 1
       },
-      recentActivity: [
-        {
-          date: 'May 28, 2025',
-          action: 'System',
-          details: 'Admin interface updated'
-        },
-        {
-          date: 'May 28, 2025',
-          action: 'User',
-          details: 'New startup registered'
-        },
-        {
-          date: 'May 27, 2025',
-          action: 'Admin',
-          details: 'User account created'
-        }
-      ]
+      recentActivity: []
     };
-    
+
     return { user: req.user, message: 'Welcome to the Admin Dashboard!', dashboard: dashboardData };
+  }
+
+  // JSON endpoint for recent activity
+  @Get('recent-activity')
+  async recentActivity() {
+    const items = await this.em.find(ActivityLog, {}, { orderBy: { createdAt: 'DESC' }, limit: 25 });
+    return items.map((i) => ({
+      date: i.createdAt.toLocaleString(),
+      action: i.action,
+      details: i.details
+    }));
   }
 
   @Get('users')
@@ -206,5 +203,32 @@ export class AdminController {
       req.flash('error', errorMessage);
     }
     return res.redirect('/admin/startups');
+  }
+
+  // JSON endpoints for frontend admin UI
+  @Get('users/:id')
+  async getUser(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.getUserById(id);
+  }
+
+  @Post('users/create-json')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  async createUserJson(@Body() createUserDto: CreateUserDto) {
+    const user = await this.adminService.createUser(createUserDto);
+    return { message: 'User created', user };
+  }
+
+  @Post('users/edit-json/:id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  async updateUserJson(@Param('id', ParseIntPipe) id: number, @Body() updateUserDto: UpdateUserDto) {
+    const user = await this.adminService.updateUser(id, updateUserDto);
+    return { message: 'User updated', user };
+  }
+
+  @Post('startups/create-json')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  async createStartupJson(@Body() createStartupDto: CreateStartupDto) {
+    const startup = await this.adminService.createStartup(createStartupDto);
+    return { message: 'Startup created', startup };
   }
 }
