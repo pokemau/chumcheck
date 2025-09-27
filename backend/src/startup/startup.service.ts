@@ -165,7 +165,7 @@ export class StartupService {
       throw new NotFoundException(`Startup with ID ${id} not found`);
     }
 
-    if (dto.userId) {
+    if (dto.userId !== undefined) {
       const user = await this.em.findOne(User, { id: dto.userId });
       if (!user) {
         throw new NotFoundException(`User with ID ${dto.userId} not found`);
@@ -173,15 +173,14 @@ export class StartupService {
       startup.user = user;
     }
 
-    // Apply all other fields from the DTO
-    if (dto.name) startup.name = dto.name;
-    if (dto.qualificationStatus)
+    if (dto.name !== undefined) startup.name = dto.name;
+    if (dto.qualificationStatus !== undefined)
       startup.qualificationStatus = dto.qualificationStatus;
-    if (dto.dataPrivacy) startup.dataPrivacy = dto.dataPrivacy;
-    if (dto.links) startup.links = dto.links;
-    if (dto.groupName) startup.groupName = dto.groupName;
-    if (dto.universityName) startup.universityName = dto.universityName;
-    if (dto.eligibility) startup.eligibility = dto.eligibility;
+    if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
+    if (dto.links !== undefined) startup.links = dto.links;
+    if (dto.groupName !== undefined) startup.groupName = dto.groupName;
+    if (dto.universityName !== undefined) startup.universityName = dto.universityName;
+    if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
 
     await this.em.flush();
     return startup;
@@ -874,7 +873,22 @@ export class StartupService {
       eligibility: dto.eligibility ?? false,
     });
 
-    await this.em.persistAndFlush(startup);
+    try {
+      await this.em.persistAndFlush(startup);
+    } catch (e: any) {
+      // Handle out-of-sync sequence: duplicate key on startups_pkey
+      const msg = String(e?.message ?? '');
+      if (e?.code === '23505' && msg.includes('startups_pkey')) {
+        // Reset sequence to max(id)
+        await this.em.getConnection().execute(
+          "select setval(pg_get_serial_sequence('startups','id'), coalesce((select max(id) from startups), 0), true)"
+        );
+        // Retry once
+        await this.em.persistAndFlush(startup);
+      } else {
+        throw e;
+      }
+    }
     return startup;
   }
 }

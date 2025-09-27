@@ -13,8 +13,7 @@
   const { user, startup, scrollContainer } = $props();
 
   const userRole = user.role;
-  const modules =
-    access.roles[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`].modules;
+  const modules = (access.roles?.[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`]?.modules ?? []) as Array<any>;
 
   const currentModule = $derived(
     page.url.pathname.slice(1).split('/')[
@@ -35,6 +34,8 @@
     ]
   );
 
+  const activeModule = $derived(modules.find((m) => m.link === module));
+
   const [send, receive] = crossfade({
     duration: 250,
     easing: cubicInOut
@@ -43,7 +44,6 @@
   let isBlurred = $state(false);
 
   function handleScroll(e?: Event) {
-    // Prefer scrollContainer if provided, fallback to window
     let scrollY = 0;
     if (scrollContainer) {
       scrollY = scrollContainer.scrollTop;
@@ -70,6 +70,28 @@
       window.removeEventListener('scroll', handleScroll);
     }
   });
+
+  // Hide Applications/Analytics/Account only on admin pages; otherwise show all
+  const filteredModules = $derived(
+    module === 'admin'
+      ? (modules ?? []).filter(
+          (m) => m.name !== 'Applications' && m.name !== 'Analytics' && m.name !== 'Account'
+        )
+      : modules ?? []
+  );
+
+  const displayModules = $derived(() => {
+    let list = [...(filteredModules ?? [])];
+    if (module !== 'admin') {
+      if (!list.some((m) => m.name === 'Applications'))
+        list = [...list, { name: 'Applications', link: 'applications', subModule: [] } as any];
+      if (!list.some((m) => m.name === 'Analytics'))
+        list = [...list, { name: 'Analytics', link: 'analytics', subModule: [] } as any];
+      if (!list.some((m) => m.name === 'Account'))
+        list = [...list, { name: 'Account', link: 'account', subModule: [] } as any];
+    }
+    return list;
+  });
 </script>
 
 <header
@@ -82,54 +104,44 @@
       <img src="/logo.png" alt="citeams_logo" class="h-7 w-7" />
       <a
         data-sveltekit-preload-data="tap"
-        href={`/${modules[0].link}`}
+        href={`/${modules?.[0]?.link ?? 'admin'}`}
         class="cursor-pointer text-xl font-black normal-case">ChumCheck</a
       >
     </div>
     <div class="flex h-1/3 items-center justify-center gap-5">
       <ul class="flex flex-1 cursor-pointer items-center gap-7 text-sm">
-        {#if module !== subModule && module !== 'account' && subModule !== 'pending'}
+        {#if activeModule && module !== 'account' && subModule !== 'pending' && activeModule.subModule?.length}
           <!-- submodule -->
-          {#each modules.filter((item) => item.link === module)[0].subModule as item}
-            {@const isActive =
-              currentModule === item.link || currentModulev2 === item.link}
+          {#each activeModule.subModule as item}
+            {@const isActive = currentModule === item.link || currentModulev2 === item.link}
             <a
               data-sveltekit-preload-data="tap"
-              href={`/${module}/${startup}/${item.link}${item.name === 'Overview' ? `/${item?.subModule[0].link}` : ''}`}
+              href={`/${module}/${startup}/${item.link}${item.name === 'Overview' ? `/${item?.subModule?.[0]?.link ?? ''}` : ''}`}
               class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
-              class:text-flutter-blue={currentModule === item.link ||
-                currentModulev2 === item.link}
+              class:text-flutter-blue={isActive}
             >
               <li>
                 {item.name}
                 {#if isActive}
-                  <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
-                    in:send={{ key: 'active-sidebar-tab' }}
-                    out:receive={{ key: 'active-sidebar-tab' }}
-                  ></div>
+                  <div class="absolute bottom-0 h-[1px] w-full bg-flutter-blue" in:send={{ key: 'active-sidebar-tab' }} out:receive={{ key: 'active-sidebar-tab' }}></div>
                 {/if}
               </li>
             </a>
           {/each}
         {:else}
           <!-- module -->
-          {#each modules as item}
-            {@const isActive =
-              currentModule === item.link || currentModulev2 === item.link}
+          {#each displayModules as item}
+            {@const isActive = currentModule === item.link || currentModulev2 === item.link}
             <a
               data-sveltekit-preload-data="tap"
-              href={`/${item.link}${item.subModule.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
+              href={`/${item.link}${item.subModule?.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
               class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
-              class:text-flutter-blue={currentModule === item.link ||
-                currentModulev2 === item.link}
+              class:text-flutter-blue={isActive}
             >
               <li>
                 {item.name}
                 {#if isActive}
-                  <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
-                  ></div>
+                  <div class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"></div>
                 {/if}
               </li>
             </a>
@@ -137,17 +149,11 @@
         {/if}
       </ul>
       <Separator orientation="vertical" />
-      <Badge
-        variant="outline"
-        class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal"
-        >{user?.role ? user?.role : 'Anonymous'}</Badge
-      >
+      <Badge variant="outline" class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal">{user?.role ? user?.role : 'Anonymous'}</Badge>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
-          <div
-            class={`flex h-9 w-9 items-center justify-center rounded-full ${getProfileColor(user.firstName)}`}
-          >
-            {user.firstName.charAt(0)}
+          <div class={`flex h-9 w-9 items-center justify-center rounded-full ${getProfileColor(user.firstName)}`}>
+            {user.firstName?.charAt(0) ?? '?'}
           </div>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end">
@@ -157,22 +163,18 @@
               <p class="text-xm font-normal">{user?.email}</p>
             </DropdownMenu.Label>
             <DropdownMenu.Separator />
-            {#each modules as module}
+            {#each modules as moduleItem}
               <a
                 class="cursor-pointer"
                 data-sveltekit-preload-data="tap"
-                href={`/${module.link}${module.subModule.length > 0 && module.name !== 'Startups' ? `/${module.subModule[0].link}` : ''}`}
+                href={`/${moduleItem.link}${moduleItem.subModule?.length > 0 && moduleItem.name !== 'Startups' ? `/${moduleItem.subModule[0].link}` : ''}`}
               >
-                <DropdownMenu.Item class="cursor-pointer"
-                  >{module.name}</DropdownMenu.Item
-                >
+                <DropdownMenu.Item class="cursor-pointer">{moduleItem.name}</DropdownMenu.Item>
               </a>
             {/each}
             <form action="/logout" method="post" class="w-full">
               <button type="submit" class="w-full">
-                <DropdownMenu.Item class="cursor-pointer"
-                  >Logout</DropdownMenu.Item
-                >
+                <DropdownMenu.Item class="cursor-pointer">Logout</DropdownMenu.Item>
               </button>
             </form>
           </DropdownMenu.Group>

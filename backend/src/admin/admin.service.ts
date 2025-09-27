@@ -2,7 +2,8 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
-} from '@nestjs/common'; // Added InternalServerErrorException
+  BadRequestException,
+} from '@nestjs/common'; // Added BadRequestException
 import { UserService } from '../user/user.service';
 import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -86,7 +87,7 @@ export class AdminService {
     const { password: newPassword, ...userData } = updateUserDto;
     const updateData: Partial<User> = { ...userData };
 
-    if (newPassword) {
+    if (newPassword && newPassword.trim().length > 0) {
       updateData.hash = await argon.hash(newPassword);
     }
 
@@ -100,6 +101,15 @@ export class AdminService {
 
   async deleteUser(id: number): Promise<void> {
     const user = await this.getUserById(id); // Ensures user exists before attempting delete
+
+    // Prevent FK violation by checking startups that reference this user
+    const startupCount = await this.em.count(Startup, { user: id });
+    if (startupCount > 0) {
+      throw new BadRequestException(
+        `Cannot delete user ${user.email} – referenced by ${startupCount} startup(s). Reassign or delete their startups first.`
+      );
+    }
+
     await this.userService.remove(id);
     await this.log('Admin', `Deleted user ${user.email}`, 'admin');
   }
