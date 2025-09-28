@@ -21,17 +21,30 @@ export class CapsuleProposal {
   @Property({ type: 'text' })
   solutionDescription!: string;
 
-  @Property({ type: 'text' })
-  objectives!: string;
+  @Property({ type: 'json' })
+  objectives!: string[];
+
+  @Property({ type: 'json' })
+  historicalTimeline!: { monthYear: string; description: string }[];
+
+  @Property({ type: 'json' })
+  competitiveAdvantageAnalysis!: {
+    competitorName: string;
+    offer: string;
+    pricingStrategy: string;
+  }[];
+
+  @Property()
+  intellectualPropertyStatus!: string;
+
+  @Property({ type: 'text', nullable: true })
+  curriculumVitae?: string;
 
   @Property({ type: 'text' })
   scope!: string;
 
   @Property({ type: 'text' })
   methodology!: string;
-
-  @Property({ nullable: true })
-  fileName?: string;
 
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
     owner: true,

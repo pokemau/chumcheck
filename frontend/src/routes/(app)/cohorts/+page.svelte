@@ -57,10 +57,10 @@
   ]);
 
   const isLoading = $derived(
-    $analyticsQueries[0].isLoading || $analyticsQueries[1].isLoading
+    () => $analyticsQueries[0].isLoading || $analyticsQueries[1].isLoading
   );
   const isError = $derived(
-    $analyticsQueries[0].isError || $analyticsQueries[1].isError
+    () => $analyticsQueries[0].isError || $analyticsQueries[1].isError
   );
 </script>
 

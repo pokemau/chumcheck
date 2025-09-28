@@ -26,3 +26,4 @@ vite.config.ts.timestamp-*
 # start.sh
 
 /backend_django
+AGENTS.md
