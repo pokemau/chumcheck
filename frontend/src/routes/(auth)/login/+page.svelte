@@ -31,7 +31,7 @@
 </svelte:head>
 
 <div
-  class="relative flex h-full flex-1 flex-col items-center rounded-bl-xl rounded-tl-xl bg-muted/40 text-flutter-gray dark:text-flutter-white"
+  class="bg-muted/40 relative flex h-full flex-1 flex-col items-center rounded-bl-xl rounded-tl-xl"
 >
   <div class="absolute flex w-full cursor-pointer items-center gap-2 p-5">
     <img src="launchlab_logo.png" alt="citeams_logo" class="h-7 w-7" />
@@ -45,7 +45,7 @@
   </div>
 </div>
 <div
-  class="flex h-full flex-1 items-center justify-center rounded-br-xl rounded-tr-xl bg-background text-flutter-gray dark:text-flutter-white"
+  class="bg-background flex h-full flex-1 items-center justify-center rounded-br-xl rounded-tr-xl"
 >
   <form
     method="post"
@@ -55,7 +55,7 @@
     <div class="mx-auto grid w-[350px] gap-6">
       <div class="grid gap-2 text-center">
         <h1 class="text-3xl font-bold">Login</h1>
-        <p class="text-balance text-[15px] text-muted-foreground">
+        <p class="text-muted-foreground text-balance text-[15px]">
           Enter your email below to login to your account
         </p>
       </div>

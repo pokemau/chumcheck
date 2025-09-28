@@ -23,7 +23,7 @@
 </script>
 
 <Card.Root
-  class={`h-full min-w-0 rounded-xl border border-gray-700 bg-background shadow-sm ${classNames}`}
+  class={`h-full min-w-0 rounded-xl border bg-background shadow-sm ${classNames}`}
 >
   <Card.Header class="flex items-center justify-between px-4 pb-2 pt-4">
     <div class="flex w-full items-center justify-between">

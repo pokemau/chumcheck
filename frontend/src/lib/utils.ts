@@ -238,6 +238,23 @@ export const getData = async (url: string, access: string) => {
 
 export const zIndex = ['z-50', 'z-40', 'z-30', 'z-20', 'z-10', 'z-0'];
 
+export const getBadgeColor = (
+  label: 'Pending' | 'Waitlisted' | 'Qualified' | 'Completed'
+) => {
+  switch (label) {
+    case 'Qualified':
+      return 'bg-green-100 text-green-800 border border-green-200';
+    case 'Pending':
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+    case 'Waitlisted':
+      return 'bg-orange-100 text-orange-800 border border-orange-200';
+    case 'Completed':
+      return 'bg-blue-100 text-blue-800 border border-blue-200';
+    default:
+      return 'bg-gray-50 text-gray-800 border border-gray-100';
+  }
+};
+
 export const profileColor = [
   'bg-red-500',
   'bg-blue-500',

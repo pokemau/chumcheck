@@ -89,8 +89,8 @@
 </script>
 
 <Card.Root
-  class={`cursor-pointer rounded-lg border bg-gray-900 shadow-sm
-  ${isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse border-sky-600' : 'border-gray-700'} `}
+  class={`bg-accent cursor-pointer rounded-lg border shadow-sm
+  ${isNewCard() || initiativesCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse' : ''} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -100,14 +100,14 @@
     <div class="relative mb-1 flex items-center justify-between">
       {#if isNewCard()}
         <div
-          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-5 -top-5 rounded-[2px] p-[1px] text-xs"
         >
           New
         </div>
       {/if}
       {#if initiativesCopy.approvalStatus !== 'Unchanged'}
         <div
-          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-5 -top-5 rounded-[2px] p-[1px] text-xs"
         >
           Pending Approval
         </div>
@@ -131,7 +131,7 @@
         {assignedRNS.readinessType}
       </Badge>
     </div>
-    <div class="whitespace-pre-wrap break-words text-sm text-white">
+    <div class="whitespace-pre-wrap break-words text-sm">
       Task: {@html assignedRNS?.description?.substring(0, 40) +
         (assignedRNS?.description?.length > 40 ? '...' : '')}
     </div>
@@ -187,7 +187,7 @@
           </span>
         {:else}
           <div
-            class="flex h-5 w-5 items-center justify-center rounded-full bg-muted"
+            class="bg-muted flex h-5 w-5 items-center justify-center rounded-full"
           >
             <User class="h-4 w-4" />
           </div>

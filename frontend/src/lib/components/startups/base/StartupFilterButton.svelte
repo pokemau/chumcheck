@@ -7,10 +7,10 @@
 </script>
 
 <button
-  class={`px-4 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-700
-    ${rounded === 'left' ? 'rounded-bl-lg rounded-tl-lg text-white' : ''}
+  class={`focus:ring-ring px-4 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2
+    ${rounded === 'left' ? 'text-muted-foreground rounded-bl-lg rounded-tl-lg' : ''}
     ${rounded === 'right' ? 'rounded-br-lg rounded-tr-lg' : ''}
-    ${active ? 'bg-blue-600 font-bold text-white' : 'text-gray-400'}
+    ${active ? 'bg-primary text-primary-foreground font-bold' : 'text-muted-foreground'}
     ${className}
   `}
   on:click={onclick}

@@ -73,7 +73,7 @@
 </script>
 
 <header
-  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b text-flutter-gray transition-all duration-300 dark:text-flutter-white"
+  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b transition-all duration-300"
   class:backdrop-blur-lg={isBlurred}
   style="backdrop-filter: blur(16px);"
 >
@@ -96,7 +96,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${module}/${startup}/${item.link}${item.name === 'Overview' ? `/${item?.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -104,7 +104,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="bg-primary absolute bottom-0 h-[1px] w-full"
                     in:send={{ key: 'active-sidebar-tab' }}
                     out:receive={{ key: 'active-sidebar-tab' }}
                   ></div>
@@ -120,7 +120,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${item.link}${item.subModule.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -128,7 +128,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="bg-primary absolute bottom-0 h-[1px] w-full"
                   ></div>
                 {/if}
               </li>
@@ -139,7 +139,7 @@
       <Separator orientation="vertical" />
       <Badge
         variant="outline"
-        class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal"
+        class="bg-accent h-8 rounded-full text-sm font-normal"
         >{user?.role ? user?.role : 'Anonymous'}</Badge
       >
       <DropdownMenu.Root>

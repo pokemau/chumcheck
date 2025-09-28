@@ -2,8 +2,8 @@
   export let count: number;
   export let label: string;
   export let borderColor: string = 'border-gray-400';
-  export let bgColor: string = 'bg-gray-900';
-  export let textColor: string = 'text-gray-400';
+  export let bgColor: string = 'bg-background';
+  export let textColor: string = 'text-foreground';
 </script>
 
 <div
