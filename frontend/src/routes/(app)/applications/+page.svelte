@@ -6,9 +6,6 @@
   import type { PageData } from './$types';
   import { page } from '$app/stores';
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
-  import RatedDialog from '$lib/components/dashboard/RatedDialog.svelte';
-  import QualifiedDialog from '$lib/components/dashboard/QualifiedDialog.svelte';
-  import PendingStartupDialog from '$lib/components/dashboard/PendingStartupDialog.svelte';
   import axiosInstance from '$lib/axios';
   import { useQueries } from '@sveltestack/svelte-query';
   import { ReadinessType } from '$lib/utils';
@@ -238,7 +235,7 @@
 
   <!-- Dialog components -->
   {#if selectedTab === 'pending'}
-    <PendingStartupDialog 
+    <PendingDialog 
       startup={selectedStartup}
       isOpen={showStartupDialog}
       onClose={closeStartupDialog}
