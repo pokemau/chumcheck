@@ -3,7 +3,7 @@
   import Button from '$lib/components/ui/button/button.svelte';
   import { RocketIcon } from 'lucide-svelte';
   import { StartupCard } from '$lib/components/startups';
-  import StartupStatusCard from '$lib/components/startups/base/StartupStatusCard.svelte'
+  import StartupStatusCard from '$lib/components/startups/base/StartupStatusCard.svelte';
   import StartupFilterButton from '$lib/components/startups/base/StartupFilterButton.svelte';
   import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   import { Can } from '$lib/components/shared';
@@ -53,16 +53,28 @@
   let completedInitiativesPercentage = $state(0);
 
   const pendingStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.PENDING)
+    listOfStartups().filter(
+      (startup: any) =>
+        startup.qualificationStatus === QualificationStatus.PENDING
+    )
   );
   const waitlistedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.WAITLISTED)
+    listOfStartups().filter(
+      (startup: any) =>
+        startup.qualificationStatus === QualificationStatus.WAITLISTED
+    )
   );
   const qualifiedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.QUALIFIED)
+    listOfStartups().filter(
+      (startup: any) =>
+        startup.qualificationStatus === QualificationStatus.QUALIFIED
+    )
   );
   const completedStartups = $derived(
-    listOfStartups().filter((startup: any) => startup.qualificationStatus === QualificationStatus.COMPLETED)
+    listOfStartups().filter(
+      (startup: any) =>
+        startup.qualificationStatus === QualificationStatus.COMPLETED
+    )
   );
 
   const filteredStartups = $derived(() => {
@@ -185,7 +197,7 @@
 <div class="mb-8 flex items-center justify-between">
   <div>
     <h2 class="text-3xl font-bold">Startups</h2>
-    <p class="text-muted-foreground">Manage assigned startups</p>
+    <p>Manage assigned startups</p>
   </div>
   <Can role={['Startup']} userRole={role}>
     <div class="flex gap-5">
@@ -201,56 +213,51 @@
 <!-- Statistics Cards -->
 <div class="mb-8 grid grid-cols-3 gap-5">
   <div
-    class="flex flex-col gap-1 rounded-lg border border-border bg-background p-5"
+    class="border-border bg-background flex flex-col gap-1 rounded-lg border p-5"
   >
     <span class="text-2xl font-bold">{listOfStartups().length}</span>
-    <span class="mb-2 text-sm text-muted-foreground">Total Startups</span>
+    <span class="mb-2 text-sm">Total Startups</span>
     <div class="mt-2 flex flex-wrap justify-start gap-3">
       {#if role === 'Startup'}
         <StartupStatusCard
           count={pendingStartups.length}
           label="Pending"
-          borderColor="border-yellow-400"
-          bgColor="bg-yellow-900"
-          textColor="text-yellow-400"
+          borderColor="border-secondary"
+          bgColor="bg-secondary"
         />
         <StartupStatusCard
           count={waitlistedStartups.length}
           label="Waitlisted"
-          borderColor="border-purple-400"
-          bgColor="bg-purple-900"
-          textColor="text-purple-400"
+          borderColor="border-accent"
+          bgColor="bg-accent"
         />
-        <StartupStatusCard  
+        <StartupStatusCard
           count={qualifiedStartups.length}
           label="Qualified"
-          borderColor="border-blue-500"
-          bgColor="bg-slate-900"
-          textColor="text-blue-500"
+          borderColor="border-primary"
+          bgColor="bg-card"
         />
       {:else if role === 'Mentor'}
         <StartupStatusCard
           count={qualifiedStartups.length}
           label="Active"
-          borderColor="border-blue-500"
-          bgColor="bg-slate-900"
-          textColor="text-blue-500"
+          borderColor="border-primary"
+          bgColor="bg-card"
         />
       {/if}
-        <StartupStatusCard
-          count={completedStartups.length}
-          label="Completed"
-          borderColor="border-green-500"
-          bgColor="bg-green-900"
-          textColor="text-green-500"
-        />
+      <StartupStatusCard
+        count={completedStartups.length}
+        label="Completed"
+        borderColor="border-primary"
+        bgColor="bg-card"
+      />
     </div>
   </div>
 
   <div
-    class="flex flex-col gap-2 rounded-lg border border-border bg-background p-5"
+    class="border-border bg-background flex flex-col gap-2 rounded-lg border p-5"
   >
-    <div class="text-sm text-muted-foreground">Initiatives Progress</div>
+    <div class="text-sm">Initiatives Progress</div>
     <div class="flex items-center gap-2">
       <span class="text-2xl font-bold"
         >{allInitiatives?.filter((initiative) => initiative?.status === 4)
@@ -260,18 +267,18 @@
         >{completedInitiativesPercentage.toFixed(0)}%</span
       >
     </div>
-    <div class="h-2 w-full rounded bg-gray-800">
+    <div class="bg-accent h-2 w-full rounded">
       <div
-        class="h-2 rounded bg-white"
+        class="bg-primary h-2 rounded"
         style="width:{completedInitiativesPercentage.toFixed(0)}%"
       ></div>
     </div>
   </div>
 
   <div
-    class="flex flex-col gap-2 rounded-lg border border-border bg-background p-5"
+    class="border-border bg-background flex flex-col gap-2 rounded-lg border p-5"
   >
-    <div class="text-sm text-muted-foreground">Completion Rate</div>
+    <div class="text-sm">Completion Rate</div>
     <div class="flex items-center gap-2">
       <span class="text-2xl font-bold"
         >{listOfStartups().length > 0
@@ -279,7 +286,7 @@
           : 0}%</span
       >
     </div>
-    <div class="text-sm text-muted-foreground">
+    <div class="text-sm">
       {completedStartups.length} of {listOfStartups().length} startups completed
     </div>
   </div>
@@ -290,13 +297,13 @@
   <div class="mb-2 flex w-[400px] items-center gap-2">
     <div class="relative flex-1">
       <input
-        class="w-full rounded-lg border border-gray-800 bg-background px-4 py-2 pr-12 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        class="border-border bg-background placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border px-4 py-2 pr-12 text-sm focus:outline-none focus:ring-2"
         type="text"
         placeholder="Search startups..."
         bind:value={search}
       />
       <button
-        class="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-blue-600 p-2 transition-colors hover:bg-blue-700"
+        class="bg-primary hover:bg-primary/90 absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition-colors"
         tabindex="-1"
         type="button"
       >
@@ -304,7 +311,7 @@
       </button>
     </div>
   </div>
-  <div class="flex w-fit gap-0.5 rounded-xl border border-border">
+  <div class="border-border flex w-fit gap-0.5 rounded-xl border">
     <StartupFilterButton
       label="All Startups"
       active={filter === 'All Startups'}
@@ -347,13 +354,13 @@
 <!-- Startup Cards Grid -->
 {#if isLoading}
   <div class="mt-3 grid grid-cols-4 gap-3 pb-10">
-    <div class="rounded-lg bg-background">
+    <div class="bg-background rounded-lg">
       <Skeleton class="h-40 rounded-lg" />
     </div>
-    <div class="rounded-lg bg-background">
+    <div class="bg-background rounded-lg">
       <Skeleton class="h-40 rounded-lg" />
     </div>
-    <div class="rounded-lg bg-background">
+    <div class="bg-background rounded-lg">
       <Skeleton class="h-40 rounded-lg" />
     </div>
   </div>
@@ -374,7 +381,7 @@
     {/each}
   </div>
 {:else}
-  <div class="mt-3 text-center text-muted-foreground">No startups found.</div>
+  <div class="mt-3 text-center">No startups found.</div>
 {/if}
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>

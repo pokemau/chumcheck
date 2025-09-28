@@ -12,15 +12,13 @@
     class="mx-auto flex h-screen w-4/5 items-center justify-between"
     id="hero"
   >
-    <div
-      class="flex flex-1 flex-col gap-5 text-flutter-gray dark:text-flutter-white"
-    >
+    <div class="flex flex-1 flex-col gap-5">
       <p class="relative text-7xl font-black">
         A New Way to <br /> Empower <br />
-        <span class="relative text-flutter-blue"
+        <span class="text-primary relative"
           >Startups
           <span
-            class="absolute bottom-[-4px] left-0 h-10 w-full rotate-3 text-flutter-gray dark:text-white"
+            class="absolute bottom-[-4px] left-0 h-10 w-full rotate-3 dark:text-white"
           >
             <svg
               viewBox="0 0 680 116"
@@ -39,14 +37,14 @@
         Your startup's path to empowerment <br /> and success
       </p>
       <a data-sveltekit-reload href="/register">
-        <Button class="text-white shadow-lg shadow-flutter-blue/50"
+        <Button class="shadow-flutter-blue/50 text-white shadow-lg"
           >Get Started!</Button
         >
       </a>
     </div>
     <div class="relative flex-1">
       <div
-        class="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-flutter-blue opacity-20 blur-[100px]"
+        class="bg-flutter-blue absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full opacity-20 blur-[100px]"
       ></div>
       <img src="/startup.svg" alt="startup" class="animate-fade w-full" />
     </div>

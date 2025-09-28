@@ -3,7 +3,7 @@
 </script>
 
 <div
-  class="mx-auto w-4/5 py-24 text-flutter-gray dark:text-flutter-white"
+  class="mx-auto w-4/5 py-24"
   id="howitwork"
 >
   <div class="flex flex-col justify-center gap-20">

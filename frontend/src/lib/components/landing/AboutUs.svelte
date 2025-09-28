@@ -8,7 +8,7 @@
     id="aboutus"
   >
     <div
-      class="flex flex-1 items-center text-flutter-gray dark:text-flutter-white"
+      class="flex flex-1 items-center"
     >
       <div class="flex flex-1 flex-col gap-5">
         <p class="text-4xl font-extrabold">About Us</p>

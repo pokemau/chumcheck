@@ -1,6 +1,8 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card/index.js';
   import { QualificationStatus } from '$lib/enums/qualification-status.enum';
+  import { getBadgeColor } from '$lib/utils';
+  import Badge from '../ui/badge/badge.svelte';
   let {
     startup,
     role,
@@ -9,7 +11,12 @@
 
   const statusMap: Record<
     number,
-    { label: string; border: string; text: string; bg: string }
+    {
+      label: 'Pending' | 'Waitlisted' | 'Qualified' | 'Completed';
+      border: string;
+      text: string;
+      bg: string;
+    }
   > = {
     1: {
       label: 'Pending',
@@ -34,29 +41,30 @@
       border: 'border-green-500',
       text: 'text-green-500',
       bg: 'bg-green-900'
-    },
-    5: {
-      label: 'Rejected',
-      border: 'border-red-400',
-      text: 'text-red-400',
-      bg: 'bg-red-900'
-    },
-    6: {
-      label: 'Paused',
-      border: 'border-gray-400',
-      text: 'text-gray-400',
-      bg: 'bg-gray-900'
-    },
+    }
+    // 5: {
+    //   label: 'Rejected',
+    //   border: 'border-red-400',
+    //   text: 'text-red-400',
+    //   bg: 'bg-red-900'
+    // },
+    // 6: {
+    //   label: 'Paused',
+    //   border: 'border-gray-400',
+    //   text: 'text-gray-400',
+    //   bg: 'bg-gray-900'
+    // }
   };
   const status = $derived(
     statusMap[startup?.qualificationStatus] ?? statusMap[1]
   );
+
 </script>
 
 <a
   href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
   class="block"
-  on:click={(e) => {
+  onclick={(e) => {
     if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
       e.preventDefault();
       const event = new CustomEvent('openApplication', { detail: { startup } });
@@ -65,13 +73,13 @@
   }}
 >
   <Card.Root
-    class="h-44 cursor-pointer rounded-xl border border-gray-700 bg-background p-0 transition-colors duration-150 hover:bg-accent"
+    class="bg-background hover:bg-accent h-44 cursor-pointer rounded-xl border  p-0 transition-colors duration-150"
   >
     <Card.Content class="h-full">
       <div class="flex h-full flex-col justify-between p-3">
         <div class="mb-1 flex w-full items-center gap-3">
           <div
-            class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#2563eb] text-base font-bold text-white"
+            class="bg-primary text-primary-foreground flex h-9 w-9 items-center justify-center rounded-lg text-base font-bold"
           >
             {startup.name
               .split(' ')
@@ -80,31 +88,29 @@
               .slice(0, 3)}
           </div>
           <span
-            class="max-w-[120px] truncate text-base font-semibold text-white"
+            class="max-w-[120px] truncate text-base font-semibold"
             title={startup.name}
           >
             {startup.name.length > 10
               ? startup.name.slice(0, 10) + '...'
               : startup.name}
           </span>
-          <span
-            class="ml-auto rounded border px-2 py-0.5 text-xs font-semibold {status.border} {status.text} {status.bg}"
-          >
+          <Badge class={`ml-auto rounded px-2 py-0.5 text-xs font-semibold ${getBadgeColor(status.label)}`}>
             {status.label === 'Qualified' && role === 'Mentor'
               ? 'Active'
               : status.label}
-          </span>
+          </Badge>
         </div>
-        <div class="mb-1 flex items-center gap-2 text-xs text-[#b3bed7]">
+        <div class="mb-1 flex items-center gap-2 text-xs">
           Initiatives
-          <span class="ml-1 font-bold text-white"
+          <span class="ml-1 font-bold"
             >{initiatives.filter((initiative) => initiative.status === 4)
               .length} / {initiatives.length}</span
           >
         </div>
-        <div class="mb-2 h-2 w-full rounded bg-gray-800">
+        <div class="bg-accent mb-2 h-2 w-full rounded">
           <div
-            class="h-2 rounded bg-white"
+            class="bg-primary h-2 rounded"
             style="width: {(initiatives.filter(
               (initiative) => initiative.status === 4
             ).length /
@@ -112,11 +118,9 @@
               100}%"
           ></div>
         </div>
-        <div class="flex items-center gap-2 text-xs text-[#b3bed7]">
+        <div class="flex items-center gap-2 text-xs">
           <img src="/checked.png" alt="Checked" class="h-4 w-4" />
-          <span class="text-[#b3bed7]"
-            >{startup.consultationText ?? 'No consultation pending'}</span
-          >
+          <span>{startup.consultationText ?? 'No consultation pending'}</span>
         </div>
       </div>
     </Card.Content>
