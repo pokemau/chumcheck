@@ -15,6 +15,7 @@
   import StartupDetailsStep from '$lib/components/startup/application/StartupDetailsStep.svelte';
   import IncubationPlanStep from '$lib/components/startup/application/IncubationPlanStep.svelte';
   import TeamMembersStep from '$lib/components/startup/application/TeamMembersStep.svelte';
+  import WaitlistedMessage from '$lib/components/startup/application/WaitlistedMessage.svelte';
 
   let { data }: { data: PageData } = $props();
   const { form, errors, enhance, message, submitting } = superForm(data.form, {
@@ -67,6 +68,7 @@
 </script>
 
 <div class="mx-auto max-w-4xl space-y-6 p-6">
+  <WaitlistedMessage message="PUT WAITLISTED MESSAGE HERE"/>
   <!-- Progress Bar -->
   <Card>
     <CardContent class="pt-6">

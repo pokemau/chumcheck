@@ -31,7 +31,7 @@
       </span>
       <Button
         {...buttonProps}
-        class="rounded bg-green-800 px-4 py-2 text-sm font-semibold text-white hover:bg-green-900 transition"
+        class="flex items-center justify-center gap-2 rounded-lg"
       >
         {isReadOnly ? 'View Assessment' : 'Start Assessment'}
       </Button>

@@ -93,8 +93,8 @@
   ];
 
   if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
-    steps = ['waitlisted', ...steps];
-    labels = ['Your startup is currently waitlisted....', ...labels];
+    steps = ['waitlisted'];
+    labels = ['Your startup is currently waitlisted....'];
   }   
 
   let currentActive = 0;
@@ -194,7 +194,15 @@
             : false}>Next</Button
       >
     {:else}
-      <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {#if startup?.qualificationStatus === QualificationStatus.WAITLISTED}
+        <a href="/apply">
+          <Button>
+            Edit application
+          </Button>
+        </a>
+      {:else}
+        <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {/if}
     {/if}
   </div>
 </form>
