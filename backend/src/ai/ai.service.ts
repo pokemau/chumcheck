@@ -4,6 +4,7 @@ import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { Startup } from 'src/entities/startup.entity';
+import { StartupApplicationDto } from 'src/startup/dto/startup.dto';
 
 @Injectable()
 export class AiService {
@@ -43,6 +44,46 @@ export class AiService {
         `,
     });
     return res.text;
+  }
+
+  async generateStartupAnalysisSummary(dto: StartupApplicationDto): Promise<string> {
+    const res = await this.ai.models.generateContent({
+      model: 'gemini-2.0-flash',
+      contents: `Please provide a comprehensive analysis of the following startup proposal:
+      
+      Title: ${dto.title}
+      Description: ${dto.description}
+      Problem Statement: ${dto.problemStatement}
+      Target Market: ${dto.targetMarket}
+      Solution Description: ${dto.solutionDescription}
+      Objectives: ${dto.objectives.join('\n')}
+      Proposal Scope: ${dto.proposalScope}
+      Methodology: ${dto.methodology}
+      Historical Timeline: ${dto.historicalTimeline?.map(h => `${h.monthYear}: ${h.description}`).join('\n') || 'Not provided'}
+      Competitive Advantage Analysis: ${dto.competitiveAdvantageAnalysis?.map(c => 
+        `Competitor: ${c.competitorName}
+         Offer: ${c.offer}
+         Pricing Strategy: ${c.pricingStrategy}`).join('\n\n') || 'Not provided'}
+      Intellectual Property Status: ${dto.intellectualPropertyStatus}
+
+      Analyze the startup proposal and provide a concise three-sentence summary that covers:
+      1. Overall viability assessment (market potential and solution strength)
+      2. Key competitive advantages and growth strategy feasibility
+      3. Critical risks and primary recommendations
+      
+      Important: 
+      - Provide exactly three sentences
+      - Start directly with the analysis, no introductory phrases
+      - Be clear and direct about the startup's potential
+      - Focus on the most impactful insights
+      - Keep output concise while covering essential points`,
+    });
+
+    if (!res.text) {
+      throw new Error('AI response did not contain any text');
+    }
+
+    return res.text.trim();
   }
 
   async generateRNAsFromPrompt(

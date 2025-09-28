@@ -20,8 +20,9 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto } from './dto';
+import { StartupApplicationDto, WaitlistStartupDto } from './dto';
 import { Request } from 'express';
+import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -50,6 +51,13 @@ export class StartupController {
     return this.startupService.getStartupReadinessLevel(startupId);
   }
 
+  @Get('/all')
+  async getAllStartups(): Promise<any[]> {
+    return await this.startupService.getAllStartups();
+  }
+
+  // ==================================================
+  // Deprecated endpoints - keeping for backward compatibility
   @Get('/ranking-by-urat')
   async getStartupsByUrat() {
     return await this.startupService.getPendingStartupsRankingByUrat();
@@ -59,6 +67,7 @@ export class StartupController {
   async getStartupsByRubrics() {
     return await this.startupService.getQualifiedStartupsRankingByRubrics();
   }
+  // ==================================================
 
   @Post('/apply')
   async applyStartup(@Body() dto: StartupApplicationDto, @Req() req: any) {
@@ -172,9 +181,12 @@ export class StartupController {
     return await this.startupService.approveApplicant(startupId);
   }
 
-  @Post(':startupId/waitlist-applicant')
-  async waitlistApplicant(@Param('startupId') startupId: number) {
-    return await this.startupService.waitlistApplicant(startupId);
+  @Patch(':startupId/waitlist-applicant')
+  async waitlistApplicant(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: WaitlistStartupDto
+  ) {
+    return await this.startupService.waitlistApplicant(startupId, dto);
   }
 
   @Post(':startupId/appoint-mentors')

@@ -16,13 +16,18 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/rna.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
+import { StartupWaitlistMessage } from 'src/entities/startup-waitlist-message.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto, StartupApplicationDtoOld } from './dto';
+import { StartupApplicationDto, StartupApplicationDtoOld, WaitlistStartupDto } from './dto';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class StartupService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
   async getStartups(userId: number) {
     const user = await this.em.findOne(User, { id: userId });
@@ -64,6 +69,14 @@ export class StartupService {
     return this.em.findAll(Startup, {
       populate: ['user', 'mentors', 'members', 'capsuleProposal'],
     });
+  }
+
+  async getAllStartups(): Promise<Startup[]> {
+    return await this.em.find(
+      Startup,
+      {},
+      { populate: ['user', 'members', 'capsuleProposal'] }
+    );
   }
 
   async getStartupById(startupId: number): Promise<Startup | null> {
@@ -114,6 +127,8 @@ export class StartupService {
     dto: StartupApplicationDto,
   ) {
     try {
+      const aiAnalysisSummary = await this.aiService.generateStartupAnalysisSummary(dto);
+      
       if (startup.capsuleProposal) {
         const proposal = startup.capsuleProposal;
         proposal.title = dto.title;
@@ -129,6 +144,7 @@ export class StartupService {
         proposal.scope = dto.proposalScope;
         proposal.methodology = dto.methodology;
         proposal.curriculumVitae = dto.curriculumVitae ?? null;
+        proposal.aiAnalysisSummary = aiAnalysisSummary;
 
         await this.em.flush();
         return proposal;
@@ -147,6 +163,7 @@ export class StartupService {
         scope: dto.proposalScope,
         methodology: dto.methodology,
         curriculumVitae: dto.curriculumVitae ?? null,
+        aiAnalysisSummary,
         startup,
       });
 
@@ -502,6 +519,22 @@ export class StartupService {
     // return orderedStartups;
   }
 
+  async getStartupsByQualificationStatus(qualificationStatus: QualificationStatus): Promise<any[]> {
+    const startups = await this.em.find(
+      Startup,
+      { qualificationStatus },
+      { 
+        populate: ['user', 'mentors', 'capsuleProposal'] 
+      }
+    );
+
+    return startups.map(startup => ({
+      ...startup,
+      mentors: startup.mentors.getItems().map((mentor: User) => (mentor)),
+      capsuleProposal: startup.capsuleProposal ? startup.capsuleProposal : null,
+    }));
+  }
+
   async getCalculatorFinalScores(startupId: number) {
     // // Initialize an object to store scores grouped by category
     // let calculatorAnswers = await this.calculateLevels(startupId);
@@ -542,7 +575,7 @@ export class StartupService {
     return { message: `Startup with ID ${startupId} has been approved.` };
   }
 
-  async waitlistApplicant(startupId: number) {
+  async waitlistApplicant(startupId: number, dto: WaitlistStartupDto) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -550,13 +583,20 @@ export class StartupService {
       );
     }
 
-    // Maybe (if have time) add logic for sending the startup an email that they got approved
-
-    startup.datetimeDeleted = new Date();
     startup.qualificationStatus = QualificationStatus.WAITLISTED;
-
+    
+    // Create waitlist message
+    const waitlistMessage = new StartupWaitlistMessage();
+    waitlistMessage.startup = startup;
+    waitlistMessage.message = dto.message;
+    
+    this.em.persist(waitlistMessage);
     await this.em.flush();
-    return { message: `Startup with ID ${startupId} has been rejected.` };
+
+    return { 
+      message: `Startup with ID ${startupId} has been waitlisted.`,
+      waitlistMessage
+    };
   }
 
   async appointMentors(

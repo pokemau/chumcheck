@@ -46,6 +46,9 @@ export class CapsuleProposal {
   @Property({ type: 'text' })
   methodology!: string;
 
+  @Property({ type: 'text' })
+  aiAnalysisSummary!: string;
+
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
     owner: true,
   })
