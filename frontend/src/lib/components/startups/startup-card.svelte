@@ -1,6 +1,7 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card/index.js';
   import { QualificationStatus } from '$lib/enums/qualification-status.enum';
+  import { getBadgeColor } from '$lib/utils';
   import Badge from '../ui/badge/badge.svelte';
   let {
     startup,
@@ -58,24 +59,6 @@
     statusMap[startup?.qualificationStatus] ?? statusMap[1]
   );
 
-  interface Status {
-    label: 'Pending' | 'Waitlisted' | 'Qualified' | 'Completed';
-  }
-
-  function getBadgeClasses(label: Status['label']): string {
-    switch (label) {
-      case 'Qualified':
-        return 'bg-green-100 text-green-800 border border-green-200';
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
-      case 'Waitlisted':
-        return 'bg-orange-100 text-orange-800 border border-orange-200';
-      case 'Completed':
-        return 'bg-blue-100 text-blue-800 border border-blue-200';
-      default:
-        return 'bg-gray-50 text-gray-800 border border-gray-100';
-    }
-  }
 </script>
 
 <a
@@ -112,7 +95,7 @@
               ? startup.name.slice(0, 10) + '...'
               : startup.name}
           </span>
-          <Badge class={`ml-auto rounded px-2 py-0.5 text-xs font-semibold ${getBadgeClasses(status.label)}`}>
+          <Badge class={`ml-auto rounded px-2 py-0.5 text-xs font-semibold ${getBadgeColor(status.label)}`}>
             {status.label === 'Qualified' && role === 'Mentor'
               ? 'Active'
               : status.label}
