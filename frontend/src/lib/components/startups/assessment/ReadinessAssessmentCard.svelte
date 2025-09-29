@@ -1,6 +1,8 @@
 <script lang="ts">
   import * as Card from '$lib/components/ui/card';
   import Button from '$lib/components/ui/button/button.svelte';
+  import { Badge } from '$lib/components/ui/badge';
+  import { getBadgeColor } from '$lib/utils';
 
   const statusStyles: Record<string, { bg: string; text: string }> = {
     Pending: {
@@ -26,12 +28,12 @@
       <span class="font-semibold text-lg">{name}</span>
     </div>
     <div class="flex items-center gap-3">
-      <span class="rounded {statusStyles[assessmentStatus].bg} px-3 py-1 text-xs font-semibold {statusStyles[assessmentStatus].text}">
-        {assessmentStatus}
-      </span>
+      <Badge class={`ml-auto rounded px-2 py-0.5 text-xs font-semibold ${getBadgeColor(assessmentStatus)}`}>
+          {assessmentStatus}
+      </Badge>
       <Button
         {...buttonProps}
-        class="flex items-center justify-center gap-2 rounded-lg"
+        class="text-foreground bg-accent flex items-center justify-center gap-2 rounded-lg"
       >
         {isReadOnly ? 'View Assessment' : 'Start Assessment'}
       </Button>
