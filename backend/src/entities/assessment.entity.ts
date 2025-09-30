@@ -12,7 +12,7 @@ export class Assessment {
   assessmentType!: AssessmentType;
 
   @Property()
-  fieldKey!:string; // e.g. deans-response // basically mura siyag key
+  fieldKey?:string; // e.g. deans-response // basically mura siyag key
 
   @Property()
   description!: string; // e.g. "Dean's Response"
