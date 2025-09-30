@@ -15,6 +15,6 @@ export class StartupResponse {
   @Property({ nullable: true })
   answerValue?: string; // text or file URL
 
-  @Property({ type: "date", onCreate: () => new Date() })
-  submittedAt: Date = new Date();
+  @Property()
+  submittedAt?: Date = new Date();
 }

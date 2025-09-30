@@ -11,9 +11,9 @@
   <AssessmentLabel description={description} />
   <Input
     type="text"
-    placeholder={isReadOnly ? "No answer provided yet" : "Enter your answer"}
+    placeholder={isReadOnly ? "No answer provided" : "Enter your answer"}
     bind:value
-    disabled={isReadOnly}
-    class={isReadOnly ? "bg-gray-50 dark:bg-gray-800" : ""}
+    readonly={isReadOnly}
+    class={isReadOnly ? "cursor-default" : ""}
   />
 </div>

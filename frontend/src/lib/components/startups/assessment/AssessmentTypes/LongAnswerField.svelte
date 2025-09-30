@@ -8,11 +8,12 @@
 </script>
 
 <div class="grid gap-2">
-  <AssessmentLabel description={description} htmlFor="long_answer" />
+  <AssessmentLabel description={description} />
   <Textarea
     rows={6}
     placeholder={isReadOnly ? "No answer provided yet" : "Enter your answer"}
     bind:value
-    disabled={isReadOnly}
+    readonly={isReadOnly}
+    class={isReadOnly ? "cursor-default" : ""}
   />
 </div>

@@ -25,7 +25,10 @@
   $: {
     assessment.assessmentFields.forEach(field => {
       if (!formData[field.id]) {
-        formData[field.id] = field.answer || (field.type === 'File' ? null : '');
+        // Don't initialize file fields at all
+        if (field.type !== 'File') {
+          formData[field.id] = field.answer || '';
+        }
       }
     });
   }
@@ -87,26 +90,12 @@
             {isReadOnly}
           />
         {:else if field.type === 'File'}
-          {#if isReadOnly && field.fileUrl}
-            <div class="grid gap-2">
-              <AssessmentLabel description={field.description} />
-              <a
-                href={field.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-2 text-blue-500 hover:underline"
-              >
-                <span>Download File</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </a>
-            </div>
-          {:else}
-            <FileUploadField
-              description={field.description}
-              bind:files={formData[field.id]}
-              {isReadOnly}
-            />
-          {/if}
+          <FileUploadField
+            description={field.description}
+            bind:files={formData[field.id]}
+            fileUrl={field.answer}
+            {isReadOnly}
+          />
         {/if}
       {/each}
     </div>

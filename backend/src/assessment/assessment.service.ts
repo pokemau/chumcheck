@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { AssessmentDto, AssessmentFieldDto } from './dto/assessment.dto';
+import { SubmitAssessmentDto } from './dto/assessment.dto';
 import { StartupAssessment } from '../entities/startup-assessment.entity';
 import { Assessment } from '../entities/assessment.entity';
 import { StartupResponse } from '../entities/startup-response.entity';
@@ -60,5 +61,77 @@ export class AssessmentService {
     }
 
     return Array.from(groupedAssessments.values());
+  }
+
+  async submitAssessment(submitDto: SubmitAssessmentDto): Promise<void> {
+    const em = this.em.fork();
+
+    try {
+      const assessmentType = AssessmentType[submitDto.assessmentType as keyof typeof AssessmentType];
+      if (assessmentType === undefined) {
+        throw new BadRequestException('Invalid assessment type');
+      }
+      // 1. Get startup assessment
+      const startupAssessment = await em.findOne(StartupAssessment, {
+        startupId: submitDto.startupId,
+        assessmentType: assessmentType,
+      });
+
+      if (!startupAssessment) {
+        throw new BadRequestException('Assessment not found for startup');
+      }
+
+      // 2. Get all required assessments for this type
+      const requiredAssessments = await em.find(Assessment, {
+        assessmentType: assessmentType,
+      });
+
+      // 3. Save submitted answers
+      for (const answer of submitDto.answers) {
+        const assessment = requiredAssessments.find(a => a.fieldKey === answer.assessmentId);
+        if (!assessment) continue;
+
+        const existingResponse = await em.findOne(StartupResponse, {
+          startupId: submitDto.startupId,
+          assessment: assessment,
+        });
+
+        if (existingResponse) {
+          existingResponse.answerValue = answer.answer;
+          await em.persist(existingResponse);
+        } else {
+          const newResponse = em.create(StartupResponse, {
+            startupId: submitDto.startupId,
+            assessment: assessment,
+            answerValue: answer.answer,
+          });
+          await em.persist(newResponse);
+        }
+      }
+
+      // 4. Check if all required assessments are answered
+      const allResponses = await em.find(StartupResponse, {
+        startupId: submitDto.startupId,
+        assessment: { $in: requiredAssessments },
+      });
+
+      const isComplete = requiredAssessments.every(required => 
+        allResponses.some(response => 
+          response.assessment.assessment_id === required.assessment_id && 
+          response.answerValue?.trim()
+        )
+      );
+
+      // 5. Update status if all assessments are completed
+      if (isComplete) {
+        startupAssessment.status = AssessmentStatus.Completed;
+        await em.persist(startupAssessment);
+      }
+
+      await em.flush();
+    } catch (error) {
+      console.error('Error submitting assessment:', error);
+      throw error;
+    }
   }
 }
