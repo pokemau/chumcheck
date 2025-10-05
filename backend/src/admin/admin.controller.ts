@@ -1,4 +1,18 @@
-import { Controller, Get, UseGuards, Render, Req, Post, Body, Res, Param, ParseIntPipe, UsePipes, ValidationPipe, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Render,
+  Req,
+  Post,
+  Body,
+  Res,
+  Param,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
+  NotFoundException,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -20,33 +34,38 @@ export class AdminController {
         totalUsers: 3,
         totalStartups: 2,
         qualifiedStartups: 1,
-        pendingStartups: 1
+        pendingStartups: 1,
       },
       recentActivity: [
         {
           date: 'May 28, 2025',
           action: 'System',
-          details: 'Admin interface updated'
+          details: 'Admin interface updated',
         },
         {
           date: 'May 28, 2025',
           action: 'User',
-          details: 'New startup registered'
+          details: 'New startup registered',
         },
         {
           date: 'May 27, 2025',
           action: 'Admin',
-          details: 'User account created'
-        }
-      ]
+          details: 'User account created',
+        },
+      ],
     };
-    
-    return { user: req.user, message: 'Welcome to the Admin Dashboard!', dashboard: dashboardData };
+
+    return {
+      user: req.user,
+      message: 'Welcome to the Admin Dashboard!',
+      dashboard: dashboardData,
+    };
   }
 
   @Get('users')
   @Render('admin/users')
-  async listUsers(@Req() req: Request) { // Add Request type
+  async listUsers(@Req() req: Request) {
+    // Add Request type
     const users = await this.adminService.getAllUsers();
     // req.flash('success', 'Successfully loaded users!'); // Example flash message
     return { user: req.user, users, message: 'Manage Users' };
@@ -54,13 +73,24 @@ export class AdminController {
 
   @Get('users/create')
   @Render('admin/create-user')
-  createUserForm(@Req() req: Request) { // Add Request type
+  createUserForm(@Req() req: Request) {
+    // Add Request type
     return { user: req.user, message: 'Create New User' };
   }
 
   @Post('users/create')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async createUser(@Req() req: Request, @Body() createUserDto: CreateUserDto, @Res() res) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
+  async createUser(
+    @Req() req: Request,
+    @Body() createUserDto: CreateUserDto,
+    @Res() res,
+  ) {
     try {
       await this.adminService.createUser(createUserDto);
       req.flash('success', 'User created successfully!');
@@ -75,10 +105,19 @@ export class AdminController {
 
   @Get('users/edit/:id')
   @Render('admin/edit-user')
-  async editUserForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
+  async editUserForm(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res,
+  ) {
+    // Add Request type
     try {
       const editableUser = await this.adminService.getUserById(id);
-      return { user: req.user, editableUser, message: `Edit User: ${editableUser.email}` };
+      return {
+        user: req.user,
+        editableUser,
+        message: `Edit User: ${editableUser.email}`,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         req.flash('error', 'User not found.');
@@ -91,7 +130,13 @@ export class AdminController {
   }
 
   @Post('users/edit/:id')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
   async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
@@ -112,13 +157,21 @@ export class AdminController {
 
   // Changed to POST for better practice
   @Post('users/delete/:id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
+  async deleteUser(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res,
+  ) {
+    // Add Request type
     try {
       await this.adminService.deleteUser(id);
       req.flash('success', 'User deleted successfully!');
     } catch (error) {
       console.error(`Error deleting user ${id}:`, error);
-      const errorMessage = error instanceof NotFoundException ? 'User not found.' : 'Could not delete user.';
+      const errorMessage =
+        error instanceof NotFoundException
+          ? 'User not found.'
+          : 'Could not delete user.';
       req.flash('error', errorMessage);
     }
     return res.redirect('/admin/users');
@@ -141,8 +194,18 @@ export class AdminController {
   }
 
   @Post('startups/create')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async createStartup(@Req() req: Request, @Body() createStartupDto: CreateStartupDto, @Res() res) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
+  async createStartup(
+    @Req() req: Request,
+    @Body() createStartupDto: CreateStartupDto,
+    @Res() res,
+  ) {
     try {
       await this.adminService.createStartup(createStartupDto);
       req.flash('success', 'Startup created successfully!');
@@ -158,11 +221,20 @@ export class AdminController {
 
   @Get('startups/edit/:id')
   @Render('admin/edit-startup')
-  async editStartupForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
+  async editStartupForm(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res,
+  ) {
     try {
       const editableStartup = await this.adminService.getStartupById(id);
       const users = await this.adminService.getAllUsers(); // Reverted: For selecting startup owner
-      return { user: req.user, editableStartup, users, message: `Edit Startup: ${editableStartup.name}` };
+      return {
+        user: req.user,
+        editableStartup,
+        users,
+        message: `Edit Startup: ${editableStartup.name}`,
+      };
     } catch (error) {
       if (error instanceof NotFoundException) {
         req.flash('error', 'Startup not found.');
@@ -175,7 +247,13 @@ export class AdminController {
   }
 
   @Post('startups/edit/:id')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
   async updateStartup(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateStartupDto: UpdateStartupDto,
@@ -196,13 +274,20 @@ export class AdminController {
   }
 
   @Post('startups/delete/:id')
-  async deleteStartup(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
+  async deleteStartup(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: Request,
+    @Res() res,
+  ) {
     try {
       await this.adminService.deleteStartup(id);
       req.flash('success', 'Startup deleted successfully!');
     } catch (error) {
       console.error(`Error deleting startup ${id}:`, error);
-      const errorMessage = error instanceof NotFoundException ? 'Startup not found.' : 'Could not delete startup.';
+      const errorMessage =
+        error instanceof NotFoundException
+          ? 'Startup not found.'
+          : 'Could not delete startup.';
       req.flash('error', errorMessage);
     }
     return res.redirect('/admin/startups');

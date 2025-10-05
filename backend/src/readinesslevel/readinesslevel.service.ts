@@ -37,7 +37,7 @@ export class ReadinesslevelService {
       category,
       questions: categoryMap[category],
     }));
-    let selectedValues: { [key: string]: string } = {};
+    const selectedValues: { [key: string]: string } = {};
 
     res.forEach((category) => {
       if (!selectedValues[category.category] && category.questions.length > 0) {
@@ -48,28 +48,36 @@ export class ReadinesslevelService {
     return res;
   }
 
-  async getReadinessLevels(){
+  async getReadinessLevels() {
     return await this.em.findAll(ReadinessLevel);
   }
 
-  async getReadinessLevelCriterion(){
+  async getReadinessLevelCriterion() {
     return await this.em.findAll(LevelCriterion);
   }
 
   async getReadinessLevelCriterionAnswers(startupId: number) {
-    return this.em.find(StartupCriterionAnswer, {
-      startup: startupId, 
-    }, {
-      populate: ['criterion'],
-    });
+    return this.em.find(
+      StartupCriterionAnswer,
+      {
+        startup: startupId,
+      },
+      {
+        populate: ['criterion'],
+      },
+    );
   }
 
   async getStartupReadinessLevel(startupId: number) {
-    const res = await this.em.find(StartupReadinessLevel, {
-      startup: startupId,
-    }, {
-      populate: ['readinessLevel'],
-    });
+    const res = await this.em.find(
+      StartupReadinessLevel,
+      {
+        startup: startupId,
+      },
+      {
+        populate: ['readinessLevel'],
+      },
+    );
     return res;
   }
 
@@ -159,7 +167,10 @@ export class ReadinesslevelService {
     }));
   }
 
-  async updateUratQuestionAnswer(id: number, dto: { response?: string; score?: number }) {
+  async updateUratQuestionAnswer(
+    id: number,
+    dto: { response?: string; score?: number },
+  ) {
     const answer = await this.em.findOneOrFail(UratQuestionAnswer, { id });
     if (dto.response !== undefined) answer.response = dto.response;
     answer.score = 1;
@@ -167,10 +178,17 @@ export class ReadinesslevelService {
     return answer;
   }
 
-  async updateCalculatorQuestionAnswer(id: number, dto: { calculatorQuestionId?: number }) {
-    const answer = await this.em.findOneOrFail(CalculatorQuestionAnswer, { id });
+  async updateCalculatorQuestionAnswer(
+    id: number,
+    dto: { calculatorQuestionId?: number },
+  ) {
+    const answer = await this.em.findOneOrFail(CalculatorQuestionAnswer, {
+      id,
+    });
     if (dto.calculatorQuestionId !== undefined) {
-      const newQuestion = await this.em.findOneOrFail(CalculatorQuestion, { id: dto.calculatorQuestionId });
+      const newQuestion = await this.em.findOneOrFail(CalculatorQuestion, {
+        id: dto.calculatorQuestionId,
+      });
       answer.question = newQuestion;
     }
     await this.em.flush();

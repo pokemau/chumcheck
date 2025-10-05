@@ -22,6 +22,7 @@ import { InitiativeModule } from './initiative/initiative.module';
 import { ProgressModule } from './progress/progress.module';
 import { OverviewModule } from './overview/overview.module';
 import { ElevateModule } from './elevate/elevate.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   controllers: [AppController],
@@ -46,6 +47,7 @@ import { ElevateModule } from './elevate/elevate.module';
     OverviewModule,
     ChatHistoryModule,
     ElevateModule,
+    UploadModule,
     AdminModule,
   ],
   providers: [AppService],

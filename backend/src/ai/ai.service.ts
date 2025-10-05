@@ -46,8 +46,8 @@ export class AiService {
   }
 
   async generateRNAsFromPrompt(
-    prompt: string
-  ): Promise<{ readiness_level_type:string, rna:string }[]> {
+    prompt: string,
+  ): Promise<{ readiness_level_type: string; rna: string }[]> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: prompt,
@@ -74,7 +74,9 @@ export class AiService {
     }
   }
 
-  async generateTasksFromPrompt(prompt: string): Promise<{ target_level: number; description: string }[]> {
+  async generateTasksFromPrompt(
+    prompt: string,
+  ): Promise<{ target_level: number; description: string }[]> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: prompt,
@@ -93,7 +95,7 @@ export class AiService {
       const parsedData = JSON.parse(jsonString);
       return parsedData.map((task: any) => ({
         target_level: parseInt(task.target_level, 10) || 0,
-        description: task.description
+        description: task.description,
       }));
     } catch (err) {
       console.error('Failed to parse AI response:', text);
@@ -101,9 +103,14 @@ export class AiService {
     }
   }
 
-  async generateInitiativesFromPrompt(
-    prompt: string
-  ): Promise<{ description: string; measures: string; targets: string; remarks: string }[]> {
+  async generateInitiativesFromPrompt(prompt: string): Promise<
+    {
+      description: string;
+      measures: string;
+      targets: string;
+      remarks: string;
+    }[]
+  > {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: prompt,
@@ -132,7 +139,9 @@ export class AiService {
     }
   }
 
-async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string; aiCommentary: string }> {
+  async refineRnsDescription(
+    prompt: string,
+  ): Promise<{ refinedDescription: string; aiCommentary: string }> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: prompt,
@@ -142,8 +151,11 @@ async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string
       throw new Error('AI response did not contain any text');
     }
 
-    const [refinedDescriptionRaw, aiCommentaryRaw] = res.text.split(/\n?={5,}\n?/);
-    const refinedDescription = refinedDescriptionRaw ? refinedDescriptionRaw.trim() : '';
+    const [refinedDescriptionRaw, aiCommentaryRaw] =
+      res.text.split(/\n?={5,}\n?/);
+    const refinedDescription = refinedDescriptionRaw
+      ? refinedDescriptionRaw.trim()
+      : '';
     const aiCommentary = aiCommentaryRaw ? aiCommentaryRaw.trim() : '';
     return {
       refinedDescription,
@@ -151,8 +163,8 @@ async refineRnsDescription(prompt: string): Promise<{ refinedDescription: string
     };
   }
 
-async generateRoadblocksFromPrompt(
-    prompt: string
+  async generateRoadblocksFromPrompt(
+    prompt: string,
   ): Promise<{ description: string; fix: string; riskNumber: number }[]> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
@@ -172,7 +184,7 @@ async generateRoadblocksFromPrompt(
       return JSON.parse(jsonString).map((entry: any) => ({
         description: entry.description,
         fix: entry.fix,
-        riskNumber: entry.riskNumber
+        riskNumber: entry.riskNumber,
       }));
     } catch (err) {
       console.error('Failed to parse AI response:', text);
@@ -180,31 +192,31 @@ async generateRoadblocksFromPrompt(
     }
   }
 
-
-  async createBasePrompt(startup: Startup, em: EntityManager,): Promise<string | null> {
+  async createBasePrompt(
+    startup: Startup,
+    em: EntityManager,
+  ): Promise<string | null> {
     const capsuleProposalInfo = startup.capsuleProposal;
     if (!capsuleProposalInfo) return null;
-  
-  const startupReadinessLevels = await em.find(
-          StartupReadinessLevel,
-          {
-          startup: startup,
-          },
-          {
-          populate: ['readinessLevel'],
-          },
-  );
-  
-  
-  const trl = startupReadinessLevels[0].readinessLevel.level;
-  const mrl = startupReadinessLevels[1].readinessLevel.level;
-  const arl = startupReadinessLevels[2].readinessLevel.level;
-  const orl = startupReadinessLevels[3].readinessLevel.level;
-  const rrl = startupReadinessLevels[4].readinessLevel.level;
-  const irl = startupReadinessLevels[5].readinessLevel.level;
-  
-  
-  return `
+
+    const startupReadinessLevels = await em.find(
+      StartupReadinessLevel,
+      {
+        startup: startup,
+      },
+      {
+        populate: ['readinessLevel'],
+      },
+    );
+
+    const trl = startupReadinessLevels[0].readinessLevel.level;
+    const mrl = startupReadinessLevels[1].readinessLevel.level;
+    const arl = startupReadinessLevels[2].readinessLevel.level;
+    const orl = startupReadinessLevels[3].readinessLevel.level;
+    const rrl = startupReadinessLevels[4].readinessLevel.level;
+    const irl = startupReadinessLevels[5].readinessLevel.level;
+
+    return `
       Given these data:
       Acceleration Proposal Title: ${capsuleProposalInfo.title}
       Duration: 3 months
@@ -243,31 +255,34 @@ async generateRoadblocksFromPrompt(
   }> {
     const response = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: prompt
+      contents: prompt,
     });
 
     const content = response.text;
     if (!content) throw new Error('No content in response');
 
-    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
-    
+    const [jsonStr, commentary] = content
+      .split('=========')
+      .map((str) => str.trim());
+
     const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
-    
+
     try {
       const refinements = JSON.parse(cleanJsonStr);
 
-      const hasRefinements = refinements.refinedDescription || 
-                           refinements.refinedMeasures || 
-                           refinements.refinedTargets || 
-                           refinements.refinedRemarks;
-      
+      const hasRefinements =
+        refinements.refinedDescription ||
+        refinements.refinedMeasures ||
+        refinements.refinedTargets ||
+        refinements.refinedRemarks;
+
       if (!hasRefinements) {
         console.warn('AI response contained no refinements');
       }
 
       return {
         ...refinements,
-        aiCommentary: commentary || 'Changes applied successfully.'
+        aiCommentary: commentary || 'Changes applied successfully.',
       };
     } catch (err) {
       console.error('Failed to parse AI response:', content);
@@ -283,28 +298,30 @@ async generateRoadblocksFromPrompt(
   }> {
     const response = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: prompt
+      contents: prompt,
     });
 
     const content = response.text;
     if (!content) throw new Error('No content in response');
 
-    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
+    const [jsonStr, commentary] = content
+      .split('=========')
+      .map((str) => str.trim());
     const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
-    
+
     try {
       const refinements = JSON.parse(cleanJsonStr);
 
-      const hasRefinements = refinements.refinedDescription || 
-                           refinements.refinedFix; 
-      
+      const hasRefinements =
+        refinements.refinedDescription || refinements.refinedFix;
+
       if (!hasRefinements) {
         console.warn('AI response contained no refinements');
       }
 
       return {
         ...refinements,
-        aiCommentary: commentary || 'Changes applied successfully.'
+        aiCommentary: commentary || 'Changes applied successfully.',
       };
     } catch (err) {
       console.error('Failed to parse AI response:', content);
@@ -319,27 +336,29 @@ async generateRoadblocksFromPrompt(
   }> {
     const response = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: prompt
+      contents: prompt,
     });
 
     const content = response.text;
     if (!content) throw new Error('No content in response');
 
-    const [jsonStr, commentary] = content.split('=========').map(str => str.trim());
+    const [jsonStr, commentary] = content
+      .split('=========')
+      .map((str) => str.trim());
     const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
-    
+
     try {
       const refinements = JSON.parse(cleanJsonStr);
 
       const hasRefinements = refinements.refinedRna;
-      
+
       if (!hasRefinements) {
         console.warn('AI response contained no refinements');
       }
 
       return {
         ...refinements,
-        aiCommentary: commentary || 'Changes applied successfully.'
+        aiCommentary: commentary || 'Changes applied successfully.',
       };
     } catch (err) {
       console.error('Failed to parse AI response:', content);

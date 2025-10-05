@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ElevateService } from './elevate.service';
 import { ElevateStartupDto } from './dto';
 
@@ -12,9 +19,7 @@ export class ElevateController {
   }
 
   @Get(':id')
-  async getStartupElevateLogs(
-    @Param('id', ParseIntPipe) startupId: number
-  ) {
+  async getStartupElevateLogs(@Param('id', ParseIntPipe) startupId: number) {
     return await this.elevateService.getStartupElevateLogs(startupId);
   }
 }

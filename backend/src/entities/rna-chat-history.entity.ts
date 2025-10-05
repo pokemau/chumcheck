@@ -26,4 +26,4 @@ export class RnaChatHistory {
       Object.assign(this, data);
     }
   }
-} 
+}
