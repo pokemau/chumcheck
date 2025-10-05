@@ -384,7 +384,7 @@
   <div class="mt-3 text-center">No startups found.</div>
 {/if}
 
-<Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
+<Dialog.Root open={true} onOpenChange={toggleApplicationForm}>
   <Dialog.Content class="h-4/5 max-w-[800px]">
     <Application access={data.access!} startup={selectedStartup} />
   </Dialog.Content>

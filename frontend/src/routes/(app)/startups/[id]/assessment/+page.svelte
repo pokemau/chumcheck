@@ -27,22 +27,11 @@
     try {
       const { formData } = event.detail;
       
-      // Only include answers that have values
-      const answers = Object.entries(formData)
-        .filter(([id, value]) => {
-          const field = selectedAssessment?.assessmentFields.find(f => f.id === id);
-          // Include if:
-          // 1. Not a file type and has value
-          // 2. Is a file type and has actual file value (not example.com)
-          return value && (
-            field?.type !== 'File' || 
-            (field?.type === 'File' && value !== 'example.com')
-          );
-        })
-        .map(([id, value]) => ({
-          assessmentId: id,
-          answer: value
-        }));
+      // Convert formData to answers array - all fields are treated the same
+      const answers = selectedAssessment?.assessmentFields?.map(field => ({
+        assessmentId: field.id,
+        answer: formData[field.id] || ''
+      })).filter(answer => answer.answer !== '') || [];
 
       const submitData = {
         startupId: parseInt(startupId),
@@ -196,7 +185,8 @@
           assessment={selectedAssessment}
           on:close={toggleAssessmentForm}
           on:submit={handleAssessmentSubmit}
-          isReadOnly={data.role === 'Mentor'}
+          on:statusChanged={() => $assessmentQuery.refetch()}
+          isMentor={data.role === 'Mentor'}
         />
       {/if}
     </Dialog.Content>
