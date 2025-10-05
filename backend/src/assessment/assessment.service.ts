@@ -35,7 +35,7 @@ export class AssessmentService {
         const response = responses.find(r => r.assessment.assessment_id === field.assessment_id);
         
         const baseField = {
-          id: field.fieldKey,
+          id: field.fieldKey ?? '', // Ensure id is always a string
           description: field.description,
           type: AssessmentAnswerType[field.answerType], // Get enum key instead of value
           answer: response?.answerValue || '', // Always include answer, empty string if no response
