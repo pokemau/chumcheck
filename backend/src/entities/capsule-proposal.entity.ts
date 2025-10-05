@@ -34,7 +34,7 @@ export class CapsuleProposal {
     pricingStrategy: string;
   }[];
 
-  @Property()
+  @Property({type: 'text'})
   intellectualPropertyStatus!: string;
 
   @Property({ type: 'text', nullable: true })

@@ -569,7 +569,6 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.qualificationStatus = QualificationStatus.QUALIFIED;
-    await this.createStartupReadinessLevels(startupId);
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been approved.` };

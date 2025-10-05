@@ -19,17 +19,17 @@
   let applicants: any = [];
 
   let dialogLoading = false;
-  let showStartupDialog = false;
+  let showDialog = false;
   let selectedStartup: any = null;
 
   async function openStartupDialog(startup: any) {
     selectedStartup = startup;
-    showStartupDialog = true;
+    showDialog = true;
   }
 
-  function closeStartupDialog() {
-    showStartupDialog = false;
-    selectedStartup = null;
+  function toggleDialog() {
+    showDialog = !showDialog;
+    if (!showDialog) selectedStartup = null;
   }
 
   async function approveStartup(startupId: number, selectedMentor: any) {
@@ -46,7 +46,6 @@
 
     if (response.ok) {
       const assignmentor = await fetch(
-        // `${PUBLIC_API_URL}/startups/${selectedMentor}/appoint-mentors/`,
         `${PUBLIC_API_URL}/startups/${startupId}/appoint-mentors/`,
         {
           method: 'post',
@@ -60,15 +59,17 @@
           })
         }
       );
-
+      console.log('assignmentor:', assignmentor);
       if (assignmentor.ok) {
-        // const filtered = applicants.filter((d) => d.id !== startupId);
-        // applicants = filtered;
-        // const startup = $queries[0].data.find((applicant: any) => applicant.id === startupId);
-        // if (startup) {
-        //   startup.qualificationStatus = 3;
-        // }
-        window.location.href = '/applications?tab=qualified';
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
       }
     }
   }
@@ -86,7 +87,15 @@
         }
       );
       if (response.status === 200) {
-        window.location.href = '/applications?tab=waitlisted';
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
       }
       return response.data;
     } catch (error) {
@@ -237,8 +246,8 @@
   {#if selectedTab === 'pending'}
     <PendingDialog 
       startup={selectedStartup}
-      isOpen={showStartupDialog}
-      onClose={closeStartupDialog}
+      {showDialog}
+      {toggleDialog}
       {waitlistStartup}
       mentors={$queries[1].data || []}
       {approveStartup}

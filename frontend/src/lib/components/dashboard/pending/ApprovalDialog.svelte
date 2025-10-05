@@ -1,53 +1,47 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button/index.js';
-  import { X } from 'lucide-svelte';
+  import * as Dialog from '$lib/components/ui/dialog';
   import { Label } from '$lib/components/ui/label/index.js';
   import * as Select from '$lib/components/ui/select';
   import { ReadinessType } from '$lib/utils';
   import { toast } from 'svelte-sonner';
 
   export let startup: any;
-  export let isOpen: boolean = false;
-  export let onClose: () => void;
+  export let showDialog: boolean = false;
+  export let toggleDialog: () => void;
   export let mentors: any[] = [];
   export let onApprove: (startupId: number, mentorId: any) => Promise<void>;
 
   let selectedMentor: any = null;
+  let isLoading = false;
 
   async function handleApprove() {
     if (!selectedMentor) {
       alert('Please select a mentor first');
       return;
     }
+    isLoading = true;
     try {
       await onApprove(startup.id, selectedMentor);
       toast.success('Startup has been approved successfully');
-      onClose();
-      // Close parent dialog and refresh page
-      window.location.reload();
+      toggleDialog();
     } catch (error) {
       console.error('Error during approval:', error);
       toast.error('An error occurred during approval. Please try again.');
-      return;
+    } finally {
+      isLoading = false;
     }
   }
 </script>
 
-{#if isOpen && startup}
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div class="flex flex-col bg-background rounded-lg shadow-xl w-[500px] mx-4 gap-4 p-6">
-      <!-- Dialog Header -->
-      <div class="flex justify-between items-center pb-4 border-b">
-        <h2 class="text-xl font-semibold text-foreground">
+{#if startup}
+  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
+    <Dialog.Content class="sm:max-w-[500px]">
+      <Dialog.Header>
+        <Dialog.Title>
           Approve {startup.capsuleProposal?.title || startup.name}
-        </h2>
-        <button 
-          onclick={onClose}
-          class="text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <X class="w-6 h-6" />
-        </button>
-      </div>
+        </Dialog.Title>
+      </Dialog.Header>
 
       <!-- Dialog Content -->
       <div class="space-y-6">
@@ -86,17 +80,20 @@
       <div class="flex justify-end gap-3 pt-0">
         <Button 
           variant="outline" 
-          onclick={onClose}
+          class="transition-transform hover:scale-105 duration-200"
+          disabled={isLoading}
+          onclick={toggleDialog}
         >
           Cancel
         </Button>
         <Button 
-          variant="default"
+          class="transition-transform hover:scale-105 duration-200"
+          disabled={!selectedMentor || isLoading}
           onclick={handleApprove}
         >
-          Approve
+          {isLoading ? 'Approving...' : 'Approve'}
         </Button>
       </div>
-    </div>
-  </div>
+    </Dialog.Content>
+  </Dialog.Root>
 {/if}

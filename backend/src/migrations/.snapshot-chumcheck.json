@@ -1514,13 +1514,12 @@
         },
         "intellectual_property_status": {
           "name": "intellectual_property_status",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "curriculum_vitae": {
           "name": "curriculum_vitae",
