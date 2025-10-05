@@ -5,15 +5,19 @@ import { SubmitAssessmentDto } from './dto/assessment.dto';
 import { StartupAssessment } from '../entities/startup-assessment.entity';
 import { Assessment } from '../entities/assessment.entity';
 import { StartupResponse } from '../entities/startup-response.entity';
-import { AssessmentAnswerType, AssessmentType, AssessmentStatus } from '../entities/enums/assessment-util.enum';
+import { AssessmentType } from '../entities/assessment-type.entity';
+import { AssessmentAnswerType, AssessmentStatus } from '../entities/enums/assessment-util.enum';
 
 @Injectable()
 export class AssessmentService {
   constructor(private readonly em: EntityManager) {}
 
   async getStartupAssessments(startupId: number): Promise<AssessmentDto[]> {
-    // 1. Get all startup assessments for this startup
-    const startupAssessments = await this.em.find(StartupAssessment, { startupId });
+    // 1. Get all startup assessments for this startup with assessment type populated
+    const startupAssessments = await this.em.find(StartupAssessment, 
+      { startupId }, 
+      { populate: ['assessmentType'] }
+    );
     
     // 2. Group by assessment type and create final structure
     const groupedAssessments = new Map<string, AssessmentDto>();
@@ -35,10 +39,10 @@ export class AssessmentService {
         const response = responses.find(r => r.assessment.assessment_id === field.assessment_id);
         
         const baseField = {
-          id: field.fieldKey ?? '', // Ensure id is always a string
+          id: field.assessment_id.toString(),
           description: field.description,
-          type: AssessmentAnswerType[field.answerType], // Get enum key instead of value
-          answer: response?.answerValue || '', // Always include answer, empty string if no response
+          type: AssessmentAnswerType[field.answerType],
+          answer: response?.answerValue || '',
         };
 
         // Add fileUrl only for File type responses that have a value
@@ -52,10 +56,10 @@ export class AssessmentService {
         return baseField;
       });
 
-      // Add to grouped result
-      groupedAssessments.set(AssessmentType[sa.assessmentType], {
-        name: AssessmentType[sa.assessmentType], // Get enum key instead of value
-        assessmentStatus: AssessmentStatus[sa.status], // Get enum key instead of value
+      // Add to grouped result using the assessment type from the table
+      groupedAssessments.set(sa.assessmentType.type, {
+        name: sa.assessmentType.type,
+        assessmentStatus: AssessmentStatus[sa.status],
         assessmentFields: fields,
       });
     }
@@ -67,11 +71,16 @@ export class AssessmentService {
     const em = this.em.fork();
 
     try {
-      const assessmentType = AssessmentType[submitDto.assessmentType as keyof typeof AssessmentType];
-      if (assessmentType === undefined) {
+      // 1. Find the assessment type by name
+      const assessmentType = await em.findOne(AssessmentType, {
+        type: submitDto.assessmentType
+      });
+
+      if (!assessmentType) {
         throw new BadRequestException('Invalid assessment type');
       }
-      // 1. Get startup assessment
+
+      // 2. Get startup assessment
       const startupAssessment = await em.findOne(StartupAssessment, {
         startupId: submitDto.startupId,
         assessmentType: assessmentType,
@@ -81,14 +90,14 @@ export class AssessmentService {
         throw new BadRequestException('Assessment not found for startup');
       }
 
-      // 2. Get all required assessments for this type
+      // 3. Get all required assessments for this type
       const requiredAssessments = await em.find(Assessment, {
         assessmentType: assessmentType,
       });
 
-      // 3. Save submitted answers
+      // 4. Save submitted answers
       for (const answer of submitDto.answers) {
-        const assessment = requiredAssessments.find(a => a.fieldKey === answer.assessmentId);
+        const assessment = requiredAssessments.find(a => a.assessment_id.toString() === answer.assessmentId);
         if (!assessment) continue;
 
         const existingResponse = await em.findOne(StartupResponse, {
@@ -109,28 +118,69 @@ export class AssessmentService {
         }
       }
 
-      // 4. Check if all required assessments are answered
-      const allResponses = await em.find(StartupResponse, {
-        startupId: submitDto.startupId,
-        assessment: { $in: requiredAssessments },
-      });
-
-      const isComplete = requiredAssessments.every(required => 
-        allResponses.some(response => 
-          response.assessment.assessment_id === required.assessment_id && 
-          response.answerValue?.trim()
-        )
-      );
-
-      // 5. Update status if all assessments are completed
-      if (isComplete) {
-        startupAssessment.status = AssessmentStatus.Completed;
-        await em.persist(startupAssessment);
-      }
-
       await em.flush();
     } catch (error) {
       console.error('Error submitting assessment:', error);
+      throw error;
+    }
+  }
+
+  async markAssessmentComplete(startupId: number, assessmentType: string): Promise<void> {
+    const em = this.em.fork();
+
+    try {
+      const assessmentTypeEntity = await em.findOne(AssessmentType, {
+        type: assessmentType
+      });
+
+      if (!assessmentTypeEntity) {
+        throw new BadRequestException('Invalid assessment type');
+      }
+
+      const startupAssessment = await em.findOne(StartupAssessment, {
+        startupId,
+        assessmentType: assessmentTypeEntity,
+      });
+
+      if (!startupAssessment) {
+        throw new BadRequestException('Assessment not found for startup');
+      }
+
+      startupAssessment.status = AssessmentStatus.Completed;
+      await em.persist(startupAssessment);
+      await em.flush();
+    } catch (error) {
+      console.error('Error marking assessment as complete:', error);
+      throw error;
+    }
+  }
+
+  async markAssessmentPending(startupId: number, assessmentType: string): Promise<void> {
+    const em = this.em.fork();
+
+    try {
+      const assessmentTypeEntity = await em.findOne(AssessmentType, {
+        type: assessmentType
+      });
+
+      if (!assessmentTypeEntity) {
+        throw new BadRequestException('Invalid assessment type');
+      }
+
+      const startupAssessment = await em.findOne(StartupAssessment, {
+        startupId,
+        assessmentType: assessmentTypeEntity,
+      });
+
+      if (!startupAssessment) {
+        throw new BadRequestException('Assessment not found for startup');
+      }
+
+      startupAssessment.status = AssessmentStatus.Pending;
+      await em.persist(startupAssessment);
+      await em.flush();
+    } catch (error) {
+      console.error('Error marking assessment as pending:', error);
       throw error;
     }
   }

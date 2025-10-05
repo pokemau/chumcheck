@@ -20,17 +20,19 @@
 
   let formData: Record<string, any> = {};
   let isSubmitting = false;
+  let isInitialized = false;
   
-  // Initialize formData with existing answers if any
+  // Initialize formData with existing answers only once
   $: {
-    assessment.assessmentFields.forEach(field => {
-      if (!formData[field.id]) {
-        // Don't initialize file fields at all
+    if (!isInitialized && assessment?.assessmentFields) {
+      assessment.assessmentFields.forEach(field => {
         if (field.type !== 'File') {
           formData[field.id] = field.answer || '';
         }
-      }
-    });
+      });
+      isInitialized = true;
+      console.log('Initial formData:', formData);
+    }
   }
 
   async function handleSubmit() {

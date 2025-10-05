@@ -95,12 +95,12 @@
   //   {
   //     name: "Technology Readiness Assessment",
   //     assessmentStatus: "Pending",
-  //     assessmentFields: [
-  //       {
-  //         id: "tech-signed-letter",
-  //         description: "Signed Letter",
-  //         type: "File"
-  //       },
+      // assessmentFields: [
+      //   {
+      //     id: "tech-signed-letter",
+      //     description: "Signed Letter",
+      //     type: "File"
+      //   },
   //       {
   //         id: "tech-dean-response",
   //         description: "Dean's Response",

@@ -1,5 +1,6 @@
 import { Entity, PrimaryKey, Property, ManyToOne, Enum } from "@mikro-orm/core";
-import { AssessmentStatus, AssessmentType } from "./enums/assessment-util.enum";
+import { AssessmentStatus } from "./enums/assessment-util.enum";
+import { AssessmentType } from "./assessment-type.entity";
 
 @Entity({ tableName: "startup_assessments" })
 export class StartupAssessment {
@@ -9,7 +10,7 @@ export class StartupAssessment {
   @Property()
   startupId!: number; // FK → Startup table
 
-  @Enum(() => AssessmentType)
+  @ManyToOne(() => AssessmentType)
   assessmentType!: AssessmentType;
 
   @Enum(() => AssessmentStatus)
