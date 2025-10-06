@@ -9,11 +9,14 @@ export class StartupResponse {
   @Property()
   startupId!: number; // FK → Startup table
 
-  @ManyToOne(() => Assessment)
+  @ManyToOne(() => Assessment, { deleteRule: 'cascade' })
   assessment!: Assessment; // the specific question answered
 
   @Property({ nullable: true })
   answerValue?: string; // text or file URL
+
+  @Property({ nullable: true })
+  fileName?: string; // text or file URL
 
   @Property()
   submittedAt?: Date = new Date();

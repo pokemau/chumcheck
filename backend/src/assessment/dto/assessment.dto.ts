@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsObject, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsObject, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SubmitAnswerDto {
@@ -7,6 +7,10 @@ export class SubmitAnswerDto {
 
   @IsString()
   answer: string;
+
+  @IsOptional()
+  @IsString()
+  fileName?: string;
 }
 
 export class SubmitAssessmentDto {
@@ -27,6 +31,7 @@ export interface AssessmentFieldDto {
   type: string;
   answer?: string;
   fileUrl?: string;
+  fileName?: string;
 }
 
 export interface AssessmentDto {

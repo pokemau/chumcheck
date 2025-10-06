@@ -4,6 +4,7 @@ export type AssessmentField = {
   type: 'File' | 'ShortAnswer' | 'LongAnswer';
   answer?: string;
   fileUrl?: string;
+  fileName?: string;
 };
 
 export type Assessment = {

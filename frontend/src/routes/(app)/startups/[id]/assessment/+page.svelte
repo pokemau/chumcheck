@@ -23,15 +23,28 @@
     showAssessmentForm = !showAssessmentForm;
   };
 
-  const handleAssessmentSubmit = async (event: CustomEvent<{ formData: Record<string, any> }>) => {
+  const handleAssessmentSubmit = async (event: CustomEvent<{ 
+    formData: Record<string, any>; 
+    fileNames: Record<string, string> 
+  }>) => {
     try {
-      const { formData } = event.detail;
+      const { formData, fileNames } = event.detail;
       
-      // Convert formData to answers array - all fields are treated the same
-      const answers = selectedAssessment?.assessmentFields?.map(field => ({
-        assessmentId: field.id,
-        answer: formData[field.id] || ''
-      })).filter(answer => answer.answer !== '') || [];
+      // Convert formData to answers array, including fileName for file uploads
+      const answers = selectedAssessment?.assessmentFields?.map(field => {
+        const answer = formData[field.id] || '';
+        const answerObj: any = {
+          assessmentId: field.id,
+          answer
+        };
+        
+        // Add fileName for file type fields if available
+        if (field.type === 'File' && fileNames[field.id]) {
+          answerObj.fileName = fileNames[field.id];
+        }
+        
+        return answerObj;
+      }).filter(answer => answer.answer !== '') || [];
 
       const submitData = {
         startupId: parseInt(startupId),
@@ -78,60 +91,6 @@
       hasAssessment = $assessmentQuery.data.length > 0;
     }
   });
-
-  // Example assessments data (later from API)
-  // const assessments: Assessment[] = [
-  //   {
-  //     name: "Technology Readiness Assessment",
-  //     assessmentStatus: "Pending",
-      // assessmentFields: [
-      //   {
-      //     id: "tech-signed-letter",
-      //     description: "Signed Letter",
-      //     type: "File"
-      //   },
-  //       {
-  //         id: "tech-dean-response",
-  //         description: "Dean's Response",
-  //         type: "ShortAnswer"
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     name: "Market Readiness Assessment",
-  //     assessmentStatus: "Pending",
-  //     assessmentFields: [
-  //       {
-  //         id: "market-signed-letter",
-  //         description: "Market Analysis",
-  //         type: "File"
-  //       },
-  //       {
-  //         id: "market-report",
-  //         description: "Market Report",
-  //         type: "LongAnswer"
-  //       }
-  //     ]
-  //   },
-  //   {
-  //     name: "Investment Readiness Assessment",
-  //     assessmentStatus: "Completed",
-  //     assessmentFields: [
-  //       {
-  //         id: "tech-signed-letter",
-  //         description: "Signed Letter",
-  //         type: "File",
-  //         fileUrl: "/api/files/tech-signed-letter.pdf" // example URL
-  //       },
-  //       {
-  //         id: "tech-dean-response",
-  //         description: "Dean's Response",
-  //         type: "ShortAnswer",
-  //         answer: "I have agreed upon as the Dean"
-  //       }
-  //     ]
-  //   }
-  // ];
 
   let selectedAssessment = $state<Assessment | null>(null);
   

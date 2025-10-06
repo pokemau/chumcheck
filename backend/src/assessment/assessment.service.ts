@@ -45,11 +45,12 @@ export class AssessmentService {
           answer: response?.answerValue || '',
         };
 
-        // Add fileUrl only for File type responses that have a value
+        // Add fileUrl and fileName only for File type responses that have a value
         if (field.answerType === AssessmentAnswerType.File && response?.answerValue) {
           return {
             ...baseField,
-            fileUrl: response.answerValue
+            fileUrl: response.answerValue,
+            fileName: response.fileName || undefined
           };
         }
 
@@ -107,12 +108,18 @@ export class AssessmentService {
 
         if (existingResponse) {
           existingResponse.answerValue = answer.answer;
+          // Only update fileName if it's provided
+          if (answer.fileName !== undefined) {
+            existingResponse.fileName = answer.fileName;
+          }
           await em.persist(existingResponse);
         } else {
           const newResponse = em.create(StartupResponse, {
             startupId: submitDto.startupId,
             assessment: assessment,
             answerValue: answer.answer,
+            // Only set fileName if it's provided
+            ...(answer.fileName !== undefined && { fileName: answer.fileName })
           });
           await em.persist(newResponse);
         }

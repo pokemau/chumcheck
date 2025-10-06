@@ -534,6 +534,16 @@
           "length": 255,
           "mappedType": "string"
         },
+        "file_name": {
+          "name": "file_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
         "submitted_at": {
           "name": "submitted_at",
           "type": "timestamptz",
@@ -572,6 +582,7 @@
           ],
           "referencedTableName": "public.assessments",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

@@ -17,11 +17,12 @@
 
   const dispatch = createEventDispatcher<{
     close: void;
-    submit: { assessmentName: string; startupId: string; formData: Record<string, any> };
+    submit: { assessmentName: string; startupId: string; formData: Record<string, any>; fileNames: Record<string, string> };
     statusChanged: void;
   }>();
 
   let formData: Record<string, any> = {};
+  let fileNames: Record<string, string> = {}; // Track file names for each field
   let isSubmitting = false;
   let isInitialized = false;
   let isChangingStatus = false;
@@ -32,9 +33,11 @@
     if (!isInitialized && assessment?.assessmentFields) {
       assessment.assessmentFields.forEach(field => {
         formData[field.id] = field.answer || '';
+        if (field.type === 'File' && field.fileName) {
+          fileNames[field.id] = field.fileName;
+        }
       });
       isInitialized = true;
-      console.log('Initial formData:', formData);
     }
   }
 
@@ -54,7 +57,8 @@
       console.log('Form Data to be submitted:', {
         assessmentName: assessment.name,
         startupId,
-        formData
+        formData,
+        fileNames
       });
 
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -63,7 +67,8 @@
       dispatch('submit', { 
         assessmentName: assessment.name, 
         startupId, 
-        formData 
+        formData ,
+        fileNames
       });
       dispatch('close');
     } catch (error) {
@@ -126,6 +131,7 @@
             description={field.description}
             fileUrl={field.answer}
             bind:value={formData[field.id]}
+            bind:fileName={fileNames[field.id]}
             isReadOnly={isMentor}
           />
         {/if}
