@@ -5,7 +5,7 @@
 
 <h1 class="mb-4 text-3xl font-bold tracking-tight">Admin Dashboard</h1>
 
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
   <a data-sveltekit-preload-data="tap" href="/admin/users" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
     <div class="text-lg font-semibold">Manage Users</div>
     <p class="text-sm text-muted-foreground">List, edit, and delete users</p>
@@ -13,6 +13,10 @@
   <a data-sveltekit-preload-data="tap" href="/admin/startups" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
     <div class="text-lg font-semibold">Manage Startups</div>
     <p class="text-sm text-muted-foreground">List, edit, and delete startups</p>
+  </a>
+  <a data-sveltekit-preload-data="tap" href="/admin/assessments" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
+    <div class="text-lg font-semibold">Manage Assessment Types</div>
+    <p class="text-sm text-muted-foreground">Add/remove types and customize answer fields</p>
   </a>
 </div>
 

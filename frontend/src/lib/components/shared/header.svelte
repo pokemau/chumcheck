@@ -2,7 +2,7 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { Badge } from '$lib/components/ui/badge';
   import { access } from '$lib/access';
-  import { page } from '$app/state';
+  import { page as pageStore } from '$app/stores';
   import { Separator } from '$lib/components/ui/separator';
   import { crossfade } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
@@ -14,6 +14,9 @@
 
   const userRole = user.role;
   const modules = (access.roles?.[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`]?.modules ?? []) as Array<any>;
+
+  // Provide a reactive page value compatible with master code
+  const page = $derived($pageStore);
 
   const currentModule = $derived(
     page.url.pathname.slice(1).split('/')[
@@ -134,7 +137,7 @@
             {@const isActive = currentModule === item.link || currentModulev2 === item.link}
             <a
               data-sveltekit-preload-data="tap"
-              href={`/${item.link}${item.subModule?.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
+              href={`/${item.link}${item.subModule?.length > 0 && item.name !== 'Startups' ? `/${item.subModule?.[0]?.link ?? ''}` : ''}`}
               class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
               class:text-flutter-blue={isActive}
             >

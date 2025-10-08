@@ -13,5 +13,5 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
   if (res.status === 401) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
 
   const recent = await res.json();
-  return { recent };
+  return { recent, access: token };
 };

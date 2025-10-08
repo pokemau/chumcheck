@@ -3,7 +3,7 @@
   import * as Card from '$lib/components/ui/card';
   import { Label } from '$lib/components/ui/label/index.js';
   import { Switch } from '$lib/components/ui/switch/index.js';
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
   import { toast } from 'svelte-sonner';
 
   let { data } = $props();

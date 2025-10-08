@@ -11,7 +11,7 @@
   import { getData } from '$lib/utils.js';
   import * as Dialog from '$lib/components/ui/dialog';
   import Application from '$lib/components/startup/Application.svelte';
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
   import { toast } from 'svelte-sonner';
   import axiosInstance from '$lib/axios';
 
