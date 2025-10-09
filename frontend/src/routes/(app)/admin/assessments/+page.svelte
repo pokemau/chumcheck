@@ -38,13 +38,23 @@
   import { PUBLIC_API_URL } from '$env/static/public';
 
   async function refreshTypes() {
-    const res = await fetch(`${PUBLIC_API_URL}/assessment/types`, { headers: { Authorization: `Bearer ${data.access}` } });
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types`, { headers: { Authorization: `Bearer ${data.access}` } });
+    if (!res.ok) {
+      console.error('Failed to load types', res.status, await res.text());
+      alert(`Failed to load assessment types (${res.status}). Check PUBLIC_API_URL and backend.`);
+      return;
+    }
     types = await res.json();
   }
 
   async function fetchFields() {
     if (!selectedType) return;
-    const res = await fetch(`${PUBLIC_API_URL}/assessment/types/${selectedType.id}/fields`, { headers: { Authorization: `Bearer ${data.access}` } });
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types/${selectedType.id}/fields`, { headers: { Authorization: `Bearer ${data.access}` } });
+    if (!res.ok) {
+      console.error('Failed to load fields', res.status, await res.text());
+      alert(`Failed to load fields (${res.status}).`);
+      return;
+    }
     fields = await res.json();
   }
 
@@ -68,11 +78,16 @@
 
   async function createType() {
     if (!createName.trim()) return;
-    await fetch(`${PUBLIC_API_URL}/assessment/types`, {
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.access}` },
       body: JSON.stringify({ name: createName.trim() })
     });
+    if (!res.ok) {
+      console.error('Create type failed', res.status, await res.text());
+      alert(`Create type failed (${res.status}). Check backend logs.`);
+      return;
+    }
     createName = '';
     showCreate = false;
     await refreshTypes();
@@ -80,20 +95,30 @@
 
   async function renameType() {
     if (!selectedType) return;
-    await fetch(`${PUBLIC_API_URL}/assessment/types/${selectedType.id}`, {
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types/${selectedType.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.access}` },
       body: JSON.stringify({ name: renameName })
     });
+    if (!res.ok) {
+      console.error('Rename type failed', res.status, await res.text());
+      alert(`Rename type failed (${res.status}).`);
+      return;
+    }
     await refreshTypes();
   }
 
   async function deleteType() {
     if (!selectedType) return;
-    await fetch(`${PUBLIC_API_URL}/assessment/types/${selectedType.id}`, {
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types/${selectedType.id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${data.access}` }
     });
+    if (!res.ok) {
+      console.error('Delete type failed', res.status, await res.text());
+      alert(`Delete type failed (${res.status}).`);
+      return;
+    }
     selectedType = null;
     fields = [];
     showTypeModal = false;
@@ -108,18 +133,25 @@
       fieldType: Number(editingField.fieldType ?? 1)
     } as any;
 
+    let res: Response;
     if (editingField.id) {
-      await fetch(`${PUBLIC_API_URL}/assessment/fields/${editingField.id}`, {
+      res = await fetch(`${PUBLIC_API_URL}/assessments/fields/${editingField.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.access}` },
         body: JSON.stringify(payload)
       });
     } else {
-      await fetch(`${PUBLIC_API_URL}/assessment/fields`, {
+      res = await fetch(`${PUBLIC_API_URL}/assessments/fields`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.access}` },
         body: JSON.stringify(payload)
       });
+    }
+
+    if (!res.ok) {
+      console.error('Save field failed', res.status, await res.text());
+      alert(`Save field failed (${res.status}).`);
+      return;
     }
 
     showFieldEditModal = false;
@@ -127,10 +159,15 @@
   }
 
   async function removeField(id: number) {
-    await fetch(`${PUBLIC_API_URL}/assessment/fields/${id}`, {
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/fields/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${data.access}` }
     });
+    if (!res.ok) {
+      console.error('Remove field failed', res.status, await res.text());
+      alert(`Remove field failed (${res.status}).`);
+      return;
+    }
     await fetchFields();
   }
 </script>

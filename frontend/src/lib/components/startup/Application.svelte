@@ -55,6 +55,7 @@
   import Investment from './application/Investment.svelte';
   import Organizational from './application/Organizational.svelte';
   import TechnologyCalculator from './application/Calculator.svelte';
+  import Waitlisted from './application/Waitlisted.svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
   import { boolean } from 'zod';
 
@@ -92,8 +93,8 @@
   ];
 
   if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
-    steps = ['waitlisted', ...steps];
-    labels = ['Your startup is currently waitlisted....', ...labels];
+    steps = ['waitlisted'];
+    labels = ['Your startup is currently waitlisted....'];
   }   
 
   let currentActive = 0;
@@ -138,6 +139,10 @@
   {/if}
   <h1 class="px-1 text-2xl font-semibold">{labels[currentActive]}</h1>
   <!-- TO ADD WAITLISTED SCREEN -->
+  <Waitlisted
+    stepName="waitlisted"
+    {currentStep}
+  />
   <DataPrivacy
     stepName="data-privacy"
     {currentStep}
@@ -189,7 +194,15 @@
             : false}>Next</Button
       >
     {:else}
-      <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {#if startup?.qualificationStatus === QualificationStatus.WAITLISTED}
+        <a href="/apply">
+          <Button>
+            Edit application
+          </Button>
+        </a>
+      {:else}
+        <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {/if}
     {/if}
   </div>
 </form>

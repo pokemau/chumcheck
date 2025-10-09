@@ -64,8 +64,8 @@
 </script>
 
 <Card.Root
-  class={`cursor-pointer rounded-lg border bg-gray-900 shadow-sm
-  ${isNewCard() || rnsCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse border-sky-600' : 'border-gray-700'} `}
+  class={`bg-accent cursor-pointer rounded-lg border shadow-sm
+  ${isNewCard() || rnsCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse' : ''} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -79,14 +79,14 @@
       >
       {#if isNewCard()}
         <div
-          class="z-100 absolute -right-2 -top-2 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-2 -top-2 rounded-[2px] p-[1px] text-xs"
         >
           New
         </div>
       {/if}
       {#if rnsCopy.approvalStatus !== 'Unchanged'}
         <div
-          class="z-100 absolute -right-2 -top-2 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-2 -top-2 rounded-[2px] p-[1px] text-xs"
         >
           Pending Approval
         </div>
@@ -101,7 +101,7 @@
         `${rns.description.length > 100 ? '...' : ''}`}
     </div>
     <div class="flex items-center justify-between">
-      <div class="flex items-center gap-1 text-xs text-muted-foreground">
+      <div class="text-muted-foreground flex items-center gap-1 text-xs">
         <Target class="h-4 w-4" /> Target Level: {rns.targetLevelScore}
       </div>
 
@@ -124,7 +124,7 @@
           </span>
         {:else}
           <div
-            class="flex h-5 w-5 items-center justify-center rounded-full bg-muted"
+            class="bg-muted flex h-5 w-5 items-center justify-center rounded-full"
           >
             <User class="h-4 w-4" />
           </div>
@@ -132,7 +132,7 @@
         {/if}
       </div>
     </div>
-    <div class="flex items-center gap-1 text-xs text-muted-foreground">
+    <div class="text-muted-foreground flex items-center gap-1 text-xs">
       <img src="/clock.png" alt="Clock" class="h-4 w-4" />
       <span>{rns.status === 7 ? 'Long Term' : 'Short Term'}</span>
     </div>

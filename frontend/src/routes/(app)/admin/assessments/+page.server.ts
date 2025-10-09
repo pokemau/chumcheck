@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
   const token = cookies.get('Access');
   if (!token) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
 
-  const res = await fetch(`${PUBLIC_API_URL}/assessment/types`, {
+  const res = await fetch(`${PUBLIC_API_URL}/assessments/types`, {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (!res.ok) return { types: [] };
@@ -20,7 +20,7 @@ export const actions: Actions = {
     const data = await request.formData();
     const name = String(data.get('name') || '').trim();
     if (!name) return fail(400, { message: 'Name required' });
-    const res = await fetch(`${PUBLIC_API_URL}/assessment/types`, {
+    const res = await fetch(`${PUBLIC_API_URL}/assessments/types`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ name })

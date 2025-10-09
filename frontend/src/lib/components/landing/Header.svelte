@@ -23,7 +23,7 @@
 </script>
 
 <header
-  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center text-flutter-gray transition-all duration-300 ease-in-out dark:text-flutter-white"
+  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center transition-all duration-300 ease-in-out"
   class:border-b={isBlurred}
   class:backdrop-blur-lg={isBlurred}
 >
@@ -55,7 +55,7 @@
             onclick={toggleMode}
             variant="ghost"
             size="icon"
-            class="hover:bg-transparent hover:text-flutter-blue"
+            class="hover:text-flutter-blue hover:bg-transparent"
           >
             <Sun
               class="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"

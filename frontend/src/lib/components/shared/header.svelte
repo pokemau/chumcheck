@@ -98,7 +98,7 @@
 </script>
 
 <header
-  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b text-flutter-gray transition-all duration-300 dark:text-flutter-white"
+  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b transition-all duration-300"
   class:backdrop-blur-lg={isBlurred}
   style="backdrop-filter: blur(16px);"
 >

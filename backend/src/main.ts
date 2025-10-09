@@ -13,7 +13,7 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://chumcheck.vercel.app/'],
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://chumcheck.vercel.app/'],
     credentials: true,
   });
 
