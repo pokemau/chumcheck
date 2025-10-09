@@ -10,7 +10,7 @@ export class StartupAssessment {
   @Property()
   startupId!: number; // FK → Startup table
 
-  @ManyToOne(() => AssessmentType)
+  @ManyToOne(() => AssessmentType, { deleteRule: 'cascade' })
   assessmentType!: AssessmentType;
 
   @Enum(() => AssessmentStatus)

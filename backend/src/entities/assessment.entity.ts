@@ -8,7 +8,7 @@ export class Assessment {
   @PrimaryKey({ autoincrement: true })
   assessment_id!: number;
 
-  @ManyToOne(() => AssessmentType)
+  @ManyToOne(() => AssessmentType, { deleteRule: 'cascade' })
   assessmentType!: AssessmentType;
 
   @Property()
