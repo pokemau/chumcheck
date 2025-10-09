@@ -83,7 +83,8 @@
       : modules ?? []
   );
 
-  const displayModules = $derived(() => {
+  type ModuleItem = { name: string; link: string; subModule?: Array<{ name: string; link: string }>; };
+  const displayModules = $derived((): ModuleItem[] => {
     let list = [...(filteredModules ?? [])];
     if (module !== 'admin') {
       if (!list.some((m) => m.name === 'Applications'))
@@ -93,8 +94,11 @@
       if (!list.some((m) => m.name === 'Account'))
         list = [...list, { name: 'Account', link: 'account', subModule: [] } as any];
     }
-    return list;
+    return list as ModuleItem[];
   });
+  // Create a reactive array value for template iteration
+  let modulesToShow = $state<ModuleItem[]>([]);
+  $effect(() => { modulesToShow = displayModules(); });
 </script>
 
 <header
@@ -133,11 +137,11 @@
           {/each}
         {:else}
           <!-- module -->
-          {#each displayModules as item}
+          {#each modulesToShow as item}
             {@const isActive = currentModule === item.link || currentModulev2 === item.link}
             <a
               data-sveltekit-preload-data="tap"
-              href={`/${item.link}${item.subModule?.length > 0 && item.name !== 'Startups' ? `/${item.subModule?.[0]?.link ?? ''}` : ''}`}
+              href={`/${item.link}${(item.subModule && item.subModule.length > 0 && item.name !== 'Startups') ? `/${item.subModule[0]?.link ?? ''}` : ''}`}
               class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
               class:text-flutter-blue={isActive}
             >
@@ -176,7 +180,7 @@
               </a>
             {/each}
             <form action="/logout" method="post" class="w-full">
-              <button type="submit" class="w-full">
+              <button type="submit" class="w-full" aria-label="Logout">
                 <DropdownMenu.Item class="cursor-pointer">Logout</DropdownMenu.Item>
               </button>
             </form>

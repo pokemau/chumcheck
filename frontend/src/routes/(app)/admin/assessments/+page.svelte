@@ -30,9 +30,9 @@
   let editingField = $state<Partial<AssessmentField> & { id?: number }>({});
 
   const FIELD_TYPES: { value: number; label: string }[] = [
-    { value: 1, label: 'Short' },
-    { value: 2, label: 'Long' },
-    { value: 3, label: 'File' }
+    { value: 1, label: 'Short answer' },
+    { value: 2, label: 'Long answer' },
+    { value: 3, label: 'File upload' }
   ];
 
   import { PUBLIC_API_URL } from '$env/static/public';

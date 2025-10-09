@@ -18,6 +18,7 @@ export const load: LayoutServerLoad = async ({
     startup: params.id,
     user: locals.user,
     role: locals.user.role,
-    currentModule: url.pathname.slice(1)
+    currentModule: url.pathname.slice(1),
+    isAdminRoute: url.pathname.startsWith('/admin')
   };
 };
