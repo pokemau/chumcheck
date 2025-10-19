@@ -1,210 +1,104 @@
-import { Controller, Get, UseGuards, Render, Req, Post, Body, Res, Param, ParseIntPipe, UsePipes, ValidationPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Post, Body, Param, ParseIntPipe, UsePipes, ValidationPipe, NotFoundException, Delete, BadRequestException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateStartupDto } from './dto/create-startup.dto';
 import { UpdateStartupDto } from './dto/update-startup.dto';
-import { Request } from 'express'; // Import Request for flash messages
+import { EntityManager } from '@mikro-orm/postgresql';
+import { ActivityLog } from '../entities/activity-log.entity';
+import { JwtGuard, ManagerGuard } from '../auth/guard';
 
+@UseGuards(JwtGuard, ManagerGuard)
 @Controller('admin')
-// @UseGuards(AuthenticatedGuard) // Protect admin routes
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private readonly adminService: AdminService, private readonly em: EntityManager) {}
 
-  @Get()
-  @Render('admin/dashboard')
-  async dashboard(@Req() req: Request) {
-    // Create static dashboard data instead of relying on API calls
-    const dashboardData = {
-      stats: {
-        totalUsers: 3,
-        totalStartups: 2,
-        qualifiedStartups: 1,
-        pendingStartups: 1
-      },
-      recentActivity: [
-        {
-          date: 'May 28, 2025',
-          action: 'System',
-          details: 'Admin interface updated'
-        },
-        {
-          date: 'May 28, 2025',
-          action: 'User',
-          details: 'New startup registered'
-        },
-        {
-          date: 'May 27, 2025',
-          action: 'Admin',
-          details: 'User account created'
-        }
-      ]
-    };
-    
-    return { user: req.user, message: 'Welcome to the Admin Dashboard!', dashboard: dashboardData };
+  // JSON endpoint for recent activity
+  @Get('recent-activity')
+  async recentActivity() {
+    const items = await this.em.find(ActivityLog, {}, { orderBy: { createdAt: 'DESC' }, limit: 25 });
+    return items.map((i) => ({
+      date: i.createdAt.toISOString(),
+      action: i.action,
+      details: i.details
+    }));
   }
 
-  @Get('users')
-  @Render('admin/users')
-  async listUsers(@Req() req: Request) { // Add Request type
+  // --- Users ---
+  @Get('users-json')
+  async getUsersJson() {
     const users = await this.adminService.getAllUsers();
-    // req.flash('success', 'Successfully loaded users!'); // Example flash message
-    return { user: req.user, users, message: 'Manage Users' };
+    return users.sort((a: any, b: any) => a.id - b.id);
   }
 
-  @Get('users/create')
-  @Render('admin/create-user')
-  createUserForm(@Req() req: Request) { // Add Request type
-    return { user: req.user, message: 'Create New User' };
+  @Get('users/:id-json')
+  async getUserJson(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.getUserById(id);
   }
 
-  @Post('users/create')
+  @Post('users/create-json')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async createUser(@Req() req: Request, @Body() createUserDto: CreateUserDto, @Res() res) {
-    try {
-      await this.adminService.createUser(createUserDto);
-      req.flash('success', 'User created successfully!');
-      return res.redirect('/admin/users');
-    } catch (error) {
-      console.error('Error creating user:', error);
-      req.flash('form_error', error.message || 'Could not create user.');
-      req.flash('formData', createUserDto as any); // Flash the submitted data
-      return res.redirect('/admin/users/create'); // Redirect back to the create form
-    }
+  async createUserJson(@Body() dto: CreateUserDto) {
+    const user = await this.adminService.createUser(dto);
+    return { message: 'User created', user };
   }
 
-  @Get('users/edit/:id')
-  @Render('admin/edit-user')
-  async editUserForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
-    try {
-      const editableUser = await this.adminService.getUserById(id);
-      return { user: req.user, editableUser, message: `Edit User: ${editableUser.email}` };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        req.flash('error', 'User not found.');
-        return res.redirect('/admin/users');
-      }
-      console.error('Error fetching user for edit:', error);
-      req.flash('error', 'Error fetching user for edit.');
-      return res.redirect('/admin/users');
-    }
-  }
-
-  @Post('users/edit/:id')
+  @Post('users/edit-json/:id')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDto,
-    @Req() req: Request, // Add Request type
-    @Res() res,
-  ) {
-    try {
-      await this.adminService.updateUser(id, updateUserDto);
-      req.flash('success', 'User updated successfully!');
-      return res.redirect('/admin/users');
-    } catch (error) {
-      console.error(`Error updating user ${id}:`, error);
-      req.flash('form_error', error.message || 'Could not update user.');
-      req.flash('formData', { ...updateUserDto, id } as any); // Flash submitted data
-      return res.redirect(`/admin/users/edit/${id}`); // Redirect back to edit form
-    }
+  async updateUserJson(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
+    const user = await this.adminService.updateUser(id, dto);
+    return { message: 'User updated', user };
   }
 
-  // Changed to POST for better practice
-  @Post('users/delete/:id')
-  async deleteUser(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) { // Add Request type
+  @Post('users/delete-json/:id')
+  async deleteUserJson(@Param('id', ParseIntPipe) id: number) {
     try {
       await this.adminService.deleteUser(id);
-      req.flash('success', 'User deleted successfully!');
-    } catch (error) {
-      console.error(`Error deleting user ${id}:`, error);
-      const errorMessage = error instanceof NotFoundException ? 'User not found.' : 'Could not delete user.';
-      req.flash('error', errorMessage);
-    }
-    return res.redirect('/admin/users');
-  }
-
-  // --- Startup Routes ---
-
-  @Get('startups')
-  @Render('admin/startups')
-  async listStartups(@Req() req: Request) {
-    const startups = await this.adminService.getAllStartups();
-    return { user: req.user, startups, message: 'Manage Startups' };
-  }
-
-  @Get('startups/create')
-  @Render('admin/create-startup')
-  async createStartupForm(@Req() req: Request) {
-    const users = await this.adminService.getAllUsers(); // Reverted: For selecting startup owner
-    return { user: req.user, users, message: 'Create New Startup' };
-  }
-
-  @Post('startups/create')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async createStartup(@Req() req: Request, @Body() createStartupDto: CreateStartupDto, @Res() res) {
-    try {
-      await this.adminService.createStartup(createStartupDto);
-      req.flash('success', 'Startup created successfully!');
-      return res.redirect('/admin/startups');
-    } catch (error) {
-      console.error('Error creating startup:', error);
-      const users = await this.adminService.getAllUsers(); // Reverted: Ensure users list is passed back to the form in case of error
-      req.flash('form_error', error.message || 'Could not create startup.');
-      req.flash('formData', createStartupDto as any);
-      return res.redirect('/admin/startups/create');
-    }
-  }
-
-  @Get('startups/edit/:id')
-  @Render('admin/edit-startup')
-  async editStartupForm(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
-    try {
-      const editableStartup = await this.adminService.getStartupById(id);
-      const users = await this.adminService.getAllUsers(); // Reverted: For selecting startup owner
-      return { user: req.user, editableStartup, users, message: `Edit Startup: ${editableStartup.name}` };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        req.flash('error', 'Startup not found.');
-        return res.redirect('/admin/startups');
+      return { message: 'User deleted' };
+    } catch (e: any) {
+      if (e instanceof BadRequestException) {
+        throw e;
       }
-      console.error('Error fetching startup for edit:', error);
-      req.flash('error', 'Error fetching startup for edit.');
-      return res.redirect('/admin/startups');
+      throw e;
     }
   }
 
-  @Post('startups/edit/:id')
+  // --- Startups ---
+  @Get('startups-json')
+  async getStartupsJson() {
+    const startups = await this.adminService.getAllStartups();
+    return startups.sort((a: any, b: any) => a.id - b.id);
+  }
+
+  @Get('startups/:id-json')
+  async getStartupJson(@Param('id', ParseIntPipe) id: number) {
+    return this.adminService.getStartupById(id);
+  }
+
+  @Post('startups/create-json')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async updateStartup(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateStartupDto: UpdateStartupDto,
-    @Req() req: Request,
-    @Res() res,
-  ) {
-    try {
-      await this.adminService.updateStartup(id, updateStartupDto);
-      req.flash('success', 'Startup updated successfully!');
-      return res.redirect('/admin/startups');
-    } catch (error) {
-      console.error(`Error updating startup ${id}:`, error);
-      const users = await this.adminService.getAllUsers(); // Reverted: Ensure users list is passed back to the form in case of error
-      req.flash('form_error', error.message || 'Could not update startup.');
-      req.flash('formData', { ...updateStartupDto, id } as any);
-      return res.redirect(`/admin/startups/edit/${id}`);
-    }
+  async createStartupJson(@Body() dto: CreateStartupDto) {
+    const startup = await this.adminService.createStartup(dto);
+    return { message: 'Startup created', startup };
   }
 
-  @Post('startups/delete/:id')
-  async deleteStartup(@Param('id', ParseIntPipe) id: number, @Req() req: Request, @Res() res) {
+  @Post('startups/edit-json/:id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  async updateStartupJson(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStartupDto) {
+    const startup = await this.adminService.updateStartup(id, dto);
+    return { message: 'Startup updated', startup };
+  }
+
+  @Post('startups/delete-json/:id')
+  async deleteStartupJson(@Param('id', ParseIntPipe) id: number) {
     try {
       await this.adminService.deleteStartup(id);
-      req.flash('success', 'Startup deleted successfully!');
-    } catch (error) {
-      console.error(`Error deleting startup ${id}:`, error);
-      const errorMessage = error instanceof NotFoundException ? 'Startup not found.' : 'Could not delete startup.';
-      req.flash('error', errorMessage);
+      return { message: 'Startup deleted' };
+    } catch (e: any) {
+      if (e instanceof BadRequestException) {
+        throw e;
+      }
+      throw e;
     }
-    return res.redirect('/admin/startups');
   }
 }

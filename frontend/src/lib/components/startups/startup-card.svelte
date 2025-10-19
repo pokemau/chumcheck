@@ -62,7 +62,7 @@
 </script>
 
 <a
-  href={`/startups/${startup.id}/${startup?.qualificationStatus === 3 ? 'readiness-level' : 'pending'}`}
+  href={`/startups/${startup.id}/${startup?.qualificationStatus === QualificationStatus.QUALIFIED ? 'assessment' : 'pending'}`}
   class="block"
   onclick={(e) => {
     if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
