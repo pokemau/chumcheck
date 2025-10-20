@@ -8,8 +8,6 @@
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
   import axiosInstance from '$lib/axios';
   import { useQueries } from '@sveltestack/svelte-query';
-  import { ReadinessType } from '$lib/utils';
-  import { Calendar, Users, Clock, Eye } from 'lucide-svelte';
 
   export let data: PageData;
 
@@ -32,6 +30,31 @@
     if (!showDialog) selectedStartup = null;
   }
 
+
+  // Assign multiple assessments to a startup
+  async function assignAssessmentsToStartup(startupId: number, assessmentTypeIds: number[]) {
+    try {
+      // Send all assessmentTypeIds in a single request as required by backend
+      const response = await axiosInstance.post(
+        `/assessments/startup-assessment`,
+        {
+          startupId,
+          assessmentTypeIds
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning assessments:', error);
+      throw error;
+    }
+  }
+
+  // Approve startup and assign mentor (unchanged)
   async function approveStartup(startupId: number, selectedMentor: any) {
     const response = await fetch(
       `${PUBLIC_API_URL}/startups/${startupId}/approve-applicant/`,
@@ -64,7 +87,8 @@
         // Refetch the queries
         await Promise.all([
           $queries[0].refetch(),
-          $queries[1].refetch()
+          $queries[1].refetch(),
+          $queries[2].refetch()
         ]);
         
         // Close the dialog
@@ -90,7 +114,8 @@
         // Refetch the queries
         await Promise.all([
           $queries[0].refetch(),
-          $queries[1].refetch()
+          $queries[1].refetch(),
+          $queries[2].refetch()
         ]);
         
         // Close the dialog
@@ -102,6 +127,19 @@
       console.error('Error waitlisting startup:', error);
       throw error;
     }
+  }
+
+  async function getAssessmentTypesWithFields() {
+    const { data: types } = await axiosInstance.get('/assessments/types');
+
+    const fieldsByType = await Promise.all(
+      types.map(async (t: { id: number }) => {
+        const { data: fields } = await axiosInstance.get(`/assessments/types/${t.id}/fields`);
+        return { ...t, fields };
+      })
+    );
+
+    return fieldsByType;
   }
 
   const queries = useQueries([
@@ -130,7 +168,14 @@
         ).data,
       cacheTime: 0,
       staleTime: 0
-    }
+    },
+    {
+      queryKey: ['assessments'],
+      queryFn: async () =>
+      getAssessmentTypesWithFields(),
+      cacheTime: 0,
+      staleTime: 0
+    },
   ]);
 
   // Update applicants based on selected tab and query results
@@ -163,7 +208,7 @@
   <title>ChumCheck - Applications</title>
 </svelte:head>
 
-{#if $queries[0].isLoading || $queries[1].isLoading}
+{#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
   <div class="flex items-center justify-center h-64">
     <div class="flex items-center gap-3">
       <div class="loader"></div>
@@ -172,6 +217,7 @@
   </div>
 {:else}
   {@const mentors = $queries[1].data}
+  {@const assessments = $queries[2].data}
   <div class="flex flex-col gap-3">
     <div class="flex justify-between rounded-lg bg-background">
       <Tabs.Root value={selectedTab}>
@@ -249,8 +295,10 @@
       {showDialog}
       {toggleDialog}
       {waitlistStartup}
-      mentors={$queries[1].data || []}
+      mentors={mentors || []}
+      assessments={assessments || []}
       {approveStartup}
+      {assignAssessmentsToStartup}
     />
   {:else if selectedTab === 'waitlisted'}
     <!-- WaitlistedDialog -->

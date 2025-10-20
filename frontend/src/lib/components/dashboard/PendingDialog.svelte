@@ -9,8 +9,10 @@
   export let showDialog: boolean = false;
   export let toggleDialog: () => void;
   export let waitlistStartup: (startupId: number, data: { message: string }) => Promise<any>;
-  export let mentors: any[] = [];
+  export let mentors: {id: number, email: string, firstName: string, lastName: string, role: string}[] = [];
+  export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
   export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
+  export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
 
   let showWaitlistDialog = false;
   let showApprovalDialog = false;
@@ -206,6 +208,8 @@
     showDialog={showApprovalDialog}
     toggleDialog={toggleApprovalDialog}
     {mentors}
+    {assessments}
     onApprove={approveStartup}
+    {assignAssessmentsToStartup}
   />
 {/if}
