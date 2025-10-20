@@ -258,7 +258,7 @@ export class RoadblockService {
 
     const basePrompt = await createBasePrompt(startup, this.em);
 
-    let prompt = `${basePrompt}
+    const prompt = `${basePrompt}
 
         Current Roadblock Details:
         Description: ${roadblock.description}

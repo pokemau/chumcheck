@@ -5,6 +5,6 @@ import { AiModule } from 'src/ai/ai.module';
 @Module({
   imports: [AiModule],
   providers: [RoadblockService],
-  controllers: [RoadblockController]
+  controllers: [RoadblockController],
 })
 export class RoadblockModule {}

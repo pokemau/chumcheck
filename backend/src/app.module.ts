@@ -23,6 +23,7 @@ import { ProgressModule } from './progress/progress.module';
 import { OverviewModule } from './overview/overview.module';
 import { ElevateModule } from './elevate/elevate.module';
 import { AssessmentModule } from './assessment/assessment.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   controllers: [AppController],
@@ -47,6 +48,7 @@ import { AssessmentModule } from './assessment/assessment.module';
     OverviewModule,
     ChatHistoryModule,
     ElevateModule,
+    UploadModule,
     AdminModule,
     AssessmentModule,
   ],
