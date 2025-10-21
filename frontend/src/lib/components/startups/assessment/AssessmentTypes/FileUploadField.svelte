@@ -241,10 +241,11 @@
       </div>
       {#each uploadedFiles as file, index}
         <div
-          class="flex w-full justify-between items-center bg-gray-50 dark:bg-gray-800 rounded p-2"
+          class="flex w-fit justify-between items-center bg-gray-50 dark:bg-gray-800 rounded p-1"
         >
           <a
             href={makeAbsoluteUrl(file.url)}
+            download={file.fileName}
             target="_blank"
             rel="noopener noreferrer"
             class="text-blue-500 hover:underline cursor-pointer flex-1 truncate"
