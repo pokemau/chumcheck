@@ -2,6 +2,7 @@
   import { createEventDispatcher } from 'svelte';
   import Spinner from 'lucide-svelte/icons/loader-circle';
   import X from 'lucide-svelte/icons/x';
+  import Download from 'lucide-svelte/icons/download';
   import AssessmentLabel from './AssessmentLabel.svelte';
   import axiosInstance from '$lib/axios';
   import { toast } from 'svelte-sonner';
@@ -80,18 +81,15 @@
     const fileToRemove = uploadedFiles[index];
     
     try {
-      // Optimistically remove from UI
       const newUploadedFiles = uploadedFiles.filter((_, i) => i !== index);
       uploadedFiles = newUploadedFiles;
       
-      // Update value
       const newValue = newUploadedFiles.length > 0 
         ? JSON.stringify({ files: newUploadedFiles })
         : '';
       
       value = newValue;
 
-      // Immediately submit to database
       const payload = {
         startupId: parseInt(startupId, 10),
         assessmentName,
@@ -119,11 +117,9 @@
       console.log('File removed from database successfully');
       toast.success('File removed successfully');
       
-      // Dispatch event to parent to trigger refetch
       dispatch('fileRemoved');
     } catch (error) {
       console.error('Failed to remove file from database:', error);
-      // Rollback on error
       uploadedFiles = [
         ...uploadedFiles.slice(0, index), 
         fileToRemove, 
@@ -140,6 +136,25 @@
   function cancelRemove(): void {
     showDeleteConfirm = false;
     fileToDeleteIndex = null;
+  }
+
+  async function downloadFile(file: { url: string; fileName: string }): Promise<void> {
+    try {
+      const response = await fetch(makeAbsoluteUrl(file.url));
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Download started');
+    } catch (error) {
+      console.error('Failed to download file:', error);
+      toast.error('Failed to download file');
+    }
   }
 
   export async function uploadPendingFiles(): Promise<void> {
@@ -241,26 +256,40 @@
       </div>
       {#each uploadedFiles as file, index}
         <div
-          class="flex w-fit justify-between items-center bg-gray-50 dark:bg-gray-800 rounded p-1"
+          class="flex w-fit justify-between items-center rounded p-1"
         >
           <a
-            href={makeAbsoluteUrl(file.url)}
-            download={file.fileName}
+            href="#"
+            onclick={(e) => {
+              e.preventDefault();
+              downloadFile(file);
+            }}
             target="_blank"
             rel="noopener noreferrer"
-            class="text-blue-500 hover:underline cursor-pointer flex-1 truncate"
+            class="flex-1 truncate text-blue-500 hover:underline"
           >
             {file.fileName}
           </a>
-          {#if !isReadOnly}
+          <div class="flex flex-shrink-0 items-center gap-1">
             <button
               type="button"
-              onclick={() => confirmRemoveUploadedFile(index)}
-              class="ml-2 text-red-500 hover:text-red-700 p-1 flex-shrink-0"
+              onclick={() => downloadFile(file)}
+              class="p-1 text-blue-500 hover:text-blue-700"
+              title="Download file"
             >
-              <X size={16} />
+              <Download size={16} />
             </button>
-          {/if}
+            {#if !isReadOnly}
+              <button
+                type="button"
+                onclick={() => confirmRemoveUploadedFile(index)}
+                class="p-1 text-red-500 hover:text-red-700"
+                title="Remove file"
+              >
+                <X size={16} />
+              </button>
+            {/if}
+          </div>
         </div>
       {/each}
     </div>
@@ -273,15 +302,15 @@
       </div>
       {#each pendingFiles as file, index}
         <div
-          class="flex items-center justify-between bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded"
+          class="flex items-center justify-between rounded bg-yellow-50 p-2 dark:bg-yellow-900/20"
         >
-          <span class="flex-1 text-gray-700 dark:text-gray-300 truncate">
+          <span class="flex-1 truncate text-gray-700 dark:text-gray-300">
             {file.name}
           </span>
           <button
             type="button"
             onclick={() => removePendingFile(index)}
-            class="ml-2 text-red-500 hover:text-red-700 p-1 flex-shrink-0"
+            class="ml-2 flex-shrink-0 p-1 text-red-500 hover:text-red-700"
           >
             <X size={16} />
           </button>
@@ -305,7 +334,7 @@
       {:else}
         <div class="text-center">
           <p>Drop multiple files here or click to upload</p>
-          <p class="text-xs text-gray-500 mt-1">
+          <p class="mt-1 text-xs text-gray-500">
             You can upload multiple files at once
           </p>
         </div>
