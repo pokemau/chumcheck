@@ -51,8 +51,7 @@ export class AssessmentService {
     return fields.map(f => ({ id: f.assessment_id, label: f.description, fieldType: f.answerType as unknown as number }));
   }
 
-  async createField(params: { typeId: number; label: string; fieldType: number }): Promise<{ id: number }> {
-    const { typeId, label, fieldType } = params;
+  async createField(typeId: number, label: string, fieldType: number): Promise<{ id: number }> {
     const t = await this.em.findOne(AssessmentType, { id: typeId });
     if (!t) throw new NotFoundException('Type not found');
     const f = this.em.create(Assessment, { assessmentType: t, description: label, answerType: fieldType as unknown as AssessmentAnswerType } as any);
@@ -60,11 +59,11 @@ export class AssessmentService {
     return { id: f.assessment_id };
   }
 
-  async updateField(fieldId: number, changes: { label?: string; fieldType?: number }): Promise<void> {
+  async updateField(fieldId: number, label?: string, fieldType?: number): Promise<void> {
     const f = await this.em.findOne(Assessment, { assessment_id: fieldId });
     if (!f) throw new NotFoundException('Field not found');
-    if (typeof changes.label === 'string') f.description = changes.label;
-    if (typeof changes.fieldType === 'number') f.answerType = changes.fieldType as unknown as AssessmentAnswerType;
+    if (typeof label === 'string') f.description = label;
+    if (typeof fieldType === 'number') f.answerType = fieldType as unknown as AssessmentAnswerType;
     await this.em.persistAndFlush(f);
   }
 
@@ -75,51 +74,38 @@ export class AssessmentService {
   }
 
   async getStartupAssessments(startupId: number): Promise<AssessmentDto[]> {
-    // 1. Get all startup assessments for this startup with assessment type populated
     const startupAssessments = await this.em.find(StartupAssessment,
       { startupId },
       { populate: ['assessmentType'] }
     );
 
-    // 2. Group by assessment type and create final structure
     const groupedAssessments = new Map<string, AssessmentDto>();
 
     for (const sa of startupAssessments) {
-      // Get all assessment fields for this assessment type
       const assessmentFields = await this.em.find(Assessment, {
         assessmentType: sa.assessmentType,
       });
 
-      // Get all responses for this startup's assessment fields
       const responses = await this.em.find(StartupResponse, {
         startupId,
         assessment: { assessment_id: { $in: assessmentFields.map(af => af.assessment_id) } },
       });
 
-      // Create assessment fields with answers
       const fields: AssessmentFieldDto[] = assessmentFields.map(field => {
         const response = responses.find(r => r.assessment.assessment_id === field.assessment_id);
 
-        const baseField = {
+        return {
           id: field.assessment_id.toString(),
           description: field.description,
           type: AssessmentAnswerType[field.answerType],
           answer: response?.answerValue || '',
+          // For File type, answerValue contains the JSON with files array
+          ...(field.answerType === AssessmentAnswerType.File && response?.answerValue && {
+            fileUrl: response.answerValue
+          })
         };
-
-        // Add fileUrl and fileName only for File type responses that have a value
-        if (field.answerType === AssessmentAnswerType.File && response?.answerValue) {
-          return {
-            ...baseField,
-            fileUrl: response.answerValue,
-            fileName: response.fileName || undefined
-          };
-        }
-
-        return baseField;
       });
 
-      // Add to grouped result using the assessment type from the table
       groupedAssessments.set(sa.assessmentType.type, {
         name: sa.assessmentType.type,
         assessmentStatus: AssessmentStatus[sa.status],
@@ -134,34 +120,41 @@ export class AssessmentService {
     const em = this.em.fork();
 
     try {
-      // 1. Find the assessment type by name
+      console.log('=== SUBMIT ASSESSMENT SERVICE ===');
+      console.log('Received DTO:', JSON.stringify(submitDto, null, 2));
+
       const assessmentType = await em.findOne(AssessmentType, {
-        type: submitDto.assessmentType
+        type: submitDto.assessmentName
       });
 
       if (!assessmentType) {
-        throw new BadRequestException('Invalid assessment type');
+        throw new BadRequestException(`Assessment type "${submitDto.assessmentName}" not found`);
       }
 
-      // 2. Get startup assessment
       const startupAssessment = await em.findOne(StartupAssessment, {
         startupId: submitDto.startupId,
         assessmentType: assessmentType,
       });
 
       if (!startupAssessment) {
-        throw new BadRequestException('Assessment not found for startup');
+        throw new BadRequestException('Assessment not assigned to this startup');
       }
 
-      // 3. Get all required assessments for this type
       const requiredAssessments = await em.find(Assessment, {
         assessmentType: assessmentType,
       });
 
-      // 4. Save submitted answers
-      for (const answer of submitDto.answers) {
-        const assessment = requiredAssessments.find(a => a.assessment_id.toString() === answer.assessmentId);
-        if (!assessment) continue;
+      console.log('Required assessments:', requiredAssessments.map(a => ({ id: a.assessment_id, desc: a.description })));
+
+      for (const response of submitDto.responses) {
+        const assessment = requiredAssessments.find(a => a.assessment_id.toString() === response.assessmentId);
+        
+        if (!assessment) {
+          console.warn(`Assessment field ${response.assessmentId} not found, skipping`);
+          continue;
+        }
+
+        console.log(`Processing response for assessment ${response.assessmentId}:`, response.answerValue);
 
         const existingResponse = await em.findOne(StartupResponse, {
           startupId: submitDto.startupId,
@@ -169,25 +162,22 @@ export class AssessmentService {
         });
 
         if (existingResponse) {
-          existingResponse.answerValue = answer.answer;
-          // Only update fileName if it's provided
-          if (answer.fileName !== undefined) {
-            existingResponse.fileName = answer.fileName;
-          }
+          existingResponse.answerValue = response.answerValue;
           await em.persist(existingResponse);
+          console.log('Updated existing response');
         } else {
           const newResponse = em.create(StartupResponse, {
             startupId: submitDto.startupId,
             assessment: assessment,
-            answerValue: answer.answer,
-            // Only set fileName if it's provided
-            ...(answer.fileName !== undefined && { fileName: answer.fileName })
+            answerValue: response.answerValue,
           });
           await em.persist(newResponse);
+          console.log('Created new response');
         }
       }
 
       await em.flush();
+      console.log('=== SUBMIT COMPLETE ===');
     } catch (error) {
       console.error('Error submitting assessment:', error);
       throw error;
