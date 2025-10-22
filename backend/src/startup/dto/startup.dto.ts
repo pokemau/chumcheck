@@ -149,3 +149,9 @@ export class StartupApplicationDto {
   @IsNotEmpty()
   curriculumVitae: string;
 }
+
+export class WaitlistStartupDto {
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+}

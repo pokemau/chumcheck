@@ -243,4 +243,31 @@ export class AssessmentService {
       throw error;
     }
   }
+
+  // Create StartupAssessment for a startup and multiple assessment types
+  async createStartupAssessments(startupId: number, assessmentTypeIds: number[]): Promise<{ ids: number[] }> {
+    if (!Array.isArray(assessmentTypeIds) || assessmentTypeIds.length === 0) {
+      throw new BadRequestException('assessmentTypeIds must be a non-empty array');
+    }
+    const ids: number[] = [];
+    for (const assessmentTypeId of assessmentTypeIds) {
+      // Check if already exists
+      const existing = await this.em.findOne(StartupAssessment, { startupId, assessmentType: assessmentTypeId });
+      if (existing) continue; // skip duplicates
+
+      // Find assessment type
+      const assessmentType = await this.em.findOne(AssessmentType, { id: assessmentTypeId });
+      if (!assessmentType) continue; // skip invalid
+
+      // Create new StartupAssessment
+      const sa = this.em.create(StartupAssessment, {
+        startupId,
+        assessmentType,
+        status: AssessmentStatus.Pending
+      });
+      await this.em.persistAndFlush(sa);
+      ids.push(sa.id);
+    }
+    return { ids };
+  }
 }

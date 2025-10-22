@@ -34,7 +34,7 @@ export class CapsuleProposal {
     pricingStrategy: string;
   }[];
 
-  @Property()
+  @Property({type: 'text'})
   intellectualPropertyStatus!: string;
 
   @Property({ type: 'text', nullable: true })
@@ -45,6 +45,9 @@ export class CapsuleProposal {
 
   @Property({ type: 'text' })
   methodology!: string;
+
+  @Property({ type: 'text' })
+  aiAnalysisSummary!: string;
 
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
     owner: true,

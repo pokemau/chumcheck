@@ -74,6 +74,11 @@ export class AssessmentController {
     return { ok: true };
   }
 
+  @Post('startup-assessment')
+  async createStartupAssessment(@Body() body: { startupId: number; assessmentTypeIds: number[] }) {
+    return this.assessmentService.createStartupAssessments(body.startupId, body.assessmentTypeIds);
+  }
+
   // Existing startup assessment endpoints
   @Get('startup/:startupId')
   async getStartupAssessments(

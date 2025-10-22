@@ -1029,6 +1029,79 @@
     },
     {
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "default": "CURRENT_TIMESTAMP",
+          "mappedType": "date"
+        }
+      },
+      "name": "startup_waitlist_messages",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "startup_waitlist_messages_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "startup_waitlist_messages_startup_id_foreign": {
+          "constraintName": "startup_waitlist_messages_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.startup_waitlist_messages",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "createForeignKeyConstraint": true,
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
         "startup_id": {
           "name": "startup_id",
           "type": "int",
@@ -1778,13 +1851,12 @@
         },
         "intellectual_property_status": {
           "name": "intellectual_property_status",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "curriculum_vitae": {
           "name": "curriculum_vitae",
@@ -1806,6 +1878,15 @@
         },
         "methodology": {
           "name": "methodology",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "ai_analysis_summary": {
+          "name": "ai_analysis_summary",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,

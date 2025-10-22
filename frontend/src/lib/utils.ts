@@ -466,3 +466,12 @@ export const getStatusName = (s: 1 | 2 | 3 | 4 | 5 | 6 | 7) => {
 
   return status[s];
 };
+
+export const getAssessmentFieldType = (s: 1 | 2 | 3) => {
+  const fieldTypes = {
+    1: 'Short Answer',
+    2: 'Long Answer',
+    3: 'File Upload'
+  };
+  return fieldTypes[s];
+};
