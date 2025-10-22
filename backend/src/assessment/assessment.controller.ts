@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, Patch, ParseIntPipe, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  ParseIntPipe,
+  Delete,
+} from '@nestjs/common';
 import { AssessmentService } from './assessment.service';
 import { AssessmentDto } from './dto/assessment.dto';
 import { SubmitAssessmentDto } from './dto/assessment.dto';
@@ -19,7 +28,10 @@ export class AssessmentController {
   }
 
   @Patch('types/:id')
-  async renameType(@Param('id', ParseIntPipe) id: number, @Body() body: { name: string }) {
+  async renameType(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { name: string }
+  ) {
     await this.assessmentService.renameType(id, body.name);
     return { ok: true };
   }
@@ -37,13 +49,22 @@ export class AssessmentController {
   }
 
   @Post('fields')
-  async createField(@Body() body: { typeId: number; label: string; fieldType: number }) {
-    return this.assessmentService.createField(body);
+  async createField(
+    @Body() body: { typeId: number; label: string; fieldType: number }
+  ) {
+    return this.assessmentService.createField(
+      body.typeId,
+      body.label,
+      body.fieldType
+    );
   }
 
   @Patch('fields/:id')
-  async updateField(@Param('id', ParseIntPipe) id: number, @Body() body: { label?: string; fieldType?: number }) {
-    await this.assessmentService.updateField(id, body);
+  async updateField(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { label?: string; fieldType?: number }
+  ) {
+    await this.assessmentService.updateField(id, body.label, body.fieldType);
     return { ok: true };
   }
 
@@ -62,7 +83,13 @@ export class AssessmentController {
   }
 
   @Post('submit')
-  async submitAssessment(@Body() submitDto: SubmitAssessmentDto): Promise<void> {
+  async submitAssessment(
+    @Body() submitDto: SubmitAssessmentDto
+  ): Promise<void> {
+    console.log('=== RECEIVED SUBMIT REQUEST ===');
+    console.log('DTO:', JSON.stringify(submitDto, null, 2));
+    console.log('=== END RECEIVED DATA ===');
+
     await this.assessmentService.submitAssessment(submitDto);
   }
 
@@ -71,7 +98,10 @@ export class AssessmentController {
     @Param('startupId', ParseIntPipe) startupId: number,
     @Param('assessmentType') assessmentType: string
   ): Promise<void> {
-    await this.assessmentService.markAssessmentComplete(startupId, assessmentType);
+    await this.assessmentService.markAssessmentComplete(
+      startupId,
+      assessmentType
+    );
   }
 
   @Patch('startup/:startupId/assessment/:assessmentType/pending')
@@ -79,6 +109,9 @@ export class AssessmentController {
     @Param('startupId', ParseIntPipe) startupId: number,
     @Param('assessmentType') assessmentType: string
   ): Promise<void> {
-    await this.assessmentService.markAssessmentPending(startupId, assessmentType);
+    await this.assessmentService.markAssessmentPending(
+      startupId,
+      assessmentType
+    );
   }
 }

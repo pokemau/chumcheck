@@ -1,32 +1,33 @@
-import { Startup } from "src/entities/startup.entity";
-import { Rns } from "src/entities/rns.entity";
-import { StartupReadinessLevel } from "src/entities/startup-readiness-level.entity";
-import { EntityManager } from "@mikro-orm/core";
+import { Startup } from 'src/entities/startup.entity';
+import { Rns } from 'src/entities/rns.entity';
+import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
+import { EntityManager } from '@mikro-orm/core';
 
-export async function createBasePrompt(startup: Startup, em: EntityManager,): Promise<string | null> {
+export async function createBasePrompt(
+  startup: Startup,
+  em: EntityManager,
+): Promise<string | null> {
   const capsuleProposalInfo = startup.capsuleProposal;
   if (!capsuleProposalInfo) return null;
 
-const startupReadinessLevels = await em.find(
-        StartupReadinessLevel,
-        {
-        startup: startup,
-        },
-        {
-        populate: ['readinessLevel'],
-        },
-);
+  const startupReadinessLevels = await em.find(
+    StartupReadinessLevel,
+    {
+      startup: startup,
+    },
+    {
+      populate: ['readinessLevel'],
+    },
+  );
 
+  const trl = startupReadinessLevels[0].readinessLevel.level;
+  const mrl = startupReadinessLevels[1].readinessLevel.level;
+  const arl = startupReadinessLevels[2].readinessLevel.level;
+  const orl = startupReadinessLevels[3].readinessLevel.level;
+  const rrl = startupReadinessLevels[4].readinessLevel.level;
+  const irl = startupReadinessLevels[5].readinessLevel.level;
 
-const trl = startupReadinessLevels[0].readinessLevel.level;
-const mrl = startupReadinessLevels[1].readinessLevel.level;
-const arl = startupReadinessLevels[2].readinessLevel.level;
-const orl = startupReadinessLevels[3].readinessLevel.level;
-const rrl = startupReadinessLevels[4].readinessLevel.level;
-const irl = startupReadinessLevels[5].readinessLevel.level;
-
-
-return `
+  return `
     Given these data:
     Acceleration Proposal Title: ${capsuleProposalInfo.title}
     Duration: 3 months

@@ -13,18 +13,18 @@ export class ChatHistoryService {
     const chatHistory = await this.em.find(
       RnsChatHistory,
       { rns: { id: rnsId } },
-      { 
+      {
         orderBy: { createdAt: 'ASC' },
-        populate: ['rns']
-      }
+        populate: ['rns'],
+      },
     );
 
-    return chatHistory.map(message => ({
+    return chatHistory.map((message) => ({
       id: message.id,
       role: message.role,
       content: message.content,
       createdAt: message.createdAt,
-      refinedDescription: message.refinedDescription
+      refinedDescription: message.refinedDescription,
     }));
   }
 
@@ -32,13 +32,13 @@ export class ChatHistoryService {
     const chatHistory = await this.em.find(
       InitiativeChatHistory,
       { initiative: { id: initiativeId } },
-      { 
+      {
         orderBy: { createdAt: 'ASC' },
-        populate: ['initiative']
-      }
+        populate: ['initiative'],
+      },
     );
 
-    return chatHistory.map(message => ({
+    return chatHistory.map((message) => ({
       id: message.id,
       role: message.role,
       content: message.content,
@@ -46,7 +46,7 @@ export class ChatHistoryService {
       refinedDescription: message.refinedDescription,
       refinedMeasures: message.refinedMeasures,
       refinedTargets: message.refinedTargets,
-      refinedRemarks: message.refinedRemarks
+      refinedRemarks: message.refinedRemarks,
     }));
   }
 
@@ -54,19 +54,19 @@ export class ChatHistoryService {
     const chatHistory = await this.em.find(
       RoadblockChatHistory,
       { roadblock: { id: roadblockId } },
-      { 
+      {
         orderBy: { createdAt: 'ASC' },
-        populate: ['roadblock']
-      }
+        populate: ['roadblock'],
+      },
     );
 
-    return chatHistory.map(message => ({
+    return chatHistory.map((message) => ({
       id: message.id,
       role: message.role,
       content: message.content,
       createdAt: message.createdAt,
       refinedDescription: message.refinedDescription,
-      refinedFix: message.refinedFix
+      refinedFix: message.refinedFix,
     }));
   }
 
@@ -74,18 +74,18 @@ export class ChatHistoryService {
     const chatHistory = await this.em.find(
       RnaChatHistory,
       { rna: { id: rnaId } },
-      { 
+      {
         orderBy: { createdAt: 'ASC' },
-        populate: ['rna']
-      }
+        populate: ['rna'],
+      },
     );
 
-    return chatHistory.map(message => ({
+    return chatHistory.map((message) => ({
       id: message.id,
       role: message.role,
       content: message.content,
       createdAt: message.createdAt,
-      refinedRna: message.refinedRna
+      refinedRna: message.refinedRna,
     }));
   }
-} 
+}

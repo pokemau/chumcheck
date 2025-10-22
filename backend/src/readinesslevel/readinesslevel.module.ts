@@ -4,6 +4,6 @@ import { ReadinesslevelService } from './readinesslevel.service';
 
 @Module({
   controllers: [ReadinesslevelController],
-  providers: [ReadinesslevelService]
+  providers: [ReadinesslevelService],
 })
 export class ReadinesslevelModule {}
