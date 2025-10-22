@@ -1,4 +1,9 @@
-import { IsString, IsNumber, IsObject, ValidateNested, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  ValidateNested,
+  IsOptional,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class SubmitAnswerDto {
@@ -6,11 +11,7 @@ export class SubmitAnswerDto {
   assessmentId: string;
 
   @IsString()
-  answer: string;
-
-  @IsOptional()
-  @IsString()
-  fileName?: string;
+  answerValue: string; // Changed from 'answer' to match frontend payload
 }
 
 export class SubmitAssessmentDto {
@@ -18,11 +19,11 @@ export class SubmitAssessmentDto {
   startupId: number;
 
   @IsString()
-  assessmentType: string;
+  assessmentName: string;
 
   @ValidateNested({ each: true })
   @Type(() => SubmitAnswerDto)
-  answers: SubmitAnswerDto[];
+  responses: SubmitAnswerDto[];
 }
 
 export interface AssessmentFieldDto {
@@ -31,7 +32,6 @@ export interface AssessmentFieldDto {
   type: string;
   answer?: string;
   fileUrl?: string;
-  fileName?: string;
 }
 
 export interface AssessmentDto {

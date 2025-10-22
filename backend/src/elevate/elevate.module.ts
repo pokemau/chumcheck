@@ -4,6 +4,6 @@ import { ElevateController } from './elevate.controller';
 
 @Module({
   providers: [ElevateService],
-  controllers: [ElevateController]
+  controllers: [ElevateController],
 })
 export class ElevateModule {}

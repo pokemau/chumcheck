@@ -16,14 +16,14 @@ import { Type } from 'class-transformer';
 export class CreateInitiativeDto {
   @IsInt()
   initiativeNumber: number;
-  
+
   @IsEnum(RnsStatus)
   status: RnsStatus;
 
   @IsNotEmpty()
   @IsNumber()
   @Type(() => Number)
-  rnsId: number; 
+  rnsId: number;
 
   @IsBoolean()
   isAiGenerated: boolean;
@@ -76,7 +76,7 @@ export class UpdateInitiativeDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  rnsId: number; 
+  rnsId: number;
 
   @IsOptional()
   @IsBoolean()

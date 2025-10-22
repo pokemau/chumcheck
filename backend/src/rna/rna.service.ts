@@ -1,8 +1,19 @@
 import { EntityManager } from '@mikro-orm/core';
-import { BadRequestException, Body, Injectable, NotFoundException, Param, Patch } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Injectable,
+  NotFoundException,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { StartupRNA } from 'src/entities/rna.entity';
 import { Startup } from 'src/entities/startup.entity';
-import { CreateStartupRnaDto, GenerateRNAsDto, UpdateStartupRnaDto  } from './dto/rna.dto';
+import {
+  CreateStartupRnaDto,
+  GenerateRNAsDto,
+  UpdateStartupRnaDto,
+} from './dto/rna.dto';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { AiService } from 'src/ai/ai.service';
@@ -11,108 +22,130 @@ import { RnaChatHistory } from 'src/entities/rna-chat-history.entity';
 
 @Injectable()
 export class RnaService {
-    constructor(private em: EntityManager, private readonly aiService: AiService) {}
-    
-    async getRNAbyId(startupId: number) {
-      return await this.em.find(StartupRNA, { startup: startupId }, {
-        populate: ['readinessLevel']
-      });
-    }  
+  constructor(
+    private em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
-    async create(dto: CreateStartupRnaDto) {
-      if (!dto.readiness_level_id) {
-        throw new BadRequestException('readiness_level_id is required');
-      }
-    
-      const readinessRef = this.em.getReference(ReadinessLevel, dto.readiness_level_id);
-      const startupRef = this.em.getReference(Startup, dto.startup_id);
-    
-      const rna = this.em.create(StartupRNA, {
-        rna: dto.rna,
-        isAiGenerated: dto.isAiGenerated ?? false,
-        startup: startupRef,
-        readinessLevel: readinessRef,
-      });
-    
-      await this.em.persistAndFlush(rna);
-      return rna;
-    }
-    
+  async getRNAbyId(startupId: number) {
+    return await this.em.find(
+      StartupRNA,
+      { startup: startupId },
+      {
+        populate: ['readinessLevel'],
+      },
+    );
+  }
 
-    async update(id: number, dto: UpdateStartupRnaDto) {
-      const rna = await this.em.findOneOrFail(StartupRNA, { id });
-    
-      if (dto.rna !== undefined) {
-        rna.rna = dto.rna;
-      }
-
-      if (dto.isAiGenerated !== undefined) {
-        rna.isAiGenerated = dto.isAiGenerated;
-      }
-
-      await this.em.flush();
-      return rna;
+  async create(dto: CreateStartupRnaDto) {
+    if (!dto.readiness_level_id) {
+      throw new BadRequestException('readiness_level_id is required');
     }
 
-    async delete(id: number) {
-      const rna = await this.em.findOne(StartupRNA, { id });
-      if (!rna) throw new NotFoundException(`RNA with ID ${id} not found`);
-    
-      await this.em.removeAndFlush(rna);
-      return rna;
+    const readinessRef = this.em.getReference(
+      ReadinessLevel,
+      dto.readiness_level_id,
+    );
+    const startupRef = this.em.getReference(Startup, dto.startup_id);
+
+    const rna = this.em.create(StartupRNA, {
+      rna: dto.rna,
+      isAiGenerated: dto.isAiGenerated ?? false,
+      startup: startupRef,
+      readinessLevel: readinessRef,
+    });
+
+    await this.em.persistAndFlush(rna);
+    return rna;
+  }
+
+  async update(id: number, dto: UpdateStartupRnaDto) {
+    const rna = await this.em.findOneOrFail(StartupRNA, { id });
+
+    if (dto.rna !== undefined) {
+      rna.rna = dto.rna;
     }
 
-    async generateRNA(id: number) {
-      // 1. Validate startup exists
-      const startup = await this.em.findOne(Startup, { id: id }, {
-        populate:['capsuleProposal']
-      });
-      if (!startup) throw new NotFoundException('Startup not found');
-  
-      // 2. Get capsule proposal info
-      const capsuleProposalInfo = startup.capsuleProposal;
-      if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found.');
-  
-      // 3. Get existing RNA entries for this startup
-      const existingRNAs = await this.em.find(StartupRNA, { startup: startup }, {
-        populate: ['readinessLevel']
-      });
+    if (dto.isAiGenerated !== undefined) {
+      rna.isAiGenerated = dto.isAiGenerated;
+    }
 
-      // 4. Get all readiness levels for this startup
-      const startupReadinessLevels = await this.em.find(
-        StartupReadinessLevel,
-        { startup: startup },
-        { populate: ['readinessLevel'] },
-      );
+    await this.em.flush();
+    return rna;
+  }
 
-      // 5. Find readiness levels that don't have RNA yet
-      const readinessLevelsWithoutRNA = startupReadinessLevels.filter(
-        (startupReadinessLevel) => 
-          !existingRNAs.some(
-            (existingRNA) => existingRNA.readinessLevel.id === startupReadinessLevel.readinessLevel.id
-          )
-      );
+  async delete(id: number) {
+    const rna = await this.em.findOne(StartupRNA, { id });
+    if (!rna) throw new NotFoundException(`RNA with ID ${id} not found`);
 
-      // 6. If all readiness levels already have RNA, return empty array
-      if (readinessLevelsWithoutRNA.length === 0) {
-        return [];
-      }
+    await this.em.removeAndFlush(rna);
+    return rna;
+  }
 
-      // 7. Build readiness level data for prompt
-      const readinessLevelData = startupReadinessLevels.map((srl, index) => ({
-        type: srl.readinessLevel.readinessType,
-        level: srl.readinessLevel.level,
-        hasRNA: existingRNAs.some(rna => rna.readinessLevel.id === srl.readinessLevel.id)
-      }));
+  async generateRNA(id: number) {
+    // 1. Validate startup exists
+    const startup = await this.em.findOne(
+      Startup,
+      { id: id },
+      {
+        populate: ['capsuleProposal'],
+      },
+    );
+    if (!startup) throw new NotFoundException('Startup not found');
 
-      const trl = startupReadinessLevels[0]?.readinessLevel.level || 0;
-      const mrl = startupReadinessLevels[1]?.readinessLevel.level || 0;
-      const arl = startupReadinessLevels[2]?.readinessLevel.level || 0;
-      const orl = startupReadinessLevels[3]?.readinessLevel.level || 0;
-      const rrl = startupReadinessLevels[4]?.readinessLevel.level || 0;
-      const irl = startupReadinessLevels[5]?.readinessLevel.level || 0;
-  
-      const basePrompt = `
+    // 2. Get capsule proposal info
+    const capsuleProposalInfo = startup.capsuleProposal;
+    if (!capsuleProposalInfo)
+      throw new BadRequestException('No capsule proposal found.');
+
+    // 3. Get existing RNA entries for this startup
+    const existingRNAs = await this.em.find(
+      StartupRNA,
+      { startup: startup },
+      {
+        populate: ['readinessLevel'],
+      },
+    );
+
+    // 4. Get all readiness levels for this startup
+    const startupReadinessLevels = await this.em.find(
+      StartupReadinessLevel,
+      { startup: startup },
+      { populate: ['readinessLevel'] },
+    );
+
+    // 5. Find readiness levels that don't have RNA yet
+    const readinessLevelsWithoutRNA = startupReadinessLevels.filter(
+      (startupReadinessLevel) =>
+        !existingRNAs.some(
+          (existingRNA) =>
+            existingRNA.readinessLevel.id ===
+            startupReadinessLevel.readinessLevel.id,
+        ),
+    );
+
+    // 6. If all readiness levels already have RNA, return empty array
+    if (readinessLevelsWithoutRNA.length === 0) {
+      return [];
+    }
+
+    // 7. Build readiness level data for prompt
+    const readinessLevelData = startupReadinessLevels.map((srl, index) => ({
+      type: srl.readinessLevel.readinessType,
+      level: srl.readinessLevel.level,
+      hasRNA: existingRNAs.some(
+        (rna) => rna.readinessLevel.id === srl.readinessLevel.id,
+      ),
+    }));
+
+    const trl = startupReadinessLevels[0]?.readinessLevel.level || 0;
+    const mrl = startupReadinessLevels[1]?.readinessLevel.level || 0;
+    const arl = startupReadinessLevels[2]?.readinessLevel.level || 0;
+    const orl = startupReadinessLevels[3]?.readinessLevel.level || 0;
+    const rrl = startupReadinessLevels[4]?.readinessLevel.level || 0;
+    const irl = startupReadinessLevels[5]?.readinessLevel.level || 0;
+
+    const basePrompt = `
       Given these data:
       Acceleration Proposal Title: ${capsuleProposalInfo.title}
       Duration: 3 months
@@ -141,9 +174,11 @@ export class RnaService {
       IRL ${irl}
       `;
 
-      // 8. Create prompt for only missing readiness types
-      const missingReadinessTypes = readinessLevelsWithoutRNA.map(rl => rl.readinessLevel.readinessType);
-      const prompt = `
+    // 8. Create prompt for only missing readiness types
+    const missingReadinessTypes = readinessLevelsWithoutRNA.map(
+      (rl) => rl.readinessLevel.readinessType,
+    );
+    const prompt = `
       ${basePrompt}
       
       TASK: Generate a RNA(Readiness and Needs Assessment) for the following readiness levels that are missing: ${missingReadinessTypes.join(', ')}.
@@ -155,82 +190,95 @@ export class RnaService {
       - rna should be specific to that readiness type only.
       `;
 
-      const generatedRNAs = await this.aiService.generateRNAsFromPrompt(prompt);
+    const generatedRNAs = await this.aiService.generateRNAsFromPrompt(prompt);
 
-      // 9. Create RNA entries only for missing readiness types
-      const createdRNAs: StartupRNA[] = [];
-      for (const generatedRNA of generatedRNAs) {
-        const matchingReadinessLevel = readinessLevelsWithoutRNA.find(
-          rl => rl.readinessLevel.readinessType === generatedRNA.readiness_level_type
-        );
+    // 9. Create RNA entries only for missing readiness types
+    const createdRNAs: StartupRNA[] = [];
+    for (const generatedRNA of generatedRNAs) {
+      const matchingReadinessLevel = readinessLevelsWithoutRNA.find(
+        (rl) =>
+          rl.readinessLevel.readinessType === generatedRNA.readiness_level_type,
+      );
 
-        if (matchingReadinessLevel) {
-          const newRNA = new StartupRNA();
-          newRNA.rna = generatedRNA.rna;
-          newRNA.isAiGenerated = true; // Mark as AI generated
-          newRNA.startup = startup;
-          newRNA.readinessLevel = matchingReadinessLevel.readinessLevel;
+      if (matchingReadinessLevel) {
+        const newRNA = new StartupRNA();
+        newRNA.rna = generatedRNA.rna;
+        newRNA.isAiGenerated = true; // Mark as AI generated
+        newRNA.startup = startup;
+        newRNA.readinessLevel = matchingReadinessLevel.readinessLevel;
 
-          await this.em.persist(newRNA);
-          createdRNAs.push(newRNA);
-        }
+        await this.em.persist(newRNA);
+        createdRNAs.push(newRNA);
       }
-      await this.em.flush();
-  
-      return createdRNAs.map((r: StartupRNA) => ({
-          id: r.id,
-          rna: r.rna,
-          isAiGenerated: r.isAiGenerated,
-          startup: r.startup,
-          readinessLevel: r.readinessLevel
-      }));
     }
+    await this.em.flush();
 
-    async checkIfAllReadinessTypesHaveRNA(startupId: number): Promise<boolean> {
-      const startup = await this.em.findOne(Startup, { id: startupId });
-      if (!startup) throw new NotFoundException('Startup not found');
+    return createdRNAs.map((r: StartupRNA) => ({
+      id: r.id,
+      rna: r.rna,
+      isAiGenerated: r.isAiGenerated,
+      startup: r.startup,
+      readinessLevel: r.readinessLevel,
+    }));
+  }
 
-      // Get all readiness levels for this startup
-      const startupReadinessLevels = await this.em.find(
-        StartupReadinessLevel,
-        { startup: startup },
-        { populate: ['readinessLevel'] },
+  async checkIfAllReadinessTypesHaveRNA(startupId: number): Promise<boolean> {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) throw new NotFoundException('Startup not found');
+
+    // Get all readiness levels for this startup
+    const startupReadinessLevels = await this.em.find(
+      StartupReadinessLevel,
+      { startup: startup },
+      { populate: ['readinessLevel'] },
+    );
+
+    // Get existing RNA entries for this startup
+    const existingRNAs = await this.em.find(
+      StartupRNA,
+      { startup: startup },
+      {
+        populate: ['readinessLevel'],
+      },
+    );
+
+    // Check if all readiness levels have RNA
+    return startupReadinessLevels.every((startupReadinessLevel) =>
+      existingRNAs.some(
+        (existingRNA) =>
+          existingRNA.readinessLevel.id ===
+          startupReadinessLevel.readinessLevel.id,
+      ),
+    );
+  }
+
+  async refineRna(
+    rnaId: number,
+    chatHistory: { role: 'User' | 'Ai'; content: string }[],
+    latestPrompt: string,
+  ): Promise<{
+    refinedRna?: string;
+    aiCommentary: string;
+  }> {
+    const rna = await this.em.findOne(
+      StartupRNA,
+      { id: rnaId },
+      {
+        populate: ['startup', 'startup.capsuleProposal', 'readinessLevel'],
+      },
+    );
+    if (!rna) throw new NotFoundException('RNA not found');
+
+    const startup = rna.startup;
+    const capsuleProposalInfo = startup.capsuleProposal;
+    if (!capsuleProposalInfo)
+      throw new BadRequestException(
+        'No capsule proposal found for this startup.',
       );
 
-      // Get existing RNA entries for this startup
-      const existingRNAs = await this.em.find(StartupRNA, { startup: startup }, {
-        populate: ['readinessLevel']
-      });
+    const basePrompt = await createBasePrompt(startup, this.em);
 
-      // Check if all readiness levels have RNA
-      return startupReadinessLevels.every(
-        (startupReadinessLevel) => 
-          existingRNAs.some(
-            (existingRNA) => existingRNA.readinessLevel.id === startupReadinessLevel.readinessLevel.id
-          )
-      );
-    }
-
-    async refineRna(
-      rnaId: number,
-      chatHistory: { role: 'User' | 'Ai'; content: string }[],
-      latestPrompt: string
-    ): Promise<{ 
-      refinedRna?: string;
-      aiCommentary: string 
-    }> {
-      const rna = await this.em.findOne(StartupRNA, { id: rnaId }, { 
-        populate: ['startup', 'startup.capsuleProposal', 'readinessLevel'] 
-      });
-      if (!rna) throw new NotFoundException('RNA not found');
-
-      const startup = rna.startup;
-      const capsuleProposalInfo = startup.capsuleProposal;
-      if (!capsuleProposalInfo) throw new BadRequestException('No capsule proposal found for this startup.');
-
-      const basePrompt = await createBasePrompt(startup, this.em);
-
-      let prompt = `${basePrompt}
+    const prompt = `${basePrompt}
 
       Current RNA Details:
       Readiness Type: ${rna.readinessLevel.readinessType}
@@ -238,7 +286,7 @@ export class RnaService {
       RNA Description: ${rna.rna}
       
       Chat History:
-      ${chatHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}
+      ${chatHistory.map((msg) => `${msg.role}: ${msg.content}`).join('\n')}
 
       User: ${latestPrompt}
 
@@ -264,25 +312,25 @@ export class RnaService {
       - The JSON must be valid and properly formatted
       - Always include the ========= separator followed by your commentary`;
 
-      const result = await this.aiService.refineRna(prompt);
+    const result = await this.aiService.refineRna(prompt);
 
-      // Save chat history
-      const newMessages = [
-        new RnaChatHistory({
-          rna,
-          role: 'User',
-          content: latestPrompt
-        }),
-        new RnaChatHistory({
-          rna,
-          role: 'Ai',
-          content: result.aiCommentary,
-          refinedRna: result.refinedRna
-        })
-      ];
+    // Save chat history
+    const newMessages = [
+      new RnaChatHistory({
+        rna,
+        role: 'User',
+        content: latestPrompt,
+      }),
+      new RnaChatHistory({
+        rna,
+        role: 'Ai',
+        content: result.aiCommentary,
+        refinedRna: result.refinedRna,
+      }),
+    ];
 
-      await this.em.persistAndFlush(newMessages);
+    await this.em.persistAndFlush(newMessages);
 
-      return result;
-    }
+    return result;
+  }
 }

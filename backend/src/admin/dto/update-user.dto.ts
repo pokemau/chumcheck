@@ -1,4 +1,10 @@
-import { IsEmail, IsString, IsOptional, IsEnum, IsNotEmpty } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsNotEmpty,
+} from 'class-validator';
 import { Role } from '../../entities/enums/role.enum'; // Adjust path as needed
 
 export class UpdateUserDto {

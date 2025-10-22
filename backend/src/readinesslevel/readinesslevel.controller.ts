@@ -39,7 +39,7 @@ export class ReadinesslevelController {
   }
 
   @Get('/criterion')
-  async getReadinessLevelCriterion(){
+  async getReadinessLevelCriterion() {
     return await this.readinessLevelService.getReadinessLevelCriterion();
   }
 
@@ -65,10 +65,11 @@ export class ReadinesslevelController {
     return await this.readinessLevelService.getUratQuestionAnswers(startupId);
   }
 
-
   @UseGuards(JwtGuard)
   @Get('readiness-level')
-  async getStartupReadinessLevels(@Query('startupId', ParseIntPipe) startupId: number) {
+  async getStartupReadinessLevels(
+    @Query('startupId', ParseIntPipe) startupId: number,
+  ) {
     return await this.readinessLevelService.getStartupReadinessLevel(startupId);
   }
 
@@ -76,7 +77,7 @@ export class ReadinesslevelController {
   @Patch('/urat-question-answers/:id')
   async updateUratQuestionAnswer(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { response?: string; score?: number }
+    @Body() dto: { response?: string; score?: number },
   ) {
     return await this.readinessLevelService.updateUratQuestionAnswer(id, dto);
   }
@@ -85,8 +86,11 @@ export class ReadinesslevelController {
   @Patch('/calculator-question-answers/:id')
   async updateCalculatorQuestionAnswer(
     @Param('id', ParseIntPipe) id: number,
-    @Body() dto: { calculatorQuestionId?: number }
+    @Body() dto: { calculatorQuestionId?: number },
   ) {
-    return await this.readinessLevelService.updateCalculatorQuestionAnswer(id, dto);
+    return await this.readinessLevelService.updateCalculatorQuestionAnswer(
+      id,
+      dto,
+    );
   }
 }

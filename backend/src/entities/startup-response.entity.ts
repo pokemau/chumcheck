@@ -12,11 +12,8 @@ export class StartupResponse {
   @ManyToOne(() => Assessment, { deleteRule: 'cascade' })
   assessment!: Assessment; // the specific question answered
 
-  @Property({ nullable: true })
-  answerValue?: string; // text or file URL
-
-  @Property({ nullable: true })
-  fileName?: string; // text or file URL
+  @Property({ nullable: true, type: 'text' })
+  answerValue?: string; // text, file URL, or JSON array of files
 
   @Property()
   submittedAt?: Date = new Date();
