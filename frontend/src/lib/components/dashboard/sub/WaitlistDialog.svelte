@@ -7,7 +7,10 @@
   export let showDialog: boolean = false;
   export let toggleDialog: () => void;
   export let startupId: number;
-  export let waitlistStartup: (startupId: number, data: { message: string }) => Promise<any>;
+  export let waitlistStartup: (startupId: number, message: string) => Promise<any>;
+  
+  // Get the current user's ID from session/store
+  // This should be replaced with actual user ID from your auth system
 
   let reason: string = '';
   let isLoading = false;
@@ -15,9 +18,10 @@
   async function handleSubmit() {
     isLoading = true;
     try {
-      await waitlistStartup(startupId, { message: reason });
+      await waitlistStartup(startupId, reason);
       reason = '';
       toast.success('Startup has been waitlisted successfully');
+      toggleDialog();
     } catch (error) {
       console.error('Error occurred while waitlisting startup:', error);
       toast.error('Error occurred while waitlisting startup. Please try again.');

@@ -20,7 +20,7 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto, WaitlistStartupDto } from './dto';
+import { StartupApplicationDto, WaitlistStartupDto, AppointMentorsDto, ChangeMentorDto } from './dto';
 import { Request } from 'express';
 import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
@@ -192,14 +192,27 @@ export class StartupController {
   @Post(':startupId/appoint-mentors')
   async appointMentors(
     @Param('startupId') startupId: number,
-    @Body('mentor_ids') mentorIds: number[],
-    @Body('cohort_id') cohortId: number,
+    @Body() dto: AppointMentorsDto  
   ) {
     return await this.startupService.appointMentors(
       startupId,
-      mentorIds,
-      cohortId,
+      dto
     );
+  }
+
+  @Patch(':startupId/mark-complete')
+  async markStartupComplete(
+    @Param('startupId', ParseIntPipe) startupId: number
+  ) {
+    return await this.startupService.markComplete(startupId);
+  }
+
+  @Patch(':startupId/change-mentor')
+  async changeMentor(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: ChangeMentorDto
+  ) {
+    return await this.startupService.changeMentor(startupId, dto);
   }
 
   @Get(':startupId/allow-rnas')

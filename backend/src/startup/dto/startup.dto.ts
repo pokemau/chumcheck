@@ -154,4 +154,23 @@ export class WaitlistStartupDto {
   @IsString()
   @IsNotEmpty()
   message: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  managerId: number;
+}
+
+export class AppointMentorsDto {
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsNotEmpty()
+  @Type(() => Number)
+  mentorIds: number[];
+}
+
+export class ChangeMentorDto {
+  @IsNotEmpty()
+  @IsNumber()
+  mentorId: number;
 }

@@ -19,7 +19,7 @@ import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
 import { StartupWaitlistMessage } from 'src/entities/startup-waitlist-message.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto, StartupApplicationDtoOld, WaitlistStartupDto } from './dto';
+import { StartupApplicationDto, StartupApplicationDtoOld, WaitlistStartupDto, AppointMentorsDto, ChangeMentorDto } from './dto';
 import { AiService } from '../ai/ai.service';
 import { CreateStartupDto } from '../admin/dto/create-startup.dto';
 
@@ -76,7 +76,9 @@ export class StartupService {
     return await this.em.find(
       Startup,
       {},
-      { populate: ['user', 'members', 'capsuleProposal'] }
+      { 
+        populate: ['user', 'members', 'capsuleProposal', 'waitlistMessages', 'waitlistMessages.manager', 'mentors'],
+      }
     );
   }
 
@@ -584,10 +586,17 @@ export class StartupService {
 
     startup.qualificationStatus = QualificationStatus.WAITLISTED;
     
+    // Find the manager who is waitlisting the startup
+    const manager = await this.em.findOne(User, { id: dto.managerId });
+    if (!manager) {
+      throw new NotFoundException(`Manager with ID ${dto.managerId} does not exist.`);
+    }
+
     // Create waitlist message
     const waitlistMessage = new StartupWaitlistMessage();
     waitlistMessage.startup = startup;
     waitlistMessage.message = dto.message;
+    waitlistMessage.manager = manager;
     
     this.em.persist(waitlistMessage);
     await this.em.flush();
@@ -600,8 +609,7 @@ export class StartupService {
 
   async appointMentors(
     startupId: number,
-    mentorIds: number[],
-    cohortId: number,
+    dto: AppointMentorsDto
   ) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
@@ -611,18 +619,13 @@ export class StartupService {
     }
 
     const mentors = await this.em.find(User, {
-      id: { $in: mentorIds },
+      id: { $in: dto.mentorIds },
       role: Role.Mentor,
     });
-    if (mentors.length !== mentorIds.length) {
+    if (mentors.length !== dto.mentorIds.length) {
       throw new BadRequestException('One or more mentor IDs are invalid.');
     }
     startup.mentors.set(mentors);
-
-    // Cohort ID given but we dont know what they are for yet
-    // if (cohortId) {
-    //   startup.cohortId = cohortId;
-    // }
 
     await this.em.flush();
     return {
@@ -655,6 +658,38 @@ export class StartupService {
       startup: startupId,
     });
     return count > 0;
+  }
+
+  async markComplete(startupId: number) {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    startup.qualificationStatus = QualificationStatus.COMPLETED;
+    await this.em.flush();
+    return { message: `Startup with ID ${startupId} has been marked as completed.` };
+  }
+
+  async changeMentor(startupId: number, dto: ChangeMentorDto) {
+    const startup = await this.em.findOne(Startup, { id: startupId }, { populate: ['mentors'] });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    const newMentor = await this.em.findOne(User, { id: dto.mentorId, role: Role.Mentor });
+    if (!newMentor) {
+      throw new NotFoundException(`Mentor with ID ${dto.mentorId} not found`);
+    }
+
+    // Replace existing mentors with the new mentor
+    startup.mentors.set([newMentor]);
+    
+    await this.em.flush();
+    return {
+      message: `Mentor has been successfully changed for Startup ID ${startupId}.`,
+      startup
+    };
   }
 
   private async calculateTechnologyLevel(startupId: number): Promise<number> {

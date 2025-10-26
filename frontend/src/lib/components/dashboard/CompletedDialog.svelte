@@ -1,45 +1,27 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button/index.js';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import WaitlistDialog from './sub/WaitlistDialog.svelte';
-  import ApprovalDialog from './sub/ApprovalDialog.svelte';
+  import { X } from 'lucide-svelte';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
   import { getBadgeColorObject } from '$lib/utils';
 
   export let startup: any;
   export let showDialog: boolean = false;
   export let toggleDialog: () => void;
-  export let waitlistStartup: (startupId: number, message: string) => Promise<any>;
-  export let mentors: {id: number, email: string, firstName: string, lastName: string, role: string}[] = [];
-  export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
-  export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
-  export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
+  export let startupAssessments: Array<{ name: string; assessmentStatus: string; assessmentFields?: any[] }> = [];
 
-  let showWaitlistDialog = false;
-  let showApprovalDialog = false;
-
-  $: statusColors = getBadgeColorObject('Pending');
-
-  function toggleWaitlistDialog() {
-    showWaitlistDialog = !showWaitlistDialog;
-  }
-
-  function toggleApprovalDialog() {
-    showApprovalDialog = !showApprovalDialog;
-  }
+  $: statusColors = getBadgeColorObject('Completed');
 
   function getMemberCount(applicant: any) {
-    // Use actual members array length if available, otherwise default to 1 (just the founder)
     if (applicant.members && Array.isArray(applicant.members)) {
-      return applicant.members.length + 1; // +1 for the founder (user)
+      return applicant.members.length + 1;
     }
-    return 1; // Default to 1 (just the founder)
+    return 1;
   }
 </script>
 
 {#if startup}
-  {@const startupData = startup}
-  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>  
+  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
     <Dialog.Content class="max-w-4xl max-h-[90vh] overflow-y-auto">
       <!-- Dialog Header -->
       <Dialog.Header class="p-6 border-b">
@@ -52,15 +34,31 @@
       <div class="p-6 pt-2 overflow-y-auto">
         <!-- Status Message -->
         <div class="mb-6 p-4 rounded-lg {statusColors.bg} border {statusColors.border}">
-          <h3 class="font-bold mb-1 {statusColors.text}">Status: Pending</h3>
-          <p class="text-sm {statusColors.text}">This startup application is awaiting review.</p>
+          <h3 class="font-bold mb-1 {statusColors.text}">Status: Completed</h3>
+          <p class="text-sm {statusColors.text}">This startup has completed its journey in the program.</p>
+        </div>
+
+        <!-- Assigned Assessments Section -->
+        <div class="mb-8">
+          <h3 class="text-lg font-medium mb-2">Assigned Assessments</h3>
+          {#if startupAssessments.length === 0}
+            <p class="text-sm text-muted-foreground">No assessments assigned.</p>
+          {:else}
+            <div class="flex flex-wrap gap-2">
+              {#each startupAssessments as a}
+                <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary/10 border border-border text-foreground">
+                  {a.name}
+                </span>
+              {/each}
+            </div>
+          {/if}
         </div>
 
         <!-- AI Analysis Summary Section -->
         {#if startup.capsuleProposal?.aiAnalysisSummary}
-          <div class="border border-border rounded-lg p-4 mb-6">
+          <div class="border border-border bg-primary/10 rounded-lg p-4 mb-6">
             <h3 class="text-lg font-semibold text-foreground mb-3">AI Analysis Summary</h3>
-            <p class="text-muted-foreground leading-relaxed">
+            <p class="text-foreground leading-relaxed">
               {startup.capsuleProposal.aiAnalysisSummary}
             </p>
           </div>
@@ -70,11 +68,10 @@
         <div>
           <h3 class="text-xl font-bold text-foreground mb-4">Detailed Application Information</h3>
           <div class="border-t pt-4 space-y-14">
-            <!-- Row: Description and Target Market -->
             <div class="flex flex-col gap-6">
               <div>
                 <h4 class="font-semibold text-foreground mb-2">Startup Description</h4>
-                <div class="border border-border rounded-lg p-3 h-full">
+                <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                   <p class="text-muted-foreground text-sm">
                     {startup.capsuleProposal?.description || 'No description available'}
                   </p>
@@ -84,7 +81,7 @@
               {#if startup.capsuleProposal?.targetMarket}
                 <div>
                   <h4 class="font-semibold text-foreground mb-2">Target Market</h4>
-                  <div class="border border-border rounded-lg p-3 h-full">
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
                       {startup.capsuleProposal.targetMarket}
                     </p>
@@ -93,51 +90,53 @@
               {/if}
 
               {#if startup.capsuleProposal?.problemStatement}
-                  <div>
-                    <h4 class="font-semibold text-foreground mb-2">Problem Statement</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
-                      <p class="text-muted-foreground text-sm">
-                        {startup.capsuleProposal.problemStatement}
-                      </p>
-                    </div>
-                  </div>
-                {/if}
-                {#if startup.capsuleProposal?.solutionDescription}
-                  <div>
-                    <h4 class="font-semibold text-foreground mb-2">Solution Description</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
-                      <p class="text-muted-foreground text-sm">
-                        {startup.capsuleProposal.solutionDescription}
-                      </p>
-                    </div>
-                  </div>
-                {/if}
-
                 <div>
-                  <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
-                  <div class="border border-border rounded-lg p-3 h-full">
+                  <h4 class="font-semibold text-foreground mb-2">Problem Statement</h4>
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
-                      {getMemberCount(startup)} members
+                      {startup.capsuleProposal.problemStatement}
                     </p>
                   </div>
                 </div>
-                {#if startup.capsuleProposal?.intellectualPropertyStatus}
-                  <div>
-                    <h4 class="font-semibold text-foreground mb-2">Intellectual Property</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
-                      <p class="text-muted-foreground text-sm">
-                        {startup.capsuleProposal.intellectualPropertyStatus}
-                      </p>
-                    </div>
+              {/if}
+
+              {#if startup.capsuleProposal?.solutionDescription}
+                <div>
+                  <h4 class="font-semibold text-foreground mb-2">Solution Description</h4>
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
+                    <p class="text-muted-foreground text-sm">
+                      {startup.capsuleProposal.solutionDescription}
+                    </p>
                   </div>
-                {/if}
+                </div>
+              {/if}
+
+              <div>
+                <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
+                <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
+                  <p class="text-muted-foreground text-sm">
+                    {getMemberCount(startup)} members
+                  </p>
+                </div>
+              </div>
+
+              {#if startup.capsuleProposal?.intellectualPropertyStatus}
+                <div>
+                  <h4 class="font-semibold text-foreground mb-2">Intellectual Property</h4>
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
+                    <p class="text-muted-foreground text-sm">
+                      {startup.capsuleProposal.intellectualPropertyStatus}
+                    </p>
+                  </div>
+                </div>
+              {/if}
             </div>
 
             <!-- Historical Timeline -->
             {#if startup.capsuleProposal?.historicalTimeline && startup.capsuleProposal.historicalTimeline.length > 0}
               <div class="mt-6">
                 <h4 class="font-semibold text-foreground mb-3">Historical Timeline</h4>
-                <div class="border border-border rounded-lg p-2">
+                <div class="border border-border bg-secondary/10 rounded-lg p-2">
                   <Table.Root>
                     <Table.Header>
                       <Table.Row>
@@ -162,7 +161,7 @@
             {#if startup.capsuleProposal?.competitiveAdvantageAnalysis && startup.capsuleProposal.competitiveAdvantageAnalysis.length > 0}
               <div class="mt-6">
                 <h4 class="font-semibold text-foreground mb-3">Competitive Analysis</h4>
-                <div class="border border-border rounded-lg p-2">
+                <div class="border border-border bg-secondary/10 rounded-lg p-2">
                   <Table.Root>
                     <Table.Header>
                       <Table.Row>
@@ -186,41 +185,7 @@
             {/if}
           </div>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex justify-end gap-3 mt-8">
-          <Button 
-            variant="outline"
-            class="transition-transform hover:scale-105 duration-200"
-            onclick={toggleWaitlistDialog}
-          >
-            Waitlist
-          </Button>
-          <Button 
-            class="transition-transform hover:scale-105 duration-200"
-            onclick={toggleApprovalDialog}
-          >
-            Approve
-          </Button>
-        </div>
       </div>
     </Dialog.Content>
   </Dialog.Root>
-
-  <WaitlistDialog
-    showDialog={showWaitlistDialog}
-    toggleDialog={toggleWaitlistDialog}
-    startupId={startup?.id}
-    {waitlistStartup}
-  />
-
-  <ApprovalDialog
-    {startup}
-    showDialog={showApprovalDialog}
-    toggleDialog={toggleApprovalDialog}
-    {mentors}
-    {assessments}
-    onApprove={approveStartup}
-    {assignAssessmentsToStartup}
-  />
 {/if}

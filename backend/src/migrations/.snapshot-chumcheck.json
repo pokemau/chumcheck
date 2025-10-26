@@ -1047,6 +1047,15 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "manager_id": {
+          "name": "manager_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "message": {
           "name": "message",
           "type": "text",
@@ -1094,6 +1103,19 @@
             "id"
           ],
           "referencedTableName": "public.startups",
+          "createForeignKeyConstraint": true,
+          "updateRule": "cascade"
+        },
+        "startup_waitlist_messages_manager_id_foreign": {
+          "constraintName": "startup_waitlist_messages_manager_id_foreign",
+          "columnNames": [
+            "manager_id"
+          ],
+          "localTableName": "public.startup_waitlist_messages",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
           "updateRule": "cascade"
         }
