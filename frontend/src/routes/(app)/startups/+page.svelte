@@ -282,7 +282,7 @@
     <div class="flex items-center gap-2">
       <span class="text-2xl font-bold"
         >{listOfStartups().length > 0
-          ? (completedStartups.length / listOfStartups().length) * 100
+          ? Math.round((completedStartups.length / listOfStartups().length) * 100)
           : 0}%</span
       >
     </div>
