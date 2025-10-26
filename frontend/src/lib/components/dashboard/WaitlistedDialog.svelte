@@ -1,32 +1,23 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button/index.js';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import WaitlistDialog from './sub/WaitlistDialog.svelte';
+  import { X } from 'lucide-svelte';
   import ApprovalDialog from './sub/ApprovalDialog.svelte';
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
   import { getBadgeColorObject } from '$lib/utils';
 
   export let startup: any;
   export let showDialog: boolean = false;
   export let toggleDialog: () => void;
-  export let waitlistStartup: (startupId: number, message: string) => Promise<any>;
-  export let mentors: {id: number, email: string, firstName: string, lastName: string, role: string}[] = [];
+  export let mentors: any[] = [];
   export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
   export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
   export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
 
-  let showWaitlistDialog = false;
   let showApprovalDialog = false;
+  let isLoading = false;
 
-  $: statusColors = getBadgeColorObject('Pending');
-
-  function toggleWaitlistDialog() {
-    showWaitlistDialog = !showWaitlistDialog;
-  }
-
-  function toggleApprovalDialog() {
-    showApprovalDialog = !showApprovalDialog;
-  }
+  $: statusColors = getBadgeColorObject('Waitlisted');
 
   function getMemberCount(applicant: any) {
     // Use actual members array length if available, otherwise default to 1 (just the founder)
@@ -38,8 +29,7 @@
 </script>
 
 {#if startup}
-  {@const startupData = startup}
-  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>  
+  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
     <Dialog.Content class="max-w-4xl max-h-[90vh] overflow-y-auto">
       <!-- Dialog Header -->
       <Dialog.Header class="p-6 border-b">
@@ -50,17 +40,31 @@
 
       <!-- Dialog Content -->
       <div class="p-6 pt-2 overflow-y-auto">
-        <!-- Status Message -->
+        <!-- Status Message with Waitlist Reason -->
         <div class="mb-6 p-4 rounded-lg {statusColors.bg} border {statusColors.border}">
-          <h3 class="font-bold mb-1 {statusColors.text}">Status: Pending</h3>
-          <p class="text-sm {statusColors.text}">This startup application is awaiting review.</p>
+          <h3 class="font-bold mb-1 {statusColors.text}">Status: Waitlisted</h3>
+          {#if startup.waitlistMessages && startup.waitlistMessages.length > 0}
+            <p class="text-sm mb-2 {statusColors.text}">
+              Reason: {startup.waitlistMessages[0].message}
+            </p>
+            <div class="flex gap-2 text-xs opacity-75 {statusColors.text}">
+              <span>
+                Waitlisted by: {startup.waitlistMessages[0].manager.firstName} {startup.waitlistMessages[0].manager.lastName}
+              </span>
+              <span>
+                ({new Date(startup.waitlistMessages[0].createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })})
+              </span>
+            </div>
+          {:else}
+            <p class="text-sm {statusColors.text}">This startup has been waitlisted.</p>
+          {/if}
         </div>
 
         <!-- AI Analysis Summary Section -->
         {#if startup.capsuleProposal?.aiAnalysisSummary}
-          <div class="border border-border rounded-lg p-4 mb-6">
+          <div class="border border-border bg-primary/10 rounded-lg p-4 mb-6">
             <h3 class="text-lg font-semibold text-foreground mb-3">AI Analysis Summary</h3>
-            <p class="text-muted-foreground leading-relaxed">
+            <p class="text-foreground leading-relaxed">
               {startup.capsuleProposal.aiAnalysisSummary}
             </p>
           </div>
@@ -74,7 +78,7 @@
             <div class="flex flex-col gap-6">
               <div>
                 <h4 class="font-semibold text-foreground mb-2">Startup Description</h4>
-                <div class="border border-border rounded-lg p-3 h-full">
+                <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                   <p class="text-muted-foreground text-sm">
                     {startup.capsuleProposal?.description || 'No description available'}
                   </p>
@@ -84,7 +88,7 @@
               {#if startup.capsuleProposal?.targetMarket}
                 <div>
                   <h4 class="font-semibold text-foreground mb-2">Target Market</h4>
-                  <div class="border border-border rounded-lg p-3 h-full">
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
                       {startup.capsuleProposal.targetMarket}
                     </p>
@@ -95,7 +99,7 @@
               {#if startup.capsuleProposal?.problemStatement}
                   <div>
                     <h4 class="font-semibold text-foreground mb-2">Problem Statement</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
+                    <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                       <p class="text-muted-foreground text-sm">
                         {startup.capsuleProposal.problemStatement}
                       </p>
@@ -105,7 +109,7 @@
                 {#if startup.capsuleProposal?.solutionDescription}
                   <div>
                     <h4 class="font-semibold text-foreground mb-2">Solution Description</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
+                    <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                       <p class="text-muted-foreground text-sm">
                         {startup.capsuleProposal.solutionDescription}
                       </p>
@@ -115,7 +119,7 @@
 
                 <div>
                   <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
-                  <div class="border border-border rounded-lg p-3 h-full">
+                  <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
                       {getMemberCount(startup)} members
                     </p>
@@ -124,7 +128,7 @@
                 {#if startup.capsuleProposal?.intellectualPropertyStatus}
                   <div>
                     <h4 class="font-semibold text-foreground mb-2">Intellectual Property</h4>
-                    <div class="border border-border rounded-lg p-3 h-full">
+                    <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                       <p class="text-muted-foreground text-sm">
                         {startup.capsuleProposal.intellectualPropertyStatus}
                       </p>
@@ -137,7 +141,7 @@
             {#if startup.capsuleProposal?.historicalTimeline && startup.capsuleProposal.historicalTimeline.length > 0}
               <div class="mt-6">
                 <h4 class="font-semibold text-foreground mb-3">Historical Timeline</h4>
-                <div class="border border-border rounded-lg p-2">
+                <div class="border border-border bg-secondary/10 rounded-lg p-2">
                   <Table.Root>
                     <Table.Header>
                       <Table.Row>
@@ -162,7 +166,7 @@
             {#if startup.capsuleProposal?.competitiveAdvantageAnalysis && startup.capsuleProposal.competitiveAdvantageAnalysis.length > 0}
               <div class="mt-6">
                 <h4 class="font-semibold text-foreground mb-3">Competitive Analysis</h4>
-                <div class="border border-border rounded-lg p-2">
+                <div class="border border-border bg-secondary/10 rounded-lg p-2">
                   <Table.Root>
                     <Table.Header>
                       <Table.Row>
@@ -184,21 +188,16 @@
                 </div>
               </div>
             {/if}
+
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-3 mt-8">
           <Button 
-            variant="outline"
+            variant="default"
+            onclick={() => showApprovalDialog = true}
             class="transition-transform hover:scale-105 duration-200"
-            onclick={toggleWaitlistDialog}
-          >
-            Waitlist
-          </Button>
-          <Button 
-            class="transition-transform hover:scale-105 duration-200"
-            onclick={toggleApprovalDialog}
           >
             Approve
           </Button>
@@ -207,17 +206,10 @@
     </Dialog.Content>
   </Dialog.Root>
 
-  <WaitlistDialog
-    showDialog={showWaitlistDialog}
-    toggleDialog={toggleWaitlistDialog}
-    startupId={startup?.id}
-    {waitlistStartup}
-  />
-
   <ApprovalDialog
     {startup}
     showDialog={showApprovalDialog}
-    toggleDialog={toggleApprovalDialog}
+    toggleDialog={() => showApprovalDialog = !showApprovalDialog}
     {mentors}
     {assessments}
     onApprove={approveStartup}

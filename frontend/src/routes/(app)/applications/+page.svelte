@@ -6,6 +6,9 @@
   import type { PageData } from './$types';
   import { page } from '$app/stores';
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
+  import WaitlistedDialog from '$lib/components/dashboard/WaitlistedDialog.svelte';
+  import QualifiedDialog from '$lib/components/dashboard/QualifiedDialog.svelte';
+  import CompletedDialog from '$lib/components/dashboard/CompletedDialog.svelte';
   import axiosInstance from '$lib/axios';
   import { useQueries } from '@sveltestack/svelte-query';
 
@@ -19,15 +22,32 @@
   let dialogLoading = false;
   let showDialog = false;
   let selectedStartup: any = null;
+  let startupAssessments: Array<{ name: string; assessmentStatus: string; assessmentFields?: any[] }> = [];
+
+  async function fetchStartupAssessments(startupId: number) {
+    try {
+      const { data } = await axiosInstance.get(`/assessments/startup/${startupId}`);
+      startupAssessments = data ?? [];
+    } catch (e) {
+      console.error('Failed to load startup assessments', e);
+      startupAssessments = [];
+    }
+  }
 
   async function openStartupDialog(startup: any) {
     selectedStartup = startup;
+    if (startup?.id) {
+      await fetchStartupAssessments(startup.id);
+    }
     showDialog = true;
   }
 
   function toggleDialog() {
     showDialog = !showDialog;
-    if (!showDialog) selectedStartup = null;
+    if (!showDialog) {
+      selectedStartup = null;
+      startupAssessments = [];
+    }
   }
 
 
@@ -77,12 +97,10 @@
             Authorization: `Bearer ${access}`
           },
           body: JSON.stringify({
-            mentor_ids: [selectedMentor],
-            cohort_id: 1
+            mentorIds: [selectedMentor],
           })
         }
       );
-      console.log('assignmentor:', assignmentor);
       if (assignmentor.ok) {
         // Refetch the queries
         await Promise.all([
@@ -99,11 +117,14 @@
   }
 
   // waitlist startup
-  async function waitlistStartup(startupId: number, data: { message: string }) {
+  async function waitlistStartup(startupId: number, message: string) {
     try {
       const response = await axiosInstance.patch(
         `/startups/${startupId}/waitlist-applicant`,
-        data,
+        {
+          message: message,
+          managerId: data.user.id
+        },
         {
           headers: {
             Authorization: `Bearer ${access}`
@@ -178,6 +199,68 @@
     },
   ]);
 
+  async function markComplete(startupId: number) {
+    try {
+      dialogLoading = true;
+      const response = await axiosInstance.patch(
+        `/startups/${startupId}/mark-complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
+      }
+    } catch (error) {
+      console.error('Error marking startup as complete:', error);
+    } finally {
+      dialogLoading = false;
+    }
+  }
+
+  async function changeMentor(startupId: number, mentorId: number) {
+    try {
+      dialogLoading = true;
+      const response = await axiosInstance.patch(
+        `/startups/${startupId}/change-mentor`,
+        { mentorId },
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        // Refetch the queries to update the data
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Update the selectedStartup with new data
+        const updatedStartup = $queries[0].data.find((s: any) => s.id === startupId);
+        if (updatedStartup) {
+          selectedStartup = updatedStartup;
+        }
+      }
+    } catch (error) {
+      console.error('Error changing mentor:', error);
+    } finally {
+      dialogLoading = false;
+    }
+  }
+
   // Update applicants based on selected tab and query results
   $: if ($queries[0].isSuccess) {
     if ($queries[0].data.length > 0) {
@@ -226,6 +309,7 @@
             value="pending"
             onclick={() => {
               selectedTab = 'pending';
+              showDialog = false;
               goto('/applications?tab=pending');
             }}>Pending</Tabs.Trigger
           >
@@ -233,6 +317,7 @@
             value="waitlisted"
             onclick={() => {
               selectedTab = 'waitlisted';
+              showDialog = false;
               goto('/applications?tab=waitlisted');
             }}>Waitlisted</Tabs.Trigger
           >
@@ -240,6 +325,7 @@
             value="qualified"
             onclick={() => {
               selectedTab = 'qualified';
+              showDialog = false;
               goto('/applications?tab=qualified');
             }}>Qualified</Tabs.Trigger
           >
@@ -247,6 +333,7 @@
             value="completed"
             onclick={() => {
               selectedTab = 'completed';
+              showDialog = false;
               goto('/applications?tab=completed');
             }}>Completed</Tabs.Trigger
           >
@@ -301,11 +388,32 @@
       {assignAssessmentsToStartup}
     />
   {:else if selectedTab === 'waitlisted'}
-    <!-- WaitlistedDialog -->
+    <WaitlistedDialog
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      mentors={mentors || []}
+      assessments={assessments || []}
+      {approveStartup}
+      {assignAssessmentsToStartup}
+    />
   {:else if selectedTab === 'qualified'}
-    <!-- <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} /> -->
+    <QualifiedDialog  
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      mentors={mentors || []}
+      onMarkComplete={markComplete}
+      onChangeMentor={changeMentor}
+      {startupAssessments}
+    />
   {:else if selectedTab === 'completed'}
-    <!-- <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} /> -->
+    <CompletedDialog
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      {startupAssessments}
+    />
   {/if}
 {/if}
 

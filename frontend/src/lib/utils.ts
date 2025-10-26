@@ -5,6 +5,8 @@ import axiosInstance from './axios';
 import { PUBLIC_API_URL } from '$env/static/public';
 import type { RNSItem } from './types/rns.types';
 import type { Role } from './types/user.types';
+import { mode } from 'mode-watcher';
+import { get } from 'svelte/store';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -237,6 +239,75 @@ export const getData = async (url: string, access: string) => {
 };
 
 export const zIndex = ['z-50', 'z-40', 'z-30', 'z-20', 'z-10', 'z-0'];
+
+export const getBadgeColorObject = (
+  label: 'Pending' | 'Waitlisted' | 'Qualified' | 'Completed'
+) => {
+  const isDark = get(mode) === 'dark';
+
+  switch (label) {
+    case 'Qualified':
+      return isDark
+        ? {
+            bg: 'bg-green-900',
+            text: 'text-green-100',
+            border: 'border-green-100'
+          }
+        : {
+            bg: 'bg-green-100',
+            text: 'text-green-800',
+            border: 'border-green-200'
+          };
+    case 'Pending':
+      return isDark
+        ? {
+            bg: 'bg-yellow-900',
+            text: 'text-yellow-100',
+            border: 'border-yellow-100'
+          }
+        : {
+            bg: 'bg-yellow-100',
+            text: 'text-yellow-800',
+            border: 'border-yellow-200'
+          };
+    case 'Waitlisted':
+      return isDark
+        ? {
+            bg: 'bg-orange-900',
+            text: 'text-orange-100',
+            border: 'border-orange-100'
+          }
+        : {
+            bg: 'bg-orange-100',
+            text: 'text-orange-800',
+            border: 'border-orange-200'
+          };
+    case 'Completed':
+      return isDark
+        ? {
+            bg: 'bg-blue-900',
+            text: 'text-blue-100',
+            border: 'border-blue-100'
+          }
+        : {
+            bg: 'bg-blue-100',
+            text: 'text-blue-800',
+            border: 'border-blue-200'
+          };
+    default:
+      return isDark
+        ? {
+            bg: 'bg-gray-800',
+            text: 'text-gray-100',
+            border: 'border-gray-100'
+          }
+        : {
+            bg: 'bg-gray-50',
+            text: 'text-gray-800',
+            border: 'border-gray-100'
+          };
+  }
+};
 
 export const getBadgeColor = (
   label: 'Pending' | 'Waitlisted' | 'Qualified' | 'Completed'
