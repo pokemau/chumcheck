@@ -102,8 +102,18 @@
                 <Select.Root type="single" bind:value={selectedMentorId}>
                   <Select.Trigger class="w-full">
                     {#if startup?.mentors?.[0]}
-                      {mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.firstName} 
-                      {mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.lastName}
+                      <div class="flex flex-wrap items-center gap-2 w-full">
+                        <span>
+                          {mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.firstName}
+                          {" "}
+                          {mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.lastName}
+                        </span>
+                        {#if mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.email}
+                          <span class="mr-2 ml-auto text-sm text-muted-foreground whitespace-nowrap">
+                            {mentors.find(m => String(m.id) === (selectedMentorId ?? String(startup.mentors[0].id)))?.email}
+                          </span>
+                        {/if}
+                      </div>
                     {:else}
                       Select Mentor
                     {/if}
@@ -111,7 +121,12 @@
                   <Select.Content>
                     {#each mentors as mentor}
                       <Select.Item value={String(mentor.id)}>
-                        {mentor.firstName} {mentor.lastName}
+                        <div class="flex items-center gap-2 w-full">
+                          <span>{mentor.firstName} {mentor.lastName}</span>
+                          {#if mentor.email}
+                            <span class="ml-auto text-sm text-muted-foreground whitespace-nowrap">{mentor.email}</span>
+                          {/if}
+                        </div>
                       </Select.Item>
                     {/each}
                   </Select.Content>

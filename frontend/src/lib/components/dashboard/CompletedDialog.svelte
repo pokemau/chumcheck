@@ -38,20 +38,42 @@
           <p class="text-sm {statusColors.text}">This startup has completed its journey in the program.</p>
         </div>
 
-        <!-- Assigned Assessments Section -->
+        <!-- Assessments and Mentor Section -->
         <div class="mb-8">
-          <h3 class="text-lg font-medium mb-2">Assigned Assessments</h3>
-          {#if startupAssessments.length === 0}
-            <p class="text-sm text-muted-foreground">No assessments assigned.</p>
-          {:else}
-            <div class="flex flex-wrap gap-2">
-              {#each startupAssessments as a}
-                <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary/10 border border-border text-foreground">
-                  {a.name}
-                </span>
-              {/each}
+          <!-- Assigned Assessments -->
+          <div class="mb-6">
+            <h3 class="text-lg font-medium mb-2">Assigned Assessments</h3>
+            {#if startupAssessments.length === 0}
+              <p class="text-sm text-muted-foreground">No assessments assigned.</p>
+            {:else}
+              <div class="flex flex-wrap gap-2">
+                {#each startupAssessments as a}
+                  <span class="px-3 py-1 rounded-full text-sm font-medium bg-secondary/10 border border-border text-foreground">
+                    {a.name}
+                  </span>
+                {/each}
+              </div>
+            {/if}
+          </div>
+
+          <!-- Assigned Mentor Section (Read-only) -->
+          <div class="space-y-2">
+            <h3 class="text-lg font-medium">Assigned Mentor</h3>
+            <div class="border border-border rounded-lg p-3 bg-secondary/10">
+              {#if startup?.mentors?.[0]}
+                <div class="flex flex-wrap items-center gap-2">
+                  <span class="text-foreground font-medium">
+                    {startup.mentors[0].firstName} {startup.mentors[0].lastName}
+                  </span>
+                  {#if startup.mentors[0].email}
+                    <span class="text-sm text-muted-foreground ml-auto whitespace-nowrap">{startup.mentors[0].email}</span>
+                  {/if}
+                </div>
+              {:else}
+                <p class="text-sm text-muted-foreground">No mentor assigned</p>
+              {/if}
             </div>
-          {/if}
+          </div>
         </div>
 
         <!-- AI Analysis Summary Section -->
