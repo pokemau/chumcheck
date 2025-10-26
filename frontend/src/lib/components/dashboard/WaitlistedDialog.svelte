@@ -10,6 +10,7 @@
   export let showDialog: boolean = false;
   export let toggleDialog: () => void;
   export let mentors: any[] = [];
+  export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
   export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
   export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
 
@@ -210,6 +211,7 @@
     showDialog={showApprovalDialog}
     toggleDialog={() => showApprovalDialog = !showApprovalDialog}
     {mentors}
+    {assessments}
     onApprove={approveStartup}
     {assignAssessmentsToStartup}
   />

@@ -392,7 +392,8 @@
       startup={selectedStartup}
       {showDialog}
       {toggleDialog}
-      mentors={$queries[1].data || []}
+      mentors={mentors || []}
+      assessments={assessments || []}
       {approveStartup}
       {assignAssessmentsToStartup}
     />
@@ -401,7 +402,7 @@
       startup={selectedStartup}
       {showDialog}
       {toggleDialog}
-      mentors={$queries[1].data || []}
+      mentors={mentors || []}
       onMarkComplete={markComplete}
       onChangeMentor={changeMentor}
       {startupAssessments}
