@@ -34,7 +34,10 @@ export class CapsuleProposal {
     pricingStrategy: string;
   }[];
 
-  @Property({type: 'text'})
+  @Property({ type: 'json' })
+  members?: { name: string; role: string }[];
+
+  @Property({ type: 'text' })
   intellectualPropertyStatus!: string;
 
   @Property({ type: 'text', nullable: true })

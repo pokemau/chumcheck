@@ -4,7 +4,7 @@
   import WaitlistDialog from './sub/WaitlistDialog.svelte';
   import ApprovalDialog from './sub/ApprovalDialog.svelte';
   import * as Table from '$lib/components/ui/table/index.js';
-  import { getBadgeColorObject } from '$lib/utils';
+  import { getBadgeColorObject, getStartupMemberCount } from '$lib/utils';
 
   export let startup: any;
   export let showDialog: boolean = false;
@@ -28,13 +28,7 @@
     showApprovalDialog = !showApprovalDialog;
   }
 
-  function getMemberCount(applicant: any) {
-    // Use actual members array length if available, otherwise default to 1 (just the founder)
-    if (applicant.members && Array.isArray(applicant.members)) {
-      return applicant.members.length + 1; // +1 for the founder (user)
-    }
-    return 1; // Default to 1 (just the founder)
-  }
+  const memberCount = getStartupMemberCount(startup);
 </script>
 
 {#if startup}
@@ -117,7 +111,7 @@
                   <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
                   <div class="border border-border rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
-                      {getMemberCount(startup)} members
+                      {memberCount} member{memberCount > 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>

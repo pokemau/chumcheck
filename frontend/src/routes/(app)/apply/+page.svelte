@@ -9,7 +9,6 @@
   import { ChevronLeft, ChevronRight } from 'lucide-svelte';
   import { superForm } from 'sveltekit-superforms';
   import { type PageData } from './$types';
-  import { get } from 'svelte/store';
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
   import StartupDetailsStep from '$lib/components/startup/application/StartupDetailsStep.svelte';
@@ -43,7 +42,6 @@
   let currentStep = $state(1);
 
   function nextStep() {
-    console.log('next step');
     if (currentStep < steps.length) {
       currentStep += 1;
     }

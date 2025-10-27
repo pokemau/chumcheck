@@ -148,6 +148,21 @@ export const getColumns = (): Array<{
   // ];
 };
 
+export const getStartupMemberCount = (startup: any) => {
+
+  if (!startup?.capsuleProposal) {
+    return 1;
+  }
+
+  if (
+    startup.capsuleProposal.members &&
+    Array.isArray(startup.capsuleProposal.members)
+  ) {
+    return startup.capsuleProposal.members.length + 1;
+  }
+  return 1;
+};
+
 export const getReadiness = () => {
   return [
     {
@@ -546,3 +561,4 @@ export const getAssessmentFieldType = (s: 1 | 2 | 3) => {
   };
   return fieldTypes[s];
 };
+

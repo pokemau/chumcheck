@@ -1871,6 +1871,15 @@
           "nullable": false,
           "mappedType": "json"
         },
+        "members": {
+          "name": "members",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
         "intellectual_property_status": {
           "name": "intellectual_property_status",
           "type": "text",

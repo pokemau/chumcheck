@@ -3,7 +3,7 @@
   import * as Card from '$lib/components/ui/card/index.js';
   import { Calendar, Users, Clock, Eye } from 'lucide-svelte';
   import Badge from '../ui/badge/badge.svelte';
-  import { getBadgeColor } from '$lib/utils';
+  import { getBadgeColor, getStartupMemberCount } from '$lib/utils';
 
   export let startup: any;
   export let selectedTab: string;
@@ -17,76 +17,81 @@
     });
   }
 
-  function getMemberCount(startup: any) {
-    if (startup.members && Array.isArray(startup.members)) {
-      return startup.members.length + 1;
-    }
-    return 1;
-  }
+  const memberCount = getStartupMemberCount(startup);
 </script>
 
-<Card.Root 
-  class="bg-background rounded-lg shadow-sm border hover:bg-muted/50 hover:shadow-md transition-all cursor-pointer"
+<Card.Root
+  class="hover:bg-muted/50 cursor-pointer rounded-lg border bg-background shadow-sm transition-all hover:shadow-md"
   onclick={() => onOpenStartupDialog(startup)}
 >
   <Card.Content class="p-6">
-    <div class="flex justify-between items-start">
+    <div class="flex items-start justify-between">
       <div class="flex-1">
         <!-- Company Name -->
-        <h3 class="text-lg font-semibold text-foreground mb-2">
+        <h3 class="mb-2 text-lg font-semibold text-foreground">
           {startup.capsuleProposal?.title || startup.name}
         </h3>
-        
+
         <!-- Metadata -->
-        <div class="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+        <div class="mb-3 flex items-center gap-4 text-sm text-muted-foreground">
           <div class="flex items-center gap-1">
-            <Calendar class="w-4 h-4" />
-            <span>{formatDate(startup.createdAt || startup.dateCreated || new Date().toISOString())}</span>
+            <Calendar class="h-4 w-4" />
+            <span
+              >{formatDate(
+                startup.createdAt ||
+                  startup.dateCreated ||
+                  new Date().toISOString()
+              )}</span
+            >
           </div>
           <div class="flex items-center gap-1">
-            <Users class="w-4 h-4" />
-            <span>{getMemberCount(startup)} members</span>
+            <Users class="h-4 w-4" />
+            <span>{memberCount} member{memberCount > 1 ? 's' : ''}</span>
           </div>
         </div>
-        
+
         <!-- Description -->
-        <p class="text-sm text-muted-foreground leading-relaxed">
-          {startup.capsuleProposal?.description || startup.description || startup.businessDescription || 'No description available'}
+        <p class="text-sm leading-relaxed text-muted-foreground">
+          {startup.capsuleProposal?.description ||
+            startup.description ||
+            startup.businessDescription ||
+            'No description available'}
         </p>
       </div>
-      
+
       <!-- Action Buttons -->
-      <div class="flex items-center gap-2 ml-4">
+      <div class="ml-4 flex items-center gap-2">
         {#if selectedTab === 'pending'}
-          <Badge class="{getBadgeColor('Pending')}">
+          <Badge class={getBadgeColor('Pending')}>
             <Clock size={12} class="mr-1" />
             Pending
           </Badge>
         {:else if selectedTab === 'waitlisted'}
-          <Badge class="{getBadgeColor('Waitlisted')}">
+          <Badge class={getBadgeColor('Waitlisted')}>
             <Clock size={12} class="mr-1" />
             Waitlisted
           </Badge>
         {:else if selectedTab === 'qualified'}
-          <Badge class="{getBadgeColor('Qualified')}">
+          <Badge class={getBadgeColor('Qualified')}>
             <Clock size={12} class="mr-1" />
             Qualified
           </Badge>
         {:else if selectedTab === 'completed'}
-          <Badge class="{getBadgeColor('Completed')}">
+          <Badge class={getBadgeColor('Completed')}>
             <Clock size={12} class="mr-1" />
             Completed
           </Badge>
         {/if}
         <Button
-          variant="outline" 
-          class="border-muted text-muted-foreground hover:bg-muted/50 px-4 py-2 h-auto text-sm"
+          variant="outline"
+          class="hover:bg-muted/50 h-auto border-muted px-4 py-2 text-sm text-muted-foreground"
           onclick={(e) => onOpenStartupDialog(startup)}
         >
-          <Eye class="w-3 h-3 mr-1" />
+          <Eye class="mr-1 h-3 w-3" />
           View Details
         </Button>
       </div>
     </div>
   </Card.Content>
 </Card.Root>
+
