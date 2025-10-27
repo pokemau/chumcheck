@@ -195,11 +195,13 @@
       >
     {:else}
       {#if startup?.qualificationStatus === QualificationStatus.WAITLISTED}
-        <a href="/apply">
-          <Button>
-            Edit application
-          </Button>
-        </a>
+        <div class="flex justify-end gap-3">
+          <a href="/apply?startupId={startup.id}">
+            <Button>
+              Edit application
+            </Button>
+          </a>
+        </div>
       {:else}
         <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
       {/if}

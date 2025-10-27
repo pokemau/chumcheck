@@ -140,9 +140,10 @@ export class StartupApplicationDto {
   methodology: string;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => MemberDto)
-  @ArrayMinSize(1)
+  // @ValidateNested({ each: true })
+  // @Type(() => MemberDto)
+  // @ArrayMinSize(1)
+  @IsOptional()
   members: MemberDto[];
 
   @IsString()
