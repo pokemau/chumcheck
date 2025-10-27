@@ -50,6 +50,7 @@ export class StartupService {
               'readinessLevels.readinessLevel',
               'uratQuestionAnswers.uratQuestion',
               'calculatorQuestionAnswers.question',
+              'waitlistMessages',
             ],
           },
         );
@@ -86,7 +87,7 @@ export class StartupService {
     const startup = await this.em.findOne(
       Startup,
       { id: startupId },
-      { populate: ['user', 'members', 'capsuleProposal'] },
+      { populate: ['user', 'members', 'capsuleProposal', 'waitlistMessages'] },
     );
     if (!startup) {
       throw new NotFoundException(

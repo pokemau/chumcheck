@@ -129,7 +129,7 @@
         historicalTimeline: $form.historicalTimeline,
         competitiveAdvantageAnalysis: $form.competitiveAdvantageAnalysis,
         intellectualPropertyStatus: $form.intellectualPropertyStatus,
-        proposalScope: $form.proposalScope,  // Changed from scope to proposalScope
+        proposalScope: $form.proposalScope, 
         methodology: $form.methodology,
         curriculumVitae: $form.curriculumVitae,
         // members: $form.teamMembers || [],  // Add members array (optional)
@@ -179,13 +179,23 @@
 
   const progress = $derived(() => (currentStep / steps.length) * 100);
   const currentStepData = $derived(() => steps[currentStep - 1]);
+
+  // Add a derived state for the waitlist message
+  const waitlistMessage = $derived(() => {
+    if (!startupData?.waitlistMessages || startupData.waitlistMessages.length === 0) {
+      return 'Your application is currently waitlisted. Please review and resubmit.';
+    }
+    // Get the most recent message
+    const messages = startupData.waitlistMessages;
+    const latestMessage = messages[messages.length - 1];
+    return latestMessage.message;
+  });
 </script>
 
 <div class="mx-auto max-w-4xl space-y-6 p-6">
   {#if isEditMode && startupData}
-    <WaitlistedMessage message="Your application is currently waitlisted. You can edit and resubmit your application below." />
+    <WaitlistedMessage message={waitlistMessage()} />
   {/if}
-
   {#if isLoadingStartup}
     <Card>
       <CardContent class="pt-6">

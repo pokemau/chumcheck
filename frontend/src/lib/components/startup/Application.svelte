@@ -127,6 +127,27 @@
   });
 
   let submitting = false;
+
+  // Extract waitlist message
+  let waitlistMessage: string;
+  $: {
+    console.log('=== WAITLIST MESSAGE DEBUG ===');
+    console.log('startup object:', startup);
+    console.log('waitlistMessages:', startup?.waitlistMessages);
+    
+    if (startup?.waitlistMessages && startup.waitlistMessages.length > 0) {
+      const messages = startup.waitlistMessages;
+      const latestMessage = messages[messages.length - 1];
+      waitlistMessage = latestMessage.message;
+      
+      console.log('Latest message object:', latestMessage);
+      console.log('Message text:', waitlistMessage);
+    } else {
+      waitlistMessage = "Unable to load waitlisted message";
+      console.log('No waitlist messages found');
+    }
+    console.log('=== END DEBUG ===');
+  }
 </script>
 
 <form
@@ -141,6 +162,7 @@
   <!-- TO ADD WAITLISTED SCREEN -->
   <Waitlisted
     stepName="waitlisted"
+    message={waitlistMessage}
     {currentStep}
   />
   <DataPrivacy
