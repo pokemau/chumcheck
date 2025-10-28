@@ -1042,6 +1042,7 @@ async updateCapsuleProposal(
   proposal.scope = dto.proposalScope;
   proposal.methodology = dto.methodology;
   proposal.curriculumVitae = dto.curriculumVitae ?? proposal.curriculumVitae;
+  proposal.members = dto.members ?? [];
 
   startup.name = dto.title;
 

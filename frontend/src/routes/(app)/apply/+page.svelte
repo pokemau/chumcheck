@@ -97,16 +97,8 @@
         $form.proposalScope = startupData.capsuleProposal.scope || '';
         $form.methodology = startupData.capsuleProposal.methodology || '';
         $form.curriculumVitae = startupData.capsuleProposal.curriculumVitae || '';
+        $form.members = startupData.capsuleProposal.members || [];
       }
-
-      // Autofill team members
-      // if (startupData.users && startupData.users.length > 0) {
-      //   $form.teamMembers = startupData.users.map((user: any) => ({
-      //     name: user.name || '',
-      //     email: user.email || '',
-      //     role: user.role || ''
-      //   }));
-      // }
 
     } catch (error) {
       console.error('Error loading startup data:', error);
@@ -132,7 +124,7 @@
         proposalScope: $form.proposalScope, 
         methodology: $form.methodology,
         curriculumVitae: $form.curriculumVitae,
-        // members: $form.teamMembers || [],  // Add members array (optional)
+        members: $form.members
       };
 
       console.log('=== FINAL PAYLOAD ===');
