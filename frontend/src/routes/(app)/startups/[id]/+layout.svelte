@@ -3,6 +3,7 @@
   import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
   import { getData } from '$lib/utils';
   import { useQuery } from '@sveltestack/svelte-query';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum.js';
 
   const { children, data } = $props();
   const { access, startupId } = data;
@@ -12,6 +13,11 @@
   );
 
   const info: any = $derived($startupQuery.isSuccess ? $startupQuery.data : {});
+
+  $effect( () => {
+    console.log($startupQuery.data);
+  }
+  );
 
   type m =
     | 'readiness-level'
@@ -49,10 +55,12 @@
       </Breadcrumb.Item>
       <Breadcrumb.Separator />
       <Breadcrumb.Item>
-        <Breadcrumb.Page
-          >{getModule($page.url.pathname.split('/').slice(-1)[0] as m) ||
-            'Pending Approval'}</Breadcrumb.Page
-        >
+        <Breadcrumb.Page>
+          {info.qualificationStatus === QualificationStatus.QUALIFIED
+            ? 'Assessments'
+            : getModule($page.url.pathname.split('/').slice(-1)[0] as m) ||
+              'Pending Approval'}
+        </Breadcrumb.Page>
       </Breadcrumb.Item>
     </Breadcrumb.List>
   </Breadcrumb.Root>
