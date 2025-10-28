@@ -7,7 +7,7 @@
   const { children, data } = $props();
   const { access, startupId } = data;
 
-  const startupQuery = useQuery('startupData', () =>
+  const startupQuery = useQuery(['startupData', startupId], () =>
     getData(`/startups/${startupId}`, access!)
   );
 
