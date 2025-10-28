@@ -20,7 +20,12 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto, WaitlistStartupDto, AppointMentorsDto, ChangeMentorDto } from './dto';
+import {
+  StartupApplicationDto,
+  WaitlistStartupDto,
+  AppointMentorsDto,
+  ChangeMentorDto,
+} from './dto';
 import { Request } from 'express';
 import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
@@ -184,7 +189,7 @@ export class StartupController {
   @Patch(':startupId/waitlist-applicant')
   async waitlistApplicant(
     @Param('startupId', ParseIntPipe) startupId: number,
-    @Body() dto: WaitlistStartupDto
+    @Body() dto: WaitlistStartupDto,
   ) {
     return await this.startupService.waitlistApplicant(startupId, dto);
   }
@@ -192,17 +197,14 @@ export class StartupController {
   @Post(':startupId/appoint-mentors')
   async appointMentors(
     @Param('startupId') startupId: number,
-    @Body() dto: AppointMentorsDto  
+    @Body() dto: AppointMentorsDto,
   ) {
-    return await this.startupService.appointMentors(
-      startupId,
-      dto
-    );
+    return await this.startupService.appointMentors(startupId, dto);
   }
 
   @Patch(':startupId/mark-complete')
   async markStartupComplete(
-    @Param('startupId', ParseIntPipe) startupId: number
+    @Param('startupId', ParseIntPipe) startupId: number,
   ) {
     return await this.startupService.markComplete(startupId);
   }
@@ -210,7 +212,7 @@ export class StartupController {
   @Patch(':startupId/change-mentor')
   async changeMentor(
     @Param('startupId', ParseIntPipe) startupId: number,
-    @Body() dto: ChangeMentorDto
+    @Body() dto: ChangeMentorDto,
   ) {
     return await this.startupService.changeMentor(startupId, dto);
   }

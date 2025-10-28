@@ -1,10 +1,9 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button/index.js';
-  import { X } from 'lucide-svelte';
   import ApprovalDialog from './sub/ApprovalDialog.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
-  import { getBadgeColorObject } from '$lib/utils';
+  import { getBadgeColorObject, getStartupMemberCount } from '$lib/utils';
 
   export let startup: any;
   export let showDialog: boolean = false;
@@ -14,18 +13,13 @@
   export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
   export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
 
+  const memberCount = getStartupMemberCount(startup);
+
   let showApprovalDialog = false;
   let isLoading = false;
 
   $: statusColors = getBadgeColorObject('Waitlisted');
 
-  function getMemberCount(applicant: any) {
-    // Use actual members array length if available, otherwise default to 1 (just the founder)
-    if (applicant.members && Array.isArray(applicant.members)) {
-      return applicant.members.length + 1; // +1 for the founder (user)
-    }
-    return 1; // Default to 1 (just the founder)
-  }
 </script>
 
 {#if startup}
@@ -121,7 +115,7 @@
                   <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
                   <div class="border border-foreground/50 bg-secondary/10 rounded-lg p-3 h-full">
                     <p class="text-muted-foreground text-sm">
-                      {getMemberCount(startup)} members
+                      {memberCount} member{memberCount > 1 ? 's' : ''}
                     </p>
                   </div>
                 </div>
