@@ -9,8 +9,16 @@
   import { onMount, onDestroy } from 'svelte';
   import { getProfileColor } from '$lib/utils';
   import { browser } from '$app/environment';
+  import { goto } from '$app/navigation';
 
   const { user, startup, scrollContainer } = $props();
+
+  let dropdownOpen = $state(false);
+
+  function navigateTo(path: string) {
+    dropdownOpen = false;
+    goto(path);
+  }
 
   const userRole = user.role;
   const modules =
@@ -142,7 +150,7 @@
         class="h-8 rounded-full bg-accent text-sm font-normal"
         >{user?.role ? user?.role : 'Anonymous'}</Badge
       >
-      <DropdownMenu.Root>
+      <DropdownMenu.Root bind:open={dropdownOpen}>
         <DropdownMenu.Trigger>
           <div
             class={`flex h-9 w-9 items-center justify-center rounded-full ${getProfileColor(user.firstName)}`}
@@ -158,15 +166,15 @@
             </DropdownMenu.Label>
             <DropdownMenu.Separator />
             {#each modules as module}
-              <a
+              <DropdownMenu.Item
                 class="cursor-pointer"
-                data-sveltekit-preload-data="tap"
-                href={`/${module.link}${module.subModule.length > 0 && module.name !== 'Startups' ? `/${module.subModule[0].link}` : ''}`}
+                onclick={() =>
+                  navigateTo(
+                    `/${module.link}${module.subModule.length > 0 && module.name !== 'Startups' ? `/${module.subModule[0].link}` : ''}`
+                  )}
               >
-                <DropdownMenu.Item class="cursor-pointer"
-                  >{module.name}</DropdownMenu.Item
-                >
-              </a>
+                {module.name}
+              </DropdownMenu.Item>
             {/each}
             <form action="/logout" method="post" class="w-full">
               <button type="submit" class="w-full">
