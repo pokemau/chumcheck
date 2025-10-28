@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  ArrayMinSize,
   IsArray,
   IsBoolean,
   IsNotEmpty,
@@ -113,13 +112,13 @@ export class StartupApplicationDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => HistoricalTimelineDto)
-  @ArrayMinSize(1)
+  @IsOptional()
   historicalTimeline: HistoricalTimelineDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CompetitiveAdvantageDto)
-  @ArrayMinSize(1)
+  @IsOptional()
   competitiveAdvantageAnalysis: CompetitiveAdvantageDto[];
 
   @IsString()
@@ -128,7 +127,7 @@ export class StartupApplicationDto {
 
   @IsArray()
   @IsString({ each: true })
-  @ArrayMinSize(1)
+  @IsOptional()
   objectives: string[];
 
   @IsString()
@@ -142,7 +141,7 @@ export class StartupApplicationDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MemberDto)
-  @ArrayMinSize(1)
+  @IsOptional()
   members: MemberDto[];
 
   @IsString()

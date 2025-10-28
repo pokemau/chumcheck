@@ -1,13 +1,5 @@
 import { z } from 'zod';
 
-const optionalEmail = z
-  .string()
-  .optional()
-  .transform((s) => (s === undefined ? undefined : s.trim()))
-  .refine((v) => v === undefined || z.string().email().safeParse(v).success, {
-    message: 'Invalid email'
-  });
-
 const TimelineItemSchema = z.object({
   monthYear: z.string().min(1, 'Month-Year is required'),
   description: z.string().min(1, 'Description is required')
@@ -21,7 +13,7 @@ const CompetitorSchema = z.object({
 
 const MemberSchema = z.object({
   name: z.string().min(1, 'Member name is required'),
-  role: z.string().min(1, 'Member role is required'),
+  role: z.string().min(1, 'Member role is required')
 });
 
 export const applicationSchema = z.object({

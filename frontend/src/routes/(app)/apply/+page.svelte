@@ -8,6 +8,8 @@
   } from '$lib/components/ui/card';
   import { ChevronLeft, ChevronRight } from 'lucide-svelte';
   import { superForm } from 'sveltekit-superforms';
+  import { zod } from 'sveltekit-superforms/adapters';
+  import { applicationSchema } from '$lib/validators/application.validator';
   import { type PageData } from './$types';
   import { toast } from 'svelte-sonner';
   import { goto } from '$app/navigation';
@@ -17,9 +19,28 @@
   import WaitlistedMessage from '$lib/components/startup/application/WaitlistedMessage.svelte';
 
   let { data }: { data: PageData } = $props();
-  const { form, errors, enhance, message, submitting } = superForm(data.form, {
-    dataType: 'json'
-  });
+  const { form, errors, enhance, message, submitting, validate } = superForm(
+    data.form,
+    {
+      dataType: 'json',
+      validators: zod(applicationSchema)
+    }
+  );
+
+  const stepFields = {
+    1: [
+      'title',
+      'description',
+      'problemStatement',
+      'targetMarket',
+      'solutionDescription',
+      'historicalTimeline',
+      'competitiveAdvantageAnalysis',
+      'intellectualPropertyStatus'
+    ],
+    2: ['objectives', 'proposalScope', 'methodology'],
+    3: ['members', 'curriculumVitae']
+  };
 
   const steps = [
     {
@@ -41,7 +62,35 @@
 
   let currentStep = $state(1);
 
-  function nextStep() {
+  async function nextStep() {
+    const fieldsToValidate = stepFields[currentStep as keyof typeof stepFields];
+
+    await Promise.all(
+      fieldsToValidate.map((field) => validate(field as any, { update: true }))
+    );
+
+    const currentErrors = fieldsToValidate.flatMap((field: any) => {
+      const fieldError = $errors[field];
+
+      if (typeof fieldError === 'string' || Array.isArray(fieldError)) {
+        return fieldError && fieldError.length > 0 ? [[field, fieldError]] : [];
+      }
+
+      if (fieldError && typeof fieldError === 'object') {
+        const nestedErrors = Object.entries(fieldError).filter(
+          ([_, value]) => value && Object.keys(value).length > 0
+        );
+        return nestedErrors.length > 0 ? [[field, fieldError]] : [];
+      }
+
+      return [];
+    });
+
+    if (currentErrors.length > 0) {
+      toast.error('Please fix the errors before proceeding');
+      return;
+    }
+
     if (currentStep < steps.length) {
       currentStep += 1;
     }
@@ -66,7 +115,7 @@
 </script>
 
 <div class="mx-auto max-w-4xl space-y-6 p-6">
-  <WaitlistedMessage message="PUT WAITLISTED MESSAGE HERE"/>
+  <WaitlistedMessage message="PUT WAITLISTED MESSAGE HERE" />
   <!-- Progress Bar -->
   <Card>
     <CardContent class="pt-6">

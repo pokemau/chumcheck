@@ -29,31 +29,45 @@
         Add Objective
       </Button>
     </div>
-    {#each $form.objectives ?? [] as _, index}
-      <div class="flex gap-4">
-        <div class="flex-1 space-y-2">
-          <Label for="objective-{index}">Objective {index + 1}</Label>
-          <Input
-            id="objective-{index}"
-            name={`objectives[${index}]`}
-            placeholder="Enter your objective..."
-            bind:value={$form.objectives[index]}
-          />
-        </div>
-        <div class="flex items-end">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onclick={() => removeObjective(index)}
-            class="text-red-500 hover:text-red-700"
-          >
-            <Trash2 class="h-4 w-4" />
-          </Button>
-        </div>
+    {#if ($form.objectives ?? []).length === 0}
+      <div
+        class="rounded-lg border border-dashed p-8 text-center text-muted-foreground"
+      >
+        <p class="text-sm">
+          No objectives added yet. Click "Add Objective" to get started.
+        </p>
       </div>
-    {/each}
-    {#if $errors.objectives}
+    {:else}
+      {#each $form.objectives ?? [] as _, index}
+        <div class="flex gap-4">
+          <div class="flex-1 space-y-2">
+            <Label for="objective-{index}">Objective {index + 1} *</Label>
+            <Input
+              id="objective-{index}"
+              name={`objectives[${index}]`}
+              placeholder="Enter your objective..."
+              bind:value={$form.objectives[index]}
+              class={$errors.objectives?.[index] ? 'border-red-500' : ''}
+            />
+            {#if $errors.objectives?.[index]}
+              <p class="text-sm text-red-500">{$errors.objectives[index]}</p>
+            {/if}
+          </div>
+          <div class="flex items-end">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onclick={() => removeObjective(index)}
+              class="text-red-500 hover:text-red-700"
+            >
+              <Trash2 class="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      {/each}
+    {/if}
+    {#if $errors.objectives && typeof $errors.objectives === 'string'}
       <p class="text-sm text-red-500">{$errors.objectives}</p>
     {/if}
   </div>
