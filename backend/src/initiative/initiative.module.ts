@@ -6,6 +6,6 @@ import { AiModule } from 'src/ai/ai.module';
 @Module({
   imports: [AiModule],
   controllers: [InitiativeController],
-  providers: [InitiativeService]
+  providers: [InitiativeService],
 })
 export class InitiativeModule {}

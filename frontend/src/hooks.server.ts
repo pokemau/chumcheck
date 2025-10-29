@@ -1,7 +1,7 @@
 import { JWT_SECRET } from '$env/static/private';
 import type { Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
-import { redirect } from '@sveltejs/kit';
+import { redirect, isRedirect } from '@sveltejs/kit';
 
 const protectedRoutes = [
   '/account',
@@ -17,11 +17,11 @@ export const handle: Handle = async ({ event, resolve }) => {
   const pathname = event.url.pathname;
 
   // Treat protected route only if exact match or prefixed with '/'
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname === route || pathname.startsWith(route + '/')
+  const isProtectedRoute = protectedRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
   );
-  const isPublicOnlyRoute = publicOnlyRoutes.some((route) =>
-    pathname === route || pathname.startsWith(route + '/')
+  const isPublicOnlyRoute = publicOnlyRoutes.some(
+    (route) => pathname === route || pathname.startsWith(route + '/')
   );
   const isAdminLogin = pathname.startsWith('/admin-login');
 
@@ -29,7 +29,10 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (isProtectedRoute) {
       // If admin area and not logged, go to admin-login; else normal login
       if (pathname.startsWith('/admin')) {
-        throw redirect(302, `/admin-login?redirectTo=${encodeURIComponent(pathname)}`);
+        throw redirect(
+          302,
+          `/admin-login?redirectTo=${encodeURIComponent(pathname)}`
+        );
       }
       throw redirect(302, `/login?redirectTo=${encodeURIComponent(pathname)}`);
     }
@@ -58,7 +61,10 @@ export const handle: Handle = async ({ event, resolve }) => {
     if (isPublicOnlyRoute) {
       if (isAdminLogin) {
         // If already logged and role qualifies, go to admin; else redirect to startups
-        if (event.locals.user.role === 'Manager' || event.locals.user.role === 'Manager as Mentor') {
+        if (
+          event.locals.user.role === 'Manager' ||
+          event.locals.user.role === 'Manager as Mentor'
+        ) {
           throw redirect(302, '/admin');
         }
         throw redirect(302, '/startups');
@@ -66,11 +72,18 @@ export const handle: Handle = async ({ event, resolve }) => {
       throw redirect(302, '/startups');
     }
   } catch (error) {
+    if (isRedirect(error)) {
+      throw error;
+    }
+
     console.error(`[ HANDLE ERROR ]`);
     console.error(error);
     if (isProtectedRoute) {
       if (pathname.startsWith('/admin')) {
-        throw redirect(302, `/admin-login?redirectTo=${encodeURIComponent(pathname)}`);
+        throw redirect(
+          302,
+          `/admin-login?redirectTo=${encodeURIComponent(pathname)}`
+        );
       }
       throw redirect(302, `/login?redirectTo=${encodeURIComponent(pathname)}`);
     }

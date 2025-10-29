@@ -1,258 +1,220 @@
 <script lang="ts">
-  import Ellipsis from 'lucide-svelte/icons/ellipsis';
   import { Button } from '$lib/components/ui/button/index.js';
-  import * as Card from '$lib/components/ui/card/index.js';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-  import { Input } from '$lib/components/ui/input/index.js';
-  import Eye from 'lucide-svelte/icons/eye';
-  import EyeOff from 'lucide-svelte/icons/eye-off';
-  import RadarChart from '$lib/components/shared/RadarChart.svelte';
-  import { fade } from 'svelte/transition';
-  import { Label } from '$lib/components/ui/label/index.js';
   import * as Dialog from '$lib/components/ui/dialog';
-  import Assessment from '$lib/components/admin/Assessment.svelte';
-  import { CalculatorCategory } from '$lib/utils';
+  import WaitlistDialog from './sub/WaitlistDialog.svelte';
+  import ApprovalDialog from './sub/ApprovalDialog.svelte';
+  import * as Table from '$lib/components/ui/table/index.js';
+  import { getBadgeColorObject, getStartupMemberCount } from '$lib/utils';
 
-  let showCapsule = false;
+  export let startup: any;
+  export let showDialog: boolean = false;
+  export let toggleDialog: () => void;
+  export let waitlistStartup: (startupId: number, message: string) => Promise<any>;
+  export let mentors: {id: number, email: string, firstName: string, lastName: string, role: string}[] = [];
+  export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
+  export let approveStartup: (startupId: number, mentorId: any) => Promise<void>;
+  export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
 
-  function toggleCapsule() {
-    showCapsule = !showCapsule;
+  let showWaitlistDialog = false;
+  let showApprovalDialog = false;
+
+  $: statusColors = getBadgeColorObject('Pending');
+
+  function toggleWaitlistDialog() {
+    showWaitlistDialog = !showWaitlistDialog;
   }
-  export let inf: any,
-    que: any,
-    ans: any,
-    calc: any,
-    saveRating,
-    showDialog,
-    toggleDialog,
-    access;
 
-  const calculatorCategoryLabels = [
-    CalculatorCategory.Technology,
-    CalculatorCategory.Product_Development,
-    CalculatorCategory.Product_Definition,
-    CalculatorCategory.Competitive_Landscape,
-    CalculatorCategory.Team,
-    CalculatorCategory.Go_To_Market,
-    CalculatorCategory.Supply_Chain
-  ];
-
-  const calculatorScoresByCategory = calculatorCategoryLabels.map((label) => {
-    const apiKeyMapping: Record<string, string> = {
-      [CalculatorCategory.Technology]: 'Technology',
-      [CalculatorCategory.Product_Development]: 'Product Development',
-      [CalculatorCategory.Product_Definition]: 'Product Definition/Design',
-      [CalculatorCategory.Competitive_Landscape]: 'Competitive Landscape',
-      [CalculatorCategory.Team]: 'Team',
-      [CalculatorCategory.Go_To_Market]: 'Go-To-Market',
-      [CalculatorCategory.Supply_Chain]: 'Manufacturing/Supply Chain'
-    };
-
-    const apiKey = apiKeyMapping[label];
-    return calc[apiKey] || 0;
-  });
-
-  let scores: { readinessType: string; questionId: number; score: number }[] =
-    [];
-
-  function updateScore({
-    readinessType,
-    questionId,
-    score
-  }: {
-    readinessType: string;
-    questionId: number;
-    score: number;
-  }) {
-    // Update or add the score for the given questionId
-    const existingIndex = scores.findIndex((s) => s.questionId === questionId);
-    if (existingIndex !== -1) {
-      scores[existingIndex] = { readinessType, questionId, score };
-    } else {
-      scores.push({ readinessType, questionId, score });
-    }
+  function toggleApprovalDialog() {
+    showApprovalDialog = !showApprovalDialog;
   }
+
+  const memberCount = getStartupMemberCount(startup);
 </script>
 
-<Dialog.Root open={showDialog} onOpenChange={toggleDialog}>
-  <Dialog.Content class="h-[90%] max-w-[1000px]">
-    <div class="flex flex-col overflow-auto">
-      <div class="flex h-0 flex-col gap-5">
-        <!-- Project Details -->
-        <div class="flex flex-col gap-3">
-          <h1 class="text-2xl font-semibold">Project Details</h1>
-          <div class="grid gap-2">
-            <Label for="email">Startup Name</Label>
-            <Input
-              readonly
-              name="email"
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={inf.name}
-            />
-          </div>
-        </div>
-        <!-- Group Information -->
-        <div class="flex flex-col gap-3">
-          <h1 class="text-2xl font-semibold">Group Information</h1>
-          <div class="grid gap-2">
-            <Label for="email">Group Name</Label>
-            <Input
-              readonly
-              name="email"
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              value={inf.groupName}
-            />
-          </div>
+{#if startup}
+  {@const startupData = startup}
+  <Dialog.Root open={showDialog} onOpenChange={toggleDialog}>  
+    <Dialog.Content class="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <!-- Dialog Header -->
+      <Dialog.Header class="p-6 border-b">
+        <Dialog.Title class="text-2xl font-bold text-foreground">
+          {startup.capsuleProposal?.title || startup.name}
+        </Dialog.Title>
+      </Dialog.Header>
 
-          <div class="grid gap-2">
-            <Label for="email">Leader</Label>
-            <div class="flex gap-3">
-              <Input
-                readonly
-                name="email"
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={inf.user.email}
-              />
-              <Input
-                readonly
-                name="email"
-                id="email"
-                type="text"
-                placeholder="m@example.com"
-                value={inf.user.firstName}
-              />
-              <Input
-                readonly
-                name="email"
-                id="email"
-                type="text"
-                placeholder="m@example.com"
-                value={inf.user.lastName}
-              />
-            </div>
+      <!-- Dialog Content -->
+      <div class="p-6 pt-2 overflow-y-auto">
+        <!-- Status Message -->
+        <div class="mb-6 p-4 rounded-lg {statusColors.bg} border {statusColors.border}">
+          <h3 class="font-bold mb-1 {statusColors.text}">Status: Pending</h3>
+          <p class="text-sm {statusColors.text}">This startup application is awaiting review.</p>
+        </div>
+
+        <!-- AI Analysis Summary Section -->
+        {#if startup.capsuleProposal?.aiAnalysisSummary}
+          <div class="border border-border rounded-lg p-4 mb-6">
+            <h3 class="text-lg font-semibold text-foreground mb-3">AI Analysis Summary</h3>
+            <p class="text-muted-foreground leading-relaxed">
+              {startup.capsuleProposal.aiAnalysisSummary}
+            </p>
           </div>
-          {#each inf.members as member, i}
-            <div class="grid gap-2">
-              <Label for="email">Member #{i + 1}</Label>
-              <div class="flex gap-3">
-                <Input
-                  readonly
-                  name="email"
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  value={member.email}
-                />
-                <Input
-                  readonly
-                  name="email"
-                  id="email"
-                  type="text"
-                  placeholder="m@example.com"
-                  value={member.first_name}
-                />
-                <Input
-                  readonly
-                  name="email"
-                  id="email"
-                  type="text"
-                  placeholder="m@example.com"
-                  value={member.last_name}
-                />
+        {/if}
+
+        <!-- Detailed Application Information -->
+        <div>
+          <h3 class="text-xl font-bold text-foreground mb-4">Detailed Application Information</h3>
+          <div class="border-t pt-4 space-y-14">
+            <!-- Row: Description and Target Market -->
+            <div class="flex flex-col gap-6">
+              <div>
+                <h4 class="font-semibold text-foreground mb-2">Startup Description</h4>
+                <div class="border border-border rounded-lg p-3 h-full">
+                  <p class="text-muted-foreground text-sm">
+                    {startup.capsuleProposal?.description || 'No description available'}
+                  </p>
+                </div>
               </div>
-            </div>
-          {/each}
+              
+              {#if startup.capsuleProposal?.targetMarket}
+                <div>
+                  <h4 class="font-semibold text-foreground mb-2">Target Market</h4>
+                  <div class="border border-border rounded-lg p-3 h-full">
+                    <p class="text-muted-foreground text-sm">
+                      {startup.capsuleProposal.targetMarket}
+                    </p>
+                  </div>
+                </div>
+              {/if}
 
-          {#if inf.university_name}
-            <div class="grid gap-2">
-              <Label for="email">University Name</Label>
-              <Input
-                readonly
-                name="email"
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={inf.university_name}
-              />
+              {#if startup.capsuleProposal?.problemStatement}
+                  <div>
+                    <h4 class="font-semibold text-foreground mb-2">Problem Statement</h4>
+                    <div class="border border-border rounded-lg p-3 h-full">
+                      <p class="text-muted-foreground text-sm">
+                        {startup.capsuleProposal.problemStatement}
+                      </p>
+                    </div>
+                  </div>
+                {/if}
+                {#if startup.capsuleProposal?.solutionDescription}
+                  <div>
+                    <h4 class="font-semibold text-foreground mb-2">Solution Description</h4>
+                    <div class="border border-border rounded-lg p-3 h-full">
+                      <p class="text-muted-foreground text-sm">
+                        {startup.capsuleProposal.solutionDescription}
+                      </p>
+                    </div>
+                  </div>
+                {/if}
+
+                <div>
+                  <h4 class="font-semibold text-foreground mb-2">Team Size</h4>
+                  <div class="border border-border rounded-lg p-3 h-full">
+                    <p class="text-muted-foreground text-sm">
+                      {memberCount} member{memberCount > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                {#if startup.capsuleProposal?.intellectualPropertyStatus}
+                  <div>
+                    <h4 class="font-semibold text-foreground mb-2">Intellectual Property</h4>
+                    <div class="border border-border rounded-lg p-3 h-full">
+                      <p class="text-muted-foreground text-sm">
+                        {startup.capsuleProposal.intellectualPropertyStatus}
+                      </p>
+                    </div>
+                  </div>
+                {/if}
             </div>
-          {/if}
-        </div>
-        <!-- Calculator -->
-        <div class="flex flex-col gap-3">
-          <h1 class="text-2xl font-semibold">
-            Technology and Commercialization Calculator
-          </h1>
-          <div class="p-10">
-            <RadarChart
-              id={inf.id}
-              min={0}
-              max={5}
-              data={calculatorScoresByCategory}
-              labels={calculatorCategoryLabels}
-            />
+
+            <!-- Historical Timeline -->
+            {#if startup.capsuleProposal?.historicalTimeline && startup.capsuleProposal.historicalTimeline.length > 0}
+              <div class="mt-6">
+                <h4 class="font-semibold text-foreground mb-3">Historical Timeline</h4>
+                <div class="border border-border rounded-lg p-2">
+                  <Table.Root>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head class="font-bold text-foreground">Date</Table.Head>
+                        <Table.Head class="font-bold text-foreground">Description</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {#each startup.capsuleProposal.historicalTimeline as timeline}
+                        <Table.Row>
+                          <Table.Cell class="text-muted-foreground">{timeline.monthYear}</Table.Cell>
+                          <Table.Cell class="text-muted-foreground">{timeline.description}</Table.Cell>
+                        </Table.Row>
+                      {/each}
+                    </Table.Body>
+                  </Table.Root>
+                </div>
+              </div>
+            {/if}
+
+            <!-- Competitive Analysis -->
+            {#if startup.capsuleProposal?.competitiveAdvantageAnalysis && startup.capsuleProposal.competitiveAdvantageAnalysis.length > 0}
+              <div class="mt-6">
+                <h4 class="font-semibold text-foreground mb-3">Competitive Analysis</h4>
+                <div class="border border-border rounded-lg p-2">
+                  <Table.Root>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head class="font-bold text-foreground">Competitor</Table.Head>
+                        <Table.Head class="font-bold text-foreground">Offering</Table.Head>
+                        <Table.Head class="font-bold text-foreground">Pricing Strategy</Table.Head>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {#each startup.capsuleProposal.competitiveAdvantageAnalysis as competitor}
+                        <Table.Row>
+                          <Table.Cell class="text-muted-foreground">{competitor.competitorName}</Table.Cell>
+                          <Table.Cell class="text-muted-foreground">{competitor.offer}</Table.Cell>
+                          <Table.Cell class="text-muted-foreground">{competitor.pricingStrategy}</Table.Cell>
+                        </Table.Row>
+                      {/each}
+                    </Table.Body>
+                  </Table.Root>
+                </div>
+              </div>
+            {/if}
           </div>
         </div>
-        <!-- URAT Assessment -->
-        <div class="flex flex-col gap-3">
-          <h1 class="text-2xl font-semibold">URAT Assessment</h1>
-          <div class="flex flex-col gap-20">
-            <Assessment
-              questions={que.filter((d) => d.readinessType === 'Technology')}
-              answers={ans.filter((d) => d.readinessType === 'Technology')}
-              type="Technology"
-              {access}
-              onScoreChange={updateScore}
-            />
-            <Assessment
-              questions={que.filter((d) => d.readinessType === 'Market')}
-              answers={ans.filter((d) => d.readinessType === 'Market')}
-              type="Market"
-              {access}
-              onScoreChange={updateScore}
-            />
-            <Assessment
-              questions={que.filter((d) => d.readinessType === 'Regulatory')}
-              answers={ans.filter((d) => d.readinessType === 'Regulatory')}
-              type="Regulatory"
-              {access}
-              onScoreChange={updateScore}
-            />
-            <Assessment
-              questions={que.filter((d) => d.readinessType === 'Acceptance')}
-              answers={ans.filter((d) => d.readinessType === 'Acceptance')}
-              type="Acceptance"
-              {access}
-              onScoreChange={updateScore}
-            />
-            <Assessment
-              questions={que.filter(
-                (d) => d.readinessType === 'Organizational'
-              )}
-              answers={ans.filter((d) => d.readinessType === 'Organizational')}
-              type="Organizational"
-              {access}
-              onScoreChange={updateScore}
-            />
-            <Assessment
-              questions={que.filter((d) => d.readinessType === 'Investment')}
-              answers={ans.filter((d) => d.readinessType === 'Investment')}
-              type="Investment"
-              {access}
-              onScoreChange={updateScore}
-            />
-          </div>
-        </div>
-        <div class="flex justify-end">
-          <Button onclick={() => saveRating(inf.id, scores)}>Save Rating</Button
+
+        <!-- Action Buttons -->
+        <div class="flex justify-end gap-3 mt-8">
+          <Button 
+            variant="outline"
+            class="transition-transform hover:scale-105 duration-200"
+            onclick={toggleWaitlistDialog}
           >
+            Waitlist
+          </Button>
+          <Button 
+            class="transition-transform hover:scale-105 duration-200"
+            onclick={toggleApprovalDialog}
+          >
+            Approve
+          </Button>
         </div>
       </div>
-    </div></Dialog.Content
-  >
-</Dialog.Root>
+    </Dialog.Content>
+  </Dialog.Root>
+
+  <WaitlistDialog
+    showDialog={showWaitlistDialog}
+    toggleDialog={toggleWaitlistDialog}
+    startupId={startup?.id}
+    {waitlistStartup}
+  />
+
+  <ApprovalDialog
+    {startup}
+    showDialog={showApprovalDialog}
+    toggleDialog={toggleApprovalDialog}
+    {mentors}
+    {assessments}
+    onApprove={approveStartup}
+    {assignAssessmentsToStartup}
+  />
+{/if}

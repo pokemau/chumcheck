@@ -20,8 +20,14 @@ import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto } from './dto';
+import {
+  StartupApplicationDto,
+  WaitlistStartupDto,
+  AppointMentorsDto,
+  ChangeMentorDto,
+} from './dto';
 import { Request } from 'express';
+import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -50,6 +56,13 @@ export class StartupController {
     return this.startupService.getStartupReadinessLevel(startupId);
   }
 
+  @Get('/all')
+  async getAllStartups(): Promise<any[]> {
+    return await this.startupService.getAllStartups();
+  }
+
+  // ==================================================
+  // Deprecated endpoints - keeping for backward compatibility
   @Get('/ranking-by-urat')
   async getStartupsByUrat() {
     return await this.startupService.getPendingStartupsRankingByUrat();
@@ -59,6 +72,7 @@ export class StartupController {
   async getStartupsByRubrics() {
     return await this.startupService.getQualifiedStartupsRankingByRubrics();
   }
+  // ==================================================
 
   @Post('/apply')
   async applyStartup(@Body() dto: StartupApplicationDto, @Req() req: any) {
@@ -172,22 +186,35 @@ export class StartupController {
     return await this.startupService.approveApplicant(startupId);
   }
 
-  @Post(':startupId/waitlist-applicant')
-  async waitlistApplicant(@Param('startupId') startupId: number) {
-    return await this.startupService.waitlistApplicant(startupId);
+  @Patch(':startupId/waitlist-applicant')
+  async waitlistApplicant(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: WaitlistStartupDto,
+  ) {
+    return await this.startupService.waitlistApplicant(startupId, dto);
   }
 
   @Post(':startupId/appoint-mentors')
   async appointMentors(
     @Param('startupId') startupId: number,
-    @Body('mentor_ids') mentorIds: number[],
-    @Body('cohort_id') cohortId: number,
+    @Body() dto: AppointMentorsDto,
   ) {
-    return await this.startupService.appointMentors(
-      startupId,
-      mentorIds,
-      cohortId,
-    );
+    return await this.startupService.appointMentors(startupId, dto);
+  }
+
+  @Patch(':startupId/mark-complete')
+  async markStartupComplete(
+    @Param('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return await this.startupService.markComplete(startupId);
+  }
+
+  @Patch(':startupId/change-mentor')
+  async changeMentor(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: ChangeMentorDto,
+  ) {
+    return await this.startupService.changeMentor(startupId, dto);
   }
 
   @Get(':startupId/allow-rnas')
@@ -222,6 +249,15 @@ export class StartupController {
     @Body() dto: UpdateStartupDto,
   ) {
     return await this.startupService.update(id, dto);
+  }
+
+  @Patch(':id/reapply')
+  async reapplyStartup(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: StartupApplicationDto,
+    @Req() req: any,
+  ) {
+    return await this.startupService.updateCapsuleProposal(id, dto);
   }
 
   // @Patch(':id/with-capsule-proposal')

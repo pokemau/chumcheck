@@ -16,14 +16,25 @@ import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answe
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/rna.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
+import { StartupWaitlistMessage } from 'src/entities/startup-waitlist-message.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { StartupApplicationDto, StartupApplicationDtoOld } from './dto';
+import {
+  StartupApplicationDto,
+  StartupApplicationDtoOld,
+  WaitlistStartupDto,
+  AppointMentorsDto,
+  ChangeMentorDto,
+} from './dto';
+import { AiService } from '../ai/ai.service';
 import { CreateStartupDto } from '../admin/dto/create-startup.dto';
 
 @Injectable()
 export class StartupService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
   async getStartups(userId: number) {
     const user = await this.em.findOne(User, { id: userId });
@@ -45,6 +56,7 @@ export class StartupService {
               'readinessLevels.readinessLevel',
               'uratQuestionAnswers.uratQuestion',
               'calculatorQuestionAnswers.question',
+              'waitlistMessages',
             ],
           },
         );
@@ -67,11 +79,42 @@ export class StartupService {
     });
   }
 
+  async getAllStartups(): Promise<Startup[]> {
+    const t = await this.em.find(
+      Startup,
+      {},
+      {
+        populate: [
+          'user',
+          'members',
+          'capsuleProposal',
+          'waitlistMessages',
+          'waitlistMessages.manager',
+          'mentors',
+        ],
+      },
+    );
+
+    t.forEach((startup, index) => {
+      console.log(`Startup ${index} (ID: ${startup.id}):`);
+      if (startup.capsuleProposal) {
+        console.log(
+          '  capsuleProposal.members:',
+          startup.capsuleProposal.members,
+        );
+      } else {
+        console.log('  No capsuleProposal found');
+      }
+    });
+
+    return t;
+  }
+
   async getStartupById(startupId: number): Promise<Startup | null> {
     const startup = await this.em.findOne(
       Startup,
       { id: startupId },
-      { populate: ['user', 'members', 'capsuleProposal'] },
+      { populate: ['user', 'members', 'capsuleProposal', 'waitlistMessages'] },
     );
     if (!startup) {
       throw new NotFoundException(
@@ -83,8 +126,6 @@ export class StartupService {
 
   async create(dto: StartupApplicationDto, userId: number) {
     return this.em.transactional(async () => {
-      console.log('herherherhe');
-
       const user = await this.em.findOne(User, { id: userId });
       if (!user) {
         throw new NotFoundException(`User with ID ${userId} does not exist.`);
@@ -115,6 +156,9 @@ export class StartupService {
     dto: StartupApplicationDto,
   ) {
     try {
+      const aiAnalysisSummary =
+        await this.aiService.generateStartupAnalysisSummary(dto);
+
       if (startup.capsuleProposal) {
         const proposal = startup.capsuleProposal;
         proposal.title = dto.title;
@@ -126,10 +170,12 @@ export class StartupService {
         proposal.historicalTimeline = dto.historicalTimeline ?? [];
         proposal.competitiveAdvantageAnalysis =
           dto.competitiveAdvantageAnalysis ?? [];
+        proposal.members = dto.members ?? [];
         proposal.intellectualPropertyStatus = dto.intellectualPropertyStatus;
         proposal.scope = dto.proposalScope;
         proposal.methodology = dto.methodology;
         proposal.curriculumVitae = dto.curriculumVitae ?? null;
+        proposal.aiAnalysisSummary = aiAnalysisSummary;
 
         await this.em.flush();
         return proposal;
@@ -144,10 +190,12 @@ export class StartupService {
         objectives: dto.objectives ?? [],
         historicalTimeline: dto.historicalTimeline ?? [],
         competitiveAdvantageAnalysis: dto.competitiveAdvantageAnalysis ?? [],
+        members: dto.members ?? [],
         intellectualPropertyStatus: dto.intellectualPropertyStatus,
         scope: dto.proposalScope,
         methodology: dto.methodology,
         curriculumVitae: dto.curriculumVitae ?? null,
+        aiAnalysisSummary,
         startup,
       });
 
@@ -179,7 +227,8 @@ export class StartupService {
     if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
     if (dto.links !== undefined) startup.links = dto.links;
     if (dto.groupName !== undefined) startup.groupName = dto.groupName;
-    if (dto.universityName !== undefined) startup.universityName = dto.universityName;
+    if (dto.universityName !== undefined)
+      startup.universityName = dto.universityName;
     if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
 
     await this.em.flush();
@@ -502,6 +551,24 @@ export class StartupService {
     // return orderedStartups;
   }
 
+  async getStartupsByQualificationStatus(
+    qualificationStatus: QualificationStatus,
+  ): Promise<any[]> {
+    const startups = await this.em.find(
+      Startup,
+      { qualificationStatus },
+      {
+        populate: ['user', 'mentors', 'capsuleProposal'],
+      },
+    );
+
+    return startups.map((startup) => ({
+      ...startup,
+      mentors: startup.mentors.getItems().map((mentor: User) => mentor),
+      capsuleProposal: startup.capsuleProposal ? startup.capsuleProposal : null,
+    }));
+  }
+
   async getCalculatorFinalScores(startupId: number) {
     // // Initialize an object to store scores grouped by category
     // let calculatorAnswers = await this.calculateLevels(startupId);
@@ -536,13 +603,12 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.qualificationStatus = QualificationStatus.QUALIFIED;
-    await this.createStartupReadinessLevels(startupId);
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been approved.` };
   }
 
-  async waitlistApplicant(startupId: number) {
+  async waitlistApplicant(startupId: number, dto: WaitlistStartupDto) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -550,20 +616,32 @@ export class StartupService {
       );
     }
 
-    // Maybe (if have time) add logic for sending the startup an email that they got approved
-
-    startup.datetimeDeleted = new Date();
     startup.qualificationStatus = QualificationStatus.WAITLISTED;
 
+    // Find the manager who is waitlisting the startup
+    const manager = await this.em.findOne(User, { id: dto.managerId });
+    if (!manager) {
+      throw new NotFoundException(
+        `Manager with ID ${dto.managerId} does not exist.`,
+      );
+    }
+
+    // Create waitlist message
+    const waitlistMessage = new StartupWaitlistMessage();
+    waitlistMessage.startup = startup;
+    waitlistMessage.message = dto.message;
+    waitlistMessage.manager = manager;
+
+    this.em.persist(waitlistMessage);
     await this.em.flush();
-    return { message: `Startup with ID ${startupId} has been rejected.` };
+
+    return {
+      message: `Startup with ID ${startupId} has been waitlisted.`,
+      waitlistMessage,
+    };
   }
 
-  async appointMentors(
-    startupId: number,
-    mentorIds: number[],
-    cohortId: number,
-  ) {
+  async appointMentors(startupId: number, dto: AppointMentorsDto) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -572,18 +650,13 @@ export class StartupService {
     }
 
     const mentors = await this.em.find(User, {
-      id: { $in: mentorIds },
+      id: { $in: dto.mentorIds },
       role: Role.Mentor,
     });
-    if (mentors.length !== mentorIds.length) {
+    if (mentors.length !== dto.mentorIds.length) {
       throw new BadRequestException('One or more mentor IDs are invalid.');
     }
     startup.mentors.set(mentors);
-
-    // Cohort ID given but we dont know what they are for yet
-    // if (cohortId) {
-    //   startup.cohortId = cohortId;
-    // }
 
     await this.em.flush();
     return {
@@ -616,6 +689,47 @@ export class StartupService {
       startup: startupId,
     });
     return count > 0;
+  }
+
+  async markComplete(startupId: number) {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    startup.qualificationStatus = QualificationStatus.COMPLETED;
+    await this.em.flush();
+    return {
+      message: `Startup with ID ${startupId} has been marked as completed.`,
+    };
+  }
+
+  async changeMentor(startupId: number, dto: ChangeMentorDto) {
+    const startup = await this.em.findOne(
+      Startup,
+      { id: startupId },
+      { populate: ['mentors'] },
+    );
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    const newMentor = await this.em.findOne(User, {
+      id: dto.mentorId,
+      role: Role.Mentor,
+    });
+    if (!newMentor) {
+      throw new NotFoundException(`Mentor with ID ${dto.mentorId} not found`);
+    }
+
+    // Replace existing mentors with the new mentor
+    startup.mentors.set([newMentor]);
+
+    await this.em.flush();
+    return {
+      message: `Mentor has been successfully changed for Startup ID ${startupId}.`,
+      startup,
+    };
   }
 
   private async calculateTechnologyLevel(startupId: number): Promise<number> {
@@ -880,9 +994,11 @@ export class StartupService {
       const msg = String(e?.message ?? '');
       if (e?.code === '23505' && msg.includes('startups_pkey')) {
         // Reset sequence to max(id)
-        await this.em.getConnection().execute(
-          "select setval(pg_get_serial_sequence('startups','id'), coalesce((select max(id) from startups), 0), true)"
-        );
+        await this.em
+          .getConnection()
+          .execute(
+            "select setval(pg_get_serial_sequence('startups','id'), coalesce((select max(id) from startups), 0), true)",
+          );
         // Retry once
         await this.em.persistAndFlush(startup);
       } else {
@@ -891,4 +1007,47 @@ export class StartupService {
     }
     return startup;
   }
+
+async updateCapsuleProposal(
+  startupId: number,
+  dto: StartupApplicationDto,
+): Promise<Startup> {
+  const startup = await this.em.findOne(
+    Startup,
+    { id: startupId },
+    { populate: ['capsuleProposal'] },
+  );
+
+  if (!startup) {
+    throw new NotFoundException(`Startup with ID ${startupId} not found`);
+  }
+
+  if (!startup.capsuleProposal) {
+    throw new BadRequestException(
+      `Startup with ID ${startupId} has no capsule proposal to update`,
+    );
+  }
+
+  const proposal = startup.capsuleProposal;
+  proposal.title = dto.title;
+  proposal.description = dto.description;
+  proposal.problemStatement = dto.problemStatement;
+  proposal.targetMarket = dto.targetMarket;
+  proposal.solutionDescription = dto.solutionDescription;
+  proposal.objectives = dto.objectives ?? [];
+  proposal.historicalTimeline = dto.historicalTimeline ?? [];
+  proposal.competitiveAdvantageAnalysis =
+    dto.competitiveAdvantageAnalysis ?? [];
+  proposal.intellectualPropertyStatus = dto.intellectualPropertyStatus;
+  proposal.scope = dto.proposalScope;
+  proposal.methodology = dto.methodology;
+  proposal.curriculumVitae = dto.curriculumVitae ?? proposal.curriculumVitae;
+  proposal.members = dto.members ?? [];
+
+  startup.name = dto.title;
+
+  await this.em.flush();
+
+  return startup;
+}
 }

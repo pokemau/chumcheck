@@ -3,7 +3,6 @@
   import * as Dialog from '$lib/components/ui/dialog';
   import ShortAnswerField from './AssessmentTypes/ShortAnswerField.svelte';
   import LongAnswerField from './AssessmentTypes/LongAnswerField.svelte';
-  import AssessmentLabel from './AssessmentTypes/AssessmentLabel.svelte';
   import FileUploadField from './AssessmentTypes/FileUploadField.svelte';
   import type { Assessment } from '$lib/types/assessment.types';
   import { createEventDispatcher } from 'svelte';
@@ -17,32 +16,28 @@
 
   const dispatch = createEventDispatcher<{
     close: void;
-    submit: { assessmentName: string; startupId: string; formData: Record<string, any>; fileNames: Record<string, string> };
+    submit: { assessmentName: string; startupId: string; formData: Record<string, any> };
     statusChanged: void;
   }>();
 
   let formData: Record<string, any> = {};
-  let fileNames: Record<string, string> = {}; // Track file names for each field
   let isSubmitting = false;
   let isInitialized = false;
   let isChangingStatus = false;
   let fileUploadComponents: Record<string, FileUploadField> = {};
   
-  // Initialize formData with existing answers only once
   $: {
     if (!isInitialized && assessment?.assessmentFields) {
-      assessment.assessmentFields.forEach(field => {
+      assessment.assessmentFields.forEach((field) => {
         formData[field.id] = field.answer || '';
-        if (field.type === 'File' && field.fileName) {
-          fileNames[field.id] = field.fileName;
-        }
       });
       isInitialized = true;
     }
   }
 
-  // Check if any file uploads are in progress
-  $: isAnyFileUploading = Object.values(fileUploadComponents).some(component => component?.processing);
+  $: isAnyFileUploading = Object.values(fileUploadComponents).some(
+    (component) => component?.processing
+  );
 
   async function handleSubmit(): Promise<void> {
     if (isAnyFileUploading) {
@@ -54,25 +49,52 @@
       isSubmitting = true;
       console.log('Starting submission');
       
-      console.log('Form Data to be submitted:', {
-        assessmentName: assessment.name,
-        startupId,
-        formData,
-        fileNames
+      // Upload all pending files
+      const fileUploadPromises = Object.entries(fileUploadComponents).map(
+        async ([fieldId, component]) => {
+          if (component && typeof component.uploadPendingFiles === 'function') {
+            console.log(`Uploading pending files for field ${fieldId}`);
+            await component.uploadPendingFiles();
+            console.log(`After upload - Field ${fieldId}:`, formData[fieldId]);
+          }
+        }
+      );
+      
+      await Promise.all(fileUploadPromises);
+      
+      // Prepare submission data
+      const submissionData: Record<string, any> = {};
+      
+      assessment.assessmentFields.forEach((field) => {
+        submissionData[field.id] = formData[field.id] || '';
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('Submission successful');
+      console.log('=== FINAL SUBMISSION DATA ===');
+      console.log('Assessment Name:', assessment.name);
+      console.log('Startup ID:', startupId);
+      console.log('Form Data:', submissionData);
+      console.log('File Fields Details:');
+      assessment.assessmentFields.forEach((field) => {
+        if (field.type === 'File') {
+          console.log(`  Field ${field.id} (${field.description}):`, {
+            answerValue: submissionData[field.id]
+          });
+        }
+      });
+      console.log('=== END SUBMISSION DATA ===');
+
       dispatch('submit', { 
         assessmentName: assessment.name, 
         startupId, 
-        formData ,
-        fileNames
+        formData: submissionData
       });
-      dispatch('close');
+      
+      console.log('Submission successful');
+      toast.success('Assessment submitted successfully');
+      // Don't close the form, let it refresh with updated data
     } catch (error) {
       console.error('Submission failed:', error);
+      toast.error('Failed to upload files or submit assessment');
     } finally {
       isSubmitting = false;
     }
@@ -106,7 +128,9 @@
   <Dialog.Header>
     <Dialog.Title class="text-2xl font-semibold">{assessment.name}</Dialog.Title>
     {#if isMentor}
-      <Dialog.Description>Mentor View - Assessment Status: {assessment.assessmentStatus}</Dialog.Description>
+      <Dialog.Description>
+        Mentor View - Assessment Status: {assessment.assessmentStatus}
+      </Dialog.Description>
     {/if}
   </Dialog.Header>
 
@@ -131,8 +155,12 @@
             description={field.description}
             fileUrl={field.answer}
             bind:value={formData[field.id]}
-            bind:fileName={fileNames[field.id]}
             isReadOnly={isMentor}
+            {access}
+            {startupId}
+            assessmentId={field.id}
+            assessmentName={assessment.name}
+            on:fileRemoved={() => dispatch('statusChanged')}
           />
         {/if}
       {/each}

@@ -1,9 +1,4 @@
-import {
-    Entity,
-    PrimaryKey,
-    Property,
-    ManyToOne,
-  } from '@mikro-orm/core';
+import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
 import { ReadinessLevel } from './readiness-level.entity';
 import { Startup } from './startup.entity';
 

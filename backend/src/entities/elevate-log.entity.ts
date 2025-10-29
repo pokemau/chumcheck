@@ -20,4 +20,3 @@ export class ElevateLogs {
   @ManyToOne(() => ReadinessLevel)
   readinessLevel!: ReadinessLevel;
 }
-

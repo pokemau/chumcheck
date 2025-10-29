@@ -15,6 +15,76 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "action": {
+          "name": "action",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "details": {
+          "name": "details",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "actor": {
+          "name": "actor",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "mappedType": "date"
+        }
+      },
+      "name": "activity_logs",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "activity_logs_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "type": {
           "name": "type",
           "type": "varchar(255)",
@@ -111,6 +181,7 @@
           ],
           "referencedTableName": "public.assessment_types",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -490,6 +561,7 @@
           ],
           "referencedTableName": "public.assessment_types",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -526,23 +598,12 @@
         },
         "answer_value": {
           "name": "answer_value",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "length": 255,
-          "mappedType": "string"
-        },
-        "file_name": {
-          "name": "file_name",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "text"
         },
         "submitted_at": {
           "name": "submitted_at",
@@ -960,6 +1021,101 @@
             "id"
           ],
           "referencedTableName": "public.urat_questions",
+          "createForeignKeyConstraint": true,
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "manager_id": {
+          "name": "manager_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 0,
+          "default": "CURRENT_TIMESTAMP",
+          "mappedType": "date"
+        }
+      },
+      "name": "startup_waitlist_messages",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "startup_waitlist_messages_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "startup_waitlist_messages_startup_id_foreign": {
+          "constraintName": "startup_waitlist_messages_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.startup_waitlist_messages",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "createForeignKeyConstraint": true,
+          "updateRule": "cascade"
+        },
+        "startup_waitlist_messages_manager_id_foreign": {
+          "constraintName": "startup_waitlist_messages_manager_id_foreign",
+          "columnNames": [
+            "manager_id"
+          ],
+          "localTableName": "public.startup_waitlist_messages",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
           "updateRule": "cascade"
         }
@@ -1715,15 +1871,23 @@
           "nullable": false,
           "mappedType": "json"
         },
-        "intellectual_property_status": {
-          "name": "intellectual_property_status",
-          "type": "varchar(255)",
+        "members": {
+          "name": "members",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 255,
-          "mappedType": "string"
+          "mappedType": "json"
+        },
+        "intellectual_property_status": {
+          "name": "intellectual_property_status",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
         },
         "curriculum_vitae": {
           "name": "curriculum_vitae",
@@ -1745,6 +1909,15 @@
         },
         "methodology": {
           "name": "methodology",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "ai_analysis_summary": {
+          "name": "ai_analysis_summary",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,

@@ -6,6 +6,6 @@ import { AiModule } from 'src/ai/ai.module';
 @Module({
   imports: [AiModule],
   controllers: [RnaController],
-  providers: [RnaService]
+  providers: [RnaService],
 })
 export class RnaModule {}

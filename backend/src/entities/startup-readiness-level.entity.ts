@@ -22,4 +22,3 @@ export class StartupReadinessLevel {
   @Property({ onUpdate: () => new Date() })
   updatedAt = new Date();
 }
-

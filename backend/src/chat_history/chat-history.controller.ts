@@ -19,12 +19,16 @@ export class ChatHistoryController {
   }
 
   @Get('initiatives/:id')
-  async getInitiativeChatHistory(@Param('id', ParseIntPipe) initiativeId: number) {
+  async getInitiativeChatHistory(
+    @Param('id', ParseIntPipe) initiativeId: number,
+  ) {
     return await this.chatHistoryService.getInitiativeChatHistory(initiativeId);
   }
 
   @Get('roadblocks/:id')
-  async getRoadblockChatHistory(@Param('id', ParseIntPipe) roadblockId: number) {
+  async getRoadblockChatHistory(
+    @Param('id', ParseIntPipe) roadblockId: number,
+  ) {
     return await this.chatHistoryService.getRoadblockChatHistory(roadblockId);
   }
 
@@ -32,4 +36,4 @@ export class ChatHistoryController {
   async getRnaChatHistory(@Param('id', ParseIntPipe) rnaId: number) {
     return await this.chatHistoryService.getRnaChatHistory(rnaId);
   }
-} 
+}
