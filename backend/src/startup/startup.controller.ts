@@ -251,6 +251,15 @@ export class StartupController {
     return await this.startupService.update(id, dto);
   }
 
+  @Patch(':id/reapply')
+  async reapplyStartup(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: StartupApplicationDto,
+    @Req() req: any,
+  ) {
+    return await this.startupService.updateCapsuleProposal(id, dto);
+  }
+
   // @Patch(':id/with-capsule-proposal')
   // @UseInterceptors(FileInterceptor('capsuleProposal'))
   // async updateStartupWithCapsuleProposal(

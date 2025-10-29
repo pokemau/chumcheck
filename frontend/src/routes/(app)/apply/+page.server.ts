@@ -9,10 +9,13 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { PUBLIC_API_URL } from '$env/static/public';
 import axiosInstance from '$lib/axios';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ cookies }) => {
   const form = await superValidate(zod(applicationSchema));
+  const access = cookies.get('Access');
+
   return {
-    form
+    form,
+    access
   };
 };
 

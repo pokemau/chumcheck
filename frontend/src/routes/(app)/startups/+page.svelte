@@ -151,25 +151,25 @@
     };
   });
 
-  $effect(() => {
-    const success = page.url.searchParams.get('success');
+  // $effect(() => {
+  //   const success = page.url.searchParams.get('success');
 
-    if (form?.error) {
-      let formError =
-        form.error.length > 60
-          ? form.error.substring(0, 60) + '...'
-          : form.error;
-      toast.error(formError);
-    }
+  //   if (form?.error) {
+  //     let formError =
+  //       form.error.length > 60
+  //         ? form.error.substring(0, 60) + '...'
+  //         : form.error;
+  //     toast.error(formError);
+  //   }
 
-    if (success === 'true') {
-      toast.success('Application successfull.');
-      // Remove the 'success' parameter from the URL
-      const url = new URL(page.url.href);
-      url.searchParams.delete('success');
-      history.replaceState(null, '', url);
-    }
-  });
+  //   if (success === 'true') {
+  //     toast.success('Application successfull.');
+  //     // Remove the 'success' parameter from the URL
+  //     const url = new URL(page.url.href);
+  //     url.searchParams.delete('success');
+  //     history.replaceState(null, '', url);
+  //   }
+  // });
 
   $effect(() => {
     async function fetchInitiatives() {

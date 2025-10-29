@@ -56,6 +56,7 @@ export class StartupService {
               'readinessLevels.readinessLevel',
               'uratQuestionAnswers.uratQuestion',
               'calculatorQuestionAnswers.question',
+              'waitlistMessages',
             ],
           },
         );
@@ -113,7 +114,7 @@ export class StartupService {
     const startup = await this.em.findOne(
       Startup,
       { id: startupId },
-      { populate: ['user', 'members', 'capsuleProposal'] },
+      { populate: ['user', 'members', 'capsuleProposal', 'waitlistMessages'] },
     );
     if (!startup) {
       throw new NotFoundException(
@@ -1006,4 +1007,47 @@ export class StartupService {
     }
     return startup;
   }
+
+async updateCapsuleProposal(
+  startupId: number,
+  dto: StartupApplicationDto,
+): Promise<Startup> {
+  const startup = await this.em.findOne(
+    Startup,
+    { id: startupId },
+    { populate: ['capsuleProposal'] },
+  );
+
+  if (!startup) {
+    throw new NotFoundException(`Startup with ID ${startupId} not found`);
+  }
+
+  if (!startup.capsuleProposal) {
+    throw new BadRequestException(
+      `Startup with ID ${startupId} has no capsule proposal to update`,
+    );
+  }
+
+  const proposal = startup.capsuleProposal;
+  proposal.title = dto.title;
+  proposal.description = dto.description;
+  proposal.problemStatement = dto.problemStatement;
+  proposal.targetMarket = dto.targetMarket;
+  proposal.solutionDescription = dto.solutionDescription;
+  proposal.objectives = dto.objectives ?? [];
+  proposal.historicalTimeline = dto.historicalTimeline ?? [];
+  proposal.competitiveAdvantageAnalysis =
+    dto.competitiveAdvantageAnalysis ?? [];
+  proposal.intellectualPropertyStatus = dto.intellectualPropertyStatus;
+  proposal.scope = dto.proposalScope;
+  proposal.methodology = dto.methodology;
+  proposal.curriculumVitae = dto.curriculumVitae ?? proposal.curriculumVitae;
+  proposal.members = dto.members ?? [];
+
+  startup.name = dto.title;
+
+  await this.em.flush();
+
+  return startup;
+}
 }
