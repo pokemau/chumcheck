@@ -102,16 +102,14 @@ export class AdminService {
   async deleteUser(id: number): Promise<void> {
     const user = await this.getUserById(id); // Ensures user exists before attempting delete
 
-    // Prevent FK violation by checking startups that reference this user
-    const startupCount = await this.em.count(Startup, { user: id });
-    if (startupCount > 0) {
-      throw new BadRequestException(
-        `Cannot delete user ${user.email} – referenced by ${startupCount} startup(s). Reassign or delete their startups first.`
-      );
+    // Let database cascades handle dependent rows (startups, roadblocks, rns, etc.)
+    try {
+      await this.userService.remove(id);
+      await this.log('Admin', `Deleted user ${user.email}`, 'admin');
+    } catch (e: any) {
+      // Surface FK errors if any relation still blocks deletion
+      throw new InternalServerErrorException(`Could not delete user ${user.email}. ${e?.message ?? ''}`);
     }
-
-    await this.userService.remove(id);
-    await this.log('Admin', `Deleted user ${user.email}`, 'admin');
   }
 
   async getAllStartups(): Promise<Startup[]> {

@@ -18,7 +18,7 @@ export const actions: Actions = {
     const token = cookies.get('Access');
     if (!token) return fail(401, { message: 'Unauthorized' });
     const data = await request.formData();
-    const id = data.get('id');
+    const id = Number(data.get('id'));
     const res = await fetch(`${PUBLIC_API_URL}/admin/users/delete-json/${id}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` }
@@ -27,6 +27,6 @@ export const actions: Actions = {
       const text = await res.text();
       return fail(res.status, { message: text || 'Failed to delete user' });
     }
-    throw redirect(303, '/admin/users');
+    return { ok: true, id };
   }
 };

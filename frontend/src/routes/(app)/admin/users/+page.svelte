@@ -1,14 +1,16 @@
 <script lang="ts">
   import * as Dialog from '$lib/components/ui/dialog';
+  import { enhance } from '$app/forms';
 
   export let data: { users: Array<any> };
   let users = data.users;
   let toDelete: any = null;
   let open = false;
   let deleting = false;
+  let errorMsg: string | null = null;
 
-  function onSuccess() {
-    users = users.filter((u) => u.id !== toDelete?.id);
+  function onSuccess(id: number) {
+    users = users.filter((u) => u.id !== id);
     open = false;
     toDelete = null;
   }
@@ -57,11 +59,40 @@
         This action cannot be undone. This will permanently delete {toDelete?.email}.
       </Dialog.Description>
     </Dialog.Header>
-    <form method="post" action="?/delete" on:submit={() => (deleting = true)}>
+    <form method="post" action="?/delete" use:enhance={(submit) => {
+      // show spinner immediately on submit
+      deleting = true; errorMsg = null;
+      return async ({ result, update }) => {
+        try {
+          if (result.type === 'success') {
+            const payload: any = result.data;
+            if (payload?.ok && typeof payload.id === 'number') {
+              onSuccess(payload.id);
+              // ensure UI reflects latest server state
+              setTimeout(() => window.location.reload(), 50);
+              return;
+            }
+            await update();
+            return;
+          }
+          if (result.type === 'failure') {
+            errorMsg = (result.data?.message as string) || 'Failed to delete user';
+            return;
+          }
+          // handle redirects or other responses via default updater
+          await update();
+        } finally {
+          deleting = false;
+        }
+      };
+    }}>
       <input type="hidden" name="id" value={toDelete?.id} />
+      {#if errorMsg}
+        <p class="mb-2 text-sm text-red-600">{errorMsg}</p>
+      {/if}
       <div class="flex justify-end gap-2 pt-4">
         <Dialog.Close type="button" class="rounded-md border px-3 py-2 text-sm" disabled={deleting} on:click={() => { if (!deleting) { toDelete = null; } }}>Cancel</Dialog.Close>
-        <button class="inline-flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-60" disabled={deleting} type="submit">
+        <button aria-busy={deleting} class="inline-flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-60" disabled={deleting} type="submit">
           {#if deleting}
             <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
           {/if}

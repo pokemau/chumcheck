@@ -27,7 +27,7 @@ export class Startup {
   @Property()
   name!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
   @Enum(() => QualificationStatus)

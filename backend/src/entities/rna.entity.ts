@@ -19,6 +19,7 @@ import { Startup } from './startup.entity';
   
     @ManyToOne(() => Startup, {
       fieldName: 'startup_id',
+      deleteRule: 'cascade',
     })
     startup!: Startup;
   
@@ -34,4 +35,3 @@ import { Startup } from './startup.entity';
     @Property({ fieldName: 'updated_at', onUpdate: () => new Date() })
     updatedAt?: Date = new Date();
   }
-  

@@ -1,14 +1,16 @@
 <script lang="ts">
   import * as Dialog from '$lib/components/ui/dialog';
+  import { enhance } from '$app/forms';
 
   export let data: { startups: Array<any> };
   let startups = data.startups;
   let toDelete: any = null;
   let open = false;
   let deleting = false;
+  let errorMsg: string | null = null;
 
-  function onSuccess() {
-    startups = startups.filter((s) => s.id !== toDelete?.id);
+  function onSuccess(id: number) {
+    startups = startups.filter((s) => s.id !== id);
     open = false;
     toDelete = null;
   }
@@ -55,8 +57,33 @@
         This action cannot be undone. This will permanently delete {toDelete?.name}.
       </Dialog.Description>
     </Dialog.Header>
-    <form method="post" action="?/delete" on:submit={() => (deleting = true)}>
+    <form method="post" action="?/delete" use:enhance={({ form }) => {
+      deleting = true; errorMsg = null;
+      return async ({ result, update }) => {
+        try {
+          if (result.type === 'success') {
+            const payload: any = result.data;
+            if (payload?.ok && typeof payload.id === 'number') {
+              onSuccess(payload.id);
+              return;
+            }
+            await update();
+            return;
+          }
+          if (result.type === 'failure') {
+            errorMsg = (result.data?.message as string) || 'Failed to delete startup';
+            return;
+          }
+          await update();
+        } finally {
+          deleting = false;
+        }
+      };
+    }}>
       <input type="hidden" name="id" value={toDelete?.id} />
+      {#if errorMsg}
+        <p class="mb-2 text-sm text-red-600">{errorMsg}</p>
+      {/if}
       <div class="flex justify-end gap-2 pt-4">
         <Dialog.Close type="button" class="rounded-md border px-3 py-2 text-sm" disabled={deleting} on:click={() => { if (!deleting) { toDelete = null; } }}>Cancel</Dialog.Close>
         <button class="inline-flex items-center gap-2 rounded-md bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700 disabled:opacity-60" disabled={deleting} type="submit">

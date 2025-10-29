@@ -48,6 +48,7 @@ export class CapsuleProposal {
 
   @OneToOne(() => Startup, (startup) => startup.capsuleProposal, {
     owner: true,
+    deleteRule: 'cascade',
   })
   startup!: Startup;
 }
