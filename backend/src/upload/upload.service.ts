@@ -13,36 +13,42 @@ import { UploadResponseDto, MultipleUploadResponseDto } from './dto';
 
 @Injectable()
 export class UploadService {
-  private s3Client: S3Client;
-  private bucketName: string;
-  private endpoint: string;
+  private s3Client?: S3Client;
+  private bucketName?: string;
+  private endpoint?: string;
+  private enabled = false;
 
   constructor(private configService: ConfigService) {
     const accessKeyId = this.configService.get<string>('DO_SPACES_KEY');
     const secretAccessKey = this.configService.get<string>('DO_SPACES_SECRET');
-    this.endpoint = this.configService.get<string>('DO_SPACES_ENDPOINT')!;
-    this.bucketName = this.configService.get<string>('DO_SPACES_BUCKET')!;
+    this.endpoint = this.configService.get<string>('DO_SPACES_ENDPOINT') || undefined;
+    this.bucketName = this.configService.get<string>('DO_SPACES_BUCKET') || undefined;
     const region = this.configService.get<string>('DO_SPACES_REGION');
 
     if (
-      !accessKeyId ||
-      !secretAccessKey ||
-      !this.endpoint ||
-      !this.bucketName ||
-      !region
+      accessKeyId &&
+      secretAccessKey &&
+      this.endpoint &&
+      this.bucketName &&
+      region
     ) {
-      throw new Error('Digital Ocean Spaces configuration is incomplete');
+      this.s3Client = new S3Client({
+        endpoint: this.endpoint,
+        region: region,
+        credentials: {
+          accessKeyId,
+          secretAccessKey,
+        },
+        forcePathStyle: false,
+      });
+      this.enabled = true;
+    } else {
+      // Missing configuration: keep service disabled but do not crash the app
+      this.enabled = false;
+      // Optional: console.warn for visibility
+      // eslint-disable-next-line no-console
+      console.warn('UploadService disabled: DigitalOcean Spaces config is incomplete');
     }
-
-    this.s3Client = new S3Client({
-      endpoint: this.endpoint,
-      region: region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-      forcePathStyle: false,
-    });
   }
 
   async uploadSingle(
@@ -50,6 +56,10 @@ export class UploadService {
     folder?: string,
   ): Promise<UploadResponseDto> {
     try {
+      if (!this.enabled) {
+        throw new InternalServerErrorException('Upload service is not configured');
+      }
+
       if (!file) {
         throw new BadRequestException('No file provided');
       }
@@ -77,6 +87,10 @@ export class UploadService {
     files: Express.Multer.File[],
     folder?: string,
   ): Promise<MultipleUploadResponseDto> {
+    if (!this.enabled) {
+      throw new InternalServerErrorException('Upload service is not configured');
+    }
+
     if (!files || files.length === 0) {
       throw new BadRequestException('No files provided');
     }
@@ -97,13 +111,17 @@ export class UploadService {
   }
 
   async deleteFile(key: string): Promise<void> {
+    if (!this.enabled) {
+      throw new InternalServerErrorException('Upload service is not configured');
+    }
+
     try {
       const command = new DeleteObjectCommand({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Key: key,
       });
 
-      await this.s3Client.send(command);
+      await this.s3Client!.send(command);
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to delete file: ${error.message}`,
@@ -112,14 +130,19 @@ export class UploadService {
   }
 
   async testConnection(): Promise<void> {
+    if (!this.enabled) {
+      // Silent no-op to avoid crashing health checks when unconfigured
+      return;
+    }
+
     try {
       const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
       const command = new ListObjectsV2Command({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         MaxKeys: 1,
       });
 
-      await this.s3Client.send(command);
+      await this.s3Client!.send(command);
     } catch (error) {
       console.error('Connection test failed:', error);
       throw new InternalServerErrorException(
@@ -132,16 +155,20 @@ export class UploadService {
     file: Express.Multer.File,
     key: string,
   ): Promise<string> {
+    if (!this.enabled) {
+      throw new InternalServerErrorException('Upload service is not configured');
+    }
+
     try {
       const command = new PutObjectCommand({
-        Bucket: this.bucketName,
+        Bucket: this.bucketName!,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
         ACL: 'public-read',
       });
 
-      await this.s3Client.send(command);
+      await this.s3Client!.send(command);
 
       return `${this.endpoint}/${this.bucketName}/${key}`;
     } catch (error) {
