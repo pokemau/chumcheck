@@ -29,25 +29,12 @@ export enum ReadinessType {
   Investment = 'Investment'
 }
 
-// export enum Role {
-//   Manager = 'Manager',
-//   Mentor = 'Mentor',
-//   Startup = 'Startup',
-//   ManagerAsMentor = 'Manager as Mentor'
-// }
-
-// export const getRole = (
-//   role: Role
-// ) => {
-//   const roles = {
-//     Manager: 'Manager',
-//     Mentor: 'Mentor',
-//     Startup: 'Startup',
-//     ManagerAsMentor: 'Manager as Mentor'
-//   };
-//
-//   return roles[`${role}`];
-// };
+// Map special roles to base roles used by access.roles
+export const getRole = (role: Role | string): 'Startup' | 'Mentor' | 'Manager' => {
+  if (role === 'Manager as Mentor') return 'Mentor';
+  if (role === 'Manager' || role === 'Mentor' || role === 'Startup') return role as any;
+  return 'Startup';
+};
 
 export const setLocal = (name: string, value: any) => {
   if (browser) {
