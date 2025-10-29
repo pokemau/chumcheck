@@ -2,12 +2,12 @@
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { Badge } from '$lib/components/ui/badge';
   import { access } from '$lib/access';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { Separator } from '$lib/components/ui/separator';
   import { crossfade } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
   import { onMount, onDestroy } from 'svelte';
-  import { getProfileColor, getRole } from '$lib/utils';
+  import { getProfileColor } from '$lib/utils';
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
 
@@ -20,25 +20,26 @@
     goto(path);
   }
 
-  const userRole = getRole(user.role);
-  const modules = access.roles[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`].modules;
+  const userRole = user.role;
+  const modules =
+    access.roles[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`].modules;
 
   const currentModule = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 1
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 1
     ]
   );
 
   const currentModulev2 = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 2
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 2
     ]
   );
 
-  const module = $derived($page.url.pathname.slice(1).split('/')[0]);
+  const module = $derived(page.url.pathname.slice(1).split('/')[0]);
   const subModule = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 1
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 1
     ]
   );
 
