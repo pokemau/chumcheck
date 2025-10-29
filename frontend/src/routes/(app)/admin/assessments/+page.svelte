@@ -24,7 +24,7 @@
   let confirmAction = $state<null | (() => Promise<void>)>(null);
 
   // Create/Rename state
-  let showCreate = $state(false);
+  let showCreateModal = $state(false);
   let createName = $state('');
   let renameName = $state('');
   let editingField = $state<Partial<AssessmentField> & { id?: number }>({});
@@ -89,7 +89,7 @@
       return;
     }
     createName = '';
-    showCreate = false;
+    showCreateModal = false;
     await refreshTypes();
   }
 
@@ -180,17 +180,9 @@
   <div class="w-full">
     <div class="mb-3 flex items-center justify-between gap-2">
       <h2 class="text-sm font-semibold">Assessment Types</h2>
-      {#if !showCreate}
-        <Button size="sm" onclick={() => (showCreate = true)}>
-          <Plus /> Add type
-        </Button>
-      {:else}
-        <div class="flex w-full max-w-md items-center gap-2">
-          <Input placeholder="Type name" bind:value={createName} />
-          <Button size="sm" onclick={() => openConfirm('Create new assessment type?', createType)}>Create</Button>
-          <Button size="sm" variant="ghost" onclick={() => (showCreate = false, createName = '')}>Cancel</Button>
-        </div>
-      {/if}
+      <Button size="sm" onclick={() => (showCreateModal = true)}>
+        <Plus /> Add type
+      </Button>
     </div>
 
     <div class="space-y-3">
@@ -203,6 +195,26 @@
     </div>
   </div>
 </div>
+
+<!-- Create Type Modal -->
+<Dialog.Root open={showCreateModal} onOpenChange={(v)=> showCreateModal = v}>
+  <Dialog.Content class="max-w-[520px]">
+    <Dialog.Header>
+      <Dialog.Title>Create new Assessment Type</Dialog.Title>
+    </Dialog.Header>
+
+    <div class="space-y-3">
+      <div class="grid gap-2">
+        <Input placeholder="name" bind:value={createName} />
+      </div>
+    </div>
+
+    <Dialog.Footer class="mt-4">
+      <Button variant="ghost" onclick={() => (showCreateModal = false, createName = '')}>Cancel</Button>
+      <Button onclick={createType} disabled={!createName.trim()}>Create</Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
 
 <!-- Type (fields) Modal -->
 <Dialog.Root open={showTypeModal} onOpenChange={(v)=> showTypeModal = v}>
