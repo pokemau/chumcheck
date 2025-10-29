@@ -13,6 +13,7 @@
     { name: 'Startups', href: '/admin/startups' },
     { name: 'Assessments', href: '/admin/assessments' }
   ];
+  const roleLabel = 'Admin';
 </script>
 
 <header class="fixed top-0 left-0 z-20 flex h-14 w-full items-center border-b bg-background/80 backdrop-blur">
@@ -28,7 +29,7 @@
       </ul>
     </div>
     <div class="flex items-center gap-4">
-      <Badge variant="outline" class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal">{user.role}</Badge>
+      <Badge variant="outline" class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal">{roleLabel}</Badge>
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
           <div class={`flex h-9 w-9 items-center justify-center rounded-full ${getProfileColor(user.firstName)}`}>

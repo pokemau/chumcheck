@@ -5,7 +5,9 @@
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog';
 
-  export let data: { users: Array<{ id: number; email: string }> };
+  // Use Svelte 5 props API for reliability
+  const { data } = $props<{ data: { users: Array<{ id: number; email: string }> } }>();
+
   let saving = false;
   let error: string | null = null;
   let formEl: HTMLFormElement | null = null;
@@ -21,6 +23,8 @@
   // Required by backend DTO, default to PENDING
   let qualificationStatus = 'PENDING';
 </script>
+
+<svelte:head><title>Create Startup</title></svelte:head>
 
 <h1 class="mb-4 text-2xl font-semibold">Create Startup</h1>
 <Card.Root class="rounded-md">
@@ -61,7 +65,7 @@
           <label class="flex items-center gap-2 text-sm"><input type="checkbox" name="eligibility" bind:checked={eligibility} /> Eligibility</label>
         </div>
         <div class="pt-2">
-          <Dialog.Trigger asChild>
+          <Dialog.Trigger>
             <Button type="button" disabled={saving} class="inline-flex items-center gap-2">
               {#if saving}
                 <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
