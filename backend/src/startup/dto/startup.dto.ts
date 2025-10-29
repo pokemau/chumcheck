@@ -142,7 +142,6 @@ export class StartupApplicationDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MemberDto)
-  @ArrayMinSize(1)
   @IsOptional()
   members: MemberDto[];
 
