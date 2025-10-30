@@ -224,7 +224,7 @@
   // Add a derived state for the waitlist message
   const waitlistMessage = $derived(() => {
     if (!startupData?.waitlistMessages || startupData.waitlistMessages.length === 0) {
-      return 'Your application is currently waitlisted. Please review and resubmit.';
+      return 'Unable to load waitlisted message';
     }
     // Get the most recent message
     const messages = startupData.waitlistMessages;

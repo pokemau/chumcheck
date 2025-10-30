@@ -14,6 +14,7 @@
   import { page } from '$app/stores';
   import { toast } from 'svelte-sonner';
   import axiosInstance from '$lib/axios';
+  import { onMount } from 'svelte';
 
   let { data, form } = $props();
 
@@ -23,7 +24,8 @@
     {
       initialData: data.startups,
       staleTime: 1000 * 60 * 5,
-      refetchOnWindowFocus: false
+      refetchOnWindowFocus: false,
+      refetchOnMount: 'always' // Always refetch when component mounts
     }
   );
 
@@ -187,6 +189,10 @@
       }
     }
     fetchInitiatives();
+  });
+
+  onMount(() => {
+    $queryResult.refetch();
   });
 </script>
 
