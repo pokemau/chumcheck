@@ -3,6 +3,7 @@
   import Spinner from 'lucide-svelte/icons/loader-circle';
   import X from 'lucide-svelte/icons/x';
   import Download from 'lucide-svelte/icons/download';
+  import ExternalLink from 'lucide-svelte/icons/external-link';
   import AssessmentLabel from './AssessmentLabel.svelte';
   import axiosInstance from '$lib/axios';
   import { toast } from 'svelte-sonner';
@@ -256,34 +257,39 @@
       </div>
       {#each uploadedFiles as file, index}
         <div
-          class="flex w-fit justify-between items-center rounded p-1"
+          class="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800"
         >
-          <a
-            href="#"
-            onclick={(e) => {
-              e.preventDefault();
-              downloadFile(file);
-            }}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex-1 truncate text-blue-500 hover:underline"
-          >
+          <span class="flex-1 truncate text-sm text-gray-900 dark:text-gray-100">
             {file.fileName}
-          </a>
-          <div class="flex flex-shrink-0 items-center gap-1">
+          </span>
+          
+          <div class="flex flex-shrink-0 items-center gap-2">
+            <a
+              href={makeAbsoluteUrl(file.url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-1.5 rounded px-2 py-1 text-sm text-blue-500 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
+              title="Preview file"
+            >
+              <ExternalLink size={14} />
+              <span>Preview</span>
+            </a>
+            
             <button
               type="button"
               onclick={() => downloadFile(file)}
-              class="p-1 text-blue-500 hover:text-blue-700"
+              class="flex items-center gap-1.5 rounded px-2 py-1 text-sm text-blue-500 hover:bg-blue-50 hover:text-blue-700 dark:text-blue-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-300"
               title="Download file"
             >
-              <Download size={16} />
+              <Download size={14} />
+              <span>Download</span>
             </button>
+            
             {#if !isReadOnly}
               <button
                 type="button"
                 onclick={() => confirmRemoveUploadedFile(index)}
-                class="p-1 text-red-500 hover:text-red-700"
+                class="p-1.5 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 title="Remove file"
               >
                 <X size={16} />
