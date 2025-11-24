@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { Role } from 'src/entities/enums/role.enum';
 import { User } from 'src/entities/user.entity';

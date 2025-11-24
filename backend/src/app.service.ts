@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { Injectable } from '@nestjs/common';
 import { UratQuestion } from './entities/urat-question.entity';
 import { ReadinessType } from './entities/enums/readiness-type.enum';

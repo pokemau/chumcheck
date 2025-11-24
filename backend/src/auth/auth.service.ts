@@ -3,7 +3,7 @@ import { AuthDto, AuthSignInDto } from './dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { User } from 'src/entities/user.entity';
 
 @Injectable()

@@ -193,17 +193,17 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  ListObjectsV2Command,
+import { S3 } from '@aws-sdk/client-s3';
+import type {
+  PutObjectCommandInput,
+  DeleteObjectCommandInput,
+  ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
 import { UploadResponseDto, MultipleUploadResponseDto } from './dto';
 
 @Injectable()
 export class UploadService {
-  private s3Client: S3Client;
+  private s3: S3;
   private bucketName: string;
   private endpoint: string;
 
@@ -224,7 +224,7 @@ export class UploadService {
       throw new Error('Digital Ocean Spaces configuration is incomplete');
     }
 
-    this.s3Client = new S3Client({
+    this.s3 = new S3({
       endpoint: this.endpoint,
       region: region,
       credentials: {
@@ -258,8 +258,13 @@ export class UploadService {
         uploadedAt: new Date(),
       };
     } catch (error) {
-      console.error(error);
-      throw error;
+      console.error('Upload error:', error);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
     }
   }
 
@@ -288,31 +293,31 @@ export class UploadService {
 
   async deleteFile(key: string): Promise<void> {
     try {
-      const command = new DeleteObjectCommand({
+      const params: DeleteObjectCommandInput = {
         Bucket: this.bucketName,
         Key: key,
-      });
+      };
 
-      await this.s3Client.send(command);
-    } catch (error: any) {
+      await this.s3.deleteObject(params);
+    } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to delete file: ${error.message}`,
+        `Failed to delete file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
 
   async testConnection(): Promise<void> {
     try {
-      const command = new ListObjectsV2Command({
+      const params: ListObjectsV2CommandInput = {
         Bucket: this.bucketName,
         MaxKeys: 1,
-      });
+      };
 
-      await this.s3Client.send(command);
-    } catch (error: any) {
+      await this.s3.listObjectsV2(params);
+    } catch (error) {
       console.error('Connection test failed:', error);
       throw new InternalServerErrorException(
-        `Connection test failed: ${error.message}`,
+        `Connection test failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
@@ -322,20 +327,21 @@ export class UploadService {
     key: string,
   ): Promise<string> {
     try {
-      const command = new PutObjectCommand({
+      const params: PutObjectCommandInput = {
         Bucket: this.bucketName,
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
         ACL: 'public-read',
-      });
+      };
 
-      await this.s3Client.send(command);
+      await this.s3.putObject(params);
 
+      // Construct the public URL
       return `${this.endpoint}/${this.bucketName}/${key}`;
-    } catch (error: any) {
+    } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to upload file: ${error.message}`,
+        `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
