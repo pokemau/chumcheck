@@ -1,20 +1,16 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button/index.js';
   import * as Tabs from '$lib/components/ui/tabs/index.js';
-  import * as Table from '$lib/components/ui/table';
   import { goto } from '$app/navigation';
-  import Ellipsis from 'lucide-svelte/icons/ellipsis';
-  import * as Card from '$lib/components/ui/card/index.js';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+  import StartupCard from '$lib/components/dashboard/StartupCard.svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
   import type { PageData } from './$types';
   import { page } from '$app/stores';
   import PendingDialog from '$lib/components/dashboard/PendingDialog.svelte';
-  import RatedDialog from '$lib/components/dashboard/RatedDialog.svelte';
+  import WaitlistedDialog from '$lib/components/dashboard/WaitlistedDialog.svelte';
   import QualifiedDialog from '$lib/components/dashboard/QualifiedDialog.svelte';
+  import CompletedDialog from '$lib/components/dashboard/CompletedDialog.svelte';
   import axiosInstance from '$lib/axios';
   import { useQueries } from '@sveltestack/svelte-query';
-  import { ReadinessType } from '$lib/utils';
 
   export let data: PageData;
 
@@ -23,191 +19,62 @@
   $: selectedTab = $page.url.searchParams.get('tab') || 'pending';
   let applicants: any = [];
 
-  let dialogReady = false;
   let dialogLoading = false;
   let showDialog = false;
+  let selectedStartup: any = null;
+  let startupAssessments: Array<{ name: string; assessmentStatus: string; assessmentFields?: any[] }> = [];
+
+  async function fetchStartupAssessments(startupId: number) {
+    try {
+      const { data } = await axiosInstance.get(`/assessments/startup/${startupId}`);
+      startupAssessments = data ?? [];
+    } catch (e) {
+      console.error('Failed to load startup assessments', e);
+      startupAssessments = [];
+    }
+  }
+
+  async function openStartupDialog(startup: any) {
+    selectedStartup = startup;
+    if (startup?.id) {
+      await fetchStartupAssessments(startup.id);
+    }
+    showDialog = true;
+  }
 
   function toggleDialog() {
     showDialog = !showDialog;
-  }
-
-  // pending
-  let inf: any, que: any, ans: any, calc: any;
-
-  async function getPendingStartupInformation(startupId: number) {
-    const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}`, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access}`
-      }
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      const urat_questions = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-questions/`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
-        }
-      );
-
-      const questions_data = await urat_questions.json();
-
-      const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers?startupId=${startupId}`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
-        }
-      );
-
-      const answers_data = await urat_answers.json();
-
-      const calculator = await fetch(
-        `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
-        {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
-        }
-      );
-
-      let calculator_data;
-      try {
-        calculator_data = await calculator.json();
-      } catch (error) {
-        console.error('Error parsing calculator JSON:', error);
-      }
-      if (
-        urat_questions.ok &&
-        urat_answers.ok &&
-        calculator.ok &&
-        calculator_data
-      ) {
-        inf = data;
-        que = questions_data;
-        ans = answers_data;
-        calc = calculator_data;
-        dialogReady = true;
-        toggleDialog();
-      }
+    if (!showDialog) {
+      selectedStartup = null;
+      startupAssessments = [];
     }
   }
 
-  async function saveRating(startupId: string, scores: Record<number, number>) {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
-      {
-        method: 'post',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${access}`
+
+  // Assign multiple assessments to a startup
+  async function assignAssessmentsToStartup(startupId: number, assessmentTypeIds: number[]) {
+    try {
+      // Send all assessmentTypeIds in a single request as required by backend
+      const response = await axiosInstance.post(
+        `/assessments/startup-assessment`,
+        {
+          startupId,
+          assessmentTypeIds
         },
-        body: JSON.stringify({
-          scores
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-      window.location.href = '/applications';
-    }
-  }
-  // rated
-  const uratReadinessScores: Record<ReadinessType, number> = {
-    [ReadinessType.Technology]: 0,
-    [ReadinessType.Organizational]: 0,
-    [ReadinessType.Market]: 0,
-    [ReadinessType.Regulatory]: 0,
-    [ReadinessType.Acceptance]: 0,
-    [ReadinessType.Investment]: 0
-  };
-  async function getRatedStartupInformation(startupId: number) {
-    const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access}`
-      }
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      const urat_questions = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-questions/`,
         {
-          method: 'get',
           headers: {
             Authorization: `Bearer ${access}`
           }
         }
       );
-
-      const questions_data = await urat_questions.json();
-
-      const urat_answers = await fetch(
-        `${PUBLIC_API_URL}/readinesslevel/urat-question-answers/?startupId=${startupId}`,
-        {
-          method: 'get',
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
-        }
-      );
-
-      const answers_data = await urat_answers.json();
-
-      const calculator = await fetch(
-        `${PUBLIC_API_URL}/startups/${startupId}/calculator-final-scores/`,
-        {
-          method: 'get',
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
-        }
-      );
-
-      let calculator_data;
-      try {
-        calculator_data = await calculator.json();
-      } catch (error) {
-        console.error('Error parsing calculator JSON:', error);
-      }
-
-      if (
-        urat_questions.ok &&
-        urat_answers.ok &&
-        calculator.ok &&
-        calculator_data
-      ) {
-        inf = data;
-        que = questions_data.results || [];
-        ans = answers_data.results || [];
-        calc = calculator_data;
-        answers_data.forEach((answer: any) => {
-          const readinessType = answer.readinessType as ReadinessType;
-          if (uratReadinessScores[readinessType] !== undefined) {
-            uratReadinessScores[readinessType] += answer.score;
-          } else {
-            console.warn(`Unknown readiness type: ${readinessType}`, answer);
-          }
-        });
-        dialogReady = true;
-        toggleDialog();
-      }
+      return response.data;
+    } catch (error) {
+      console.error('Error assigning assessments:', error);
+      throw error;
     }
   }
 
+  // Approve startup and assign mentor (unchanged)
   async function approveStartup(startupId: number, selectedMentor: any) {
     const response = await fetch(
       `${PUBLIC_API_URL}/startups/${startupId}/approve-applicant/`,
@@ -222,7 +89,6 @@
 
     if (response.ok) {
       const assignmentor = await fetch(
-        // `${PUBLIC_API_URL}/startups/${selectedMentor}/appoint-mentors/`,
         `${PUBLIC_API_URL}/startups/${startupId}/appoint-mentors/`,
         {
           method: 'post',
@@ -231,98 +97,83 @@
             Authorization: `Bearer ${access}`
           },
           body: JSON.stringify({
-            mentor_ids: [selectedMentor],
-            cohort_id: 1
+            mentorIds: [selectedMentor],
           })
         }
       );
-
       if (assignmentor.ok) {
-        // const filtered = applicants.filter((d) => d.id !== startupId);
-        // applicants = filtered;
-        // const startup = $queries[0].data.find((applicant: any) => applicant.id === startupId);
-        // if (startup) {
-        //   startup.qualificationStatus = 3;
-        // }
-        window.location.href = '/applications?tab=rated';
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch(),
+          $queries[2].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
       }
-      toggleDialog();
     }
   }
 
-  async function rejectStartup(startupId: number) {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/reject-applicant/`,
-      {
-        method: 'post',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${access}`
-        }
-      }
-    );
-
-    if (response.ok) {
-      // const filtered = applicants.filter((d) => d.id !== startupId);
-      // applicants = filtered;
-      // const startup = $queries[0].data.find((applicant: any) => applicant.id === startupId);
-      // if (startup) {
-      //   startup.qualificationStatus = 4;
-      // }
-      window.location.href = '/applications?tab=rated';
-    }
-    toggleDialog();
-  }
-
-  // qualified
-  let lev: any;
-  async function getQualifiedStartupInformation(startupId: number) {
-    const response = await fetch(`${PUBLIC_API_URL}/startups/${startupId}/`, {
-      method: 'get',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${access}`
-      }
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      const level = await fetch(
-        `${PUBLIC_API_URL}/startups/startup-readiness-level/?startupId=${data.id}`,
+  // waitlist startup
+  async function waitlistStartup(startupId: number, message: string) {
+    try {
+      const response = await axiosInstance.patch(
+        `/startups/${startupId}/waitlist-applicant`,
         {
-          method: 'get',
+          message: message,
+          managerId: data.user.id
+        },
+        {
           headers: {
-            'Content-Type': 'application/json',
             Authorization: `Bearer ${access}`
           }
         }
       );
-      const levels = await level.json();
-      if (level.ok) {
-        inf = data;
-        lev = levels;
-        // return {
-        // 	info: data,
-        // 	lev: levels.results,
-        // 	access: access,
-        // };
+      if (response.status === 200) {
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch(),
+          $queries[2].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
       }
-      dialogReady = true;
-      toggleDialog();
+      return response.data;
+    } catch (error) {
+      console.error('Error waitlisting startup:', error);
+      throw error;
     }
+  }
+
+  async function getAssessmentTypesWithFields() {
+    const { data: types } = await axiosInstance.get('/assessments/types');
+
+    const fieldsByType = await Promise.all(
+      types.map(async (t: { id: number }) => {
+        const { data: fields } = await axiosInstance.get(`/assessments/types/${t.id}/fields`);
+        return { ...t, fields };
+      })
+    );
+
+    return fieldsByType;
   }
 
   const queries = useQueries([
     {
-      queryKey: ['pendingRatedRanking'],
-      queryFn: async () =>
-        (
-          await axiosInstance.get(`/startups/ranking-by-urat`, {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          })
-        ).data,
+      queryKey: ['getAllStartups'],
+      queryFn: async () => {
+        const response = await axiosInstance.get(`/startups/all`, {
+          headers: {
+            Authorization: `Bearer ${data.access}`
+          }
+        });
+        return response.data;
+      },
       cacheTime: 0,
       staleTime: 0
     },
@@ -340,47 +191,98 @@
       staleTime: 0
     },
     {
-      queryKey: ['qualifiedRanking'],
+      queryKey: ['assessments'],
       queryFn: async () =>
-        (
-          await axiosInstance.get(`/startups/ranking-by-rubrics`, {
-            headers: {
-              Authorization: `Bearer ${data.access}`
-            }
-          })
-        ).data,
+      getAssessmentTypesWithFields(),
       cacheTime: 0,
       staleTime: 0
-    }
+    },
   ]);
 
+  async function markComplete(startupId: number) {
+    try {
+      dialogLoading = true;
+      const response = await axiosInstance.patch(
+        `/startups/${startupId}/mark-complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        // Refetch the queries
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Close the dialog
+        showDialog = false;
+        selectedStartup = null;
+      }
+    } catch (error) {
+      console.error('Error marking startup as complete:', error);
+    } finally {
+      dialogLoading = false;
+    }
+  }
+
+  async function changeMentor(startupId: number, mentorId: number) {
+    try {
+      dialogLoading = true;
+      const response = await axiosInstance.patch(
+        `/startups/${startupId}/change-mentor`,
+        { mentorId },
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
+        }
+      );
+      if (response.status === 200) {
+        // Refetch the queries to update the data
+        await Promise.all([
+          $queries[0].refetch(),
+          $queries[1].refetch()
+        ]);
+        
+        // Update the selectedStartup with new data
+        const updatedStartup = $queries[0].data.find((s: any) => s.id === startupId);
+        if (updatedStartup) {
+          selectedStartup = updatedStartup;
+        }
+      }
+    } catch (error) {
+      console.error('Error changing mentor:', error);
+    } finally {
+      dialogLoading = false;
+    }
+  }
+
+  // Update applicants based on selected tab and query results
   $: if ($queries[0].isSuccess) {
     if ($queries[0].data.length > 0) {
       if (selectedTab === 'pending') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 1
         );
-      } else if (selectedTab === 'rated') {
+      } else if (selectedTab === 'waitlisted') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 2
         );
-      } else {
+      } else if (selectedTab === 'qualified') {
         applicants = $queries[0].data.filter(
           (applicant: any) => applicant.qualificationStatus === 3
+        );
+      } else if (selectedTab === 'completed') {
+        applicants = $queries[0].data.filter(
+          (applicant: any) => applicant.qualificationStatus === 4
         );
       }
     } else {
       applicants = []; // Handle case when there are no applicants
-    }
-  }
-
-  $: if ($queries[2].isSuccess) {
-    if (selectedTab === 'qualified') {
-      if ($queries[2].data.length > 0) {
-        applicants = $queries[2].data;
-      } else {
-        applicants = [];
-      }
     }
   }
 </script>
@@ -390,9 +292,15 @@
 </svelte:head>
 
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}
-  <div>Fetching...</div>
+  <div class="flex items-center justify-center h-64">
+    <div class="flex items-center gap-3">
+      <div class="loader"></div>
+      <span>Fetching applications...</span>
+    </div>
+  </div>
 {:else}
   {@const mentors = $queries[1].data}
+  {@const assessments = $queries[2].data}
   <div class="flex flex-col gap-3">
     <div class="flex justify-between rounded-lg bg-background">
       <Tabs.Root value={selectedTab}>
@@ -401,74 +309,58 @@
             value="pending"
             onclick={() => {
               selectedTab = 'pending';
+              showDialog = false;
               goto('/applications?tab=pending');
             }}>Pending</Tabs.Trigger
           >
           <Tabs.Trigger
-            value="rated"
+            value="waitlisted"
             onclick={() => {
-              selectedTab = 'rated';
-              goto('/applications?tab=rated');
-            }}>Rated</Tabs.Trigger
+              selectedTab = 'waitlisted';
+              showDialog = false;
+              goto('/applications?tab=waitlisted');
+            }}>Waitlisted</Tabs.Trigger
           >
           <Tabs.Trigger
             value="qualified"
             onclick={() => {
               selectedTab = 'qualified';
+              showDialog = false;
               goto('/applications?tab=qualified');
             }}>Qualified</Tabs.Trigger
+          >
+          <Tabs.Trigger
+            value="completed"
+            onclick={() => {
+              selectedTab = 'completed';
+              showDialog = false;
+              goto('/applications?tab=completed');
+            }}>Completed</Tabs.Trigger
           >
         </Tabs.List>
       </Tabs.Root>
     </div>
-    <div class="rounded-md border">
-      <Table.Root class="rounded-lg bg-background">
-        <Table.Header>
-          <Table.Row class="text-centery h-12">
-            <Table.Head class="pl-5">Startup</Table.Head>
-            <Table.Head class="">Group</Table.Head>
-            <Table.Head class="">Leader</Table.Head>
-            {#if selectedTab === 'qualified'}
-              <Table.Head>Mentor</Table.Head>
-            {/if}
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {#if applicants.length > 0}
-            {#each applicants as applicant}
-              <Table.Row
-                class="h-14 cursor-pointer"
-                onclick={async () => {
-                  dialogReady = false;
-                  dialogLoading = true;
-                  if (selectedTab === 'pending') {
-                    await getPendingStartupInformation(applicant.id);
-                  } else if (selectedTab === 'rated') {
-                    await getRatedStartupInformation(applicant.id);
-                  } else {
-                    await getQualifiedStartupInformation(applicant.id);
-                  }
-                  dialogLoading = false;
-                }}
-              >
-                <Table.Cell class="pl-5">{applicant.name}</Table.Cell>
-                <Table.Cell>{applicant.groupName}</Table.Cell>
-                <Table.Cell class=""
-                  >{applicant.user.firstName} {applicant.user.lastName}
-                </Table.Cell>
-                {#if selectedTab === 'qualified'}
-                  <Table.Cell
-                    >{applicant?.mentors[0]?.firstName}
-                    {applicant?.mentors[0]?.lastName}</Table.Cell
-                  >
-                {/if}
-              </Table.Row>
-            {/each}
-          {:else}
-            <div class="flex items-center justify-center">No data found</div>
-          {/if}
-        </Table.Body>
-      </Table.Root>
+
+    <!-- Cards container -->
+    <div class="space-y-4">
+      {#if applicants.length > 0}
+        {#each applicants as applicant}
+          <StartupCard 
+            startup={applicant} 
+            {selectedTab} 
+            onOpenStartupDialog={() => {
+              openStartupDialog(applicant);
+            }}
+          />
+        {/each}
+      {:else}
+        <div class="flex items-center justify-center h-32 text-gray-500">
+          <div class="text-center">
+            <p class="text-lg font-medium">No applications found</p>
+            <p class="text-sm">There are no {selectedTab === 'pending' ? 'pending applications' : selectedTab === 'waitlisted' ? 'waitlisted applications' : selectedTab === 'qualified' ? 'qualified startups' : 'completed applications'} at the moment.</p>
+          </div>
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -483,46 +375,52 @@
     </div>
   {/if}
 
-  <!-- pending dialog -->
-  {#if dialogReady}
-    {#if selectedTab === 'pending'}
-      <!-- {#if calc} -->
-      <PendingDialog
-        {inf}
-        {que}
-        {ans}
-        {calc}
-        {saveRating}
-        {showDialog}
-        {toggleDialog}
-        {access}
-      />
-      <!-- {/if} -->
-    {:else if selectedTab === 'rated'}
-      {#if calc}
-        <RatedDialog
-          {inf}
-          {que}
-          {ans}
-          {calc}
-          {uratReadinessScores}
-          {approveStartup}
-          {rejectStartup}
-          {mentors}
-          {showDialog}
-          {toggleDialog}
-        />
-      {/if}
-    {:else}
-      <QualifiedDialog {inf} {lev} {showDialog} {toggleDialog} />
-    {/if}
+  <!-- Dialog components -->
+  {#if selectedTab === 'pending'}
+    <PendingDialog 
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      {waitlistStartup}
+      mentors={mentors || []}
+      assessments={assessments || []}
+      {approveStartup}
+      {assignAssessmentsToStartup}
+    />
+  {:else if selectedTab === 'waitlisted'}
+    <WaitlistedDialog
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      mentors={mentors || []}
+      assessments={assessments || []}
+      {approveStartup}
+      {assignAssessmentsToStartup}
+    />
+  {:else if selectedTab === 'qualified'}
+    <QualifiedDialog  
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      mentors={mentors || []}
+      onMarkComplete={markComplete}
+      onChangeMentor={changeMentor}
+      {startupAssessments}
+    />
+  {:else if selectedTab === 'completed'}
+    <CompletedDialog
+      startup={selectedStartup}
+      {showDialog}
+      {toggleDialog}
+      {startupAssessments}
+    />
   {/if}
 {/if}
 
 <style>
   .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
+    border: 4px solid hsl(var(--muted));
+    border-top: 4px solid hsl(var(--primary));
     border-radius: 50%;
     width: 24px;
     height: 24px;

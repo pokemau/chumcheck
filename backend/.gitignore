@@ -20,6 +20,7 @@ lerna-debug.log*
 # Tests
 /coverage
 /.nyc_output
+backup2.sql
 
 # IDEs and editors
 /.idea
@@ -47,6 +48,7 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
+package-lock.json
 
 # Runtime data
 pids

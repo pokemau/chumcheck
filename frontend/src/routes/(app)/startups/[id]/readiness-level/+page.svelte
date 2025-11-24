@@ -7,12 +7,7 @@
   import { Button } from '$lib/components/ui/button/index.js';
   import Rubric from '$lib/components/startups/readiness/rubric.svelte';
   import * as Card from '$lib/components/ui/card/index.js';
-  import * as Chart from '$lib/components/ui/chart/index.js';
-  import {
-    Can,
-    RadarChart,
-    RadarChartV2
-  } from '$lib/components/shared/index.js';
+  import { Can, RadarChartV2 } from '$lib/components/shared/index.js';
   import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
   const { data } = $props();
@@ -210,7 +205,7 @@
         <Skeleton class="h-9 w-[147px]" />
       </div>
     {/if}
-    <div class="h-full w-full bg-background">
+    <div class="bg-background h-full w-full">
       <Skeleton class="h-full w-full" />
     </div>
   </div>
@@ -224,7 +219,7 @@
   <div class="flex h-full flex-col gap-3">
     <Can role={['Mentor', 'Manager as Mentor']} userRole={role}>
       <div class="flex justify-between">
-        <div class="flex h-fit justify-between rounded-lg bg-background">
+        <div class="bg-background flex h-fit justify-between rounded-lg">
           <!-- <Tabs.Root value={selectedTab}> -->
           <!--   <Tabs.List class="border bg-flutter-gray/20"> -->
           <!--     <Tabs.Trigger value="chart" class="capitalize" onclick={() => updateTab('chart')} -->
@@ -239,9 +234,9 @@
           <!-- </Tabs.Root> -->
         </div>
         {#if selectedTab === 'detailed'}
-          <div class="flex h-fit justify-between rounded-lg bg-background">
+          <div class="bg-background flex h-fit justify-between rounded-lg">
             <Tabs.Root value={selectedReadinessTab}>
-              <Tabs.List class="border bg-flutter-gray/20">
+              <Tabs.List class="bg-flutter-gray/20 border">
                 <Tabs.Trigger
                   value="technology"
                   class="capitalize"

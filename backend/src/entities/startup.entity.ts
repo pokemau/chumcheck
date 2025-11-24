@@ -18,6 +18,7 @@ import { Rns } from './rns.entity';
 import { StartupReadinessLevel } from './startup-readiness-level.entity';
 import { UratQuestionAnswer } from './urat-question-answer.entity';
 import { CalculatorQuestionAnswer } from './calculator-question-answer.entity';
+import { StartupWaitlistMessage } from './startup-waitlist-message.entity';
 
 @Entity({ tableName: 'startups' })
 export class Startup {
@@ -76,4 +77,7 @@ export class Startup {
 
   @OneToMany(() => CalculatorQuestionAnswer, (answer) => answer.startup)
   calculatorQuestionAnswers = new Collection<CalculatorQuestionAnswer>(this);
+
+  @OneToMany(() => StartupWaitlistMessage, (message) => message.startup)
+  waitlistMessages = new Collection<StartupWaitlistMessage>(this);
 }

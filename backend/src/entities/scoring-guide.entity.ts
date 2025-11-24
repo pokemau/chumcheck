@@ -1,5 +1,5 @@
-import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { ReadinessLevel } from "./readiness-level.entity";
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { ReadinessLevel } from './readiness-level.entity';
 
 @Entity({ tableName: 'scoring_guide' })
 export class ScoringGuide {

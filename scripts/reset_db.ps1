@@ -1,4 +1,4 @@
-# pwsh ./reset_db.ps1
+# pwsh ./scripts/reset_db.ps1
 
 $DB_NAME = "chumcheck"
 $DB_USER = "postgres"

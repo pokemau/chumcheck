@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { AddStartupMemberDto, StartupApplicationDto } from './dto';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Startup } from 'src/entities/startup.entity';
 import { User } from 'src/entities/user.entity';
@@ -14,17 +13,28 @@ import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { QualificationStatus } from 'src/entities/enums/qualification-status.enum';
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
-import { CalculatorCategory } from 'src/entities/enums/calculator-category.enum';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { StartupRNA } from 'src/entities/rna.entity';
 import { CapsuleProposal } from 'src/entities/capsule-proposal.entity';
+import { StartupWaitlistMessage } from 'src/entities/startup-waitlist-message.entity';
 import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
-import { CreateStartupDto } from '../admin/dto/create-startup.dto';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
+import {
+  StartupApplicationDto,
+  StartupApplicationDtoOld,
+  WaitlistStartupDto,
+  AppointMentorsDto,
+  ChangeMentorDto,
+} from './dto';
+import { AiService } from '../ai/ai.service';
+import { CreateStartupDto } from '../admin/dto/create-startup.dto';
 
 @Injectable()
 export class StartupService {
-  constructor(private em: EntityManager) {}
+  constructor(
+    private em: EntityManager,
+    private readonly aiService: AiService,
+  ) {}
 
   async getStartups(userId: number) {
     const user = await this.em.findOne(User, { id: userId });
@@ -46,6 +56,7 @@ export class StartupService {
               'readinessLevels.readinessLevel',
               'uratQuestionAnswers.uratQuestion',
               'calculatorQuestionAnswers.question',
+              'waitlistMessages',
             ],
           },
         );
@@ -68,11 +79,42 @@ export class StartupService {
     });
   }
 
+  async getAllStartups(): Promise<Startup[]> {
+    const t = await this.em.find(
+      Startup,
+      {},
+      {
+        populate: [
+          'user',
+          'members',
+          'capsuleProposal',
+          'waitlistMessages',
+          'waitlistMessages.manager',
+          'mentors',
+        ],
+      },
+    );
+
+    t.forEach((startup, index) => {
+      console.log(`Startup ${index} (ID: ${startup.id}):`);
+      if (startup.capsuleProposal) {
+        console.log(
+          '  capsuleProposal.members:',
+          startup.capsuleProposal.members,
+        );
+      } else {
+        console.log('  No capsuleProposal found');
+      }
+    });
+
+    return t;
+  }
+
   async getStartupById(startupId: number): Promise<Startup | null> {
     const startup = await this.em.findOne(
       Startup,
       { id: startupId },
-      { populate: ['user', 'members', 'capsuleProposal'] },
+      { populate: ['user', 'members', 'capsuleProposal', 'waitlistMessages'] },
     );
     if (!startup) {
       throw new NotFoundException(
@@ -82,25 +124,87 @@ export class StartupService {
     return startup;
   }
 
-  async create(dto: CreateStartupDto): Promise<Startup> {
-    const user = await this.em.findOne(User, { id: dto.userId });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
-    }
+  async create(dto: StartupApplicationDto, userId: number) {
+    return this.em.transactional(async () => {
+      const user = await this.em.findOne(User, { id: userId });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} does not exist.`);
+      }
 
-    const startup = this.em.create(Startup, {
-      name: dto.name,
-      user: user, // Assign the fetched user entity
-      qualificationStatus: dto.qualificationStatus,
-      dataPrivacy: dto.dataPrivacy ?? false,
-      links: dto.links,
-      groupName: dto.groupName,
-      universityName: dto.universityName,
-      eligibility: dto.eligibility ?? false,
+      const startup = this.em.create(Startup, {
+        name: dto.title,
+        user: user,
+        qualificationStatus: QualificationStatus.PENDING,
+        dataPrivacy: true,
+        eligibility: true,
+        // qualificationStatus: dto.qualificationStatus,
+        // dataPrivacy: dto.dataPrivacy ?? false,
+        // links: dto.links,
+        // groupName: dto.groupName,
+        // universityName: dto.universityName,
+        // eligibility: dto.eligibility ?? false,
+      });
+
+      await this.em.persistAndFlush(startup);
+      await this.createStartupProposal(startup, dto);
+
+      return startup;
     });
+  }
+  private async createStartupProposal(
+    startup: Startup,
+    dto: StartupApplicationDto,
+  ) {
+    try {
+      const aiAnalysisSummary =
+        await this.aiService.generateStartupAnalysisSummary(dto);
 
-    await this.em.persistAndFlush(startup);
-    return startup;
+      if (startup.capsuleProposal) {
+        const proposal = startup.capsuleProposal;
+        proposal.title = dto.title;
+        proposal.description = dto.description;
+        proposal.problemStatement = dto.problemStatement;
+        proposal.targetMarket = dto.targetMarket;
+        proposal.solutionDescription = dto.solutionDescription;
+        proposal.objectives = dto.objectives ?? [];
+        proposal.historicalTimeline = dto.historicalTimeline ?? [];
+        proposal.competitiveAdvantageAnalysis =
+          dto.competitiveAdvantageAnalysis ?? [];
+        proposal.members = dto.members ?? [];
+        proposal.intellectualPropertyStatus = dto.intellectualPropertyStatus;
+        proposal.scope = dto.proposalScope;
+        proposal.methodology = dto.methodology;
+        proposal.curriculumVitae = dto.curriculumVitae ?? null;
+        proposal.aiAnalysisSummary = aiAnalysisSummary;
+
+        await this.em.flush();
+        return proposal;
+      }
+
+      const proposal = this.em.create(CapsuleProposal, {
+        title: dto.title,
+        description: dto.description,
+        problemStatement: dto.problemStatement,
+        targetMarket: dto.targetMarket,
+        solutionDescription: dto.solutionDescription,
+        objectives: dto.objectives ?? [],
+        historicalTimeline: dto.historicalTimeline ?? [],
+        competitiveAdvantageAnalysis: dto.competitiveAdvantageAnalysis ?? [],
+        members: dto.members ?? [],
+        intellectualPropertyStatus: dto.intellectualPropertyStatus,
+        scope: dto.proposalScope,
+        methodology: dto.methodology,
+        curriculumVitae: dto.curriculumVitae ?? null,
+        aiAnalysisSummary,
+        startup,
+      });
+
+      await this.em.persistAndFlush(proposal);
+      return proposal;
+    } catch (err) {
+      console.error(`Error creating capsule proposal`, err);
+      throw err;
+    }
   }
 
   async update(id: number, dto: UpdateStartupDto): Promise<Startup> {
@@ -109,7 +213,7 @@ export class StartupService {
       throw new NotFoundException(`Startup with ID ${id} not found`);
     }
 
-    if (dto.userId) {
+    if (dto.userId !== undefined) {
       const user = await this.em.findOne(User, { id: dto.userId });
       if (!user) {
         throw new NotFoundException(`User with ID ${dto.userId} not found`);
@@ -117,15 +221,15 @@ export class StartupService {
       startup.user = user;
     }
 
-    // Apply all other fields from the DTO
-    if (dto.name) startup.name = dto.name;
-    if (dto.qualificationStatus)
+    if (dto.name !== undefined) startup.name = dto.name;
+    if (dto.qualificationStatus !== undefined)
       startup.qualificationStatus = dto.qualificationStatus;
-    if (dto.dataPrivacy) startup.dataPrivacy = dto.dataPrivacy;
-    if (dto.links) startup.links = dto.links;
-    if (dto.groupName) startup.groupName = dto.groupName;
-    if (dto.universityName) startup.universityName = dto.universityName;
-    if (dto.eligibility) startup.eligibility = dto.eligibility;
+    if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
+    if (dto.links !== undefined) startup.links = dto.links;
+    if (dto.groupName !== undefined) startup.groupName = dto.groupName;
+    if (dto.universityName !== undefined)
+      startup.universityName = dto.universityName;
+    if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
 
     await this.em.flush();
     return startup;
@@ -135,57 +239,57 @@ export class StartupService {
     id: number,
     dto: UpdateStartupDto,
     capsuleProposalDto?: CreateCapsuleProposalDto,
-  ): Promise<Startup> {
-    const startup = await this.getStartupById(id);
-    if (!startup) {
-      throw new NotFoundException(`Startup with ID ${id} not found`);
-    }
-
-    // Update basic startup fields
-    if (dto.userId) {
-      const user = await this.em.findOne(User, { id: dto.userId });
-      if (!user) {
-        throw new NotFoundException(`User with ID ${dto.userId} not found`);
-      }
-      startup.user = user;
-    }
-
-    // Apply all other fields from the DTO
-    if (dto.name) startup.name = dto.name;
-    if (dto.qualificationStatus !== undefined) {
-      startup.qualificationStatus = dto.qualificationStatus;
-    }
-    if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
-    if (dto.links) startup.links = dto.links;
-    if (dto.groupName) startup.groupName = dto.groupName;
-    if (dto.universityName) startup.universityName = dto.universityName;
-    if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
-
-    // Handle capsule proposal update if provided
-    if (capsuleProposalDto) {
-      // Update existing capsule proposal or create new one
-      if (startup.capsuleProposal) {
-        // Update existing capsule proposal
-        startup.capsuleProposal.title = capsuleProposalDto.title;
-        startup.capsuleProposal.description = capsuleProposalDto.description;
-        startup.capsuleProposal.problemStatement =
-          capsuleProposalDto.problemStatement;
-        startup.capsuleProposal.targetMarket = capsuleProposalDto.targetMarket;
-        startup.capsuleProposal.solutionDescription =
-          capsuleProposalDto.solutionDescription;
-        startup.capsuleProposal.objectives = capsuleProposalDto.objectives;
-        startup.capsuleProposal.scope = capsuleProposalDto.scope;
-        startup.capsuleProposal.methodology = capsuleProposalDto.methodology;
-        startup.capsuleProposal.fileName = capsuleProposalDto.fileName;
-      } else {
-        // Create new capsule proposal
-        await this.createCapsuleProposal(capsuleProposalDto);
-      }
-      console.log('CapsuleProposal updated successfully');
-    }
-
-    await this.em.flush();
-    return startup;
+  ) {
+    // const startup = await this.getStartupById(id);
+    // if (!startup) {
+    //   throw new NotFoundException(`Startup with ID ${id} not found`);
+    // }
+    //
+    // // Update basic startup fields
+    // if (dto.userId) {
+    //   const user = await this.em.findOne(User, { id: dto.userId });
+    //   if (!user) {
+    //     throw new NotFoundException(`User with ID ${dto.userId} not found`);
+    //   }
+    //   startup.user = user;
+    // }
+    //
+    // // Apply all other fields from the DTO
+    // if (dto.name) startup.name = dto.name;
+    // if (dto.qualificationStatus !== undefined) {
+    //   startup.qualificationStatus = dto.qualificationStatus;
+    // }
+    // if (dto.dataPrivacy !== undefined) startup.dataPrivacy = dto.dataPrivacy;
+    // if (dto.links) startup.links = dto.links;
+    // if (dto.groupName) startup.groupName = dto.groupName;
+    // if (dto.universityName) startup.universityName = dto.universityName;
+    // if (dto.eligibility !== undefined) startup.eligibility = dto.eligibility;
+    //
+    // // Handle capsule proposal update if provided
+    // if (capsuleProposalDto) {
+    //   // Update existing capsule proposal or create new one
+    //   if (startup.capsuleProposal) {
+    //     // Update existing capsule proposal
+    //     startup.capsuleProposal.title = capsuleProposalDto.title;
+    //     startup.capsuleProposal.description = capsuleProposalDto.description;
+    //     startup.capsuleProposal.problemStatement =
+    //       capsuleProposalDto.problemStatement;
+    //     startup.capsuleProposal.targetMarket = capsuleProposalDto.targetMarket;
+    //     startup.capsuleProposal.solutionDescription =
+    //       capsuleProposalDto.solutionDescription;
+    //     startup.capsuleProposal.objectives = capsuleProposalDto.objectives;
+    //     startup.capsuleProposal.scope = capsuleProposalDto.scope;
+    //     startup.capsuleProposal.methodology = capsuleProposalDto.methodology;
+    //     startup.capsuleProposal.fileName = capsuleProposalDto.fileName;
+    //   } else {
+    //     // Create new capsule proposal
+    //     await this.createCapsuleProposal(capsuleProposalDto);
+    //   }
+    //   console.log('CapsuleProposal updated successfully');
+    // }
+    //
+    // await this.em.flush();
+    // return startup;
   }
 
   async remove(id: number): Promise<void> {
@@ -196,25 +300,27 @@ export class StartupService {
     await this.em.removeAndFlush(startup);
   }
 
-  async createStartup(dto: StartupApplicationDto) {
-    const startup = new Startup();
-
-    const user = await this.em.findOne(User, { id: dto.userId });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
-    }
-
-    startup.name = dto.name;
-
-    startup.user = user;
-    startup.dataPrivacy = dto.dataPrivacy;
-    startup.eligibility = dto.eligibility;
-    if (dto.links) startup.links = dto.links;
-    if (dto.groupName) startup.groupName = dto.groupName;
-    if (dto.universityName) startup.universityName = dto.universityName;
-
-    await this.em.persistAndFlush(startup);
-    return startup;
+  async createStartup(dto: StartupApplicationDtoOld) {
+    //   const startup = new Startup();
+    //
+    //   const user = await this.em.findOne(User, { id: dto.userId });
+    //   if (!user) {
+    //     throw new NotFoundException(`User with ID ${dto.userId} does not exist.`);
+    //   }
+    //
+    //   startup.name = dto.name;
+    //
+    //   startup.user = user;
+    //   startup.dataPrivacy = dto.dataPrivacy;
+    //   startup.eligibility = dto.eligibility;
+    //   if (dto.links) startup.links = dto.links;
+    //   if (dto.groupName) startup.groupName = dto.groupName;
+    //   if (dto.universityName) startup.universityName = dto.universityName;
+    //
+    //   await this.em.persistAndFlush(startup);
+    //   return startup;
+    // }
+    //
   }
 
   async removeMemberFromStartup(userId: number, startupId: number) {
@@ -236,26 +342,26 @@ export class StartupService {
     await this.em.flush();
   }
 
-  async addMemberToStartup(dto: AddStartupMemberDto) {
-    const startup = await this.em.findOne(Startup, { id: dto.startupId });
-    if (!startup) {
-      throw new NotFoundException(
-        `Startup with ID ${dto.startupId} does not exist.`,
-      );
-    }
-
-    const user = await this.em.findOne(User, { id: dto.userId });
-    if (!user) {
-      throw new NotFoundException(
-        `User with ID ${dto.startupId} does not exist.`,
-      );
-    }
-
-    startup.members.add(user);
-    await this.em.flush();
-    return {
-      message: `User with ID ${dto.userId} has been added to Startup ID ${dto.startupId}.`,
-    };
+  async addMemberToStartup(dto: any) {
+    // const startup = await this.em.findOne(Startup, { id: dto.startupId });
+    // if (!startup) {
+    //   throw new NotFoundException(
+    //     `Startup with ID ${dto.startupId} does not exist.`,
+    //   );
+    // }
+    //
+    // const user = await this.em.findOne(User, { id: dto.userId });
+    // if (!user) {
+    //   throw new NotFoundException(
+    //     `User with ID ${dto.startupId} does not exist.`,
+    //   );
+    // }
+    //
+    // startup.members.add(user);
+    // await this.em.flush();
+    // return {
+    //   message: `User with ID ${dto.userId} has been added to Startup ID ${dto.startupId}.`,
+    // };
   }
 
   async getPendingStartupsRankingByUrat() {
@@ -343,171 +449,147 @@ export class StartupService {
   }
 
   async getQualifiedStartupsRankingByRubrics() {
-    // Define readiness type weights
-    const readinessTypeWeights: Record<string, number> = {
-      Technology: 4,
-      Market: 3,
-      Regulatory: 2,
-      Acceptance: 2,
-      Organizational: 2,
-      Investment: 2,
-    };
+    // // Define readiness type weights
+    // const readinessTypeWeights: Record<string, number> = {
+    //   Technology: 4,
+    //   Market: 3,
+    //   Regulatory: 2,
+    //   Acceptance: 2,
+    //   Organizational: 2,
+    //   Investment: 2,
+    // };
+    //
+    // // Fetch the latest readiness levels for each startup and readiness type
+    // const uratQuestionAnswers = await this.em.find(
+    //   UratQuestionAnswer,
+    //   {},
+    //   {
+    //     populate: ['uratQuestion', 'startup'],
+    //   },
+    // );
+    //
+    // // Calculate weighted scores for each startup
+    // const startupScores: { startup_id: number; weighted_score: number }[] = [];
+    //
+    // for (const uratQuestionAnswer of uratQuestionAnswers) {
+    //   const readinessType = uratQuestionAnswer.uratQuestion.readinessType;
+    //   const weight = readinessTypeWeights[readinessType] || 0;
+    //
+    //   const weightedScore = uratQuestionAnswer.score * weight;
+    //
+    //   startupScores.push({
+    //     startup_id: uratQuestionAnswer.startup.id,
+    //     weighted_score: weightedScore,
+    //   });
+    // }
+    //
+    // // Aggregate total weighted scores for each startup
+    // const totalWeightedScores: Record<number, number> = {};
+    //
+    // for (const score of startupScores) {
+    //   const startupId = score.startup_id;
+    //   if (!totalWeightedScores[startupId]) {
+    //     totalWeightedScores[startupId] = 0;
+    //   }
+    //   totalWeightedScores[startupId] += score.weighted_score;
+    // }
+    //
+    // // Rank startups by their total weighted scores
+    // const rankedStartups = Object.entries(totalWeightedScores)
+    //   .map(([startupId, totalWeightedScore]) => ({
+    //     startup_id: Number(startupId),
+    //     total_weighted_score: totalWeightedScore,
+    //   }))
+    //   .sort((a, b) => b.total_weighted_score - a.total_weighted_score);
+    //
+    // // Fetch the startups in the ranked order
+    // const startupIds = rankedStartups.map((ranking) => ranking.startup_id);
+    // const startups = await this.em.find(
+    //   Startup,
+    //   {
+    //     id: { $in: startupIds },
+    //     qualificationStatus: QualificationStatus.QUALIFIED,
+    //   },
+    //   { populate: ['mentors', 'user'] },
+    // );
+    //
+    // if (!startups || startups.length === 0) {
+    //   console.warn('No startups found for the calculated IDs.');
+    //   return [];
+    // }
+    //
+    // // Map startups by ID for ordered retrieval
+    // const startupsMap = startups.reduce((map, startup) => {
+    //   map[startup.id] = startup;
+    //   return map;
+    // }, {});
+    //
+    // const orderedStartups = rankedStartups
+    //   .map((ranking) => {
+    //     const startup = startupsMap[ranking.startup_id];
+    //     if (startup) {
+    //       return {
+    //         ...startup, // Include all fields of the Startup entity
+    //         mentors: startup.mentors.getItems().map((mentor: User) => ({
+    //           id: mentor.id,
+    //           firstName: mentor.firstName,
+    //           lastName: mentor.lastName,
+    //         })),
+    //         ranking_score: ranking.total_weighted_score, // Add the ranking score
+    //       };
+    //     }
+    //     return null;
+    //   })
+    //   .filter((startup): startup is Startup & { ranking_score: number } =>
+    //     Boolean(startup),
+    //   ); // Remove nulls
+    // if (orderedStartups.length === 0) {
+    //   console.warn('No startups matched the final scores.');
+    //   return [];
+    // }
+    //
+    // return orderedStartups;
+  }
 
-    // Fetch the latest readiness levels for each startup and readiness type
-    const uratQuestionAnswers = await this.em.find(
-      UratQuestionAnswer,
-      {},
-      {
-        populate: ['uratQuestion', 'startup'],
-      },
-    );
-
-    // Calculate weighted scores for each startup
-    const startupScores: { startup_id: number; weighted_score: number }[] = [];
-
-    for (const uratQuestionAnswer of uratQuestionAnswers) {
-      const readinessType = uratQuestionAnswer.uratQuestion.readinessType;
-      const weight = readinessTypeWeights[readinessType] || 0;
-
-      const weightedScore = uratQuestionAnswer.score * weight;
-
-      startupScores.push({
-        startup_id: uratQuestionAnswer.startup.id,
-        weighted_score: weightedScore,
-      });
-    }
-
-    // Aggregate total weighted scores for each startup
-    const totalWeightedScores: Record<number, number> = {};
-
-    for (const score of startupScores) {
-      const startupId = score.startup_id;
-      if (!totalWeightedScores[startupId]) {
-        totalWeightedScores[startupId] = 0;
-      }
-      totalWeightedScores[startupId] += score.weighted_score;
-    }
-
-    // Rank startups by their total weighted scores
-    const rankedStartups = Object.entries(totalWeightedScores)
-      .map(([startupId, totalWeightedScore]) => ({
-        startup_id: Number(startupId),
-        total_weighted_score: totalWeightedScore,
-      }))
-      .sort((a, b) => b.total_weighted_score - a.total_weighted_score);
-
-    // Fetch the startups in the ranked order
-    const startupIds = rankedStartups.map((ranking) => ranking.startup_id);
+  async getStartupsByQualificationStatus(
+    qualificationStatus: QualificationStatus,
+  ): Promise<any[]> {
     const startups = await this.em.find(
       Startup,
+      { qualificationStatus },
       {
-        id: { $in: startupIds },
-        qualificationStatus: QualificationStatus.QUALIFIED,
+        populate: ['user', 'mentors', 'capsuleProposal'],
       },
-      { populate: ['mentors', 'user'] },
     );
 
-    if (!startups || startups.length === 0) {
-      console.warn('No startups found for the calculated IDs.');
-      return [];
-    }
-
-    // Map startups by ID for ordered retrieval
-    const startupsMap = startups.reduce((map, startup) => {
-      map[startup.id] = startup;
-      return map;
-    }, {});
-
-    const orderedStartups = rankedStartups
-      .map((ranking) => {
-        const startup = startupsMap[ranking.startup_id];
-        if (startup) {
-          return {
-            ...startup, // Include all fields of the Startup entity
-            mentors: startup.mentors.getItems().map((mentor: User) => ({
-              id: mentor.id,
-              firstName: mentor.firstName,
-              lastName: mentor.lastName,
-            })),
-            ranking_score: ranking.total_weighted_score, // Add the ranking score
-          };
-        }
-        return null;
-      })
-      .filter((startup): startup is Startup & { ranking_score: number } =>
-        Boolean(startup),
-      ); // Remove nulls
-    if (orderedStartups.length === 0) {
-      console.warn('No startups matched the final scores.');
-      return [];
-    }
-
-    return orderedStartups;
+    return startups.map((startup) => ({
+      ...startup,
+      mentors: startup.mentors.getItems().map((mentor: User) => mentor),
+      capsuleProposal: startup.capsuleProposal ? startup.capsuleProposal : null,
+    }));
   }
 
   async getCalculatorFinalScores(startupId: number) {
-    // Initialize an object to store scores grouped by category
-    let calculatorAnswers = await this.calculateLevels(startupId);
-
-    const scoresByCategory: Record<string, number> = {
-      [CalculatorCategory.Technology]: calculatorAnswers.technologyScore,
-      [CalculatorCategory.Product_Development]:
-        calculatorAnswers.productDevelopment,
-      [CalculatorCategory.Product_Definition_Design]:
-        calculatorAnswers.productDefinition,
-      [CalculatorCategory.Competitive_Landscape]:
-        calculatorAnswers.competitiveLandscape,
-      [CalculatorCategory.Team]: calculatorAnswers.team,
-      [CalculatorCategory.Go_To_Market]: calculatorAnswers.goToMarket,
-      [CalculatorCategory.Manufacturing_Supply_Chain]:
-        calculatorAnswers.supplyChain,
-      'Technology Level': calculatorAnswers.technologyLevel,
-      'Commercialization Level': calculatorAnswers.commercializationLevel,
-    };
-
-    return scoresByCategory;
-  }
-
-  async rateApplicant(
-    startupId: number,
-    scores: { readinessType: string; questionId: number; score: number }[],
-  ) {
-    // Fetch the startup
-    const startup = await this.em.findOneOrFail(
-      Startup,
-      { id: startupId },
-      {
-        failHandler: () => new Error(`Startup with ID ${startupId} not found`),
-      },
-    );
-
-    // Update scores for the provided URAT Question Answers
-    for (const { questionId, score } of scores) {
-      const uratQuestionAnswer = await this.em.findOneOrFail(
-        UratQuestionAnswer,
-        { id: questionId, startup }, // Ensure the question belongs to the given startup
-        {
-          failHandler: () =>
-            new Error(
-              `UratQuestionAnswer with ID ${questionId} not found for Startup ID ${startupId}`,
-            ),
-        },
-      );
-
-      uratQuestionAnswer.score = score;
-    }
-
-    // Update the qualification status of the startup
-    if (startup.qualificationStatus === QualificationStatus.PENDING) {
-      startup.qualificationStatus = QualificationStatus.RATED;
-    }
-
-    // Persist changes to the database
-    await this.em.flush();
-
-    return {
-      message: 'Scores updated and qualification status updated successfully!',
-    };
+    // // Initialize an object to store scores grouped by category
+    // let calculatorAnswers = await this.calculateLevels(startupId);
+    //
+    // const scoresByCategory: Record<string, number> = {
+    //   [CalculatorCategory.Technology]: calculatorAnswers.technologyScore,
+    //   [CalculatorCategory.Product_Development]:
+    //     calculatorAnswers.productDevelopment,
+    //   [CalculatorCategory.Product_Definition_Design]:
+    //     calculatorAnswers.productDefinition,
+    //   [CalculatorCategory.Competitive_Landscape]:
+    //     calculatorAnswers.competitiveLandscape,
+    //   [CalculatorCategory.Team]: calculatorAnswers.team,
+    //   [CalculatorCategory.Go_To_Market]: calculatorAnswers.goToMarket,
+    //   [CalculatorCategory.Manufacturing_Supply_Chain]:
+    //     calculatorAnswers.supplyChain,
+    //   'Technology Level': calculatorAnswers.technologyLevel,
+    //   'Commercialization Level': calculatorAnswers.commercializationLevel,
+    // };
+    //
+    // return scoresByCategory;
   }
 
   async approveApplicant(startupId: number) {
@@ -521,13 +603,12 @@ export class StartupService {
     // Maybe (if have time) add logic for sending the startup an email that they got approved
 
     startup.qualificationStatus = QualificationStatus.QUALIFIED;
-    await this.createStartupReadinessLevels(startupId);
 
     await this.em.flush();
     return { message: `Startup with ID ${startupId} has been approved.` };
   }
 
-  async rejectApplicant(startupId: number) {
+  async waitlistApplicant(startupId: number, dto: WaitlistStartupDto) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -535,20 +616,32 @@ export class StartupService {
       );
     }
 
-    // Maybe (if have time) add logic for sending the startup an email that they got approved
+    startup.qualificationStatus = QualificationStatus.WAITLISTED;
 
-    startup.datetimeDeleted = new Date();
-    startup.qualificationStatus = QualificationStatus.REJECTED;
+    // Find the manager who is waitlisting the startup
+    const manager = await this.em.findOne(User, { id: dto.managerId });
+    if (!manager) {
+      throw new NotFoundException(
+        `Manager with ID ${dto.managerId} does not exist.`,
+      );
+    }
 
+    // Create waitlist message
+    const waitlistMessage = new StartupWaitlistMessage();
+    waitlistMessage.startup = startup;
+    waitlistMessage.message = dto.message;
+    waitlistMessage.manager = manager;
+
+    this.em.persist(waitlistMessage);
     await this.em.flush();
-    return { message: `Startup with ID ${startupId} has been rejected.` };
+
+    return {
+      message: `Startup with ID ${startupId} has been waitlisted.`,
+      waitlistMessage,
+    };
   }
 
-  async appointMentors(
-    startupId: number,
-    mentorIds: number[],
-    cohortId: number,
-  ) {
+  async appointMentors(startupId: number, dto: AppointMentorsDto) {
     const startup = await this.em.findOne(Startup, { id: startupId });
     if (!startup) {
       throw new NotFoundException(
@@ -557,18 +650,13 @@ export class StartupService {
     }
 
     const mentors = await this.em.find(User, {
-      id: { $in: mentorIds },
+      id: { $in: dto.mentorIds },
       role: Role.Mentor,
     });
-    if (mentors.length !== mentorIds.length) {
+    if (mentors.length !== dto.mentorIds.length) {
       throw new BadRequestException('One or more mentor IDs are invalid.');
     }
     startup.mentors.set(mentors);
-
-    // Cohort ID given but we dont know what they are for yet
-    // if (cohortId) {
-    //   startup.cohortId = cohortId;
-    // }
 
     await this.em.flush();
     return {
@@ -601,6 +689,47 @@ export class StartupService {
       startup: startupId,
     });
     return count > 0;
+  }
+
+  async markComplete(startupId: number) {
+    const startup = await this.em.findOne(Startup, { id: startupId });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    startup.qualificationStatus = QualificationStatus.COMPLETED;
+    await this.em.flush();
+    return {
+      message: `Startup with ID ${startupId} has been marked as completed.`,
+    };
+  }
+
+  async changeMentor(startupId: number, dto: ChangeMentorDto) {
+    const startup = await this.em.findOne(
+      Startup,
+      { id: startupId },
+      { populate: ['mentors'] },
+    );
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    const newMentor = await this.em.findOne(User, {
+      id: dto.mentorId,
+      role: Role.Mentor,
+    });
+    if (!newMentor) {
+      throw new NotFoundException(`Mentor with ID ${dto.mentorId} not found`);
+    }
+
+    // Replace existing mentors with the new mentor
+    startup.mentors.set([newMentor]);
+
+    await this.em.flush();
+    return {
+      message: `Mentor has been successfully changed for Startup ID ${startupId}.`,
+      startup,
+    };
   }
 
   private async calculateTechnologyLevel(startupId: number): Promise<number> {
@@ -841,23 +970,87 @@ export class StartupService {
     return startupReadinessLevels;
   }
 
-  async createCapsuleProposal(dto: CreateCapsuleProposalDto) {
-    const startup = await this.em.findOne(Startup, { id: dto.startupId });
-    if (!startup) {
-      throw new Error('Startup not found');
+  async adminCreate(dto: CreateStartupDto): Promise<Startup> {
+    const user = await this.em.findOne(User, { id: dto.userId });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${dto.userId} not found`);
     }
-    const proposal = new CapsuleProposal();
+
+    const startup = this.em.create(Startup, {
+      name: dto.name,
+      user,
+      qualificationStatus: dto.qualificationStatus,
+      dataPrivacy: dto.dataPrivacy ?? false,
+      links: dto.links,
+      groupName: dto.groupName,
+      universityName: dto.universityName,
+      eligibility: dto.eligibility ?? false,
+    });
+
+    try {
+      await this.em.persistAndFlush(startup);
+    } catch (e: any) {
+      // Handle out-of-sync sequence: duplicate key on startups_pkey
+      const msg = String(e?.message ?? '');
+      if (e?.code === '23505' && msg.includes('startups_pkey')) {
+        // Reset sequence to max(id)
+        await this.em
+          .getConnection()
+          .execute(
+            "select setval(pg_get_serial_sequence('startups','id'), coalesce((select max(id) from startups), 0), true)",
+          );
+        // Retry once
+        await this.em.persistAndFlush(startup);
+      } else {
+        throw e;
+      }
+    }
+    return startup;
+  }
+
+  async updateCapsuleProposal(
+    startupId: number,
+    dto: StartupApplicationDto,
+  ): Promise<Startup> {
+    const startup = await this.em.findOne(
+      Startup,
+      { id: startupId },
+      { populate: ['capsuleProposal'] },
+    );
+
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${startupId} not found`);
+    }
+
+    if (!startup.capsuleProposal) {
+      throw new BadRequestException(
+        `Startup with ID ${startupId} has no capsule proposal to update`,
+      );
+    }
+
+    const proposal = startup.capsuleProposal;
     proposal.title = dto.title;
     proposal.description = dto.description;
     proposal.problemStatement = dto.problemStatement;
     proposal.targetMarket = dto.targetMarket;
     proposal.solutionDescription = dto.solutionDescription;
-    proposal.objectives = dto.objectives;
-    proposal.scope = dto.scope;
+    proposal.objectives = dto.objectives ?? [];
+    proposal.historicalTimeline = dto.historicalTimeline ?? [];
+    proposal.competitiveAdvantageAnalysis =
+      dto.competitiveAdvantageAnalysis ?? [];
+    proposal.intellectualPropertyStatus = dto.intellectualPropertyStatus;
+    proposal.scope = dto.proposalScope;
     proposal.methodology = dto.methodology;
-    proposal.fileName = dto.fileName;
-    proposal.startup = startup;
-    await this.em.persistAndFlush(proposal);
-    return proposal;
+    proposal.curriculumVitae = dto.curriculumVitae ?? proposal.curriculumVitae;
+    proposal.members = dto.members ?? [];
+
+    startup.name = dto.title;
+    
+    // Change status to PENDING when reapplying
+    startup.qualificationStatus = QualificationStatus.PENDING;
+
+    await this.em.flush();
+
+    return startup;
   }
 }

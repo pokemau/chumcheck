@@ -43,6 +43,7 @@
   import { onMount } from 'svelte';
 
   import Button from '../ui/button/button.svelte';
+  import { QualificationStatus } from '$lib/enums/qualification-status.enum';
   import DataPrivacy from './application/DataPrivacy.svelte';
   import EligibilityAgreement from './application/EligibilityAgreement.svelte';
   import ProjectDetails from './application/ProjectDetails.svelte';
@@ -54,6 +55,7 @@
   import Investment from './application/Investment.svelte';
   import Organizational from './application/Organizational.svelte';
   import TechnologyCalculator from './application/Calculator.svelte';
+  import Waitlisted from './application/Waitlisted.svelte';
   import { PUBLIC_API_URL } from '$env/static/public';
   import { boolean } from 'zod';
 
@@ -62,7 +64,7 @@
   export let access: string;
   export let startup: any = null;
 
-  const steps = [
+  let steps = [
     'data-privacy',
     'eligibility-agreement',
     'project-details',
@@ -75,7 +77,8 @@
     'investment',
     'calculator'
   ];
-  const labels = [
+  
+  let labels = [
     'Data Privacy and Consent',
     'Eligibility and Agreement',
     'Project Details',
@@ -89,7 +92,14 @@
     'Technology and Commercialization Readiness Level Calculator'
   ];
 
+  if (startup?.qualificationStatus === QualificationStatus.WAITLISTED) {
+    steps = ['waitlisted'];
+    labels = ['Your startup is currently waitlisted....'];
+  }   
+
   let currentActive = 0;
+  let currentStep = steps[currentActive];
+  
   let formData = {
     dataPrivacy: startup?.dataPrivacy ?? false,
     eligibility: startup?.eligibility ?? false
@@ -104,6 +114,7 @@
   };
   function handleStep(stepIncrement: number) {
     currentActive += stepIncrement;
+    currentStep = steps[currentActive];
   }
 
   onMount(() => {
@@ -116,6 +127,27 @@
   });
 
   let submitting = false;
+
+  // Extract waitlist message
+  let waitlistMessage: string;
+  $: {
+    console.log('=== WAITLIST MESSAGE DEBUG ===');
+    console.log('startup object:', startup);
+    console.log('waitlistMessages:', startup?.waitlistMessages);
+    
+    if (startup?.waitlistMessages && startup.waitlistMessages.length > 0) {
+      const messages = startup.waitlistMessages;
+      const latestMessage = messages[messages.length - 1];
+      waitlistMessage = latestMessage.message;
+      
+      console.log('Latest message object:', latestMessage);
+      console.log('Message text:', waitlistMessage);
+    } else {
+      waitlistMessage = "Unable to load waitlisted message";
+      console.log('No waitlist messages found');
+    }
+    console.log('=== END DEBUG ===');
+  }
 </script>
 
 <form
@@ -127,33 +159,40 @@
     <input type="hidden" name="startupId" value={startup.id} />
   {/if}
   <h1 class="px-1 text-2xl font-semibold">{labels[currentActive]}</h1>
+  <!-- TO ADD WAITLISTED SCREEN -->
+  <Waitlisted
+    stepName="waitlisted"
+    message={waitlistMessage}
+    {currentStep}
+  />
   <DataPrivacy
+    stepName="data-privacy"
+    {currentStep}
     dataPrivacy={formData.dataPrivacy}
     {toggleDataPrivacy}
-    {currentActive}
-    {startup}
   />
   <EligibilityAgreement
-    {currentActive}
+    stepName="eligibility-agreement"
+    {currentStep}
     {toggleEligibility}
     eligibility={formData.eligibility}
-    {startup}
   />
-  <ProjectDetails {currentActive} {access} {startup} />
-  <GroupInformation {currentActive} {access} {startup} />
+  <ProjectDetails stepName="project-details" {currentStep} {access} {startup} />
+  <GroupInformation stepName="group-information" {currentStep} {access} {startup} />
   {#if doneFetching && data}
-    <Technology {currentActive} question={data.technologyQuestions} {startup} />
-    <Market {currentActive} question={data.marketQuestions} {startup} />
-    <Regulatory {currentActive} question={data.regulatoryQuestions} {startup} />
-    <Acceptance {currentActive} question={data.acceptanceQuestions} {startup} />
+    <Technology stepName="technology" {currentStep} question={data.technologyQuestions} {startup} />
+    <Market stepName="market" {currentStep} question={data.marketQuestions} {startup} />
+    <Regulatory stepName="regulatory" {currentStep} question={data.regulatoryQuestions} {startup} />
+    <Acceptance stepName="acceptance" {currentStep} question={data.acceptanceQuestions} {startup} />
     <Organizational
-      {currentActive}
+      stepName="organizational" {currentStep}
       question={data.organizationalQuestions}
       {startup}
     />
-    <Investment {currentActive} question={data.investmentQuestions} {startup} />
+    <Investment stepName="investment" {currentStep} question={data.investmentQuestions} {startup} />
     <TechnologyCalculator
-      {currentActive}
+      stepName="calculator" 
+      {currentStep}
       calculatorQuestions={data.calculator}
       {startup}
     />
@@ -177,7 +216,17 @@
             : false}>Next</Button
       >
     {:else}
-      <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {#if startup?.qualificationStatus === QualificationStatus.WAITLISTED}
+        <div class="flex justify-end gap-3">
+          <a href="/apply?startupId={startup.id}">
+            <Button>
+              Edit application
+            </Button>
+          </a>
+        </div>
+      {:else}
+        <Button class="w-24" type="submit" disabled={submitting}>Submit</Button>
+      {/if}
     {/if}
   </div>
 </form>

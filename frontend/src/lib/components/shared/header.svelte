@@ -1,39 +1,45 @@
 <script lang="ts">
-  import Button from '$lib/components/ui/button/button.svelte';
-  import * as Avatar from '$lib/components/ui/avatar';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import { Badge } from '$lib/components/ui/badge';
   import { access } from '$lib/access';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { Separator } from '$lib/components/ui/separator';
   import { crossfade } from 'svelte/transition';
   import { cubicInOut } from 'svelte/easing';
   import { onMount, onDestroy } from 'svelte';
-  import { getProfileColor, getRole } from '$lib/utils';
+  import { getProfileColor } from '$lib/utils';
   import { browser } from '$app/environment';
+  import { goto } from '$app/navigation';
 
   const { user, startup, scrollContainer } = $props();
 
-  const userRole = getRole(user.role);
+  let dropdownOpen = $state(false);
+
+  function navigateTo(path: string) {
+    dropdownOpen = false;
+    goto(path);
+  }
+
+  const userRole = user.role;
   const modules =
     access.roles[`${userRole as 'Startup' | 'Mentor' | 'Manager'}`].modules;
 
   const currentModule = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 1
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 1
     ]
   );
 
   const currentModulev2 = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 2
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 2
     ]
   );
 
-  const module = $derived($page.url.pathname.slice(1).split('/')[0]);
+  const module = $derived(page.url.pathname.slice(1).split('/')[0]);
   const subModule = $derived(
-    $page.url.pathname.slice(1).split('/')[
-      $page.url.pathname.slice(1).split('/').length - 1
+    page.url.pathname.slice(1).split('/')[
+      page.url.pathname.slice(1).split('/').length - 1
     ]
   );
 
@@ -75,7 +81,7 @@
 </script>
 
 <header
-  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b text-flutter-gray transition-all duration-300 dark:text-flutter-white"
+  class="fixed left-1/2 top-0 z-10 flex h-16 w-screen -translate-x-1/2 justify-center border-b transition-all duration-300"
   class:backdrop-blur-lg={isBlurred}
   style="backdrop-filter: blur(16px);"
 >
@@ -98,7 +104,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${module}/${startup}/${item.link}${item.name === 'Overview' ? `/${item?.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -106,7 +112,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="absolute bottom-0 h-[1px] w-full bg-primary"
                     in:send={{ key: 'active-sidebar-tab' }}
                     out:receive={{ key: 'active-sidebar-tab' }}
                   ></div>
@@ -122,7 +128,7 @@
             <a
               data-sveltekit-preload-data="tap"
               href={`/${item.link}${item.subModule.length > 0 && item.name !== 'Startups' ? `/${item.subModule[0].link}` : ''}`}
-              class="relative flex h-16 items-center justify-center text-center hover:text-flutter-blue active:scale-95"
+              class="hover:text-flutter-blue relative flex h-16 items-center justify-center text-center active:scale-95"
               class:text-flutter-blue={currentModule === item.link ||
                 currentModulev2 === item.link}
             >
@@ -130,7 +136,7 @@
                 {item.name}
                 {#if isActive}
                   <div
-                    class="absolute bottom-0 h-[1px] w-full bg-flutter-blue"
+                    class="absolute bottom-0 h-[1px] w-full bg-primary"
                   ></div>
                 {/if}
               </li>
@@ -141,10 +147,10 @@
       <Separator orientation="vertical" />
       <Badge
         variant="outline"
-        class="h-8 rounded-full bg-flutter-gray/20 text-sm font-normal"
+        class="h-8 rounded-full bg-accent text-sm font-normal"
         >{user?.role ? user?.role : 'Anonymous'}</Badge
       >
-      <DropdownMenu.Root>
+      <DropdownMenu.Root bind:open={dropdownOpen}>
         <DropdownMenu.Trigger>
           <div
             class={`flex h-9 w-9 items-center justify-center rounded-full ${getProfileColor(user.firstName)}`}
@@ -160,15 +166,15 @@
             </DropdownMenu.Label>
             <DropdownMenu.Separator />
             {#each modules as module}
-              <a
+              <DropdownMenu.Item
                 class="cursor-pointer"
-                data-sveltekit-preload-data="tap"
-                href={`/${module.link}${module.subModule.length > 0 && module.name !== 'Startups' ? `/${module.subModule[0].link}` : ''}`}
+                onclick={() =>
+                  navigateTo(
+                    `/${module.link}${module.subModule.length > 0 && module.name !== 'Startups' ? `/${module.subModule[0].link}` : ''}`
+                  )}
               >
-                <DropdownMenu.Item class="cursor-pointer"
-                  >{module.name}</DropdownMenu.Item
-                >
-              </a>
+                {module.name}
+              </DropdownMenu.Item>
             {/each}
             <form action="/logout" method="post" class="w-full">
               <button type="submit" class="w-full">

@@ -1,13 +1,16 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 
-export class StartupApplicationDto {
+export class StartupApplicationDtoOld {
   @IsNumber()
   @IsNotEmpty()
   @Type(() => Number)
@@ -50,4 +53,124 @@ export class AddStartupMemberDto {
   @IsNotEmpty()
   @Type(() => Number)
   startupId: number;
+}
+
+class HistoricalTimelineDto {
+  @IsString()
+  @IsNotEmpty()
+  monthYear: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+}
+
+class CompetitiveAdvantageDto {
+  @IsString()
+  @IsNotEmpty()
+  competitorName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  offer: string;
+
+  @IsString()
+  @IsNotEmpty()
+  pricingStrategy: string;
+}
+
+class MemberDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  role: string;
+}
+
+export class StartupApplicationDto {
+  @IsString()
+  @IsNotEmpty()
+  title: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  problemStatement: string;
+
+  @IsString()
+  @IsNotEmpty()
+  targetMarket: string;
+
+  @IsString()
+  @IsNotEmpty()
+  solutionDescription: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => HistoricalTimelineDto)
+  @IsOptional()
+  historicalTimeline: HistoricalTimelineDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CompetitiveAdvantageDto)
+  @IsOptional()
+  competitiveAdvantageAnalysis: CompetitiveAdvantageDto[];
+
+  @IsString()
+  @IsNotEmpty()
+  intellectualPropertyStatus: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  objectives: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  proposalScope: string;
+
+  @IsString()
+  @IsNotEmpty()
+  methodology: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MemberDto)
+  @IsOptional()
+  members: MemberDto[];
+
+  @IsString()
+  @IsNotEmpty()
+  curriculumVitae: string;
+}
+
+export class WaitlistStartupDto {
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @Type(() => Number)
+  managerId: number;
+}
+
+export class AppointMentorsDto {
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsNotEmpty()
+  @Type(() => Number)
+  mentorIds: number[];
+}
+
+export class ChangeMentorDto {
+  @IsNotEmpty()
+  @IsNumber()
+  mentorId: number;
 }

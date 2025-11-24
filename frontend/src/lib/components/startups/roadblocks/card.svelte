@@ -70,8 +70,8 @@
 </script>
 
 <Card.Root
-  class={`cursor-pointer rounded-lg border bg-gray-900 shadow-sm
-  ${isNewCard() || roadblocksCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse border-sky-600' : 'border-gray-700'} `}
+  class={`cursor-pointer rounded-lg border shadow-sm
+  ${isNewCard() || roadblocksCopy.approvalStatus !== 'Unchanged' ? 'border-3 animate-pulse' : ''} `}
   onclick={() => {
     open = true;
     action = 'View';
@@ -86,24 +86,24 @@
       </Badge>
       {#if isNewCard()}
         <div
-          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-5 -top-5 rounded-[2px] p-[1px] text-xs"
         >
           New
         </div>
       {/if}
       {#if roadblocksCopy.approvalStatus !== 'Unchanged'}
         <div
-          class="z-100 absolute -right-5 -top-5 rounded-[2px] bg-primary p-[1px] text-xs"
+          class="z-100 bg-primary absolute -right-5 -top-5 rounded-[2px] p-[1px] text-xs"
         >
           Pending Approval
         </div>
       {/if}
     </div>
-    <div class="mb-1 whitespace-pre-wrap break-words text-sm text-white">
+    <div class="mb-1 whitespace-pre-wrap break-words text-sm">
       Description: {@html roadblocks?.description?.substring(0, 60) +
         (roadblocks?.description?.length > 60 ? '...' : '')}
     </div>
-    <div class="whitespace-pre-wrap break-words text-xs text-muted-foreground">
+    <div class="text-muted-foreground whitespace-pre-wrap break-words text-xs">
       Fix: {@html roadblocks?.fix?.substring(0, 60) +
         (roadblocks?.fix?.length > 60 ? '...' : '')}
     </div>
@@ -127,7 +127,7 @@
           </span>
         {:else}
           <div
-            class="flex h-5 w-5 items-center justify-center rounded-full bg-muted"
+            class="bg-muted flex h-5 w-5 items-center justify-center rounded-full"
           >
             <User class="h-4 w-4" />
           </div>

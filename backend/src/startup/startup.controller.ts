@@ -12,21 +12,22 @@ import {
   UseGuards,
   UseInterceptors,
   Patch,
-  UsePipes,
 } from '@nestjs/common';
-import { readFile } from 'fs/promises';
 
-import * as PdfParse from 'pdf-parse';
 import { AiService } from 'src/ai/ai.service';
-import { AddStartupMemberDto, StartupApplicationDto } from './dto';
-import { CreateCapsuleProposalDto } from './dto/create-capsule-proposal.dto';
 import { StartupService } from './startup.service';
 import { JwtGuard } from 'src/auth/guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
 import { UploadedFile } from '@nestjs/common';
 import { UpdateStartupDto } from '../admin/dto/update-startup.dto';
-import { ValidationPipe } from '@nestjs/common';
+import {
+  StartupApplicationDto,
+  WaitlistStartupDto,
+  AppointMentorsDto,
+  ChangeMentorDto,
+} from './dto';
+import { Request } from 'express';
+import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
 @UseGuards(JwtGuard)
 @Controller('startups')
@@ -55,6 +56,13 @@ export class StartupController {
     return this.startupService.getStartupReadinessLevel(startupId);
   }
 
+  @Get('/all')
+  async getAllStartups(): Promise<any[]> {
+    return await this.startupService.getAllStartups();
+  }
+
+  // ==================================================
+  // Deprecated endpoints - keeping for backward compatibility
   @Get('/ranking-by-urat')
   async getStartupsByUrat() {
     return await this.startupService.getPendingStartupsRankingByUrat();
@@ -64,57 +72,67 @@ export class StartupController {
   async getStartupsByRubrics() {
     return await this.startupService.getQualifiedStartupsRankingByRubrics();
   }
+  // ==================================================
 
-  @Post('/create-startup')
-  @UseInterceptors(FileInterceptor('capsuleProposal'))
-  async createStartup(
-    @Body() dto: StartupApplicationDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    // If a capsule proposal file is uploaded, parse and create CapsuleProposal
-    if (file) {
-      try {
-        const data = await PdfParse(file.buffer);
-        let res = await this.aiService.getCapsuleProposalInfo(data.text);
-        if (res) {
-          res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-          const parsed = JSON.parse(res);
-
-          const capsuleProposalDto: CreateCapsuleProposalDto = {
-            title: dto.name,
-            description: parsed.startup_description,
-            problemStatement: parsed.problem_statement,
-            targetMarket: parsed.target_market,
-            solutionDescription: parsed.solution_description,
-            objectives: parsed.objectives,
-            scope: parsed.scope,
-            methodology: parsed.methodology,
-            startupId: -1, //placeholder
-            fileName: file.originalname,
-          };
-          const startup = await this.startupService.createStartup(dto);
-          capsuleProposalDto.startupId = startup.id;
-          await this.startupService.createCapsuleProposal(capsuleProposalDto);
-          console.log('CapsuleProposal created successfully');
-          return startup;
-        } else {
-          console.log('AI service did not return a result');
-          throw new BadRequestException('AI service did not return a result');
-        }
-      } catch (error) {
-        console.error('Failed to parse and create capsule proposal:', error);
-        throw new BadRequestException(
-          'Failed to parse and create capsule proposal: ' + error.message,
-        );
-      }
-    } else {
-      console.log('No capsule proposal file uploaded');
-      throw new BadRequestException('No capsule proposal file uploaded');
-    }
+  @Post('/apply')
+  async applyStartup(@Body() dto: StartupApplicationDto, @Req() req: any) {
+    const userId = req.user.id;
+    const data = await this.startupService.create(dto, userId);
+    return {
+      message: 'yeahhhhhhhhhhhhh created startup',
+    };
   }
 
+  // @Post('/create-startup')
+  // @UseInterceptors(FileInterceptor('capsuleProposal'))
+  // async createStartup(
+  //   @Body() dto: StartupApplicationDto,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   // If a capsule proposal file is uploaded, parse and create CapsuleProposal
+  //   if (file) {
+  //     try {
+  //       const data = await PdfParse(file.buffer);
+  //       let res = await this.aiService.getCapsuleProposalInfo(data.text);
+  //       if (res) {
+  //         res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  //         const parsed = JSON.parse(res);
+  //
+  //         const capsuleProposalDto: CreateCapsuleProposalDto = {
+  //           title: dto.name,
+  //           description: parsed.startup_description,
+  //           problemStatement: parsed.problem_statement,
+  //           targetMarket: parsed.target_market,
+  //           solutionDescription: parsed.solution_description,
+  //           objectives: parsed.objectives,
+  //           scope: parsed.scope,
+  //           methodology: parsed.methodology,
+  //           startupId: -1, //placeholder
+  //           fileName: file.originalname,
+  //         };
+  //         const startup = await this.startupService.createStartup(dto);
+  //         capsuleProposalDto.startupId = startup.id;
+  //         await this.startupService.createCapsuleProposal(capsuleProposalDto);
+  //         console.log('CapsuleProposal created successfully');
+  //         return startup;
+  //       } else {
+  //         console.log('AI service did not return a result');
+  //         throw new BadRequestException('AI service did not return a result');
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to parse and create capsule proposal:', error);
+  //       throw new BadRequestException(
+  //         'Failed to parse and create capsule proposal: ' + error.message,
+  //       );
+  //     }
+  //   } else {
+  //     console.log('No capsule proposal file uploaded');
+  //     throw new BadRequestException('No capsule proposal file uploaded');
+  //   }
+  // }
+
   @Post('add-member')
-  async addMemberToStartup(@Body() dto: AddStartupMemberDto) {
+  async addMemberToStartup(@Body() dto: any) {
     return await this.startupService.addMemberToStartup(dto);
   }
 
@@ -129,22 +147,22 @@ export class StartupController {
   @Post('/parse-capsule-proposal')
   @UseInterceptors(FileInterceptor('capsuleProposal'))
   async getCapsuleProposal(@UploadedFile() file: Express.Multer.File) {
-    try {
-      if (!file) {
-        throw new BadRequestException('No file uploaded');
-      }
-
-      const data = await PdfParse(file.buffer);
-      let res = await this.aiService.getCapsuleProposalInfo(data.text);
-
-      if (res) {
-        res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-        return JSON.parse(res);
-      }
-    } catch (error) {
-      console.error(error);
-      throw new BadRequestException('Failed to process PDF');
-    }
+    // try {
+    //   if (!file) {
+    //     throw new BadRequestException('No file uploaded');
+    //   }
+    //
+    //   const data = await PdfParse(file.buffer);
+    //   let res = await this.aiService.getCapsuleProposalInfo(data.text);
+    //
+    //   if (res) {
+    //     res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    //     return JSON.parse(res);
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    //   throw new BadRequestException('Failed to process PDF');
+    // }
   }
 
   @Get(':startupId')
@@ -152,24 +170,15 @@ export class StartupController {
     return await this.startupService.getStartupById(startupId);
   }
 
-  // @Get(':startupId/allow-tasks')
-  // async getStartupAllowTasksById(@Param('startupId') startupId: string) {
-  //   // IDK para unsa
-  //   return true;
-  // }
+  @Get(':startupId/allow-tasks')
+  async getStartupAllowTasksById(@Param('startupId') startupId: string) {
+    // IDK para unsa
+    return true;
+  }
 
   @Get(':startupId/calculator-final-scores')
   async getCalculatorFinalScores(@Param('startupId') startupId: number) {
     return await this.startupService.getCalculatorFinalScores(startupId);
-  }
-
-  @Post(':startupId/rate-applicant')
-  async rateApplicant(
-    @Param('startupId') startupId: number,
-    @Body('scores')
-    scores: { readinessType: string; questionId: number; score: number }[],
-  ) {
-    return this.startupService.rateApplicant(startupId, scores);
   }
 
   @Post(':startupId/approve-applicant')
@@ -177,22 +186,35 @@ export class StartupController {
     return await this.startupService.approveApplicant(startupId);
   }
 
-  @Post(':startupId/reject-applicant')
-  async rejectApplicant(@Param('startupId') startupId: number) {
-    return await this.startupService.rejectApplicant(startupId);
+  @Patch(':startupId/waitlist-applicant')
+  async waitlistApplicant(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: WaitlistStartupDto,
+  ) {
+    return await this.startupService.waitlistApplicant(startupId, dto);
   }
 
   @Post(':startupId/appoint-mentors')
   async appointMentors(
     @Param('startupId') startupId: number,
-    @Body('mentor_ids') mentorIds: number[],
-    @Body('cohort_id') cohortId: number,
+    @Body() dto: AppointMentorsDto,
   ) {
-    return await this.startupService.appointMentors(
-      startupId,
-      mentorIds,
-      cohortId,
-    );
+    return await this.startupService.appointMentors(startupId, dto);
+  }
+
+  @Patch(':startupId/mark-complete')
+  async markStartupComplete(
+    @Param('startupId', ParseIntPipe) startupId: number,
+  ) {
+    return await this.startupService.markComplete(startupId);
+  }
+
+  @Patch(':startupId/change-mentor')
+  async changeMentor(
+    @Param('startupId', ParseIntPipe) startupId: number,
+    @Body() dto: ChangeMentorDto,
+  ) {
+    return await this.startupService.changeMentor(startupId, dto);
   }
 
   @Get(':startupId/allow-rnas')
@@ -229,90 +251,99 @@ export class StartupController {
     return await this.startupService.update(id, dto);
   }
 
-  @Patch(':id/with-capsule-proposal')
-  @UseInterceptors(FileInterceptor('capsuleProposal'))
-  async updateStartupWithCapsuleProposal(
+  @Patch(':id/reapply')
+  async reapplyStartup(
     @Param('id', ParseIntPipe) id: number,
-    @Body() rawDto: any,
-    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: StartupApplicationDto,
+    @Req() req: any,
   ) {
-    console.log('Controller - received raw DTO:', rawDto);
-
-    // Manually transform FormData values to proper types
-    const dto: UpdateStartupDto = {
-      name: rawDto.name,
-      userId: rawDto.userId ? parseInt(rawDto.userId) : undefined,
-      qualificationStatus: rawDto.qualificationStatus
-        ? parseInt(rawDto.qualificationStatus)
-        : undefined,
-      dataPrivacy: rawDto.dataPrivacy
-        ? rawDto.dataPrivacy === 'true'
-        : undefined,
-      links: rawDto.links,
-      groupName: rawDto.groupName,
-      universityName: rawDto.universityName,
-      eligibility: rawDto.eligibility
-        ? rawDto.eligibility === 'true'
-        : undefined,
-    };
-
-    console.log('Controller - transformed DTO:', dto);
-    console.log(
-      'Controller - qualificationStatus after transformation:',
-      typeof dto.qualificationStatus,
-      'value:',
-      dto.qualificationStatus,
-    );
-
-    // If a capsule proposal file is uploaded, parse and update CapsuleProposal
-    if (file) {
-      try {
-        console.log(
-          'Capsule proposal file received for update:',
-          file.originalname,
-        );
-        const data = await PdfParse(file.buffer);
-        let res = await this.aiService.getCapsuleProposalInfo(data.text);
-        console.log('AI service result for update:', res);
-
-        if (res) {
-          res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-          const parsed = JSON.parse(res);
-          console.log('Parsed capsule proposal for update:', parsed);
-
-          const capsuleProposalDto: CreateCapsuleProposalDto = {
-            title: dto.name || 'Updated Startup',
-            description: parsed.startup_description,
-            problemStatement: parsed.problem_statement,
-            targetMarket: parsed.target_market,
-            solutionDescription: parsed.solution_description,
-            objectives: parsed.objectives,
-            scope: parsed.scope,
-            methodology: parsed.methodology,
-            startupId: id,
-            fileName: file.originalname,
-          };
-
-          return await this.startupService.updateWithCapsuleProposal(
-            id,
-            dto,
-            capsuleProposalDto,
-          );
-        } else {
-          console.log('AI service did not return a result for update');
-          throw new BadRequestException(
-            'AI service did not return a result for update',
-          );
-        }
-      } catch (error) {
-        console.error('Failed to parse and update capsule proposal:', error);
-        throw new BadRequestException(
-          'Failed to parse and update capsule proposal: ' + error.message,
-        );
-      }
-    } else {
-      // No file uploaded, just update the startup without capsule proposal changes
-      return await this.startupService.update(id, dto);
-    }
+    return await this.startupService.updateCapsuleProposal(id, dto);
   }
+
+  // @Patch(':id/with-capsule-proposal')
+  // @UseInterceptors(FileInterceptor('capsuleProposal'))
+  // async updateStartupWithCapsuleProposal(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() rawDto: any,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   console.log('Controller - received raw DTO:', rawDto);
+  //
+  //   // Manually transform FormData values to proper types
+  //   const dto: UpdateStartupDto = {
+  //     name: rawDto.name,
+  //     userId: rawDto.userId ? parseInt(rawDto.userId) : undefined,
+  //     qualificationStatus: rawDto.qualificationStatus
+  //       ? parseInt(rawDto.qualificationStatus)
+  //       : undefined,
+  //     dataPrivacy: rawDto.dataPrivacy
+  //       ? rawDto.dataPrivacy === 'true'
+  //       : undefined,
+  //     links: rawDto.links,
+  //     groupName: rawDto.groupName,
+  //     universityName: rawDto.universityName,
+  //     eligibility: rawDto.eligibility
+  //       ? rawDto.eligibility === 'true'
+  //       : undefined,
+  //   };
+  //
+  //   console.log('Controller - transformed DTO:', dto);
+  //   console.log(
+  //     'Controller - qualificationStatus after transformation:',
+  //     typeof dto.qualificationStatus,
+  //     'value:',
+  //     dto.qualificationStatus,
+  //   );
+  //
+  //   // If a capsule proposal file is uploaded, parse and update CapsuleProposal
+  //   if (file) {
+  //     try {
+  //       console.log(
+  //         'Capsule proposal file received for update:',
+  //         file.originalname,
+  //       );
+  //       const data = await PdfParse(file.buffer);
+  //       let res = await this.aiService.getCapsuleProposalInfo(data.text);
+  //       console.log('AI service result for update:', res);
+  //
+  //       if (res) {
+  //         res = res.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+  //         const parsed = JSON.parse(res);
+  //         console.log('Parsed capsule proposal for update:', parsed);
+  //
+  //         const capsuleProposalDto: CreateCapsuleProposalDto = {
+  //           title: dto.name || 'Updated Startup',
+  //           description: parsed.startup_description,
+  //           problemStatement: parsed.problem_statement,
+  //           targetMarket: parsed.target_market,
+  //           solutionDescription: parsed.solution_description,
+  //           objectives: parsed.objectives,
+  //           scope: parsed.scope,
+  //           methodology: parsed.methodology,
+  //           startupId: id,
+  //           fileName: file.originalname,
+  //         };
+  //
+  //         return await this.startupService.updateWithCapsuleProposal(
+  //           id,
+  //           dto,
+  //           capsuleProposalDto,
+  //         );
+  //       } else {
+  //         console.log('AI service did not return a result for update');
+  //         throw new BadRequestException(
+  //           'AI service did not return a result for update',
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error('Failed to parse and update capsule proposal:', error);
+  //       throw new BadRequestException(
+  //         'Failed to parse and update capsule proposal: ' + error.message,
+  //       );
+  //     }
+  //   } else {
+  //     // No file uploaded, just update the startup without capsule proposal changes
+  //     return await this.startupService.update(id, dto);
+  //   }
+  // }
 }

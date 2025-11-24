@@ -100,24 +100,26 @@
   }
 
   async function saveRating(startupId: string) {
-    const response = await fetch(
-      `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
-      {
-        method: 'post',
-        headers: {
-          'Content-type': 'application/json',
-          Authorization: `Bearer ${access}`
-        }
-      }
-    );
+    // IDK WHAT THIS COMPONENT DOES
+    // COMMENT FOR NOW, NEED TO IMPLEMENT  BACKEND FIRST
+    // const response = await fetch(
+    //   `${PUBLIC_API_URL}/startups/${startupId}/rate-applicant/`,
+    //   {
+    //     method: 'post',
+    //     headers: {
+    //       'Content-type': 'application/json',
+    //       Authorization: `Bearer ${access}`
+    //     }
+    //   }
+    // );
 
-    const data = await response.json();
+    // const data = await response.json();
 
-    if (response.ok) {
-      const sub = applicants.filter((d) => d.id !== startupId);
-      applicants = sub;
-      togglePendingdialog();
-    }
+    // if (response.ok) {
+    //   const sub = applicants.filter((d) => d.id !== startupId);
+    //   applicants = sub;
+    //   togglePendingdialog();
+    // }
   }
 </script>
 
