@@ -3,7 +3,7 @@
 >
   <aside class="flex grid-flow-col items-center gap-5">
     <img src="logo.png" alt="" class="w-8" />
-    <p>ChumCheck <br />Fueling Startup Success</p>
+    <p>LaunchUp <br />Fueling Startup Success</p>
   </aside>
   <nav class="md:place-self-center md:justify-self-end">
     <div class="grid grid-flow-col gap-4">

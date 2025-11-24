@@ -13,7 +13,7 @@
       <div class="flex flex-1 flex-col gap-5">
         <p class="text-4xl font-extrabold">About Us</p>
         <p class="text-2xl font-medium">
-          ChumCheck is a dedicated program designed to <br />support startups on
+          LaunchUp is a dedicated program designed to <br />support startups on
           their path to success. <br />It provides essential resources and
           guidance <br />to innovative entrepreneurs, with a specific focus
           <br />on incubation and acceleration.

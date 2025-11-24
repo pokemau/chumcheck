@@ -83,7 +83,7 @@
   {/if}
 </div>
 <svelte:head>
-  <title>ChumCheck - Analytics</title>
+  <title>LaunchUp - Analytics</title>
 </svelte:head>
 {#snippet loading()}
   <div class="grid h-[175px] grid-cols-4 gap-3">

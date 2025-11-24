@@ -14,7 +14,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
-      'https://chumcheck.vercel.app',
+      'https://launchup.vercel.app',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
     ],

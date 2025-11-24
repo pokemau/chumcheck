@@ -14,7 +14,7 @@
         collected including, startup team members' names, personal email
         address, mobile phone number and other relevant information. The
         personal information you will provide in this form will be used within
-        ChumCheck Program, DASIG consortium committee and will not be shared
+        LaunchUp Program, DASIG consortium committee and will not be shared
         with any outside parties unless you have prior written consent.
         Development and Acceleration Support for Innovation Growth (DASIG)
         respects your rights as a data subject under the Data Privacy Act.
@@ -26,7 +26,7 @@
         In compliance with the Data Privacy Act (DPA) of 2012, also known as the
         Republic Act of 10173 (RA 10173), I agree and authorize the Development and
         Acceleration Support for Innovation Growth (DASIG) consortium members to
-        use the personal information for the purpose of ChumCheck programs and initiatives.
+        use the personal information for the purpose of LaunchUp programs and initiatives.
         I also acknowledge and warrant that I have acquired the consent from all
         parties relevant to this consent and hold free and harmless and indemnify
         Development and Acceleration Support for Innovation Growth (DASIG) from any

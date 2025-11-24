@@ -30,7 +30,7 @@
   <div class="flex flex-1 flex-col items-center justify-center p-4">
     <a href="/" class="mb-8 flex items-center gap-2">
       <img src="/logo.png" alt="logo" class="h-8 w-8" />
-      <span class="text-xl font-bold">ChumCheck Admin</span>
+      <span class="text-xl font-bold">LaunchUp Admin</span>
     </a>
     <form method="post" use:enhance class="w-full max-w-sm space-y-5 rounded-md border bg-background p-6 shadow-sm">
       <div class="space-y-1 text-center">

@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-  <title>ChumCheck</title>
+  <title>LaunchUp</title>
 </svelte:head>
 
 <div class="z-10 mx-auto">

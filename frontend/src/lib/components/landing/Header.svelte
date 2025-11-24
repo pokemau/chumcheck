@@ -33,7 +33,7 @@
     <div class="flex flex-1 cursor-pointer gap-2">
       <img src="/logo.png" alt="citeams_logo" class="h-7 w-7" />
       <a href="/" class="cursor-pointer text-xl font-black normal-case"
-        >ChumCheck</a
+        >LaunchUp</a
       >
     </div>
     <div class="flex-none font-medium">

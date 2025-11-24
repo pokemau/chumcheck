@@ -197,7 +197,7 @@
 </script>
 
 <svelte:head>
-  <title>ChumCheck - Startups</title>
+  <title>LaunchUp - Startups</title>
 </svelte:head>
 
 <div class="mb-8 flex items-center justify-between">

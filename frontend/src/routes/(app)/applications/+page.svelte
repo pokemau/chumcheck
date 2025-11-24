@@ -288,7 +288,7 @@
 </script>
 
 <svelte:head>
-  <title>ChumCheck - Applications</title>
+  <title>LaunchUp - Applications</title>
 </svelte:head>
 
 {#if $queries[0].isLoading || $queries[1].isLoading || $queries[2].isLoading}

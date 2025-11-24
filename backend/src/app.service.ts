@@ -10,7 +10,7 @@ import { ReadinessLevel } from './entities/readiness-level.entity';
 export class AppService {
   constructor(private em: EntityManager) {}
   getHello(): string {
-    return 'This is the Chumcheck API!';
+    return 'This is the LaunchUp API!';
   }
 
   async generateUratQuestions() {

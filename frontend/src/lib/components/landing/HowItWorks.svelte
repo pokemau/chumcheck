@@ -13,7 +13,7 @@
         <p class="text-6xl font-bold text-slate-300">01</p>
         <p class="text-xl font-bold">Application</p>
         <p class="text-lg">
-          Start by submitting your startup <br />application to ChumCheck for
+          Start by submitting your startup <br />application to LaunchUp for
           evaluation <br />and confirmation.
         </p>
       </Card.Root>

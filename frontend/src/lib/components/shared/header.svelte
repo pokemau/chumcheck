@@ -87,11 +87,11 @@
 >
   <nav class="flex h-16 w-4/5 items-center px-0">
     <div class="flex flex-1 cursor-pointer gap-2">
-      <img src="/logo.png" alt="citeams_logo" class="h-7 w-7" />
+      <!-- <img src="/logo.png" alt="citeams_logo" class="h-7 w-7" /> -->
       <a
         data-sveltekit-preload-data="tap"
         href={`/${modules[0].link}`}
-        class="cursor-pointer text-xl font-black normal-case">ChumCheck</a
+        class="cursor-pointer text-xl font-black normal-case">LaunchUp</a
       >
     </div>
     <div class="flex h-1/3 items-center justify-center gap-5">
