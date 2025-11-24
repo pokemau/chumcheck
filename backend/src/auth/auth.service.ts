@@ -15,26 +15,22 @@ export class AuthService {
   ) {}
 
   async signup(dto: AuthDto) {
-    try {
-      const hash = await argon.hash(dto.password);
+    const hash = await argon.hash(dto.password);
 
-      const user = new User();
-      user.email = dto.email;
-      user.hash = hash;
-      user.firstName = dto.firstName;
-      user.lastName = dto.lastName;
+    const user = new User();
+    user.email = dto.email;
+    user.hash = hash;
+    user.firstName = dto.firstName;
+    user.lastName = dto.lastName;
 
-      await this.em.persistAndFlush(user);
-      return this.signToken(
-        user.id,
-        user.email,
-        user.role,
-        user.firstName,
-        user.lastName,
-      );
-    } catch (error) {
-      throw error;
-    }
+    await this.em.persistAndFlush(user);
+    return this.signToken(
+      user.id,
+      user.email,
+      user.role,
+      user.firstName,
+      user.lastName,
+    );
   }
 
   async signin(dto: AuthSignInDto) {
