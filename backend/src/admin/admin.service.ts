@@ -15,7 +15,7 @@ import { StartupService } from '../startup/startup.service'; // Import StartupSe
 import { Startup } from '../entities/startup.entity'; // Import Startup entity
 import { CreateStartupDto } from './dto/create-startup.dto'; // Import CreateStartupDto
 import { UpdateStartupDto } from './dto/update-startup.dto'; // Import UpdateStartupDto
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { ActivityLog } from '../entities/activity-log.entity';
 
 @Injectable()

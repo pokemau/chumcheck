@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/core';
 import { RnsChatHistory } from '../entities/rns-chat-history.entity';
 import { InitiativeChatHistory } from '../entities/initiative-chat-history.entity';
 import { RoadblockChatHistory } from '../entities/roadblock-chat-history.entity';
