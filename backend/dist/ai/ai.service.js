@@ -1,0 +1,344 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AiService = void 0;
+const genai_1 = require("@google/genai");
+const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const startup_readiness_level_entity_1 = require("../entities/startup-readiness-level.entity");
+let AiService = class AiService {
+    config;
+    ai;
+    constructor(config) {
+        this.config = config;
+        this.ai = new genai_1.GoogleGenAI({
+            apiKey: this.config.get('GEMINI_API_KEY'),
+        });
+    }
+    async test() {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: 'what is the lyrics for bloom necry talkie',
+        });
+        return res.text;
+    }
+    async getCapsuleProposalInfo(text) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: `Based on the text ${text},
+        Task: extract the text for:
+        -Acceleration Proposal Title ( can be found above the Duration: 3 months, etc.)
+        - Startup Description
+        - Problem Statement
+        - Target Market
+        - Solution Description
+        - Objectives
+        - Scope of The Proposal
+        - Methodology and Expected Outputs
+
+        Requirement: The response should be in a JSON format.
+        It should consist of title, startup_description, problem_statement, target_market, solution_description, objectives, scope, and methodology
+        JSON format: {"title": "", "startup_description": "", "problem_statement": (int), "target_market": "", "solution_description": "", "objectives": "", "scope": "", "methodology": ""}
+        `,
+        });
+        return res.text;
+    }
+    async generateStartupAnalysisSummary(dto) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: `Please provide a comprehensive analysis of the following startup proposal:
+      
+      Title: ${dto.title}
+      Description: ${dto.description}
+      Problem Statement: ${dto.problemStatement}
+      Target Market: ${dto.targetMarket}
+      Solution Description: ${dto.solutionDescription}
+      Objectives: ${dto.objectives.join('\n')}
+      Proposal Scope: ${dto.proposalScope}
+      Methodology: ${dto.methodology}
+      Historical Timeline: ${dto.historicalTimeline?.map(h => `${h.monthYear}: ${h.description}`).join('\n') || 'Not provided'}
+      Competitive Advantage Analysis: ${dto.competitiveAdvantageAnalysis?.map(c => `Competitor: ${c.competitorName}
+         Offer: ${c.offer}
+         Pricing Strategy: ${c.pricingStrategy}`).join('\n\n') || 'Not provided'}
+      Intellectual Property Status: ${dto.intellectualPropertyStatus}
+
+      Analyze the startup proposal and provide a concise three-sentence summary that covers:
+      1. Overall viability assessment (market potential and solution strength)
+      2. Key competitive advantages and growth strategy feasibility
+      3. Critical risks and primary recommendations
+      
+      Important: 
+      - Provide exactly three sentences
+      - Start directly with the analysis, no introductory phrases
+      - Be clear and direct about the startup's potential
+      - Focus on the most impactful insights
+      - Keep output concise while covering essential points`,
+        });
+        if (!res.text) {
+            throw new Error('AI response did not contain any text');
+        }
+        return res.text.trim();
+    }
+    async generateRNAsFromPrompt(prompt) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const text = res.text;
+        if (!text) {
+            throw new Error('AI response did not contain any text');
+        }
+        try {
+            const jsonStart = text.indexOf('[');
+            const jsonEnd = text.lastIndexOf(']');
+            const jsonString = text.substring(jsonStart, jsonEnd + 1);
+            return JSON.parse(jsonString).map((entry) => ({
+                readiness_level_type: entry.readiness_level_type,
+                rna: entry.rna,
+            }));
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', text);
+            throw new Error('AI returned an invalid RNA response');
+        }
+    }
+    async generateTasksFromPrompt(prompt) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const text = res.text;
+        if (!text) {
+            throw new Error('AI response did not contain any text');
+        }
+        try {
+            const jsonStart = text.indexOf('[');
+            const jsonEnd = text.lastIndexOf(']');
+            const jsonString = text.substring(jsonStart, jsonEnd + 1);
+            const parsedData = JSON.parse(jsonString);
+            return parsedData.map((task) => ({
+                target_level: parseInt(task.target_level, 10) || 0,
+                description: task.description,
+            }));
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', text);
+            throw new Error('AI returned an invalid response');
+        }
+    }
+    async generateInitiativesFromPrompt(prompt) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const text = res.text;
+        if (!text) {
+            throw new Error('AI response did not contain any text');
+        }
+        try {
+            const jsonStart = text.indexOf('[');
+            const jsonEnd = text.lastIndexOf(']');
+            const jsonString = text.substring(jsonStart, jsonEnd + 1);
+            return JSON.parse(jsonString).map((entry) => ({
+                description: entry.description,
+                measures: entry.measures,
+                targets: entry.targets,
+                remarks: entry.remarks,
+            }));
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', text);
+            throw new Error('AI returned an invalid initiative response');
+        }
+    }
+    async refineRnsDescription(prompt) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        if (!res.text) {
+            throw new Error('AI response did not contain any text');
+        }
+        const [refinedDescriptionRaw, aiCommentaryRaw] = res.text.split(/\n?={5,}\n?/);
+        const refinedDescription = refinedDescriptionRaw
+            ? refinedDescriptionRaw.trim()
+            : '';
+        const aiCommentary = aiCommentaryRaw ? aiCommentaryRaw.trim() : '';
+        return {
+            refinedDescription,
+            aiCommentary,
+        };
+    }
+    async generateRoadblocksFromPrompt(prompt) {
+        const res = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const text = res.text;
+        if (!text) {
+            throw new Error('AI response did not contain any text');
+        }
+        try {
+            const jsonStart = text.indexOf('[');
+            const jsonEnd = text.lastIndexOf(']');
+            const jsonString = text.substring(jsonStart, jsonEnd + 1);
+            return JSON.parse(jsonString).map((entry) => ({
+                description: entry.description,
+                fix: entry.fix,
+                riskNumber: entry.riskNumber,
+            }));
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', text);
+            throw new Error('AI returned an invalid roadblock response');
+        }
+    }
+    async createBasePrompt(startup, em) {
+        const capsuleProposalInfo = startup.capsuleProposal;
+        if (!capsuleProposalInfo)
+            return null;
+        const startupReadinessLevels = await em.find(startup_readiness_level_entity_1.StartupReadinessLevel, {
+            startup: startup,
+        }, {
+            populate: ['readinessLevel'],
+        });
+        const trl = startupReadinessLevels[0].readinessLevel.level;
+        const mrl = startupReadinessLevels[1].readinessLevel.level;
+        const arl = startupReadinessLevels[2].readinessLevel.level;
+        const orl = startupReadinessLevels[3].readinessLevel.level;
+        const rrl = startupReadinessLevels[4].readinessLevel.level;
+        const irl = startupReadinessLevels[5].readinessLevel.level;
+        return `
+      Given these data:
+      Acceleration Proposal Title: ${capsuleProposalInfo.title}
+      Duration: 3 months
+      I. About the startup
+      A. Startup Description
+      ${capsuleProposalInfo.description}
+      B. Problem Statement
+      ${capsuleProposalInfo.problemStatement}
+      C. Target Market
+      ${capsuleProposalInfo.targetMarket}
+      D. Solution Description
+      ${capsuleProposalInfo.solutionDescription}
+      II. About the Proposed Acceleration
+      A. Objectives
+      ${capsuleProposalInfo.objectives}
+      B. Scope of The Proposal
+      ${capsuleProposalInfo.scope}
+      C. Methodology and Expected Outputs
+      ${capsuleProposalInfo.methodology}
+      Initial Readiness Level:
+      TRL ${trl}
+      MRL ${mrl}
+      ARL ${arl}
+      ORL ${orl}
+      RRL ${rrl}
+      IRL ${irl}
+  `;
+    }
+    async refineInitiative(prompt) {
+        const response = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const content = response.text;
+        if (!content)
+            throw new Error('No content in response');
+        const [jsonStr, commentary] = content
+            .split('=========')
+            .map((str) => str.trim());
+        const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+        try {
+            const refinements = JSON.parse(cleanJsonStr);
+            const hasRefinements = refinements.refinedDescription ||
+                refinements.refinedMeasures ||
+                refinements.refinedTargets ||
+                refinements.refinedRemarks;
+            if (!hasRefinements) {
+                console.warn('AI response contained no refinements');
+            }
+            return {
+                ...refinements,
+                aiCommentary: commentary || 'Changes applied successfully.',
+            };
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', content);
+            console.error('Parse error:', err);
+            throw new Error('AI returned an invalid JSON response');
+        }
+    }
+    async refineRoadblock(prompt) {
+        const response = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const content = response.text;
+        if (!content)
+            throw new Error('No content in response');
+        const [jsonStr, commentary] = content
+            .split('=========')
+            .map((str) => str.trim());
+        const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+        try {
+            const refinements = JSON.parse(cleanJsonStr);
+            const hasRefinements = refinements.refinedDescription || refinements.refinedFix;
+            if (!hasRefinements) {
+                console.warn('AI response contained no refinements');
+            }
+            return {
+                ...refinements,
+                aiCommentary: commentary || 'Changes applied successfully.',
+            };
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', content);
+            console.error('Parse error:', err);
+            throw new Error('AI returned an invalid JSON response');
+        }
+    }
+    async refineRna(prompt) {
+        const response = await this.ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: prompt,
+        });
+        const content = response.text;
+        if (!content)
+            throw new Error('No content in response');
+        const [jsonStr, commentary] = content
+            .split('=========')
+            .map((str) => str.trim());
+        const cleanJsonStr = jsonStr.replace(/```json\n?|\n?```/g, '').trim();
+        try {
+            const refinements = JSON.parse(cleanJsonStr);
+            const hasRefinements = refinements.refinedRna;
+            if (!hasRefinements) {
+                console.warn('AI response contained no refinements');
+            }
+            return {
+                ...refinements,
+                aiCommentary: commentary || 'Changes applied successfully.',
+            };
+        }
+        catch (err) {
+            console.error('Failed to parse AI response:', content);
+            console.error('Parse error:', err);
+            throw new Error('AI returned an invalid JSON response');
+        }
+    }
+};
+exports.AiService = AiService;
+exports.AiService = AiService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [config_1.ConfigService])
+], AiService);
+//# sourceMappingURL=ai.service.js.map

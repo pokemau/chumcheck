@@ -1,0 +1,1 @@
+{"version":3,"file":"Migration20251005071438.js","sourceRoot":"","sources":["../../src/migrations/Migration20251005071438.ts"],"names":[],"mappings":";;;AAAA,sDAAkD;AAElD,MAAa,uBAAwB,SAAQ,sBAAS;IAE3C,KAAK,CAAC,EAAE;QACf,IAAI,CAAC,MAAM,CAAC,oDAAoD,CAAC,CAAC;IACpE,CAAC;IAEQ,KAAK,CAAC,IAAI;QACjB,IAAI,CAAC,MAAM,CAAC,yEAAyE,CAAC,CAAC;IACzF,CAAC;CAEF;AAVD,0DAUC"}
