@@ -68,7 +68,6 @@ export class AuthService {
       lastName: lastName ?? '',
     };
 
-    // Since we configured the secret in the module, we don't need to pass it here
     const token = await this.jwtService.signAsync(payload);
 
     return {
