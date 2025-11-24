@@ -6,6 +6,14 @@ import { ConfigService } from '@nestjs/config';
 import { EntityManager } from '@mikro-orm/core';
 import { User } from 'src/entities/user.entity';
 
+interface JwtPayload {
+  sub: number;
+  email: string;
+  role: string;
+  firstName: string;
+  lastName: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -60,19 +68,22 @@ export class AuthService {
     firstName: string | undefined,
     lastName: string | undefined,
   ): Promise<{ access_token: string }> {
-    const payload = {
+    const payload: JwtPayload = {
       sub: userId,
       email,
       role,
-      firstName,
-      lastName,
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
     };
 
-    const secret = this.configService.get('JWT_SECRET');
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET is not defined');
+    }
 
     const token = await this.jwtService.signAsync(payload, {
+      secret,
       expiresIn: '1d',
-      secret: secret,
     });
 
     return {
