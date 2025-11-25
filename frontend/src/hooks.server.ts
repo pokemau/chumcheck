@@ -2,6 +2,7 @@ import { JWT_SECRET } from '$env/static/private';
 import type { Handle } from '@sveltejs/kit';
 import { jwtVerify } from 'jose';
 import { redirect, isRedirect } from '@sveltejs/kit';
+import type { Role } from '$lib/types/user.types';
 
 const protectedRoutes = [
   '/account',
@@ -45,7 +46,7 @@ export const handle: Handle = async ({ event, resolve }) => {
     const { payload } = await jwtVerify<{
       sub: string;
       email: string;
-      role?: 'Startup' | 'Mentor' | 'Manager' | 'Manager as Mentor';
+      role?: Role;
       firstName?: string;
       lastName?: string;
     }>(accessToken, secret);
@@ -62,8 +63,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       if (isAdminLogin) {
         // If already logged and role qualifies, go to admin; else redirect to startups
         if (
-          event.locals.user.role === 'Manager' ||
-          event.locals.user.role === 'Manager as Mentor'
+          event.locals.user.role === 'Admin'
         ) {
           throw redirect(302, '/admin');
         }

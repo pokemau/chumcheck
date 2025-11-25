@@ -8,7 +8,7 @@
   import { goto } from '$app/navigation';
   import { Loader } from 'lucide-svelte';
 
-  let { data }: { data: PageData } = $props();
+  let { data }: { data: PageData } = $props<{ data: PageData }>();
   const { form, errors, enhance, message, submitting } = superForm(data.form);
 
   $effect(() => {

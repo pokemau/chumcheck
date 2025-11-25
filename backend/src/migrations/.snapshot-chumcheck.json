@@ -768,7 +768,8 @@
           "enumItems": [
             "Startup",
             "Mentor",
-            "Manager"
+            "Manager",
+            "Admin"
           ],
           "mappedType": "enum"
         }

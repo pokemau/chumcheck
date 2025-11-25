@@ -12,7 +12,7 @@ const adminLoginSchema = z.object({
 });
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (locals.user && (locals.user.role === 'Manager' || locals.user.role === 'Manager as Mentor')) {
+  if (locals.user && (locals.user.role === 'Admin')) {
     throw redirect(302, '/admin');
   }
   const form = await superValidate(zod(adminLoginSchema));
@@ -42,7 +42,7 @@ export const actions = {
         try {
           const payload = JSON.parse(atob(tokenParts[1]));
           const role = payload.role;
-          if (role !== 'Manager' && role !== 'Manager as Mentor') {
+          if (role !== 'Admin') {
             return setError(form, 'email', 'Not an admin account');
           }
         } catch {}
