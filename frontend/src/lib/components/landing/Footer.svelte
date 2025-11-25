@@ -2,7 +2,7 @@
   class="grid-rows-auto text-base-content mx-auto grid w-4/5 justify-start gap-x-4 gap-y-10 border-t py-4 sm:flex sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-x-2 sm:gap-y-4"
 >
   <aside class="flex grid-flow-col items-center gap-5">
-    <img src="logo.png" alt="" class="w-8" />
+    <!-- <img src="logo.png" alt="" class="w-8" /> -->
     <p>LaunchUp <br />Fueling Startup Success</p>
   </aside>
   <nav class="md:place-self-center md:justify-self-end">

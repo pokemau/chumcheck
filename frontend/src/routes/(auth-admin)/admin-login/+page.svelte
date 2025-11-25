@@ -29,7 +29,7 @@
 <div class="flex min-h-screen w-full bg-muted/40">
   <div class="flex flex-1 flex-col items-center justify-center p-4">
     <a href="/" class="mb-8 flex items-center gap-2">
-      <img src="/logo.png" alt="logo" class="h-8 w-8" />
+      <!-- <img src="/logo.png" alt="logo" class="h-8 w-8" /> -->
       <span class="text-xl font-bold">LaunchUp Admin</span>
     </a>
     <form method="post" use:enhance class="w-full max-w-sm space-y-5 rounded-md border bg-background p-6 shadow-sm">
