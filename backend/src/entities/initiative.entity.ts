@@ -36,10 +36,10 @@ export class Initiative {
   @Property()
   isAiGenerated!: boolean;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   assignee!: User;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @Property({ type: 'text' })

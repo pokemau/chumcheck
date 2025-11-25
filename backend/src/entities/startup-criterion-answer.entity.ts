@@ -23,7 +23,7 @@ export class StartupCriterionAnswer {
   @ManyToOne(() => LevelCriterion)
   criterion!: LevelCriterion;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @Property({ onCreate: () => new Date() })

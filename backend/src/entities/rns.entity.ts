@@ -41,10 +41,10 @@ export class Rns {
   @Enum(() => ReadinessType)
   readinessType!: ReadinessType;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   assignee!: User;
 
   getTargetLevelScore(): number {

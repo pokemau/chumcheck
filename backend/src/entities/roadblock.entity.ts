@@ -8,10 +8,10 @@ export class Roadblock {
   @PrimaryKey({ autoincrement: true })
   id!: number;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   assignee!: User;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @Property()

@@ -6,11 +6,21 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
   const token = cookies.get('Access');
   if (!token) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
 
-  const res = await fetch(`${PUBLIC_API_URL}/admin/startups-json`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (res.status === 401) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
-  return { startups: await res.json() };
+  const [startupsRes, usersRes] = await Promise.all([
+    fetch(`${PUBLIC_API_URL}/admin/startups-json`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    fetch(`${PUBLIC_API_URL}/admin/users-json`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  ]);
+  
+  if (startupsRes.status === 401) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
+  
+  const startups = startupsRes.ok ? await startupsRes.json() : [];
+  const users = usersRes.ok ? await usersRes.json() : [];
+  
+  return { startups, users, access: token };
 };
 
 export const actions: Actions = {

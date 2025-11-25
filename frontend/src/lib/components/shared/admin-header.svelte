@@ -51,12 +51,6 @@
             </DropdownMenu.Label>
             <DropdownMenu.Separator />
             <DropdownMenu.Item 
-              class="cursor-pointer"
-              onclick={() => navigateTo('/startups')}
-            >
-              Switch to App
-            </DropdownMenu.Item>
-            <DropdownMenu.Item 
               onclick={async () => {
                 const form = new FormData();
                 await fetch('/logout', { method: 'POST', body: form });

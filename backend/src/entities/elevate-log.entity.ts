@@ -1,6 +1,5 @@
-import { Entity, Enum, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/core';
 import { Startup } from './startup.entity';
-import { ReadinessType } from './enums/readiness-type.enum';
 import { ReadinessLevel } from './readiness-level.entity';
 
 @Entity({ tableName: 'elevate_logs' })
@@ -14,7 +13,7 @@ export class ElevateLogs {
   @Property()
   level!: number;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @ManyToOne(() => ReadinessLevel)

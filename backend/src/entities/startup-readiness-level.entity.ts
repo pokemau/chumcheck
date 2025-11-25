@@ -10,7 +10,7 @@ export class StartupReadinessLevel {
   @ManyToOne(() => ReadinessLevel)
   readinessLevel!: ReadinessLevel;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @Property({ type: 'text', nullable: true })

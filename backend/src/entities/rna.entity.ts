@@ -14,6 +14,7 @@ export class StartupRNA {
 
   @ManyToOne(() => Startup, {
     fieldName: 'startup_id',
+    deleteRule: 'cascade',
   })
   startup!: Startup;
 

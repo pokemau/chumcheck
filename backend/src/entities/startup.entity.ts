@@ -28,7 +28,7 @@ export class Startup {
   @Property()
   name!: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   user!: User;
 
   @Enum(() => QualificationStatus)
@@ -54,7 +54,7 @@ export class Startup {
   })
   capsuleProposal?: CapsuleProposal;
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, undefined, { deleteRule: 'cascade' })
   mentors = new Collection<User>(this);
 
   @Property({ type: DateTimeType, nullable: true })
@@ -63,7 +63,7 @@ export class Startup {
   @OneToMany(() => Roadblock, (roadblock) => roadblock.startup)
   roadblocks = new Collection<Roadblock>(this);
 
-  @ManyToMany(() => User)
+  @ManyToMany(() => User, undefined, { deleteRule: 'cascade' })
   members = new Collection<User>(this);
 
   @OneToMany(() => Rns, (rns) => rns.startup)

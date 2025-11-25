@@ -10,6 +10,6 @@ export class CalculatorQuestionAnswer {
   @ManyToOne(() => CalculatorQuestion)
   question!: CalculatorQuestion;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 }

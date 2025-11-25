@@ -1,46 +1,125 @@
 <script lang="ts">
-  export let data: { recent: Array<{ date: string; action: string; details: string }> };
+  import { Users, Rocket, ClipboardList } from 'lucide-svelte';
+  export let data: {
+    recent: Array<{ date: string; action: string; details: string }>;
+  };
   let recent = data.recent;
+
+  const cards = [
+    {
+      title: 'Manage Users',
+      description: 'Create, edit, and manage user accounts',
+      href: '/admin/users',
+      icon: Users,
+      color: 'text-blue-500'
+    },
+    {
+      title: 'Manage Startups',
+      description: 'Oversee startup applications and data',
+      href: '/admin/startups',
+      icon: Rocket,
+      color: 'text-purple-500'
+    },
+    {
+      title: 'Assessment Types',
+      description: 'Configure assessment fields and types',
+      href: '/admin/assessments',
+      icon: ClipboardList,
+      color: 'text-green-500'
+    }
+  ];
 </script>
 
-<h1 class="mb-4 text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-
-<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-  <a data-sveltekit-preload-data="tap" href="/admin/users" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
-    <div class="text-lg font-semibold">Manage Users</div>
-    <p class="text-sm text-muted-foreground">List, edit, and delete users</p>
-  </a>
-  <a data-sveltekit-preload-data="tap" href="/admin/startups" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
-    <div class="text-lg font-semibold">Manage Startups</div>
-    <p class="text-sm text-muted-foreground">List, edit, and delete startups</p>
-  </a>
-  <a data-sveltekit-preload-data="tap" href="/admin/assessments" class="rounded-md border p-4 transition-colors hover:border-flutter-blue hover:bg-muted/40">
-    <div class="text-lg font-semibold">Manage Assessment Types</div>
-    <p class="text-sm text-muted-foreground">Add/remove types and customize answer fields</p>
-  </a>
-</div>
-
-<div class="rounded-md border">
-  <div class="border-b p-4 font-medium">Recent Activity</div>
-  <div class="p-4">
-    {#if recent.length === 0}
-      <p class="text-sm text-muted-foreground">No activity yet.</p>
-    {:else}
-      <ul class="space-y-2">
-        {#each recent as r}
-          <li class="flex items-start justify-between gap-4 rounded border p-2">
-            <div>
-              <div class="text-xs text-muted-foreground">{new Date(r.date).toLocaleString?.() || r.date}</div>
-              <div class="font-medium">{r.action}</div>
-            </div>
-            <div class="text-sm">{r.details}</div>
-          </li>
-        {/each}
-      </ul>
-    {/if}
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+    <p class="text-muted-foreground mt-1 text-sm">
+      Manage your platform from one place
+    </p>
   </div>
-</div>
 
-<div class="mt-6">
-  <a href="/admin" class="text-sm text-flutter-blue hover:underline">Back to dashboard</a>
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {#each cards as card}
+      <a
+        data-sveltekit-preload-data="tap"
+        href={card.href}
+        class="bg-card hover:border-flutter-blue group relative overflow-hidden rounded-lg border p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+      >
+        <div class="flex items-start justify-between">
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center gap-3">
+              <div
+                class="bg-muted group-hover:bg-flutter-blue/10 rounded-lg p-2 transition-colors"
+              >
+                <svelte:component
+                  this={card.icon}
+                  class="h-5 w-5 {card.color} transition-transform group-hover:scale-110"
+                />
+              </div>
+              <h3 class="text-lg font-semibold">{card.title}</h3>
+            </div>
+            <p class="text-muted-foreground text-sm leading-relaxed">
+              {card.description}
+            </p>
+          </div>
+          <div
+            class="text-muted-foreground/0 group-hover:text-muted-foreground transition-all group-hover:translate-x-1"
+          >
+            →
+          </div>
+        </div>
+      </a>
+    {/each}
+  </div>
+
+  <div class="bg-card rounded-lg border shadow-sm">
+    <div
+      class="bg-muted/50 flex items-center justify-between border-b px-6 py-4"
+    >
+      <h2 class="font-semibold">Recent Activity</h2>
+      {#if recent.length}
+        <span class="text-muted-foreground text-xs"
+          >{recent.length} {recent.length === 1 ? 'item' : 'items'}</span
+        >
+      {/if}
+    </div>
+    <div class="p-6">
+      {#if !recent.length || recent.length === 0}
+        <div
+          class="flex flex-col items-center justify-center py-12 text-center"
+        >
+          <div class="bg-muted mb-3 rounded-full p-3">
+            <ClipboardList class="text-muted-foreground h-6 w-6" />
+          </div>
+          <p class="text-muted-foreground text-sm font-medium">
+            No activity yet
+          </p>
+          <p class="text-muted-foreground mt-1 text-xs">
+            Recent actions will appear here
+          </p>
+        </div>
+      {:else}
+        <ul class="space-y-3">
+          {#each recent as r}
+            <li
+              class="bg-card hover:border-flutter-blue/50 hover:bg-muted/30 group flex items-start justify-between gap-4 rounded-lg border p-4 transition-all"
+            >
+              <div class="flex-1 space-y-1">
+                <div class="flex items-center gap-2">
+                  <div class="bg-flutter-blue h-1.5 w-1.5 rounded-full"></div>
+                  <span class="font-medium">{r.action}</span>
+                </div>
+                <div class="text-muted-foreground ml-3.5 text-xs">
+                  {new Date(r.date).toLocaleString?.() || r.date}
+                </div>
+              </div>
+              <div class="text-muted-foreground max-w-xs text-right text-sm">
+                {r.details}
+              </div>
+            </li>
+          {/each}
+        </ul>
+      {/if}
+    </div>
+  </div>
 </div>

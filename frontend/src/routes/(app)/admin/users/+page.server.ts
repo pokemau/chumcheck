@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
     headers: { Authorization: `Bearer ${token}` }
   });
   if (res.status === 401) throw redirect(302, `/login?redirectTo=${encodeURIComponent(url.pathname)}`);
-  return { users: await res.json() };
+  return { users: await res.json(), access: token };
 };
 
 export const actions: Actions = {

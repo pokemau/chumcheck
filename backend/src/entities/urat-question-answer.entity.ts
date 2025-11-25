@@ -19,7 +19,7 @@ export class UratQuestionAnswer {
   @Property()
   score: number = 1;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
   @ManyToOne(() => UratQuestion)

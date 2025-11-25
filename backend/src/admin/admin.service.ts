@@ -32,7 +32,7 @@ export class AdminService {
       action,
       details,
       actor,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
     await this.em.persistAndFlush(entry);
   }
@@ -55,25 +55,41 @@ export class AdminService {
     // If user exists, just update role/password as needed
     const existing = await this.userService.findOneByEmail(email);
     if (existing) {
-      const updateData: Partial<User> = { firstName, lastName, role };
-      if (password) {
-        updateData.hash = await argon.hash(password);
-      }
-      const updated = await this.userService.update(existing.id, updateData);
-      if (!updated) throw new InternalServerErrorException('Could not update existing user.');
-      await this.log('Admin', `Updated existing user ${email}`, 'admin');
-      return updated;
+      throw new InternalServerErrorException('User already exists');
+      // const updateData: Partial<User> = { firstName, lastName, role };
+      // if (password) {
+      //   updateData.hash = await argon.hash(password);
+      // }
+      // const updated = await this.userService.update(existing.id, updateData);
+      // if (!updated) throw new InternalServerErrorException('Could not update existing user.');
+      // await this.log('Admin', `Updated existing user ${email}`, 'admin');
+      // return updated;
     }
 
     // Otherwise sign up and then set role if needed
-    await this.authService.signup({ email, password, firstName: firstName ?? '', lastName: lastName ?? '' });
+    await this.authService.signup({
+      email,
+      password,
+      firstName: firstName ?? '',
+      lastName: lastName ?? '',
+    });
     const created = await this.userService.findOneByEmail(email);
-    if (!created) throw new InternalServerErrorException('Could not retrieve created user.');
+    if (!created)
+      throw new InternalServerErrorException(
+        'Could not retrieve created user.',
+      );
 
     if (created.role !== role) {
       const withRole = await this.userService.update(created.id, { role });
-      if (!withRole) throw new InternalServerErrorException('Could not set role for created user.');
-      await this.log('Admin', `Created user ${email} with role ${role}`, 'admin');
+      if (!withRole)
+        throw new InternalServerErrorException(
+          'Could not set role for created user.',
+        );
+      await this.log(
+        'Admin',
+        `Created user ${email} with role ${role}`,
+        'admin',
+      );
       return withRole;
     }
 
@@ -91,25 +107,29 @@ export class AdminService {
       updateData.hash = await argon.hash(newPassword);
     }
 
-    const updatedUser = await this.userService.update(id, updateData);
-    if (!updatedUser) {
-      throw new InternalServerErrorException(`User with ID "${id}" could not be updated`);
+    try {
+      const updatedUser = await this.userService.update(id, updateData);
+      if (!updatedUser) {
+        throw new InternalServerErrorException(
+          `User with ID "${id}" could not be updated`,
+        );
+      }
+      await this.log('Admin', `Updated user ${updatedUser.email}`, 'admin');
+      return updatedUser;
+    } catch (error: any) {
+      // Handle unique constraint violation for email
+      if (
+        error?.code === '23505' ||
+        (typeof error?.message === 'string' && error.message.includes('unique'))
+      ) {
+        throw new BadRequestException('Email already exists');
+      }
+      throw error;
     }
-    await this.log('Admin', `Updated user ${updatedUser.email}`, 'admin');
-    return updatedUser;
   }
 
   async deleteUser(id: number): Promise<void> {
-    const user = await this.getUserById(id); // Ensures user exists before attempting delete
-
-    // Prevent FK violation by checking startups that reference this user
-    const startupCount = await this.em.count(Startup, { user: id });
-    if (startupCount > 0) {
-      throw new BadRequestException(
-        `Cannot delete user ${user.email} – referenced by ${startupCount} startup(s). Reassign or delete their startups first.`
-      );
-    }
-
+    const user = await this.getUserById(id);
     await this.userService.remove(id);
     await this.log('Admin', `Deleted user ${user.email}`, 'admin');
   }
@@ -135,7 +155,9 @@ export class AdminService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Could not create startup. ' + (error?.message ?? ''));
+      throw new InternalServerErrorException(
+        'Could not create startup. ' + (error?.message ?? ''),
+      );
     }
   }
 
@@ -143,22 +165,33 @@ export class AdminService {
     await this.getStartupById(id); // Ensures startup exists
 
     try {
-      const updatedStartup = await this.startupService.update(id, updateStartupDto);
+      const updatedStartup = await this.startupService.update(
+        id,
+        updateStartupDto,
+      );
       if (!updatedStartup) {
-        throw new InternalServerErrorException(`Startup with ID "${id}" could not be updated`);
+        throw new InternalServerErrorException(
+          `Startup with ID "${id}" could not be updated`,
+        );
       }
-      await this.log('Admin', `Updated startup ${updatedStartup.name}`, 'admin');
+      await this.log(
+        'Admin',
+        `Updated startup ${updatedStartup.name}`,
+        'admin',
+      );
       return updatedStartup;
     } catch (error: any) {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('Could not update startup. ' + (error?.message ?? ''));
+      throw new InternalServerErrorException(
+        'Could not update startup. ' + (error?.message ?? ''),
+      );
     }
   }
 
   async deleteStartup(id: number): Promise<void> {
-    const s = await this.getStartupById(id); // Ensures startup exists before attempting delete
+    const s = await this.getStartupById(id);
     await this.startupService.remove(id);
     await this.log('Admin', `Deleted startup ${s.name}`, 'admin');
   }

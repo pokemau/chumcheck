@@ -6,8 +6,9 @@
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import * as Select from '$lib/components/ui/select';
+  import { Badge } from '$lib/components/ui/badge';
   import { onMount } from 'svelte';
-  import { Plus } from 'lucide-svelte';
+  import { Plus, Edit2, Trash2, ClipboardList, FileText, Type, Upload, ChevronRight, X } from 'lucide-svelte';
 
   type AssessmentType = { id: number; name: string };
   type AssessmentField = { id: number; label: string; fieldType: number };
@@ -29,10 +30,10 @@
   let renameName = $state('');
   let editingField = $state<Partial<AssessmentField> & { id?: number }>({});
 
-  const FIELD_TYPES: { value: number; label: string }[] = [
-    { value: 1, label: 'Short answer' },
-    { value: 2, label: 'Long answer' },
-    { value: 3, label: 'File upload' }
+  const FIELD_TYPES: { value: number; label: string; icon: any }[] = [
+    { value: 1, label: 'Short answer', icon: Type },
+    { value: 2, label: 'Long answer', icon: FileText },
+    { value: 3, label: 'File upload', icon: Upload }
   ];
 
   import { PUBLIC_API_URL } from '$env/static/public';
@@ -172,120 +173,221 @@
   }
 </script>
 
-<div class="mx-auto w-full px-4 md:px-8">
-  <h1 class="mb-2 text-3xl font-bold tracking-tight">Manage Assessment Types</h1>
-  <p class="mb-6 text-sm text-muted-foreground">Assessment types are arranged vertically. Click one to manage its fields.</p>
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Assessment Types</h1>
+      <p class="text-muted-foreground mt-1 text-sm">Configure assessment types and their custom fields</p>
+    </div>
+    {#if !showCreate}
+      <Button onclick={() => (showCreate = true)} class="gap-2">
+        <Plus class="h-4 w-4" />
+        Add Type
+      </Button>
+    {/if}
+  </div>
 
-  <!-- Full-width list -->
-  <div class="w-full">
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <h2 class="text-sm font-semibold">Assessment Types</h2>
-      {#if !showCreate}
-        <Button size="sm" onclick={() => (showCreate = true)}>
-          <Plus /> Add type
+  {#if showCreate}
+    <div class="bg-card rounded-lg border p-6 shadow-sm">
+      <div class="mb-4 flex items-center justify-between">
+        <h3 class="font-semibold">Create New Type</h3>
+        <Button size="icon" variant="ghost" onclick={() => (showCreate = false, createName = '')}>
+          <X class="h-4 w-4" />
         </Button>
-      {:else}
-        <div class="flex w-full max-w-md items-center gap-2">
-          <Input placeholder="Type name" bind:value={createName} />
-          <Button size="sm" onclick={() => openConfirm('Create new assessment type?', createType)}>Create</Button>
-          <Button size="sm" variant="ghost" onclick={() => (showCreate = false, createName = '')}>Cancel</Button>
+      </div>
+      <div class="flex items-end gap-3">
+        <div class="flex-1">
+          <Label for="createName">Type Name</Label>
+          <Input id="createName" placeholder="Enter assessment type name" bind:value={createName} class="mt-1.5" />
         </div>
+        <Button onclick={() => openConfirm('Create new assessment type?', createType)} disabled={!createName.trim()}>
+          Create
+        </Button>
+      </div>
+    </div>
+  {/if}
+
+  <div class="bg-card rounded-lg border shadow-sm">
+    <div class="bg-muted/50 flex items-center justify-between border-b px-6 py-4">
+      <h2 class="font-semibold">All Assessment Types</h2>
+      {#if types.length}
+        <span class="text-muted-foreground text-xs">{types.length} {types.length === 1 ? 'type' : 'types'}</span>
       {/if}
     </div>
-
-    <div class="space-y-3">
+    <div class="divide-y">
       {#each types as t}
-        <button class="flex w-full items-center justify-between rounded-md border p-4 text-left hover:border-flutter-blue hover:bg-muted/40" onclick={() => onClickType(t)}>
-          <span class="font-medium">{t.name}</span>
-          <span class="text-xs text-muted-foreground">Manage</span>
+        <button 
+          class="group flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-muted/50" 
+          onclick={() => onClickType(t)}
+        >
+          <div class="flex items-center gap-3">
+            <div class="rounded-lg bg-flutter-blue/10 p-2 transition-colors group-hover:bg-flutter-blue/20">
+              <ClipboardList class="h-5 w-5 text-flutter-blue" />
+            </div>
+            <span class="font-medium">{t.name}</span>
+          </div>
+          <ChevronRight class="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
         </button>
       {/each}
+      {#if !types.length}
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+          <div class="rounded-full bg-muted p-3 mb-3">
+            <ClipboardList class="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p class="text-sm font-medium text-muted-foreground">No assessment types yet</p>
+          <p class="text-xs text-muted-foreground mt-1">Create your first type to get started</p>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
 
 <!-- Type (fields) Modal -->
 <Dialog.Root open={showTypeModal} onOpenChange={(v)=> showTypeModal = v}>
-  <Dialog.Content class="max-w-[960px]">
+  <Dialog.Content class="max-w-[960px] max-h-[90vh] overflow-y-auto">
     <Dialog.Header>
-      <Dialog.Title>{selectedType?.name}</Dialog.Title>
-      <Dialog.Description>Manage fields for this assessment type.</Dialog.Description>
+      <Dialog.Title class="text-2xl">{selectedType?.name}</Dialog.Title>
+      <Dialog.Description>Configure fields for this assessment type</Dialog.Description>
     </Dialog.Header>
 
     {#if selectedType}
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <Input class="max-w-xs" bind:value={renameName} />
-        <Button size="sm" onclick={() => openConfirm('Rename this assessment type?', renameType)}>Rename</Button>
-        <Button size="sm" variant="destructive" onclick={() => openConfirm('Delete this assessment type?', deleteType)}>Delete</Button>
-      </div>
-
-      <div class="mb-2 flex items-center justify-between">
-        <h3 class="text-sm font-semibold">Fields</h3>
-        <Button size="sm" onclick={() => openFieldModal()}>Add field</Button>
-      </div>
-
-      <div class="space-y-3">
-        {#each fields as f}
-          <div class="rounded border p-3">
-            <div class="mb-1 text-sm font-medium">{f.label} <span class="ml-2 rounded bg-muted px-2 py-0.5 text-xs">{FIELD_TYPES.find(a=>a.value===f.fieldType)?.label ?? f.fieldType}</span></div>
-            <div class="mt-2 flex gap-2">
-              <Button size="sm" onclick={() => openFieldModal(f)}>Edit</Button>
-              <Button size="sm" variant="destructive" onclick={() => openConfirm('Remove this field?', () => removeField(f.id))}>Remove</Button>
-            </div>
+      <div class="space-y-6 pt-4">
+        <div class="bg-muted/30 rounded-lg border p-4">
+          <Label for="renameName" class="text-sm font-medium mb-2 block">Type Name</Label>
+          <div class="flex items-center gap-3">
+            <Input id="renameName" class="flex-1" bind:value={renameName} />
+            <Button size="sm" onclick={() => openConfirm('Rename this assessment type?', renameType)} class="gap-2">
+              <Edit2 class="h-3.5 w-3.5" />
+              Rename
+            </Button>
+            <Button size="sm" variant="destructive" onclick={() => openConfirm('Delete this assessment type and all its fields?', deleteType)} class="gap-2">
+              <Trash2 class="h-3.5 w-3.5" />
+              Delete
+            </Button>
           </div>
-        {/each}
+        </div>
+
+        <div>
+          <div class="mb-4 flex items-center justify-between">
+            <div>
+              <h3 class="font-semibold">Custom Fields</h3>
+              <p class="text-muted-foreground text-xs mt-0.5">Define what information should be collected</p>
+            </div>
+            <Button size="sm" onclick={() => openFieldModal()} class="gap-2">
+              <Plus class="h-4 w-4" />
+              Add Field
+            </Button>
+          </div>
+
+          <div class="space-y-3">
+            {#each fields as f}
+              {@const FieldIcon = FIELD_TYPES.find(a=>a.value===f.fieldType)?.icon ?? FileText}
+              <div class="group rounded-lg border bg-card p-4 transition-all hover:border-flutter-blue/50 hover:bg-muted/30">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                      <FieldIcon class="h-4 w-4 text-muted-foreground" />
+                      <span class="font-medium">{f.label}</span>
+                    </div>
+                    <Badge variant="secondary" class="text-xs">
+                      {FIELD_TYPES.find(a=>a.value===f.fieldType)?.label ?? `Type ${f.fieldType}`}
+                    </Badge>
+                  </div>
+                  <div class="flex gap-2">
+                    <Button size="sm" variant="outline" onclick={() => openFieldModal(f)} class="gap-1.5">
+                      <Edit2 class="h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                    <Button size="sm" variant="destructive" onclick={() => openConfirm('Remove this field?', () => removeField(f.id))} class="gap-1.5">
+                      <Trash2 class="h-3.5 w-3.5" />
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            {/each}
+            {#if !fields.length}
+              <div class="flex flex-col items-center justify-center rounded-lg border border-dashed py-12 text-center">
+                <div class="rounded-full bg-muted p-3 mb-3">
+                  <FileText class="h-6 w-6 text-muted-foreground" />
+                </div>
+                <p class="text-sm font-medium text-muted-foreground">No fields defined</p>
+                <p class="text-xs text-muted-foreground mt-1">Add fields to collect specific information</p>
+              </div>
+            {/if}
+          </div>
+        </div>
       </div>
     {/if}
 
     <Dialog.Footer class="mt-6">
-      <Button variant="ghost" onclick={() => (showTypeModal = false)}>Close</Button>
+      <Button variant="outline" onclick={() => (showTypeModal = false)}>Close</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
 
 <!-- Field Edit Modal -->
 <Dialog.Root open={showFieldEditModal} onOpenChange={(v)=> showFieldEditModal = v}>
-  <Dialog.Content class="max-w-[520px]">
+  <Dialog.Content class="sm:max-w-md">
     <Dialog.Header>
       <Dialog.Title>{editingField?.id ? 'Edit' : 'Add'} Field</Dialog.Title>
+      <Dialog.Description>Define how this field should appear and behave</Dialog.Description>
     </Dialog.Header>
 
-    <div class="space-y-3">
+    <div class="space-y-4 pt-4">
       <div class="grid gap-2">
-        <Label>Label</Label>
-        <Input bind:value={editingField.label} />
+        <Label for="fieldLabel">Field Label</Label>
+        <Input id="fieldLabel" placeholder="Enter field label" bind:value={editingField.label} />
       </div>
 
       <div class="grid gap-2">
-        <Label>Field type</Label>
+        <Label>Field Type</Label>
         <Select.Root type="single" bind:value={(editingField.fieldType as any)} onValueChange={() => (editingField.fieldType = Number(editingField.fieldType ?? 1) as any)}>
-          <Select.Trigger class="w-[220px]">{FIELD_TYPES.find(t=>t.value===Number(editingField.fieldType))?.label ?? 'Select type'}</Select.Trigger>
+          <Select.Trigger class="w-full">
+            {#snippet children()}
+              {@const SelectedIcon = FIELD_TYPES.find(t=>t.value===Number(editingField.fieldType))?.icon ?? FileText}
+              <div class="flex items-center gap-2">
+                <SelectedIcon class="h-4 w-4" />
+                {FIELD_TYPES.find(t=>t.value===Number(editingField.fieldType))?.label ?? 'Select type'}
+              </div>
+            {/snippet}
+          </Select.Trigger>
           <Select.Content>
             {#each FIELD_TYPES as t}
-              <Select.Item value={String(t.value)}>{t.label}</Select.Item>
+              {@const Icon = t.icon}
+              <Select.Item value={String(t.value)}>
+                {#snippet children()}
+                  <div class="flex items-center gap-2">
+                    <Icon class="h-4 w-4" />
+                    {t.label}
+                  </div>
+                {/snippet}
+              </Select.Item>
             {/each}
           </Select.Content>
         </Select.Root>
       </div>
     </div>
 
-    <Dialog.Footer class="mt-4">
-      <Button variant="ghost" onclick={() => (showFieldEditModal = false)}>Cancel</Button>
-      <Button onclick={saveField}>Save</Button>
+    <Dialog.Footer class="mt-6">
+      <Button variant="outline" onclick={() => (showFieldEditModal = false)}>Cancel</Button>
+      <Button onclick={saveField} disabled={!editingField.label?.trim()}>
+        {editingField?.id ? 'Update' : 'Create'} Field
+      </Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
 
 <!-- Confirm Modal -->
 <Dialog.Root open={showConfirm} onOpenChange={(v)=> showConfirm = v}>
-  <Dialog.Content class="max-w-[420px]">
+  <Dialog.Content class="sm:max-w-md">
     <Dialog.Header>
-      <Dialog.Title>Confirm</Dialog.Title>
+      <Dialog.Title>Confirm Action</Dialog.Title>
+      <Dialog.Description class="pt-2">{confirmText}</Dialog.Description>
     </Dialog.Header>
-    <p class="text-sm">{confirmText}</p>
-    <Dialog.Footer class="mt-4">
-      <Button variant="ghost" onclick={() => (showConfirm = false)}>Cancel</Button>
-      <Button onclick={async ()=> { if (confirmAction) await confirmAction(); showConfirm = false; }}>OK</Button>
+    <Dialog.Footer class="mt-6">
+      <Button variant="outline" onclick={() => (showConfirm = false)}>Cancel</Button>
+      <Button onclick={async ()=> { if (confirmAction) await confirmAction(); showConfirm = false; }}>Confirm</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

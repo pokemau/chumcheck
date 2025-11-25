@@ -929,6 +929,7 @@
           ],
           "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1010,6 +1011,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "urat_question_answers_urat_question_id_foreign": {
@@ -1105,6 +1107,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "startup_waitlist_messages_manager_id_foreign": {
@@ -1118,6 +1121,7 @@
           ],
           "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1369,6 +1373,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1565,6 +1570,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1689,6 +1695,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1770,6 +1777,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "elevate_logs_readiness_level_id_foreign": {
@@ -1973,6 +1981,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2048,6 +2057,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2215,6 +2225,7 @@
           ],
           "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "roadblocks_startup_id_foreign": {
@@ -2228,6 +2239,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2508,6 +2520,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "rns_assignee_id_foreign": {
@@ -2521,6 +2534,7 @@
           ],
           "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -2830,6 +2844,7 @@
           ],
           "referencedTableName": "public.users",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "initiatives_startup_id_foreign": {
@@ -2843,6 +2858,7 @@
           ],
           "referencedTableName": "public.startups",
           "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },

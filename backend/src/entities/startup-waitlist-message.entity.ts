@@ -7,10 +7,10 @@ export class StartupWaitlistMessage {
   @PrimaryKey({ autoincrement: true })
   id!: number;
 
-  @ManyToOne(() => Startup)
+  @ManyToOne(() => Startup, { deleteRule: 'cascade' })
   startup!: Startup;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { deleteRule: 'cascade' })
   manager!: User;
 
   @Property({ type: 'text' })
