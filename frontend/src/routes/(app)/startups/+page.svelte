@@ -182,10 +182,12 @@
         );
         allInitiatives = allInitiativesFetched;
         completedInitiativesPercentage =
-          (allInitiatives.filter((initiative) => initiative.status === 4)
-            .length /
-            allInitiatives.length) *
-          100;
+          allInitiatives.length > 0
+            ? (allInitiatives.filter((initiative) => initiative.status === 4)
+                .length /
+                allInitiatives.length) *
+              100
+            : 0;
       }
     }
     fetchInitiatives();
@@ -219,7 +221,7 @@
 <!-- Statistics Cards -->
 <div class="mb-8 grid grid-cols-3 gap-5">
   <div
-    class="border-border bg-background flex flex-col gap-1 rounded-lg border p-5"
+    class="flex flex-col gap-1 rounded-lg border border-border bg-background p-5"
   >
     <span class="text-2xl font-bold">{listOfStartups().length}</span>
     <span class="mb-2 text-sm">Total Startups</span>
@@ -261,34 +263,36 @@
   </div>
 
   <div
-    class="border-border bg-background flex flex-col gap-2 rounded-lg border p-5"
+    class="flex flex-col gap-2 rounded-lg border border-border bg-background p-5"
   >
     <div class="text-sm">Initiatives Progress</div>
     <div class="flex items-center gap-2">
       <span class="text-2xl font-bold"
         >{allInitiatives?.filter((initiative) => initiative?.status === 4)
-          ?.length || 0} / {allInitiatives?.length || 0}</span
+          ?.length || 0} / {allInitiatives?.length ?? 0}</span
       >
       <span class="ml-auto text-sm"
         >{completedInitiativesPercentage.toFixed(0)}%</span
       >
     </div>
-    <div class="bg-accent h-2 w-full rounded">
+    <div class="h-2 w-full rounded bg-accent">
       <div
-        class="bg-primary h-2 rounded"
+        class="h-2 rounded bg-primary"
         style="width:{completedInitiativesPercentage.toFixed(0)}%"
       ></div>
     </div>
   </div>
 
   <div
-    class="border-border bg-background flex flex-col gap-2 rounded-lg border p-5"
+    class="flex flex-col gap-2 rounded-lg border border-border bg-background p-5"
   >
     <div class="text-sm">Completion Rate</div>
     <div class="flex items-center gap-2">
       <span class="text-2xl font-bold"
         >{listOfStartups().length > 0
-          ? Math.round((completedStartups.length / listOfStartups().length) * 100)
+          ? Math.round(
+              (completedStartups.length / listOfStartups().length) * 100
+            )
           : 0}%</span
       >
     </div>
@@ -303,13 +307,13 @@
   <div class="mb-2 flex w-[400px] items-center gap-2">
     <div class="relative flex-1">
       <input
-        class="border-border bg-background placeholder:text-muted-foreground focus:ring-ring w-full rounded-lg border px-4 py-2 pr-12 text-sm focus:outline-none focus:ring-2"
+        class="w-full rounded-lg border border-border bg-background px-4 py-2 pr-12 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         type="text"
         placeholder="Search startups..."
         bind:value={search}
       />
       <button
-        class="bg-primary hover:bg-primary/90 absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 transition-colors"
+        class="hover:bg-primary/90 absolute right-2 top-1/2 -translate-y-1/2 rounded-lg bg-primary p-2 transition-colors"
         tabindex="-1"
         type="button"
       >
@@ -317,7 +321,7 @@
       </button>
     </div>
   </div>
-  <div class="border-border flex w-fit gap-0.5 rounded-xl border">
+  <div class="flex w-fit gap-0.5 rounded-xl border border-border">
     <StartupFilterButton
       label="All Startups"
       active={filter === 'All Startups'}
@@ -360,13 +364,13 @@
 <!-- Startup Cards Grid -->
 {#if isLoading}
   <div class="mt-3 grid grid-cols-4 gap-3 pb-10">
-    <div class="bg-background rounded-lg">
+    <div class="rounded-lg bg-background">
       <Skeleton class="h-40 rounded-lg" />
     </div>
-    <div class="bg-background rounded-lg">
+    <div class="rounded-lg bg-background">
       <Skeleton class="h-40 rounded-lg" />
     </div>
-    <div class="bg-background rounded-lg">
+    <div class="rounded-lg bg-background">
       <Skeleton class="h-40 rounded-lg" />
     </div>
   </div>
@@ -387,7 +391,7 @@
     {/each}
   </div>
 {:else}
-  <div class="mt-3 text-center">No startups found.</div>
+  <div class="mt-10 text-center text-3xl font-bold">No startups found...</div>
 {/if}
 
 <Dialog.Root open={showApplicationForm} onOpenChange={toggleApplicationForm}>
