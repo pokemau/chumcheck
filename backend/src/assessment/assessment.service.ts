@@ -120,8 +120,6 @@ export class AssessmentService {
     const em = this.em.fork();
 
     try {
-      console.log('=== SUBMIT ASSESSMENT SERVICE ===');
-      console.log('Received DTO:', JSON.stringify(submitDto, null, 2));
 
       const assessmentType = await em.findOne(AssessmentType, {
         type: submitDto.assessmentName
@@ -144,17 +142,13 @@ export class AssessmentService {
         assessmentType: assessmentType,
       });
 
-      console.log('Required assessments:', requiredAssessments.map(a => ({ id: a.assessment_id, desc: a.description })));
-
       for (const response of submitDto.responses) {
         const assessment = requiredAssessments.find(a => a.assessment_id.toString() === response.assessmentId);
-        
+
         if (!assessment) {
           console.warn(`Assessment field ${response.assessmentId} not found, skipping`);
           continue;
         }
-
-        console.log(`Processing response for assessment ${response.assessmentId}:`, response.answerValue);
 
         const existingResponse = await em.findOne(StartupResponse, {
           startupId: submitDto.startupId,
@@ -164,7 +158,6 @@ export class AssessmentService {
         if (existingResponse) {
           existingResponse.answerValue = response.answerValue;
           await em.persist(existingResponse);
-          console.log('Updated existing response');
         } else {
           const newResponse = em.create(StartupResponse, {
             startupId: submitDto.startupId,
@@ -172,12 +165,10 @@ export class AssessmentService {
             answerValue: response.answerValue,
           });
           await em.persist(newResponse);
-          console.log('Created new response');
         }
       }
 
       await em.flush();
-      console.log('=== SUBMIT COMPLETE ===');
     } catch (error) {
       console.error('Error submitting assessment:', error);
       throw error;

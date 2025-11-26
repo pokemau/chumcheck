@@ -55,9 +55,9 @@
     try {
       const res = await fetch(`${PUBLIC_API_URL}/admin/users/create-json`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json', 
-          Authorization: `Bearer ${data.access}` 
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${data.access}`
         },
         body: JSON.stringify(createForm)
       });
@@ -79,7 +79,7 @@
       if (result.user) {
         users = [...users, result.user];
       }
-      
+
       createOpen = false;
     } catch (e) {
       createError = 'Failed to create user';
@@ -165,26 +165,23 @@
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Users</h1>
-      <p class="text-muted-foreground mt-1 text-sm">
+      <p class="mt-1 text-sm text-muted-foreground">
         Manage user accounts and permissions
       </p>
     </div>
-    <Button
-      onclick={openCreateModal}
-      class="gap-2"
-    >
+    <Button onclick={openCreateModal} class="gap-2">
       <Plus class="h-4 w-4" />
       Create User
     </Button>
   </div>
 
-  <div class="bg-card rounded-lg border shadow-sm">
+  <div class="rounded-lg border bg-card shadow-sm">
     <div
       class="bg-muted/50 flex items-center justify-between border-b px-6 py-4"
     >
       <h2 class="font-semibold">All Users</h2>
       {#if users.length}
-        <span class="text-muted-foreground text-xs"
+        <span class="text-xs text-muted-foreground"
           >{users.length} {users.length === 1 ? 'user' : 'users'}</span
         >
       {/if}
@@ -203,7 +200,7 @@
         <tbody>
           {#each users as u}
             <tr class="hover:bg-muted/50 group border-b transition-colors">
-              <td class="text-muted-foreground px-6 py-4 font-mono text-xs"
+              <td class="px-6 py-4 font-mono text-xs text-muted-foreground"
                 >{u.id}</td
               >
               <td class="px-6 py-4">{u.email}</td>
@@ -243,7 +240,13 @@
 </div>
 
 <!-- Create User Modal -->
-<Dialog.Root bind:open={createOpen} onOpenChange={(open) => { if (!open && creating) return; createOpen = open; }}>
+<Dialog.Root
+  bind:open={createOpen}
+  onOpenChange={(open) => {
+    if (!open && creating) return;
+    createOpen = open;
+  }}
+>
   <Dialog.Content class="sm:max-w-lg">
     <Dialog.Header>
       <Dialog.Title>Create New User</Dialog.Title>
@@ -254,7 +257,6 @@
 
     {#if createError}
       <div class="rounded-md bg-red-50 p-3 text-sm text-red-600">
-      {console.log(createError)}
         {createError}
       </div>
     {/if}
@@ -262,12 +264,22 @@
     <div class="space-y-4 pt-4">
       <div class="grid gap-2">
         <Label for="create-email">Email *</Label>
-        <Input id="create-email" type="email" required bind:value={createForm.email} />
+        <Input
+          id="create-email"
+          type="email"
+          required
+          bind:value={createForm.email}
+        />
       </div>
 
       <div class="grid gap-2">
         <Label for="create-password">Password *</Label>
-        <Input id="create-password" type="password" required bind:value={createForm.password} />
+        <Input
+          id="create-password"
+          type="password"
+          required
+          bind:value={createForm.password}
+        />
       </div>
 
       <div class="grid grid-cols-2 gap-4">
@@ -324,12 +336,18 @@
 </Dialog.Root>
 
 <!-- Edit User Modal -->
-<Dialog.Root bind:open={editOpen} onOpenChange={(open) => { if (!open && saving) return; editOpen = open; }}>
+<Dialog.Root
+  bind:open={editOpen}
+  onOpenChange={(open) => {
+    if (!open && saving) return;
+    editOpen = open;
+  }}
+>
   <Dialog.Content class="sm:max-w-lg">
     <Dialog.Header>
       <Dialog.Title>Edit User</Dialog.Title>
       <Dialog.Description class="pt-2">
-        Update user information for <span class="text-foreground font-semibold"
+        Update user information for <span class="font-semibold text-foreground"
           >{toEdit?.email}</span
         >
       </Dialog.Description>
@@ -398,13 +416,19 @@
 </Dialog.Root>
 
 <!-- Delete User Modal -->
-<Dialog.Root bind:open={deleteOpen} onOpenChange={(open) => { if (!open && deleting) return; deleteOpen = open; }}>
+<Dialog.Root
+  bind:open={deleteOpen}
+  onOpenChange={(open) => {
+    if (!open && deleting) return;
+    deleteOpen = open;
+  }}
+>
   <Dialog.Content class="sm:max-w-md">
     <Dialog.Header>
       <Dialog.Title>Delete User</Dialog.Title>
       <Dialog.Description class="pt-2">
         Are you sure you want to delete <span
-          class="text-foreground font-semibold">{toDelete?.email}</span
+          class="font-semibold text-foreground">{toDelete?.email}</span
         >? This action cannot be undone.
       </Dialog.Description>
     </Dialog.Header>

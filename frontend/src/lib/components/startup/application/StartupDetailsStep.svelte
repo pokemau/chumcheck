@@ -23,8 +23,6 @@
   function addTimelineItem() {
     const newItem = { monthYear: '', description: '' };
     $form.historicalTimeline = [...($form.historicalTimeline ?? []), newItem];
-
-    console.log($form);
   }
 
   function addCompetitor() {

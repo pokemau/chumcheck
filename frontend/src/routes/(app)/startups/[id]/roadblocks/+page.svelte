@@ -322,7 +322,6 @@
     try {
       // Execute all update requests concurrently
       await Promise.all(updatePromises);
-      console.log('All tasks updated successfully');
     } catch (error) {
       $roadblocksQueries[1].refetch();
       toast.error('Error updating');
@@ -558,7 +557,7 @@
     <div class="flex gap-3">
       <div class="flex h-fit justify-between rounded-lg bg-background">
         <Tabs.Root value={selectedFormat}>
-          <Tabs.List class="border bg-flutter-gray/20">
+          <Tabs.List class="bg-flutter-gray/20 border">
             <Tabs.Trigger
               class="flex items-center gap-1"
               value="board"
@@ -584,7 +583,7 @@
       <ShowHideColumns views={columns} />
       {#if data.role !== 'Startup'}
         <Button
-          class="rounded-md bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-primary/90 rounded-md bg-primary px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onclick={() => showDialog()}
         >
@@ -593,7 +592,7 @@
         </Button>
         <div class="flex gap-1">
           <Button
-            class="rounded-br-none rounded-tr-none border-l border-primary/20 bg-primary px-4 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            class="border-primary/20 hover:bg-primary/90 rounded-br-none rounded-tr-none border-l bg-primary px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingRoadblocks}
             onclick={() => generateRoadblocks(numToGenerate)}
@@ -608,7 +607,7 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button
-                class="rounded-bl-none rounded-tl-none border-l border-primary/20 bg-primary px-2 py-2 text-white transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                class="border-primary/20 hover:bg-primary/90 rounded-bl-none rounded-tl-none border-l bg-primary px-2 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRoadblocks}
               >

@@ -364,7 +364,6 @@
 
     try {
       await Promise.all(updatePromises);
-      console.log('All tasks updated successfully');
     } catch (error) {
       $rnsQueries[1].refetch();
       toast.error('Error updating');
@@ -512,7 +511,7 @@
         <div class="flex">
           {#each [1, 2] as item, index}
             <Skeleton
-              class={`border-background flex h-9 w-9 items-center justify-center rounded-full border-2 ${
+              class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
                 index !== 2 - 1 ? '-mr-1' : ''
               } `}
             >
@@ -521,22 +520,22 @@
           {/each}
         </div>
       </div>
-      <div class="bg-background ml-auto">
+      <div class="ml-auto bg-background">
         <Skeleton class="h-9 w-[90px]" />
       </div>
     </div>
 
     <div class="grid h-full grid-cols-4 gap-5">
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
     </div>
@@ -548,7 +547,7 @@
 {#snippet accessible()}
   <div class="flex items-center justify-between">
     <div class="flex gap-3">
-      <div class="bg-background flex h-fit justify-between rounded-lg">
+      <div class="flex h-fit justify-between rounded-lg bg-background">
         <Tabs.Root value={selectedFormat}>
           <Tabs.List class="border">
             <Tabs.Trigger
@@ -578,7 +577,7 @@
       {/if}
       {#if data.role !== 'Startup'}
         <Button
-          class="bg-primary hover:bg-primary/90 rounded-md px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          class="hover:bg-primary/90 rounded-md bg-primary px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onclick={() => showDialog()}
         >
@@ -588,7 +587,7 @@
         </Button>
         <div class="flex gap-1">
           <Button
-            class="bg-primary hover:bg-primary/90 flex items-center gap-2 rounded-br-none rounded-tr-none px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            class="hover:bg-primary/90 flex items-center gap-2 rounded-br-none rounded-tr-none bg-primary px-4 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             type="button"
             disabled={generatingRNS}
             onclick={() => generateRNSForSelected()}
@@ -603,7 +602,7 @@
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
               <Button
-                class="border-primary/20 bg-primary hover:bg-primary/90 rounded-bl-none rounded-tl-none border-l px-2 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                class="border-primary/20 hover:bg-primary/90 rounded-bl-none rounded-tl-none border-l bg-primary px-2 py-2 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 type="button"
                 disabled={generatingRNS}
               >
@@ -617,7 +616,7 @@
               <DropdownMenu.Group class="space-y-1">
                 {#each $rnsQueries[4].data as rna}
                   <div
-                    class="hover:bg-accent cursor-pointer px-2 py-1.5 {$rnsQueries[1].data.some(
+                    class="cursor-pointer px-2 py-1.5 hover:bg-accent {$rnsQueries[1].data.some(
                       (rns: any) =>
                         rns.readinessType === rna.readinessLevel.readinessType
                     )
@@ -638,13 +637,13 @@
                             >{rna.readinessLevel.readinessType}</span
                           >
                           {#if $rnsQueries[1].data.some((rns: any) => rns.readinessType === rna.readinessLevel.readinessType)}
-                            <span class="text-muted-foreground text-xs"
+                            <span class="text-xs text-muted-foreground"
                               >(Has RNS)</span
                             >
                           {/if}
                         </div>
                         <span
-                          class="text-muted-foreground line-clamp-2 text-xs"
+                          class="line-clamp-2 text-xs text-muted-foreground"
                         >
                           {rna.rna.substring(0, 50) + '...'}
                         </span>
@@ -674,7 +673,7 @@
       />
     {:else}
       <div class="h-fit w-full rounded-md border">
-        <Table.Root class="bg-background rounded-lg">
+        <Table.Root class="rounded-lg bg-background">
           <Table.Header>
             <Table.Row class="text-centery h-12">
               <Table.Head class="pl-5">Type</Table.Head>
@@ -732,7 +731,7 @@
         <div class="flex">
           {#each [1, 2] as item, index}
             <Skeleton
-              class={`border-background flex h-9 w-9 items-center justify-center rounded-full border-2 ${
+              class={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-background ${
                 index !== 2 - 1 ? '-mr-1' : ''
               } `}
             >
@@ -741,22 +740,22 @@
           {/each}
         </div>
       </div>
-      <div class="bg-background ml-auto">
+      <div class="ml-auto bg-background">
         <Skeleton class="h-9 w-[90px]" />
       </div>
     </div>
 
     <div class="grid h-full grid-cols-4 gap-5">
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
-      <div class="bg-background h-full w-full">
+      <div class="h-full w-full bg-background">
         <Skeleton class="h-full" />
       </div>
     </div>

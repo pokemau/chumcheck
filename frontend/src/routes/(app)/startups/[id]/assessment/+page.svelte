@@ -13,7 +13,7 @@
   const { access, startupId } = data;
 
   let showAssessmentForm = $state(false);
-  
+
   function toggleAssessmentForm(): void {
     showAssessmentForm = !showAssessmentForm;
   }
@@ -31,7 +31,7 @@
       const assessmentType = $assessmentQuery.data?.find(
         (a: Assessment) => a.name === assessmentName
       );
-      
+
       if (!assessmentType) {
         throw new Error('Assessment type not found');
       }
@@ -48,21 +48,11 @@
         responses
       };
 
-      console.log('=== SUBMITTING TO BACKEND ===');
-      console.log('Full payload:', JSON.stringify(payload, null, 2));
-      console.log('=== END BACKEND PAYLOAD ===');
-
-      await axiosInstance.post(
-        '/assessments/submit',
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${access}`
-          }
+      await axiosInstance.post('/assessments/submit', payload, {
+        headers: {
+          Authorization: `Bearer ${access}`
         }
-      );
-
-      console.log('Backend response: Success');
+      });
 
       // Refetch assessments to update the form with latest data
       await $assessmentQuery.refetch();
@@ -79,11 +69,14 @@
   const assessmentQuery = useQuery({
     queryKey: ['assessmentData', startupId],
     queryFn: async () => {
-      const response = await axiosInstance.get(`/assessments/startup/${startupId}`, {
-        headers: {
-          Authorization: `Bearer ${access}`
+      const response = await axiosInstance.get(
+        `/assessments/startup/${startupId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
         }
-      });
+      );
       return response.data;
     }
   });
@@ -93,14 +86,13 @@
   let hasAssessment = $state(false);
 
   $effect(() => {
-    console.log($assessmentQuery.data);
     if ($assessmentQuery.data) {
       hasAssessment = $assessmentQuery.data.length > 0;
     }
   });
 
   let selectedAssessment = $state<Assessment | null>(null);
-  
+
   function openAssessment(assessment: Assessment): void {
     selectedAssessment = assessment;
     toggleAssessmentForm();
@@ -109,7 +101,9 @@
   // Filter assessments based on role
   const displayedAssessments = $derived(() =>
     data.role === 'Mentor'
-      ? $assessmentQuery.data?.filter((a: Assessment) => a.assessmentStatus === 'Completed')
+      ? $assessmentQuery.data?.filter(
+          (a: Assessment) => a.assessmentStatus === 'Completed'
+        )
       : $assessmentQuery.data
   );
 </script>
@@ -123,15 +117,21 @@
 {:else if isError}
   {@render error()}
 {/if}
-  
+
 {#snippet hasAssessments()}
   {#if data.role === 'Startup'}
-    <h1>Your application has been approved. Please complete the following readiness assessments</h1>
+    <h1>
+      Your application has been approved. Please complete the following
+      readiness assessments
+    </h1>
   {:else}
-    <h1>Here are the current assessments of the startup. Click on "View Assessment" to see their progress.</h1>
+    <h1>
+      Here are the current assessments of the startup. Click on "View
+      Assessment" to see their progress.
+    </h1>
   {/if}
-  <h2 class="text-xl font-bold mt-6">Required Assessments</h2>
-  
+  <h2 class="mt-6 text-xl font-bold">Required Assessments</h2>
+
   {#each $assessmentQuery.data as assessment}
     <ReadinessAssessmentCard
       name={assessment.name}
@@ -140,12 +140,12 @@
       isReadOnly={data.role === 'Mentor'}
     />
   {/each}
-  
+
   <Dialog.Root open={showAssessmentForm} onOpenChange={toggleAssessmentForm}>
     <Dialog.Content class="h-4/5 max-w-[800px]">
       {#if selectedAssessment}
-        <ReadinessAssessmentForm 
-          {access} 
+        <ReadinessAssessmentForm
+          {access}
           {startupId}
           assessment={selectedAssessment}
           on:close={toggleAssessmentForm}
@@ -160,7 +160,9 @@
 
 {#snippet noAssessments()}
   <Card.Root class="h-full">
-    <Card.Content class="flex h-full flex-col items-center justify-center gap-5">
+    <Card.Content
+      class="flex h-full flex-col items-center justify-center gap-5"
+    >
       <img src="/pending.svg" alt="pending" class="h-[300px] w-[300px]" />
       <h1>
         This startup is currently not assigned with an assessment right now.
@@ -170,7 +172,7 @@
 {/snippet}
 
 {#snippet loading()}
-  <Loading data={data}></Loading>
+  <Loading {data}></Loading>
 {/snippet}
 
 {#snippet error()}

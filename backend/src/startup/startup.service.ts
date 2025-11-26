@@ -1045,7 +1045,7 @@ export class StartupService {
     proposal.members = dto.members ?? [];
 
     startup.name = dto.title;
-    
+
     // Change status to PENDING when reapplying
     startup.qualificationStatus = QualificationStatus.PENDING;
 

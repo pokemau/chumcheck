@@ -16,7 +16,11 @@
 
   const dispatch = createEventDispatcher<{
     close: void;
-    submit: { assessmentName: string; startupId: string; formData: Record<string, any> };
+    submit: {
+      assessmentName: string;
+      startupId: string;
+      formData: Record<string, any>;
+    };
     statusChanged: void;
   }>();
 
@@ -25,7 +29,7 @@
   let isInitialized = false;
   let isChangingStatus = false;
   let fileUploadComponents: Record<string, FileUploadField> = {};
-  
+
   $: {
     if (!isInitialized && assessment?.assessmentFields) {
       assessment.assessmentFields.forEach((field) => {
@@ -48,48 +52,35 @@
     try {
       isSubmitting = true;
       console.log('Starting submission');
-      
+
       // Upload all pending files
       const fileUploadPromises = Object.entries(fileUploadComponents).map(
         async ([fieldId, component]) => {
           if (component && typeof component.uploadPendingFiles === 'function') {
-            console.log(`Uploading pending files for field ${fieldId}`);
             await component.uploadPendingFiles();
-            console.log(`After upload - Field ${fieldId}:`, formData[fieldId]);
           }
         }
       );
-      
+
       await Promise.all(fileUploadPromises);
-      
+
       // Prepare submission data
       const submissionData: Record<string, any> = {};
-      
+
       assessment.assessmentFields.forEach((field) => {
         submissionData[field.id] = formData[field.id] || '';
       });
 
-      console.log('=== FINAL SUBMISSION DATA ===');
-      console.log('Assessment Name:', assessment.name);
-      console.log('Startup ID:', startupId);
-      console.log('Form Data:', submissionData);
-      console.log('File Fields Details:');
       assessment.assessmentFields.forEach((field) => {
         if (field.type === 'File') {
-          console.log(`  Field ${field.id} (${field.description}):`, {
-            answerValue: submissionData[field.id]
-          });
         }
       });
-      console.log('=== END SUBMISSION DATA ===');
-
-      dispatch('submit', { 
-        assessmentName: assessment.name, 
-        startupId, 
+      dispatch('submit', {
+        assessmentName: assessment.name,
+        startupId,
         formData: submissionData
       });
-      
-      console.log('Submission successful');
+
       toast.success('Assessment submitted successfully');
       // Don't close the form, let it refresh with updated data
     } catch (error) {
@@ -100,24 +91,34 @@
     }
   }
 
-  async function handleStatusChange(newStatus: 'complete' | 'pending'): Promise<void> {
+  async function handleStatusChange(
+    newStatus: 'complete' | 'pending'
+  ): Promise<void> {
     try {
       isChangingStatus = true;
-      
+
       const endpoint = `/assessments/startup/${startupId}/assessment/${encodeURIComponent(assessment.name)}/${newStatus}`;
-      
-      await axiosInstance.patch(endpoint, {}, {
-        headers: {
-          Authorization: `Bearer ${access}`
+
+      await axiosInstance.patch(
+        endpoint,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${access}`
+          }
         }
-      });
-      
-      toast.success(`Assessment marked as ${newStatus === 'complete' ? 'completed' : 'pending'}`);
+      );
+
+      toast.success(
+        `Assessment marked as ${newStatus === 'complete' ? 'completed' : 'pending'}`
+      );
       dispatch('statusChanged');
       dispatch('close');
     } catch (error) {
       console.error('Error changing assessment status:', error);
-      toast.error(`Failed to mark assessment as ${newStatus === 'complete' ? 'completed' : 'pending'}`);
+      toast.error(
+        `Failed to mark assessment as ${newStatus === 'complete' ? 'completed' : 'pending'}`
+      );
     } finally {
       isChangingStatus = false;
     }
@@ -126,7 +127,8 @@
 
 <form class="flex flex-col gap-5 p-3" enctype="multipart/form-data">
   <Dialog.Header>
-    <Dialog.Title class="text-2xl font-semibold">{assessment.name}</Dialog.Title>
+    <Dialog.Title class="text-2xl font-semibold">{assessment.name}</Dialog.Title
+    >
     {#if isMentor}
       <Dialog.Description>
         Mentor View - Assessment Status: {assessment.assessmentStatus}
@@ -168,13 +170,11 @@
   </div>
 
   <div class="flex justify-end gap-3">
-    <Button variant="outline" onclick={() => dispatch('close')}>
-      Close
-    </Button>
-    
+    <Button variant="outline" onclick={() => dispatch('close')}>Close</Button>
+
     {#if isMentor}
       {#if assessment.assessmentStatus === 'Completed'}
-        <Button 
+        <Button
           variant="destructive"
           disabled={isChangingStatus}
           onclick={() => handleStatusChange('pending')}
@@ -182,7 +182,7 @@
           {isChangingStatus ? 'Updating...' : 'Mark as Pending'}
         </Button>
       {:else if assessment.assessmentStatus === 'Pending'}
-        <Button 
+        <Button
           variant="default"
           disabled={isChangingStatus}
           onclick={() => handleStatusChange('complete')}
@@ -191,7 +191,7 @@
         </Button>
       {/if}
     {:else}
-      <Button 
+      <Button
         variant="default"
         disabled={isSubmitting || isAnyFileUploading}
         onclick={handleSubmit}

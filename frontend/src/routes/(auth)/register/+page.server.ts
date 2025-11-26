@@ -53,7 +53,6 @@ export const actions = {
     const data = await response.json();
 
     if (response.ok) {
-      console.log('CREATE ACCOUNT SUCCESS');
       return message(form, {
         success: true,
         text: 'Account created successfully',

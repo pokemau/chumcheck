@@ -22,10 +22,10 @@
   import axiosInstance from '$lib/axios';
 
   let { data }: { data: PageData } = $props();
-  
+
   const startupIdParam = $derived($page.url.searchParams.get('startupId'));
   const isEditMode = $derived(!!startupIdParam);
-  
+
   let startupData: any = $state(null);
   let isLoadingStartup = $state(false);
 
@@ -123,32 +123,34 @@
 
     isLoadingStartup = true;
     try {
-      const response = await axiosInstance.get(
-        `/startups/${startupIdParam}`,
-        {
-          headers: { Authorization: `Bearer ${data.access}` }
-        }
-      );
+      const response = await axiosInstance.get(`/startups/${startupIdParam}`, {
+        headers: { Authorization: `Bearer ${data.access}` }
+      });
 
       startupData = response.data;
-      
+
       // Autofill form with existing data
       if (startupData.capsuleProposal) {
         $form.title = startupData.capsuleProposal.title || '';
         $form.description = startupData.capsuleProposal.description || '';
-        $form.problemStatement = startupData.capsuleProposal.problemStatement || '';
+        $form.problemStatement =
+          startupData.capsuleProposal.problemStatement || '';
         $form.targetMarket = startupData.capsuleProposal.targetMarket || '';
-        $form.solutionDescription = startupData.capsuleProposal.solutionDescription || '';
+        $form.solutionDescription =
+          startupData.capsuleProposal.solutionDescription || '';
         $form.objectives = startupData.capsuleProposal.objectives || [];
-        $form.historicalTimeline = startupData.capsuleProposal.historicalTimeline || [];
-        $form.competitiveAdvantageAnalysis = startupData.capsuleProposal.competitiveAdvantageAnalysis || [];
-        $form.intellectualPropertyStatus = startupData.capsuleProposal.intellectualPropertyStatus || '';
+        $form.historicalTimeline =
+          startupData.capsuleProposal.historicalTimeline || [];
+        $form.competitiveAdvantageAnalysis =
+          startupData.capsuleProposal.competitiveAdvantageAnalysis || [];
+        $form.intellectualPropertyStatus =
+          startupData.capsuleProposal.intellectualPropertyStatus || '';
         $form.proposalScope = startupData.capsuleProposal.scope || '';
         $form.methodology = startupData.capsuleProposal.methodology || '';
-        $form.curriculumVitae = startupData.capsuleProposal.curriculumVitae || '';
+        $form.curriculumVitae =
+          startupData.capsuleProposal.curriculumVitae || '';
         $form.members = startupData.capsuleProposal.members || [];
       }
-
     } catch (error) {
       console.error('Error loading startup data:', error);
       toast.error('Failed to load startup data');
@@ -170,14 +172,11 @@
         historicalTimeline: $form.historicalTimeline,
         competitiveAdvantageAnalysis: $form.competitiveAdvantageAnalysis,
         intellectualPropertyStatus: $form.intellectualPropertyStatus,
-        proposalScope: $form.proposalScope, 
+        proposalScope: $form.proposalScope,
         methodology: $form.methodology,
         curriculumVitae: $form.curriculumVitae,
         members: $form.members
       };
-
-      console.log('=== FINAL PAYLOAD ===');
-      console.log(JSON.stringify(payload, null, 2));
 
       const response = await axiosInstance.patch(
         `/startups/${startupIdParam}/reapply`,
@@ -185,21 +184,18 @@
         {
           headers: {
             Authorization: `Bearer ${data.access}`,
-            'Content-Type': 'application/json',
-          },
-        },
+            'Content-Type': 'application/json'
+          }
+        }
       );
       toast.success('Application updated successfully');
-
-      console.log('=== RESPONSE ===');
-      console.log(response.data);
 
       await goto('/startups');
     } catch (error: any) {
       console.error('Error updating startup:', error);
       console.error('Error response:', error.response?.data);
       toast.error(
-        error.response?.data?.message || 'Failed to update application',
+        error.response?.data?.message || 'Failed to update application'
       );
     }
   }
@@ -223,7 +219,10 @@
 
   // Add a derived state for the waitlist message
   const waitlistMessage = $derived(() => {
-    if (!startupData?.waitlistMessages || startupData.waitlistMessages.length === 0) {
+    if (
+      !startupData?.waitlistMessages ||
+      startupData.waitlistMessages.length === 0
+    ) {
       return 'Unable to load waitlisted message';
     }
     // Get the most recent message
@@ -252,7 +251,8 @@
         <div class="mb-4 flex items-center justify-between">
           <div>
             <h2 class="text-xl font-bold text-foreground">
-              {isEditMode ? 'Edit Application' : 'New Application'} - Step {currentStep} of {steps.length}
+              {isEditMode ? 'Edit Application' : 'New Application'} - Step {currentStep}
+              of {steps.length}
             </h2>
             <p class="mt-1 text-base font-medium text-primary">
               {currentStepData().title}
@@ -331,7 +331,13 @@
             disabled={$submitting || isLoadingStartup}
             class="flex items-center gap-2"
           >
-            {$submitting ? (isEditMode ? 'Updating...' : 'Submitting...') : (isEditMode ? 'Update Application' : 'Submit Application')}
+            {$submitting
+              ? isEditMode
+                ? 'Updating...'
+                : 'Submitting...'
+              : isEditMode
+                ? 'Update Application'
+                : 'Submit Application'}
           </Button>
         {:else}
           <Button

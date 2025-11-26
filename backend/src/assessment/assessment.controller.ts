@@ -30,7 +30,7 @@ export class AssessmentController {
   @Patch('types/:id')
   async renameType(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { name: string }
+    @Body() body: { name: string },
   ) {
     await this.assessmentService.renameType(id, body.name);
     return { ok: true };
@@ -50,19 +50,19 @@ export class AssessmentController {
 
   @Post('fields')
   async createField(
-    @Body() body: { typeId: number; label: string; fieldType: number }
+    @Body() body: { typeId: number; label: string; fieldType: number },
   ) {
     return this.assessmentService.createField(
       body.typeId,
       body.label,
-      body.fieldType
+      body.fieldType,
     );
   }
 
   @Patch('fields/:id')
   async updateField(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { label?: string; fieldType?: number }
+    @Body() body: { label?: string; fieldType?: number },
   ) {
     await this.assessmentService.updateField(id, body.label, body.fieldType);
     return { ok: true };
@@ -75,48 +75,49 @@ export class AssessmentController {
   }
 
   @Post('startup-assessment')
-  async createStartupAssessment(@Body() body: { startupId: number; assessmentTypeIds: number[] }) {
-    return this.assessmentService.createStartupAssessments(body.startupId, body.assessmentTypeIds);
+  async createStartupAssessment(
+    @Body() body: { startupId: number; assessmentTypeIds: number[] },
+  ) {
+    return this.assessmentService.createStartupAssessments(
+      body.startupId,
+      body.assessmentTypeIds,
+    );
   }
 
   // Existing startup assessment endpoints
   @Get('startup/:startupId')
   async getStartupAssessments(
-    @Param('startupId', ParseIntPipe) startupId: number
+    @Param('startupId', ParseIntPipe) startupId: number,
   ): Promise<AssessmentDto[]> {
     return this.assessmentService.getStartupAssessments(startupId);
   }
 
   @Post('submit')
   async submitAssessment(
-    @Body() submitDto: SubmitAssessmentDto
+    @Body() submitDto: SubmitAssessmentDto,
   ): Promise<void> {
-    console.log('=== RECEIVED SUBMIT REQUEST ===');
-    console.log('DTO:', JSON.stringify(submitDto, null, 2));
-    console.log('=== END RECEIVED DATA ===');
-
     await this.assessmentService.submitAssessment(submitDto);
   }
 
   @Patch('startup/:startupId/assessment/:assessmentType/complete')
   async markAssessmentComplete(
     @Param('startupId', ParseIntPipe) startupId: number,
-    @Param('assessmentType') assessmentType: string
+    @Param('assessmentType') assessmentType: string,
   ): Promise<void> {
     await this.assessmentService.markAssessmentComplete(
       startupId,
-      assessmentType
+      assessmentType,
     );
   }
 
   @Patch('startup/:startupId/assessment/:assessmentType/pending')
   async markAssessmentPending(
     @Param('startupId', ParseIntPipe) startupId: number,
-    @Param('assessmentType') assessmentType: string
+    @Param('assessmentType') assessmentType: string,
   ): Promise<void> {
     await this.assessmentService.markAssessmentPending(
       startupId,
-      assessmentType
+      assessmentType,
     );
   }
 }

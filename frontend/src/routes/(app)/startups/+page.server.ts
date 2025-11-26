@@ -29,7 +29,6 @@ export const actions: Actions = {
 
     // Update existing startup
     if (startupId) {
-      console.log('Processing existing startup update for ID:', startupId);
 
       // Check if a new capsule proposal file was uploaded
       const capsuleProposalFile = formData.get('capsuleProposal');
@@ -38,7 +37,6 @@ export const actions: Actions = {
         capsuleProposalFile instanceof File &&
         capsuleProposalFile.size > 0
       ) {
-        console.log('Capsule proposal file found, using file upload endpoint');
         // Use the new endpoint that handles file uploads
         const newFormData = new FormData();
         newFormData.append('name', formData.get('startup_name') as string);
@@ -71,7 +69,6 @@ export const actions: Actions = {
           }
         );
       } else {
-        console.log('No capsule proposal file, using regular update endpoint');
         // Use the regular update endpoint (no file upload)
         const updatePayload = {
           dataPrivacy: formData.get('data_privacy'),
@@ -224,7 +221,6 @@ export const actions: Actions = {
         );
       }
 
-      console.log('Finished URAT and calculator answer updates');
     } else {
       // Create new URAT question answers
       const answers: {

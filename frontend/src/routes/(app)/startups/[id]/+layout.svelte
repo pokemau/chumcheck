@@ -14,10 +14,7 @@
 
   const info: any = $derived($startupQuery.isSuccess ? $startupQuery.data : {});
 
-  $effect( () => {
-    console.log($startupQuery.data);
-  }
-  );
+
 
   type m =
     | 'readiness-level'

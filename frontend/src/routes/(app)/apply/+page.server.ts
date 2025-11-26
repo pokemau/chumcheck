@@ -24,7 +24,6 @@ export const actions: Actions = {
     const form = await superValidate(request, zod(applicationSchema));
 
     if (!form.valid) {
-      console.log(form.errors);
       return fail(400, { form });
     }
 

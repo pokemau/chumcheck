@@ -8,7 +8,7 @@
   import axiosInstance from '$lib/axios';
   import { toast } from 'svelte-sonner';
   import * as AlertDialog from '$lib/components/ui/alert-dialog';
-  
+
   export let description: string;
   export let files: FileList | null = null;
   export let fileUrl: string | undefined = undefined;
@@ -47,7 +47,6 @@
   function updateValue(): void {
     if (uploadedFiles.length > 0) {
       value = JSON.stringify({ files: uploadedFiles });
-      console.log(`Updated value for ${description}:`, value);
     } else {
       value = '';
     }
@@ -59,10 +58,10 @@
 
   function handleFileSelection(selectedFiles: FileList | null): void {
     if (!selectedFiles) return;
-    
+
     const newFiles = Array.from(selectedFiles);
     pendingFiles = [...pendingFiles, ...newFiles];
-    
+
     files = null;
   }
 
@@ -80,15 +79,15 @@
 
     const index = fileToDeleteIndex;
     const fileToRemove = uploadedFiles[index];
-    
+
     try {
       const newUploadedFiles = uploadedFiles.filter((_, i) => i !== index);
       uploadedFiles = newUploadedFiles;
-      
-      const newValue = newUploadedFiles.length > 0 
+
+      const newValue = newUploadedFiles.length > 0
         ? JSON.stringify({ files: newUploadedFiles })
         : '';
-      
+
       value = newValue;
 
       const payload = {
@@ -102,9 +101,6 @@
         ]
       };
 
-      console.log('=== REMOVING FILE - SUBMITTING TO DB ===');
-      console.log('Payload:', JSON.stringify(payload, null, 2));
-
       await axiosInstance.post(
         '/assessments/submit',
         payload,
@@ -115,15 +111,14 @@
         }
       );
 
-      console.log('File removed from database successfully');
       toast.success('File removed successfully');
-      
+
       dispatch('fileRemoved');
     } catch (error) {
       console.error('Failed to remove file from database:', error);
       uploadedFiles = [
-        ...uploadedFiles.slice(0, index), 
-        fileToRemove, 
+        ...uploadedFiles.slice(0, index),
+        fileToRemove,
         ...uploadedFiles.slice(index)
       ];
       updateValue();
@@ -160,31 +155,22 @@
 
   export async function uploadPendingFiles(): Promise<void> {
     if (pendingFiles.length === 0) {
-      console.log(`No pending files to upload for field: ${description}`);
       return;
     }
-    
-    console.log(
-      `Starting upload for field: ${description}, ${pendingFiles.length} file(s)`
-    );
+
     processing = true;
-    
+
     try {
       if (pendingFiles.length === 1) {
         const formData = new FormData();
         formData.append('file', pendingFiles[0]);
-        
+
         const response = await axiosInstance.post(
           `/upload/single?folder=${UPLOAD_FOLDER}`,
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-        
-        console.log(
-          `Single file upload response for ${description}:`, 
-          response.data
-        );
-        
+
         uploadedFiles = [
           ...uploadedFiles,
           { url: response.data.url, fileName: response.data.originalName }
@@ -194,34 +180,24 @@
         pendingFiles.forEach((file) => {
           formData.append('files', file);
         });
-        
+
         const response = await axiosInstance.post(
           `/upload/multiple?folder=${UPLOAD_FOLDER}`,
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
-        
-        console.log(
-          `Multiple file upload response for ${description}:`, 
-          response.data
-        );
-        
+
         const newUploadedFiles = response.data.files.map((file: any) => ({
           url: file.url,
           fileName: file.originalName
         }));
-        
+
         uploadedFiles = [...uploadedFiles, ...newUploadedFiles];
       }
-      
+
       updateValue();
       pendingFiles = [];
-      
-      console.log(`Files uploaded successfully for ${description}:`, {
-        uploadedFiles,
-        totalFiles: uploadedFiles.length,
-        jsonValue: value
-      });
+
     } catch (error) {
       console.error(`File upload failed for ${description}:`, error);
       throw error;
@@ -249,7 +225,7 @@
 
 <div class="grid gap-2">
   <AssessmentLabel {description} />
-  
+
   {#if uploadedFiles.length > 0}
     <div class="space-y-2">
       <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -262,7 +238,7 @@
           <span class="flex-1 truncate text-sm text-gray-900 dark:text-gray-100">
             {file.fileName}
           </span>
-          
+
           <div class="flex flex-shrink-0 items-center gap-2">
             <a
               href={makeAbsoluteUrl(file.url)}
@@ -274,7 +250,7 @@
               <ExternalLink size={14} />
               <span>Preview</span>
             </a>
-            
+
             <button
               type="button"
               onclick={() => downloadFile(file)}
@@ -284,7 +260,7 @@
               <Download size={14} />
               <span>Download</span>
             </button>
-            
+
             {#if !isReadOnly}
               <button
                 type="button"
@@ -364,10 +340,10 @@
     <AlertDialog.Header>
       <AlertDialog.Title>Remove File</AlertDialog.Title>
       <AlertDialog.Description>
-        Are you sure you want to remove 
+        Are you sure you want to remove
         <span class="font-semibold">
           {fileToDeleteIndex !== null ? uploadedFiles[fileToDeleteIndex]?.fileName : ''}
-        </span>? 
+        </span>?
         This action cannot be undone.
       </AlertDialog.Description>
     </AlertDialog.Header>
