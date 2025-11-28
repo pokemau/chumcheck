@@ -403,9 +403,12 @@
       {showDialog}
       {toggleDialog}
       mentors={mentors || []}
+      assessments={assessments || []}
       onMarkComplete={markComplete}
       onChangeMentor={changeMentor}
       {startupAssessments}
+      {assignAssessmentsToStartup}
+      refetchStartupAssessments={fetchStartupAssessments}
     />
   {:else if selectedTab === 'completed'}
     <CompletedDialog

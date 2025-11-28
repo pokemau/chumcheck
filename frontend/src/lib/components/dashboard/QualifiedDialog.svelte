@@ -4,7 +4,11 @@
   import ConfirmCompleteDialog from './sub/ConfirmCompleteDialog.svelte';
   import * as Dialog from '$lib/components/ui/dialog/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
+  import * as Card from '$lib/components/ui/card/index.js';
   import { getBadgeColorObject, getStartupMemberCount } from '$lib/utils';
+  import { toast } from 'svelte-sonner';
+  import AssessmentPreviewDialog from './sub/AssessmentPreviewDialog.svelte';
+  import { Edit2 } from 'lucide-svelte';
 
   export let startup: any;
   export let showDialog: boolean = false;
@@ -16,17 +20,39 @@
     mentorId: number
   ) => Promise<void>;
   export let startupAssessments: Array<{
+    id?: number;
     name: string;
     assessmentStatus: string;
     assessmentFields?: any[];
   }> = [];
+  export let assessments: {id: number, name: string, fields: {id: number, label: string, fieldType: number}[]}[] = [];
+  export let assignAssessmentsToStartup: (startupId: number, assessmentTypeIds: number[]) => Promise<any>;
+  export let refetchStartupAssessments: ((startupId: number) => Promise<void>) | undefined = undefined;
 
   let showConfirmCompleteModal = false;
   let selectedMentorId: string;
+  
+  // Edit assessments state
+  let showEditAssessments = false;
+  let selectedAssessments = new Set<number>();
+  let previewOpen = false;
+  let previewAssessment: { id: number; name: string; fields: { id: number; label: string; fieldType: number }[] } | null = null;
+  let isLoadingAssessments = false;
 
   const memberCount = getStartupMemberCount(startup);
 
   $: statusColors = getBadgeColorObject('Qualified');
+
+  // Initialize selectedAssessments from startupAssessments
+  $: {
+    if (startup && startupAssessments.length > 0 && !showEditAssessments) {
+      selectedAssessments = new Set(
+        startupAssessments
+          .map(a => assessments.find(asmt => asmt.name === a.name)?.id)
+          .filter(id => id !== undefined) as number[]
+      );
+    }
+  }
 
   // Update selectedMentorId whenever startup changes
   $: {
@@ -37,6 +63,55 @@
 
   $: showSaveMentorButton =
     selectedMentorId && selectedMentorId !== String(startup?.mentors?.[0]?.id);
+
+  function toggleAssessment(id: number) {
+    const next = new Set(selectedAssessments);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    selectedAssessments = next;
+  }
+
+  function openPreview(asmt: { id: number; name: string; fields: { id: number; label: string; fieldType: number }[] }) {
+    previewAssessment = asmt;
+    previewOpen = true;
+  }
+
+  function closePreview() {
+    previewOpen = false;
+  }
+
+  function cancelEditAssessments() {
+    showEditAssessments = false;
+    // Reset selectedAssessments to original
+    selectedAssessments = new Set(
+      startupAssessments
+        .map(a => assessments.find(asmt => asmt.name === a.name)?.id)
+        .filter(id => id !== undefined) as number[]
+    );
+  }
+
+  async function handleSaveAssessments() {
+    if (selectedAssessments.size === 0) {
+      toast.error('Please select at least one assessment.');
+      return;
+    }
+    isLoadingAssessments = true;
+    try {
+      await assignAssessmentsToStartup(startup.id, Array.from(selectedAssessments));
+      
+      // Refetch startup assessments if function is provided
+      if (refetchStartupAssessments) {
+        await refetchStartupAssessments(startup.id);
+      }
+      
+      toast.success('Assessments updated successfully');
+      showEditAssessments = false;
+    } catch (error) {
+      console.error('Error updating assessments:', error);
+      toast.error('Failed to update assessments. Please try again.');
+    } finally {
+      isLoadingAssessments = false;
+    }
+  }
 
   async function handleMarkAsComplete() {
     try {
@@ -85,21 +160,91 @@
         <div class="mb-8">
           <!-- Assigned Assessments -->
           <div class="mb-6">
-            <h3 class="mb-2 text-lg font-medium">Assigned Assessments</h3>
-            {#if startupAssessments.length === 0}
-              <p class="text-sm text-muted-foreground">
-                No assessments assigned.
+            <div class="mb-2 flex items-center justify-between">
+              <h3 class="text-lg font-medium">Assigned Assessments</h3>
+              {#if !showEditAssessments}
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onclick={() => (showEditAssessments = true)}
+                  class="gap-2"
+                >
+                  <Edit2 class="h-3.5 w-3.5" />
+                  Edit
+                </Button>
+              {/if}
+            </div>
+            
+            {#if showEditAssessments}
+              <!-- Edit Mode - Checkbox Selection -->
+              <p class="text-sm text-muted-foreground mb-4">
+                Select assessments for this startup to complete
               </p>
-            {:else}
-              <div class="flex flex-wrap gap-2">
-                {#each startupAssessments as a}
-                  <span
-                    class="bg-secondary/10 rounded-full border border-border px-3 py-1 text-sm font-medium text-foreground"
-                  >
-                    {a.name}
-                  </span>
-                {/each}
+              {#if assessments && assessments.length > 0}
+                <div class="space-y-3 mb-4">
+                  {#each assessments as asmt (asmt.id)}
+                    <Card.Root class="border bg-secondary/10">
+                      <div class="flex items-center justify-between p-3">
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            class="h-4 w-4 accent-primary"
+                            checked={selectedAssessments.has(asmt.id)}
+                            on:change={() => toggleAssessment(asmt.id)}
+                          />
+                          <span class="text-foreground font-medium">{asmt.name}</span>
+                        </label>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onclick={() => openPreview(asmt)}
+                          class="shrink-0"
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </Card.Root>
+                  {/each}
+                </div>
+              {:else}
+                <p class="text-sm text-muted-foreground mb-4">No assessments available.</p>
+              {/if}
+              
+              <!-- Action buttons for edit mode -->
+              <div class="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onclick={cancelEditAssessments}
+                  disabled={isLoadingAssessments}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onclick={handleSaveAssessments}
+                  disabled={selectedAssessments.size === 0 || isLoadingAssessments}
+                >
+                  {isLoadingAssessments ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
+            {:else}
+              <!-- Read-only view -->
+              {#if startupAssessments.length === 0}
+                <p class="text-sm text-muted-foreground">
+                  No assessments assigned.
+                </p>
+              {:else}
+                <div class="flex flex-wrap gap-2">
+                  {#each startupAssessments as a}
+                    <span
+                      class="bg-secondary/10 rounded-full border border-border px-3 py-1 text-sm font-medium text-foreground"
+                    >
+                      {a.name}
+                    </span>
+                  {/each}
+                </div>
+              {/if}
             {/if}
           </div>
 
@@ -376,6 +521,12 @@
           toggleDialog={() =>
             (showConfirmCompleteModal = !showConfirmCompleteModal)}
           onConfirm={handleMarkAsComplete}
+        />
+        
+        <AssessmentPreviewDialog 
+          open={previewOpen} 
+          onOpenChange={closePreview} 
+          assessment={previewAssessment}
         />
       </div>
     </Dialog.Content>
