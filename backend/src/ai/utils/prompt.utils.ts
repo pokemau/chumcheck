@@ -1,5 +1,4 @@
 import { Startup } from 'src/entities/startup.entity';
-import { Rns } from 'src/entities/rns.entity';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { EntityManager } from '@mikro-orm/core';
 

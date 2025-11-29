@@ -1,6 +1,5 @@
 import { EntityManager } from '@mikro-orm/core';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
 import { Initiative } from 'src/entities/initiative.entity';
 import { Rns } from 'src/entities/rns.entity';
 import { Roadblock } from 'src/entities/roadblock.entity';

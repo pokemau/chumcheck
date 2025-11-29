@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -9,14 +8,9 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { RnaService } from './rna.service';
-import {
-  CreateStartupRnaDto,
-  GenerateRNAsDto,
-  UpdateStartupRnaDto,
-} from './dto/rna.dto';
+import { CreateStartupRnaDto, UpdateStartupRnaDto } from './dto/rna.dto';
 
 @Controller('rna')
 export class RnaController {

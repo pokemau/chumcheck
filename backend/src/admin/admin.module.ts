@@ -13,7 +13,7 @@ import { ManagerGuard } from '../auth/guard';
     UserModule, // Import UserModule to use UserService
     AuthModule, // Add AuthModule to imports
     StartupModule, // Add StartupModule to imports
-    MikroOrmModule.forFeature([ActivityLog])
+    MikroOrmModule.forFeature([ActivityLog]),
   ],
   controllers: [AdminController],
   providers: [AdminService, ManagerGuard],

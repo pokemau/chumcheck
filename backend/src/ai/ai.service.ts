@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { EntityManager } from '@mikro-orm/core';
-import { ConsoleLogger, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { Startup } from 'src/entities/startup.entity';
@@ -46,7 +46,9 @@ export class AiService {
     return res.text;
   }
 
-  async generateStartupAnalysisSummary(dto: StartupApplicationDto): Promise<string> {
+  async generateStartupAnalysisSummary(
+    dto: StartupApplicationDto,
+  ): Promise<string> {
     const res = await this.ai.models.generateContent({
       model: 'gemini-2.0-flash',
       contents: `Please provide a comprehensive analysis of the following startup proposal:
@@ -59,11 +61,17 @@ export class AiService {
       Objectives: ${dto.objectives.join('\n')}
       Proposal Scope: ${dto.proposalScope}
       Methodology: ${dto.methodology}
-      Historical Timeline: ${dto.historicalTimeline?.map(h => `${h.monthYear}: ${h.description}`).join('\n') || 'Not provided'}
-      Competitive Advantage Analysis: ${dto.competitiveAdvantageAnalysis?.map(c => 
-        `Competitor: ${c.competitorName}
+      Historical Timeline: ${dto.historicalTimeline?.map((h) => `${h.monthYear}: ${h.description}`).join('\n') || 'Not provided'}
+      Competitive Advantage Analysis: ${
+        dto.competitiveAdvantageAnalysis
+          ?.map(
+            (c) =>
+              `Competitor: ${c.competitorName}
          Offer: ${c.offer}
-         Pricing Strategy: ${c.pricingStrategy}`).join('\n\n') || 'Not provided'}
+         Pricing Strategy: ${c.pricingStrategy}`,
+          )
+          .join('\n\n') || 'Not provided'
+      }
       Intellectual Property Status: ${dto.intellectualPropertyStatus}
 
       Analyze the startup proposal and provide a concise three-sentence summary that covers:

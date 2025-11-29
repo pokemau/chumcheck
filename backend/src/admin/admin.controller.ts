@@ -1,4 +1,15 @@
-import { Controller, Get, UseGuards, Post, Body, Param, ParseIntPipe, UsePipes, ValidationPipe, NotFoundException, Delete, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+  UsePipes,
+  ValidationPipe,
+  BadRequestException,
+} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -11,16 +22,23 @@ import { JwtGuard, ManagerGuard } from '../auth/guard';
 @UseGuards(JwtGuard, ManagerGuard)
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService, private readonly em: EntityManager) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly em: EntityManager,
+  ) {}
 
   // JSON endpoint for recent activity
   @Get('recent-activity')
   async recentActivity() {
-    const items = await this.em.find(ActivityLog, {}, { orderBy: { createdAt: 'DESC' }, limit: 25 });
+    const items = await this.em.find(
+      ActivityLog,
+      {},
+      { orderBy: { createdAt: 'DESC' }, limit: 25 },
+    );
     return items.map((i) => ({
       date: i.createdAt.toISOString(),
       action: i.action,
-      details: i.details
+      details: i.details,
     }));
   }
 
@@ -37,15 +55,30 @@ export class AdminController {
   }
 
   @Post('users/create-json')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
   async createUserJson(@Body() dto: CreateUserDto) {
     const user = await this.adminService.createUser(dto);
     return { message: 'User created', user };
   }
 
   @Post('users/edit-json/:id')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async updateUserJson(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserDto) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
+  async updateUserJson(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
+  ) {
     const user = await this.adminService.updateUser(id, dto);
     return { message: 'User updated', user };
   }
@@ -76,15 +109,30 @@ export class AdminController {
   }
 
   @Post('startups/create-json')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
   async createStartupJson(@Body() dto: CreateStartupDto) {
     const startup = await this.adminService.createStartup(dto);
     return { message: 'Startup created', startup };
   }
 
   @Post('startups/edit-json/:id')
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, stopAtFirstError: true }))
-  async updateStartupJson(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateStartupDto) {
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      stopAtFirstError: true,
+    }),
+  )
+  async updateStartupJson(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateStartupDto,
+  ) {
     const startup = await this.adminService.updateStartup(id, dto);
     return { message: 'Startup updated', startup };
   }

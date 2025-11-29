@@ -1,12 +1,5 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { ChatHistoryService } from './chat-history.service';
-import { JwtGuard } from 'src/auth/guard';
 
 @Controller('chat-history')
 // @UseGuards(JwtGuard)

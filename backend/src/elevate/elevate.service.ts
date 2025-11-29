@@ -3,8 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { ElevateStartupDto } from './dto';
 import { Startup } from 'src/entities/startup.entity';
 import { ElevateLogs } from 'src/entities/elevate-log.entity';
-import { ReadinessType } from 'src/entities/enums/readiness-type.enum';
-import { StartupReadinessLevel } from 'src/entities/startup-readiness-level.entity';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';
 
 @Injectable()

@@ -4,7 +4,6 @@ import { CalculatorQuestion } from 'src/entities/calculator-question.entity';
 import { UratQuestion } from 'src/entities/urat-question.entity';
 import { CalculatorQuestionAnswerDto, UratQuestionAnswerDto } from './dto';
 import { CalculatorQuestionAnswer } from 'src/entities/calculator-question-answer.entity';
-import { User } from 'src/entities/user.entity';
 import { Startup } from 'src/entities/startup.entity';
 import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 import { ReadinessLevel } from 'src/entities/readiness-level.entity';

@@ -9,7 +9,6 @@ import { AuthService } from '../auth/auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../entities/user.entity';
-import { Role } from '../entities/enums/role.enum';
 import * as argon from 'argon2';
 import { StartupService } from '../startup/startup.service'; // Import StartupService
 import { Startup } from '../entities/startup.entity'; // Import Startup entity

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -26,8 +25,6 @@ import {
   AppointMentorsDto,
   ChangeMentorDto,
 } from './dto';
-import { Request } from 'express';
-import { QualificationStatus } from '../entities/enums/qualification-status.enum';
 
 @UseGuards(JwtGuard)
 @Controller('startups')

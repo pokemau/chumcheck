@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -10,14 +9,9 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
-import {
-  CalculatorQuestionAnswerDto,
-  UratQuestionAnswerDto,
-  UratQuestionDto,
-} from './dto';
+import { CalculatorQuestionAnswerDto, UratQuestionAnswerDto } from './dto';
 import { ReadinesslevelService } from './readinesslevel.service';
 import { JwtGuard } from 'src/auth/guard';
-import { UratQuestionAnswer } from 'src/entities/urat-question-answer.entity';
 
 @Controller('readinesslevel')
 export class ReadinesslevelController {
