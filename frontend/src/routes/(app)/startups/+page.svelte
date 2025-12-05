@@ -230,34 +230,39 @@
         <StartupStatusCard
           count={pendingStartups.length}
           label="Pending"
-          borderColor="border-secondary"
-          bgColor="bg-secondary"
+          borderColor="border-yellow-500"
+          bgColor="bg-yellow-50 dark:bg-yellow-950"
+          textColor="text-yellow-700 dark:text-yellow-300"
         />
         <StartupStatusCard
           count={waitlistedStartups.length}
           label="Waitlisted"
-          borderColor="border-accent"
-          bgColor="bg-accent"
+          borderColor="border-orange-500"
+          bgColor="bg-orange-50 dark:bg-orange-950"
+          textColor="text-orange-700 dark:text-orange-300"
         />
         <StartupStatusCard
           count={qualifiedStartups.length}
           label="Qualified"
-          borderColor="border-primary"
-          bgColor="bg-card"
+          borderColor="border-green-500"
+          bgColor="bg-green-50 dark:bg-green-950"
+          textColor="text-green-700 dark:text-green-300"
         />
       {:else if role === 'Mentor'}
         <StartupStatusCard
           count={qualifiedStartups.length}
           label="Active"
-          borderColor="border-primary"
-          bgColor="bg-card"
+          borderColor="border-blue-500"
+          bgColor="bg-blue-50 dark:bg-blue-950"
+          textColor="text-blue-700 dark:text-blue-300"
         />
       {/if}
       <StartupStatusCard
         count={completedStartups.length}
         label="Completed"
-        borderColor="border-primary"
-        bgColor="bg-card"
+        borderColor="border-purple-500"
+        bgColor="bg-purple-50 dark:bg-purple-950"
+        textColor="text-purple-700 dark:text-purple-300"
       />
     </div>
   </div>
