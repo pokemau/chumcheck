@@ -20,10 +20,8 @@ vite.config.ts.timestamp-*
 .ropeproject
 
 
-# MAU IGNORES
-# .tmuxinator.yml
-# q.sh
-# start.sh
+.tmuxinator.yml
+q.sh
 
 /backend_django
 AGENTS.md
