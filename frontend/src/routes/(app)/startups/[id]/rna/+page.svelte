@@ -26,7 +26,7 @@
       queryFn: () =>
         getData(
           `/startups/startup-readiness-level?startupId=${startupId}`,
-          access!
+          access
         )
     },
     {
@@ -256,5 +256,5 @@
 {/snippet}
 
 {#snippet fallback()}
-  <div>Something went wrong...</div>
+  <div class="text-2xl font-bold mt-10 text-center">Something went wrong...</div>
 {/snippet}
