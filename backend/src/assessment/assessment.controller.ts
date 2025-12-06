@@ -18,42 +18,27 @@ export class AssessmentController {
 
   // Admin: Types
   @Get('types')
-  async listTypes() {
+  listTypes() {
     return this.assessmentService.listTypes();
   }
 
-  @Post('types')
-  async createType(@Body() body: { name: string }) {
-    return this.assessmentService.createType(body.name);
-  }
-
-  @Patch('types/:id')
-  async renameType(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { name: string },
-  ) {
-    await this.assessmentService.renameType(id, body.name);
-    return { ok: true };
-  }
-
-  @Delete('types/:id')
-  async deleteType(@Param('id', ParseIntPipe) id: number) {
-    await this.assessmentService.deleteType(id);
-    return { ok: true };
+  @Get()
+  async getAllAssessments() {
+    return this.assessmentService.getAllAssessments();
   }
 
   // Admin: Fields
-  @Get('types/:id/fields')
-  async listFields(@Param('id', ParseIntPipe) typeId: number) {
-    return this.assessmentService.listFields(typeId);
+  @Get('types/:typeName/fields')
+  async listFields(@Param('typeName') typeName: string) {
+    return this.assessmentService.listFields(typeName);
   }
 
   @Post('fields')
   async createField(
-    @Body() body: { typeId: number; label: string; fieldType: number },
+    @Body() body: { typeName: string; label: string; fieldType: number },
   ) {
     return this.assessmentService.createField(
-      body.typeId,
+      body.typeName,
       body.label,
       body.fieldType,
     );
@@ -76,11 +61,11 @@ export class AssessmentController {
 
   @Post('startup-assessment')
   async createStartupAssessment(
-    @Body() body: { startupId: number; assessmentTypeIds: number[] },
+    @Body() body: { startupId: number; assessmentTypes: string[] },
   ) {
     return this.assessmentService.createStartupAssessments(
       body.startupId,
-      body.assessmentTypeIds,
+      body.assessmentTypes as any,
     );
   }
 

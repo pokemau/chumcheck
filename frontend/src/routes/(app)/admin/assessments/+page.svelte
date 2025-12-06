@@ -1,13 +1,10 @@
 <script lang="ts">
-  const { data, form } = $props();
-  import { enhance } from '$app/forms';
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import { Label } from '$lib/components/ui/label';
   import * as Select from '$lib/components/ui/select';
   import { Badge } from '$lib/components/ui/badge';
-  import { onMount } from 'svelte';
   import {
     Plus,
     Edit2,
@@ -16,9 +13,12 @@
     FileText,
     Type,
     Upload,
-    ChevronRight,
-    X
+    ChevronRight
   } from 'lucide-svelte';
+
+  const { data, form } = $props();
+
+  console.log(data);
 
   type AssessmentType = { id: number; name: string };
   type AssessmentField = { id: number; label: string; fieldType: number };
@@ -39,6 +39,17 @@
   let createName = $state('');
   let renameName = $state('');
   let editingField = $state<Partial<AssessmentField> & { id?: number }>({});
+
+  const ASSESSMENT_TYPES = [
+    'Technology',
+    'Acceptance',
+    'Market',
+    'Regulatory',
+    'Organizational',
+    'Investment'
+  ];
+
+  let expandedTypes = $state<Set<string>>(new Set());
 
   const FIELD_TYPES: { value: number; label: string; icon: any }[] = [
     { value: 1, label: 'Short answer', icon: Type },
@@ -92,6 +103,15 @@
   function openFieldModal(field?: AssessmentField) {
     editingField = field ? { ...field } : { label: '', fieldType: 1 };
     showFieldEditModal = true;
+  }
+
+  function toggleType(typeName: string) {
+    if (expandedTypes.has(typeName)) {
+      expandedTypes.delete(typeName);
+    } else {
+      expandedTypes.add(typeName);
+    }
+    expandedTypes = new Set(expandedTypes);
   }
 
   async function createType() {
@@ -211,7 +231,7 @@
   }
 </script>
 
-<div class="space-y-6">
+<!-- <div class="space-y-6">
   <div class="flex items-center justify-between">
     <div>
       <h1 class="text-3xl font-bold tracking-tight">Assessment Types</h1>
@@ -270,6 +290,122 @@
           </p>
         </div>
       {/if}
+    </div>
+  </div>
+</div> -->
+
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Assessments</h1>
+      <p class="mt-1 text-sm text-muted-foreground">
+        View all assessments organized by type
+      </p>
+    </div>
+    <Button onclick={() => (showCreateTypeModal = true)} class="gap-2">
+      <Plus class="h-4 w-4" />
+      Add Type
+    </Button>
+  </div>
+
+  <div class="rounded-lg border bg-card shadow-sm">
+    <div
+      class="bg-muted/50 flex items-center justify-between border-b px-6 py-4"
+    >
+      <h2 class="font-semibold">All Assessments by Type</h2>
+      <span class="text-xs text-muted-foreground">
+        {Object.keys(data.assessments || {}).length} types
+      </span>
+    </div>
+
+    <div class="divide-y">
+      {#each ASSESSMENT_TYPES as typeName}
+        {@const assessments = data.assessments?.[typeName] || []}
+        {@const isExpanded = expandedTypes.has(typeName)}
+
+        <div>
+          <!-- Type Header (Collapsible) -->
+          <button
+            class="hover:bg-muted/50 group flex w-full items-center justify-between px-6 py-4 text-left transition-colors"
+            onclick={() => toggleType(typeName)}
+          >
+            <div class="flex items-center gap-3">
+              <div
+                class="bg-flutter-blue/10 group-hover:bg-flutter-blue/20 rounded-lg p-2 transition-colors"
+              >
+                <ClipboardList class="text-flutter-blue h-5 w-5" />
+              </div>
+              <div>
+                <span class="font-medium">{typeName}</span>
+                <span class="ml-2 text-xs text-muted-foreground">
+                  {assessments.length}
+                  {assessments.length === 1 ? 'assessment' : 'assessments'}
+                </span>
+              </div>
+            </div>
+            <ChevronRight
+              class="h-4 w-4 text-muted-foreground transition-transform {isExpanded
+                ? 'rotate-90'
+                : ''}"
+            />
+          </button>
+
+          <!-- Assessments List (Collapsible Content) -->
+          {#if isExpanded}
+            <div class="bg-muted/20 border-t px-6 py-4">
+              {#if assessments.length > 0}
+                <div class="space-y-2">
+                  {#each assessments as assessment}
+                    {@const FieldIcon =
+                      FIELD_TYPES.find((t) =>
+                        t.label
+                          .toLowerCase()
+                          .includes(assessment.answerType.toLowerCase())
+                      )?.icon ?? FileText}
+
+                    <div
+                      class="hover:bg-card/80 rounded-lg border bg-card p-4 transition-colors"
+                    >
+                      <div class="flex items-start gap-3">
+                        <div class="rounded-lg bg-muted p-2">
+                          <FieldIcon class="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-medium">
+                            {assessment.description}
+                          </p>
+                          <div class="mt-1 flex items-center gap-2">
+                            <Badge variant="secondary" class="text-xs">
+                              {assessment.answerType}
+                            </Badge>
+                            <span class="text-xs text-muted-foreground"
+                              >ID: {assessment.id}</span
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {/each}
+                </div>
+              {:else}
+                <div
+                  class="flex flex-col items-center justify-center py-8 text-center"
+                >
+                  <div class="mb-3 rounded-full bg-muted p-3">
+                    <FileText class="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <p class="text-sm font-medium text-muted-foreground">
+                    No assessments for {typeName}
+                  </p>
+                  <p class="mt-1 text-xs text-muted-foreground">
+                    Add assessments to this type to get started
+                  </p>
+                </div>
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {/each}
     </div>
   </div>
 </div>
@@ -466,10 +602,7 @@
                     Add custom fields to collect specific information for this
                     assessment type
                   </p>
-                  <Button
-                    onclick={() => openFieldModal()}
-                    class="gap-2"
-                  >
+                  <Button onclick={() => openFieldModal()} class="gap-2">
                     <Plus class="h-4 w-4" />
                     Add Your First Field
                   </Button>
@@ -499,7 +632,6 @@
   </Dialog.Content>
 </Dialog.Root>
 
-<!-- Field Edit Modal -->
 <Dialog.Root
   open={showFieldEditModal}
   onOpenChange={(v) => (showFieldEditModal = v)}
