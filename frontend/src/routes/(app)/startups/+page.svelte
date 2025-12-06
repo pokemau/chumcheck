@@ -231,7 +231,7 @@
 
     <div class="mt-4 pt-4 border-t border-border/50">
       <p class="text-xs text-muted-foreground mb-3 font-medium">Status Breakdown</p>
-      <div class="gap-2 flex">
+      <div class="gap-2 flex flex-wrap">
         {#if role === 'Startup'}
           <StartupStatusCard
             count={pendingStartups.length}

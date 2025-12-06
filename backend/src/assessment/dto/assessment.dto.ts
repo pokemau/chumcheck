@@ -94,6 +94,15 @@ export class AssignAssessmentDto {
   assessmentId: number;
 }
 
+export class AssignAssessmentsToStartupDto {
+  @IsNumber()
+  startupId: number;
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  assessmentTypeIds: number[];
+}
+
 export class SubmitResponseDto {
   @IsNumber()
   assessmentFieldId: number;

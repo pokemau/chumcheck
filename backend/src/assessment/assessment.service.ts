@@ -11,6 +11,7 @@ import {
   UpdateAssessmentFieldDto,
   CreateAssessmentFieldsDto,
   AssignAssessmentDto,
+  AssignAssessmentsToStartupDto,
   SubmitResponsesDto,
 } from './dto/assessment.dto';
 import { Assessment } from '../entities/assessment.entity';
@@ -396,6 +397,101 @@ export class AssessmentService {
       id: startupAssessment.id,
       assessmentId: assessment.id,
       status: AssessmentStatus[startupAssessment.status],
+    };
+  }
+
+  /**
+   * Assign multiple assessments to a startup
+   * POST /assessments/startup-assessment
+   */
+  async assignAssessmentsToStartup(
+    dto: AssignAssessmentsToStartupDto,
+  ): Promise<{
+    assigned: number;
+    replaced: number;
+    results: Array<{
+      assessmentId: number;
+      status: 'assigned' | 'replaced';
+    }>;
+  }> {
+    const startup = await this.em.findOne(Startup, { id: dto.startupId });
+    if (!startup) {
+      throw new NotFoundException(`Startup with ID ${dto.startupId} not found`);
+    }
+
+    let assigned = 0;
+    let replaced = 0;
+    const results: Array<{
+      assessmentId: number;
+      status: 'assigned' | 'replaced';
+    }> = [];
+
+    for (const assessmentId of dto.assessmentTypeIds) {
+      const assessment = await this.em.findOne(Assessment, {
+        id: assessmentId,
+      });
+
+      if (!assessment) {
+        console.warn(`Assessment with ID ${assessmentId} not found, skipping`);
+        continue;
+      }
+
+      // Check if there's an existing assignment for the same assessment type
+      const existingWithSameType = await this.em.findOne(
+        StartupAssessment,
+        {
+          startup: startup,
+          assessment: {
+            assessmentType: assessment.assessmentType,
+          },
+        },
+        { populate: ['assessment'] },
+      );
+
+      if (existingWithSameType) {
+        // If it's the exact same assessment, skip it
+        if (existingWithSameType.assessment.id === assessmentId) {
+          continue;
+        }
+
+        // Replace: remove old assignment and create new one
+        await this.em.removeAndFlush(existingWithSameType);
+
+        const startupAssessment = this.em.create(StartupAssessment, {
+          startup: startup,
+          assessment: assessment,
+          status: AssessmentStatus.Pending,
+        });
+
+        this.em.persist(startupAssessment);
+        replaced++;
+        results.push({
+          assessmentId: assessmentId,
+          status: 'replaced',
+        });
+      } else {
+        // Create new assignment
+        const startupAssessment = this.em.create(StartupAssessment, {
+          startup: startup,
+          assessment: assessment,
+          status: AssessmentStatus.Pending,
+        });
+
+        this.em.persist(startupAssessment);
+        assigned++;
+        results.push({
+          assessmentId: assessmentId,
+          status: 'assigned',
+        });
+      }
+    }
+
+    await this.em.flush();
+
+    return {
+      assigned,
+      replaced,
+      results,
     };
   }
 

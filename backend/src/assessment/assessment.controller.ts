@@ -16,6 +16,7 @@ import {
   CreateAssessmentFieldDto,
   UpdateAssessmentFieldDto,
   CreateAssessmentFieldsDto,
+  AssignAssessmentsToStartupDto,
 } from './dto/assessment.dto';
 import { AdminGuard, JwtGuard } from 'src/auth/guard';
 
@@ -103,5 +104,15 @@ export class AssessmentController {
   @Delete('fields/:id')
   async deleteField(@Param('id', ParseIntPipe) id: number) {
     return this.assessmentService.deleteField(id);
+  }
+
+  @Post('startup-assessment')
+  async assignAssessmentsToStartup(@Body() dto: AssignAssessmentsToStartupDto) {
+    return await this.assessmentService.assignAssessmentsToStartup(dto);
+  }
+
+  @Get('startup/:id')
+  async getStartupAssessments(@Param('id', ParseIntPipe) startupId: number) {
+    return this.assessmentService.getStartupAssessments(startupId);
   }
 }
