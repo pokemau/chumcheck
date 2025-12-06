@@ -4,8 +4,8 @@ import { redirect, fail } from '@sveltejs/kit';
 
 type AssessmentItem = {
   id: number;
-  description: string;
-  answerType: string;
+  name: string;
+  fieldsCount: number;
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ cookies, fetch, url }) => {
       `/login?redirectTo=${encodeURIComponent(url.pathname)}`
     );
 
-  const res = await fetch(`${PUBLIC_API_URL}/assessments`, {
+  const res = await fetch(`${PUBLIC_API_URL}/assessments/grouped`, {
     headers: { Authorization: `Bearer ${token}` }
   });
 

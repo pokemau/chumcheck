@@ -6,9 +6,9 @@ import {
   Collection,
   Enum,
 } from '@mikro-orm/core';
-import { AssessmentAnswerType } from './enums/assessment-util.enum';
-import { StartupResponse } from './startup-response.entity';
 import { AssessmentType } from './enums/assessment-type.enum';
+import { AssessmentField } from './assessment-field.entity';
+import { StartupAssessment } from './startup-assessment.entity';
 
 @Entity({ tableName: 'assessments' })
 export class Assessment {
@@ -19,11 +19,16 @@ export class Assessment {
   assessmentType!: AssessmentType;
 
   @Property()
-  description!: string;
+  name!: string;
 
-  @Enum(() => AssessmentAnswerType)
-  answerType!: AssessmentAnswerType;
+  @OneToMany(
+    () => AssessmentField,
+    (field) => {
+      return field.assessment;
+    },
+  )
+  fields = new Collection<AssessmentField>(this);
 
-  @OneToMany(() => StartupResponse, (r) => r.assessment)
-  responses = new Collection<StartupResponse>(this);
+  @OneToMany(() => StartupAssessment, (sa) => sa.assessment)
+  startupAssessments = new Collection<StartupAssessment>(this);
 }

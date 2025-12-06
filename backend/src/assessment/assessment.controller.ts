@@ -7,19 +7,28 @@ import {
   Patch,
   ParseIntPipe,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { AssessmentService } from './assessment.service';
-import { AssessmentDto } from './dto/assessment.dto';
-import { SubmitAssessmentDto } from './dto/assessment.dto';
+import {
+  CreateAssessmentDto,
+  UpdateAssessmentDto,
+  CreateAssessmentFieldDto,
+  UpdateAssessmentFieldDto,
+  CreateAssessmentFieldsDto,
+} from './dto/assessment.dto';
+import { AdminGuard, JwtGuard } from 'src/auth/guard';
 
+@UseGuards(JwtGuard)
 @Controller('assessments')
 export class AssessmentController {
   constructor(private readonly assessmentService: AssessmentService) {}
 
-  // Admin: Types
-  @Get('types')
-  listTypes() {
-    return this.assessmentService.listTypes();
+  @UseGuards(AdminGuard)
+  @Post()
+  async createAssessment(@Body() dto: CreateAssessmentDto) {
+    console.log(dto);
+    return this.assessmentService.createAssessment(dto);
   }
 
   @Get()
@@ -27,82 +36,72 @@ export class AssessmentController {
     return this.assessmentService.getAllAssessments();
   }
 
-  // Admin: Fields
-  @Get('types/:typeName/fields')
-  async listFields(@Param('typeName') typeName: string) {
-    return this.assessmentService.listFields(typeName);
+  @Get('grouped')
+  async getAssessmentsGroupedByType() {
+    return this.assessmentService.getAssessmentsGroupedByType();
   }
 
-  @Post('fields')
-  async createField(
-    @Body() body: { typeName: string; label: string; fieldType: number },
+  @Get('types')
+  listTypes() {
+    return this.assessmentService.listTypes();
+  }
+
+  @Get(':id')
+  async getAssessmentById(@Param('id', ParseIntPipe) id: number) {
+    return this.assessmentService.getAssessmentById(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Patch(':id')
+  async updateAssessment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAssessmentDto,
   ) {
-    return this.assessmentService.createField(
-      body.typeName,
-      body.label,
-      body.fieldType,
-    );
+    return this.assessmentService.updateAssessment(id, dto);
   }
 
+  @UseGuards(AdminGuard)
+  @Delete(':id')
+  async deleteAssessment(@Param('id', ParseIntPipe) id: number) {
+    return this.assessmentService.deleteAssessment(id);
+  }
+
+  @Get(':id/fields')
+  async getAssessmentFields(@Param('id', ParseIntPipe) id: number) {
+    return this.assessmentService.getAssessmentFields(id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('fields/:id')
+  async addFieldToAssessment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateAssessmentFieldDto,
+  ) {
+    return this.assessmentService.addFieldToAssessment(id, dto);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post(':id/fields/bulk')
+  async addFieldsToAssessment(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateAssessmentFieldsDto,
+  ) {
+    return this.assessmentService.addFieldsToAssessment(id, dto);
+  }
+
+  @UseGuards(AdminGuard)
   @Patch('fields/:id')
   async updateField(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { label?: string; fieldType?: number },
+    @Body() dto: UpdateAssessmentFieldDto,
   ) {
-    await this.assessmentService.updateField(id, body.label, body.fieldType);
-    return { ok: true };
+    console.log(id, dto);
+    return this.assessmentService.updateField(id, dto);
   }
 
+  @UseGuards(AdminGuard)
   @Delete('fields/:id')
   async deleteField(@Param('id', ParseIntPipe) id: number) {
-    await this.assessmentService.deleteField(id);
-    return { ok: true };
-  }
-
-  @Post('startup-assessment')
-  async createStartupAssessment(
-    @Body() body: { startupId: number; assessmentTypes: string[] },
-  ) {
-    return this.assessmentService.createStartupAssessments(
-      body.startupId,
-      body.assessmentTypes as any,
-    );
-  }
-
-  // Existing startup assessment endpoints
-  @Get('startup/:startupId')
-  async getStartupAssessments(
-    @Param('startupId', ParseIntPipe) startupId: number,
-  ): Promise<AssessmentDto[]> {
-    return this.assessmentService.getStartupAssessments(startupId);
-  }
-
-  @Post('submit')
-  async submitAssessment(
-    @Body() submitDto: SubmitAssessmentDto,
-  ): Promise<void> {
-    await this.assessmentService.submitAssessment(submitDto);
-  }
-
-  @Patch('startup/:startupId/assessment/:assessmentType/complete')
-  async markAssessmentComplete(
-    @Param('startupId', ParseIntPipe) startupId: number,
-    @Param('assessmentType') assessmentType: string,
-  ): Promise<void> {
-    await this.assessmentService.markAssessmentComplete(
-      startupId,
-      assessmentType,
-    );
-  }
-
-  @Patch('startup/:startupId/assessment/:assessmentType/pending')
-  async markAssessmentPending(
-    @Param('startupId', ParseIntPipe) startupId: number,
-    @Param('assessmentType') assessmentType: string,
-  ): Promise<void> {
-    await this.assessmentService.markAssessmentPending(
-      startupId,
-      assessmentType,
-    );
+    return this.assessmentService.deleteField(id);
   }
 }

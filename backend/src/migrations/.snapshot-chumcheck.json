@@ -102,8 +102,8 @@
           ],
           "mappedType": "enum"
         },
-        "description": {
-          "name": "description",
+        "name": {
+          "name": "name",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -111,15 +111,6 @@
           "nullable": false,
           "length": 255,
           "mappedType": "string"
-        },
-        "answer_type": {
-          "name": "answer_type",
-          "type": "smallint",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "enum"
         }
       },
       "name": "assessments",
@@ -138,6 +129,78 @@
       ],
       "checks": [],
       "foreignKeys": {},
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "answer_type": {
+          "name": "answer_type",
+          "type": "smallint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "enum"
+        }
+      },
+      "name": "assessment_fields",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "assessment_fields_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "assessment_fields_assessment_id_foreign": {
+          "constraintName": "assessment_fields_assessment_id_foreign",
+          "columnNames": [
+            "assessment_id"
+          ],
+          "localTableName": "public.assessment_fields",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.assessments",
+          "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
       "nativeEnums": {}
     },
     {
@@ -443,88 +506,6 @@
           ],
           "referencedTableName": "public.readiness_levels",
           "createForeignKeyConstraint": true,
-          "updateRule": "cascade"
-        }
-      },
-      "nativeEnums": {}
-    },
-    {
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "unsigned": false,
-          "autoincrement": true,
-          "primary": true,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "startup_id": {
-          "name": "startup_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "assessment_id": {
-          "name": "assessment_id",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "integer"
-        },
-        "answer_value": {
-          "name": "answer_value",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "mappedType": "text"
-        },
-        "submitted_at": {
-          "name": "submitted_at",
-          "type": "timestamptz",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "length": 6,
-          "mappedType": "datetime"
-        }
-      },
-      "name": "startup_responses",
-      "schema": "public",
-      "indexes": [
-        {
-          "keyName": "startup_responses_pkey",
-          "columnNames": [
-            "id"
-          ],
-          "composite": false,
-          "constraint": true,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {
-        "startup_responses_assessment_id_foreign": {
-          "constraintName": "startup_responses_assessment_id_foreign",
-          "columnNames": [
-            "assessment_id"
-          ],
-          "localTableName": "public.startup_responses",
-          "referencedColumnNames": [
-            "id"
-          ],
-          "referencedTableName": "public.assessments",
-          "createForeignKeyConstraint": true,
-          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       },
@@ -1363,6 +1344,112 @@
           "nullable": false,
           "mappedType": "integer"
         },
+        "startup_id": {
+          "name": "startup_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "assessment_field_id": {
+          "name": "assessment_field_id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "integer"
+        },
+        "answer_value": {
+          "name": "answer_value",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "file_url": {
+          "name": "file_url",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "file_name": {
+          "name": "file_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "startup_responses",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "startup_responses_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "startup_responses_startup_id_foreign": {
+          "constraintName": "startup_responses_startup_id_foreign",
+          "columnNames": [
+            "startup_id"
+          ],
+          "localTableName": "public.startup_responses",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.startups",
+          "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "startup_responses_assessment_field_id_foreign": {
+          "constraintName": "startup_responses_assessment_field_id_foreign",
+          "columnNames": [
+            "assessment_field_id"
+          ],
+          "localTableName": "public.startup_responses",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.assessment_fields",
+          "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "integer"
+        },
         "readiness_level_id": {
           "name": "readiness_level_id",
           "type": "int",
@@ -1602,22 +1689,14 @@
           "nullable": false,
           "mappedType": "integer"
         },
-        "assessment_type": {
-          "name": "assessment_type",
-          "type": "text",
+        "assessment_id": {
+          "name": "assessment_id",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "enumItems": [
-            "Technology",
-            "Acceptance",
-            "Market",
-            "Regulatory",
-            "Organizational",
-            "Investment"
-          ],
-          "mappedType": "enum"
+          "mappedType": "integer"
         },
         "status": {
           "name": "status",
@@ -1655,6 +1734,20 @@
             "id"
           ],
           "referencedTableName": "public.startups",
+          "createForeignKeyConstraint": true,
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "startup_assessments_assessment_id_foreign": {
+          "constraintName": "startup_assessments_assessment_id_foreign",
+          "columnNames": [
+            "assessment_id"
+          ],
+          "localTableName": "public.startup_assessments",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.assessments",
           "createForeignKeyConstraint": true,
           "deleteRule": "cascade",
           "updateRule": "cascade"
